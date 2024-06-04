@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget android-packageName="io.web3essentials.app" android-versionCode="302070" id="org.elastos.essentials.app" ios-CFBundleVersion="100" version="3.2.7.d" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
-    <name>Essentials</name>
+<widget android-packageName="io.web3essentials.apptest" android-versionCode="302070" id="org.elastos.essentials.app" ios-CFBundleVersion="100" version="3.2.7.d" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <name>Essentials Test</name>
     <description>
         Essentials web3 wallet
     </description>
