@@ -107,11 +107,21 @@ export class GlobalLanguageService extends GlobalService {
    * Set language for all modules
    */
   private setAppLanguage(language: string) {
-    if (language === 'zh') {
-      moment.locale('zh-cn');
-    } else {
-      moment.locale(language);
+    switch (language) {
+      case 'zh':
+        moment.locale('zh-cn');
+        break;
+      case 'fr':
+        moment.locale('fr');
+        break;
+      case 'it':
+        moment.locale('it');
+        break;
+      default:
+        moment.locale('en');
+        break;
     }
+
     // Set language for the ionic translate module that does the actual screen items translations
     this.translationService.setDefaultLang(language);
     this.translationService.use(language);
