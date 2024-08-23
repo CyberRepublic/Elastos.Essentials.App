@@ -5,7 +5,6 @@ import { App } from '../model/app.enum';
 import { IdentityEntry } from "../model/didsessions/identityentry";
 import { AnyNetworkWallet } from '../wallet/model/networks/base/networkwallets/networkwallet';
 import { EscSubWallet } from '../wallet/model/networks/elastos/evms/esc/subwallets/esc.evm.subwallet';
-import { WalletNetworkService } from '../wallet/services/network.service';
 import { WalletService } from '../wallet/services/wallet.service';
 import { GlobalLanguageService } from './global.language.service';
 import { GlobalNotificationsService } from './global.notifications.service';
@@ -18,7 +17,6 @@ import { GlobalService, GlobalServiceManager } from './global.service.manager';
 })
 export class GlobalESCBPoSNFTService extends GlobalService {
   private activeWalletSubscription: Subscription = null;
-  private activeNetworkSubscription: Subscription = null;
 
   private activeNetworkWallet: AnyNetworkWallet = null;
   private escSubwallet: EscSubWallet = null;
@@ -26,7 +24,6 @@ export class GlobalESCBPoSNFTService extends GlobalService {
   private getClaimableNFTTimer: any = null;
 
   constructor(
-    private walletNetworkService: WalletNetworkService,
     private walletManager: WalletService,
     public globalPopupService: GlobalPopupService,
   ) {
@@ -45,12 +42,6 @@ export class GlobalESCBPoSNFTService extends GlobalService {
       this.restartCheckESCBPoSNFTTimeout();
     });
 
-    this.activeNetworkSubscription = this.walletNetworkService.activeNetwork.subscribe(activeNetwork => {
-      if (activeNetwork) {
-        this.restartCheckESCBPoSNFTTimeout();
-      }
-    })
-
     return;
   }
 
@@ -63,10 +54,6 @@ export class GlobalESCBPoSNFTService extends GlobalService {
     if (this.activeWalletSubscription) {
       this.activeWalletSubscription.unsubscribe();
     }
-
-    if (this.activeNetworkSubscription) {
-      this.activeNetworkSubscription.unsubscribe();
-    }
     return;
   }
 
@@ -78,7 +65,7 @@ export class GlobalESCBPoSNFTService extends GlobalService {
 
     if (!this.activeNetworkWallet) return;
 
-    if (this.walletNetworkService.activeNetwork.value.key === 'elastossmartchain') {
+    if (this.activeNetworkWallet.network.key === 'elastossmartchain') {
       this.escSubwallet = this.activeNetworkWallet.getMainEvmSubWallet() as unknown as EscSubWallet;
       if (this.escSubwallet && this.escSubwallet.getUnClaimedTxs().length > 0) {
         this.getClaimableNFTTimer = setTimeout(() => {
