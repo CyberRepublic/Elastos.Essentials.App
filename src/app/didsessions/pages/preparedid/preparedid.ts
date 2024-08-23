@@ -250,7 +250,7 @@ export class PrepareDIDPage {
 
     return (
       vaultStatus &&
-      vaultStatus.publishedInfo !== null &&
+      vaultStatus.publishedInfo != null &&
       vaultStatus.publishedInfo.vaultAddress != null);
   }
 

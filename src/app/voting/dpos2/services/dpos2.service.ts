@@ -147,8 +147,8 @@ export class DPoS2Service {
 
         try {
             await this.getStoredVotes();
-            await this.fetchNodeAvatars();
             await this.fetchNodes();
+            await this.fetchNodeAvatars();
             this.updateSelectedNode()
             // For faster startup, don't get my votes on init.
             // await this.geMyVoteds();
@@ -287,7 +287,7 @@ export class DPoS2Service {
 
         try {
             const result = await GlobalElastosAPIService.instance.fetchDposNodes('all', NodeType.BPoS);
-            Logger.log(App.DPOS2, "result:", result);
+            // Logger.log(App.DPOS2, "result:", result);
 
             if (result && !Util.isEmptyObject(result.producers)) {
                 this.totalVotes = parseFloat(result.totaldposv2votes);
@@ -360,8 +360,6 @@ export class DPoS2Service {
 
                         this.dposList.push(node);
                     }
-
-                    this.getNodeIcon(node);
                 }
 
                 Logger.log('dposvoting', 'Active Nodes..', this.activeNodes);
@@ -388,7 +386,7 @@ export class DPoS2Service {
 
       try {
           const result = await GlobalElastosAPIService.instance.fetchDposNodes('all', NodeType.DPoS);
-          Logger.log(App.DPOS2, "result:", result);
+        //   Logger.log(App.DPOS2, "result:", result);
 
           if (result && !Util.isEmptyObject(result.producers)) {
               for (const node of result.producers) {
@@ -417,6 +415,8 @@ export class DPoS2Service {
                   node.isChecked = false;
                 }
             }
+
+            this.getNodeIcon(node);
         }
     }
 

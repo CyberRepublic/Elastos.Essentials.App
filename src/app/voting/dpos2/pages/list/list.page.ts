@@ -119,7 +119,7 @@ export class ListPage implements OnInit {
     async prepareActionMenu() {
       this.actionOptions = [];
 
-      if (!this.voteService.isMuiltWallet()) {
+      if (!this.voteService.isMuiltWallet() && this.dpos2Service.dposInfo) {
           if (this.dpos2Service.dposInfo.state == 'Unregistered'
               || (this.dpos2Service.dposInfo.state == 'Active' && this.dpos2Service.dposInfo.identity == "DPoSV1")) {
               if (this.dpos2Service.dposInfo.identity == 'DPoSV1') {
