@@ -25,7 +25,8 @@ import { DPoS2Service } from '../../services/dpos2.service';
 export class MyVotesPage implements OnInit, OnDestroy {
     @ViewChild(TitleBarComponent, { static: false }) titleBar: TitleBarComponent;
 
-    private votes = [];
+    public votes = [];
+
     // DPoS2Node Detail
     public showNode = false;
     public nodeIndex: number;

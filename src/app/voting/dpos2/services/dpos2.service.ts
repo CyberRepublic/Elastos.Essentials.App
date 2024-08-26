@@ -444,6 +444,7 @@ export class DPoS2Service {
             }
             catch (e) {
                 Logger.log(App.DPOS2, 'fetch my voteds exception:', e);
+                return [];
             }
             finally {
                 this.isFetchingMyvotes = false;
