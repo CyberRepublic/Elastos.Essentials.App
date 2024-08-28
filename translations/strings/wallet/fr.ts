@@ -256,7 +256,7 @@ export const fr = {
         "send-transaction-type": "Envoi d'argent",
         "claim-bpos-nft-transaction-type": "Claim BPoS NFT",
         "burn-bpos-nft-transaction-type": "Burn BPoS NFT",
-        "burn-bpos-nft-transaction-prompt": "After the BPoS NFT is burned, the corresponding BPoS voting will be transferred to the Elastos main chain",
+        "burn-bpos-nft-transaction-prompt": "About 12 minutes after the BPoS NFT is burned, the corresponding BPoS voting will be transferred to the Elastos main chain",
 
         /***********************************
         * Transaction Successful Component *

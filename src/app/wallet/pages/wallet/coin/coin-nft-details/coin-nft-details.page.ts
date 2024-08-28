@@ -227,10 +227,16 @@ export class CoinNFTDetailsPage implements OnInit {
      * Returns the ion-col size for the send/receive/destroy row, based on the available features.
      */
     public getColumnSize(): number {
-      if (this.asset.bPoSNFTInfo)
+      if (this.canDestroy())
           return 4; // 3 columns - 3x4 = 12
       else
           return 6; // 2 columns - 2x6 = 12
+    }
+
+    public canDestroy() {
+        if (this.nft && this.nft.contractAddress && (this.nft.contractAddress.toLowerCase() === Config.ETHSC_BPoSNFT_CONTRACTADDRESS.toLowerCase()))
+            return true;
+        return false;
     }
 
     private async prepareForBPoSNFTDisplay() {
