@@ -234,7 +234,8 @@ export class CoinNFTDetailsPage implements OnInit {
     }
 
     public canDestroy() {
-        if (this.nft && this.nft.contractAddress && (this.nft.contractAddress.toLowerCase() === Config.ETHSC_BPoSNFT_CONTRACTADDRESS.toLowerCase()))
+        // Only the NFTs that can obtain voting information can be destroyed. eg. the token id is wrong
+        if (this.asset.bPoSNFTInfo)
             return true;
         return false;
     }
