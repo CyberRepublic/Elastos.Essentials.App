@@ -104,7 +104,7 @@ export class ERC721Service {
     public async getCoinInfo(address: string): Promise<NFTResolvedInfo> {
         try {
             const erc721Contract = new (await this.getWeb3()).eth.Contract(this.erc721ABI, address);
-            Logger.log('wallet', 'erc721Contract', erc721Contract);
+            // Logger.log('wallet', 'erc721Contract', erc721Contract);
 
             const nftName = await erc721Contract.methods.name().call();
             Logger.log('wallet', 'NFT name:', nftName);
