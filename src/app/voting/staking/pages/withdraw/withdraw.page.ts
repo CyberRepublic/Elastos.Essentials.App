@@ -60,10 +60,6 @@ export class WithdrawPage {
             this.available = this.stakeService.rewardInfo.claimable;
             this.address = this.stakeService.firstAddress;
         }
-
-        // TODO: bug on main chain
-        // Before this bug is fixed, the withdrawn reward needs to leave 0.0001
-        this.available = this.available > 0.0001 ? this.available - 0.0001 : 0;
     }
 
     ionViewWillEnter() {
@@ -176,11 +172,5 @@ export class WithdrawPage {
         if (this.amount  == null) {
             this.amount  = 0;
         }
-    }
-
-    // TODO: bug on main chain
-    // Before this bug is fixed, the withdrawn reward needs to be greater than 0.0002 ( 0.0001 + 0.0001 (fee))
-    checkvalue() {
-        return this.amount >= 0.0002;
     }
 }
