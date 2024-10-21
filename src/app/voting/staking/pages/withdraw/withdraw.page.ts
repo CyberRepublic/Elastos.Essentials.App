@@ -33,9 +33,6 @@ export class WithdrawPage {
     public isNodeReward = false;
     public isMuiltWallet = false;
 
-    // TODO: bug on main chain, remove it after the bug is fixed.
-    public showPromptMessage = true;
-
     constructor(
         public uxService: UXService,
         public stakeService: StakeService,
@@ -65,8 +62,8 @@ export class WithdrawPage {
         }
 
         // TODO: bug on main chain
-        // Before this bug is fixed, the withdrawn reward needs to leave 1 ELA
-        this.available = this.available > 1 ? this.available - 1 : 0;
+        // Before this bug is fixed, the withdrawn reward needs to leave 0.0001
+        this.available = this.available > 0.0001 ? this.available - 0.0001 : 0;
     }
 
     ionViewWillEnter() {
