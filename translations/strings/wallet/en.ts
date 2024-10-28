@@ -504,7 +504,7 @@ export const en = {
         'nft-assets-owned': 'assets owned',
         'nft-attributes': 'Attributes',
         'nft-bpos-info': 'BPoS NFT voting information',
-        'nft-destroy': 'DESTROY',
+        'nft-destroy': 'REDEEM',
         'nft-no-ela-mainchain-wallet':'This wallet is unsupported on the Elastos Main Chain network',
 
         /************
@@ -815,7 +815,7 @@ export const en = {
         'ext-tx-info-type-lock': 'Lock',
         'ext-tx-info-type-claim-tokens': 'Claim tokens',
         'ext-tx-info-type-claim-bpos-nft': 'Claim BPoS NFT',
-        'ext-tx-info-type-destroy-bpos-nft': 'Burn BPoS NFT',
+        'ext-tx-info-type-destroy-bpos-nft': 'Redeem BPoS NFT',
         'ext-tx-info-type-withdraw-to-mainchain': 'To Main Chain',
         'ext-tx-info-type-harvest': 'Harvest',
         'ext-tx-info-type-buy-nft': 'Buy NFT',

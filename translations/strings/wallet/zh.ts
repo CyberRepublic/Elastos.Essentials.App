@@ -503,7 +503,7 @@ export const zh = {
         'nft-assets-owned': '项资产',
         'nft-attributes': '属性',
         'nft-bpos-info': 'BPoS NFT 投票信息',
-        'nft-destroy': '销毁',
+        'nft-destroy': '赎回',
         'nft-no-ela-mainchain-wallet':'此钱包不支持Elastos Main Chain网络',
 
         /************
@@ -814,7 +814,7 @@ export const zh = {
         'ext-tx-info-type-lock': '锁币',
         'ext-tx-info-type-claim-tokens': '申领代币',
         'ext-tx-info-type-claim-bpos-nft': '申领 BPoS NFT',
-        'ext-tx-info-type-destroy-bpos-nft': '销毁 BPoS NFT',
+        'ext-tx-info-type-destroy-bpos-nft': '赎回 BPoS NFT',
         'ext-tx-info-type-withdraw-to-mainchain': '主链提现',
         'ext-tx-info-type-harvest': '收获',
         'ext-tx-info-type-buy-nft': '购买 NFT',
