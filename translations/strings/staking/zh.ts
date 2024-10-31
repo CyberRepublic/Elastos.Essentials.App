@@ -35,8 +35,8 @@ export const zh = {
         'no-stake': '暂无质押',
         'no-remain-stake': '质押的ELA已全部用于投票，暂时不能取回',
         'no-cancellable-votes': '没有可取消的投票（BPoS 投票无法取消）',
-        'unstake-memo': "备注：需要三次网络确认才能收到质押的ELA",
-        'withdraw-memo': "备注：需要三次网络确认才能收到收益",
+        'unstake-memo': "备注：需要三次网络确认才能收到质押的ELA，大约6分钟",
+        'withdraw-memo': "备注：需要三次网络确认才能取回收益，大约6分钟",
 
         'unvote-message': '确定取消DPoS 1.0、CR选举、CR委员弹劾、CR提案反对票这四种投票吗?',
     }
