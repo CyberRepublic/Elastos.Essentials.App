@@ -89,11 +89,14 @@ export type RequestCache = {
     result: any
 }
 
+
 export type ImageInfo = {
-    [key: string]: { // ownerpublickkey (BPoS node) or did (CRC)
         nickname: string;
         logo: string;
-    }
+};
+
+export type ImageInfos = {
+    [key: string]: ImageInfo // ownerpublickkey (BPoS node) or did (CRC)
 };
 
 /**
@@ -123,7 +126,7 @@ export class GlobalElastosAPIService extends GlobalService {
     private crRelatedStageCache: RequestCache = {timestamp: 0, result: null};
     private crSecretaryGeneralCache: RequestCache = {timestamp: 0, result: null};
 
-    private imagesCache: ImageInfo[] = null;
+    private imagesCache: ImageInfos = null;
 
     constructor(
         public translate: TranslateService,
@@ -1091,7 +1094,7 @@ export class GlobalElastosAPIService extends GlobalService {
     }
 
     // images
-    public async fetchImages(): Promise<ImageInfo[]> {
+    public async fetchImages(): Promise<ImageInfos> {
       if (this.imagesCache) {
           return this.imagesCache;
       }

@@ -4,7 +4,7 @@ import moment from 'moment';
 import { Logger } from 'src/app/logger';
 import { App } from 'src/app/model/app.enum';
 import { Util } from 'src/app/model/util';
-import { ElastosApiUrlType, GlobalElastosAPIService, ImageInfo, NodeType } from 'src/app/services/global.elastosapi.service';
+import { ElastosApiUrlType, GlobalElastosAPIService, ImageInfo, ImageInfos, NodeType } from 'src/app/services/global.elastosapi.service';
 import { GlobalEvents } from 'src/app/services/global.events.service';
 import { GlobalJsonRPCService } from 'src/app/services/global.jsonrpc.service';
 import { GlobalNativeService } from 'src/app/services/global.native.service';
@@ -66,7 +66,7 @@ export class DPoS2Service {
     private fetchNodesOwnerPublicKey = '';
 
     // Image
-    private nodeImages: ImageInfo[] = [];
+    private nodeImages: ImageInfos = {};
 
     public voteStakeExpired30: string = null;
     public voteStakeAboutExpire: string = null;

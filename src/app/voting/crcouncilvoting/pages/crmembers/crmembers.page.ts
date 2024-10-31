@@ -55,7 +55,7 @@ export class CRMembersPage implements OnInit {
         await this.crCouncilService.getCRVotingStage();
         if (!this.crMembersFetched) {
             await this.crCouncilService.fetchCRMembers();
-            this.secretary = await this.crCouncilService.getSecretary();
+            this.secretary = this.crCouncilService.getSecretary();
             this.crMembersFetched = true;
         }
     }

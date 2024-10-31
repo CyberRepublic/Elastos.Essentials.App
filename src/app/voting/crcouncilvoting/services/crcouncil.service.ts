@@ -10,7 +10,7 @@ import { App } from 'src/app/model/app.enum';
 import { DIDDocument } from 'src/app/model/did/diddocument.model';
 import { Util } from 'src/app/model/util';
 import { GlobalDIDService } from 'src/app/services/global.did.service';
-import { ElastosApiUrlType, GlobalElastosAPIService, ImageInfo } from 'src/app/services/global.elastosapi.service';
+import { ElastosApiUrlType, GlobalElastosAPIService, ImageInfos } from 'src/app/services/global.elastosapi.service';
 import { GlobalHiveCacheService } from 'src/app/services/global.hivecache.service';
 import { GlobalIntentService } from 'src/app/services/global.intent.service';
 import { GlobalJsonRPCService } from 'src/app/services/global.jsonrpc.service';
@@ -99,7 +99,7 @@ export class CRCouncilService {
 
     // Image
     private logoUrl = 'https://api.elastos.io/images/';
-    private nodeImages: ImageInfo[] = [];
+    private nodeImages: ImageInfos = {}
 
     public httpOptions = {
         headers: new HttpHeaders({
@@ -124,7 +124,7 @@ export class CRCouncilService {
 
         Logger.log(App.CRCOUNCIL_VOTING, 'Fetching CRMembers..');
 
-        if (this.nodeImages.length == 0) {
+        if (Object.keys(this.nodeImages).length == 0) {
             await this.fetchNodeAvatars();
         }
 
@@ -211,7 +211,7 @@ export class CRCouncilService {
         return this.selectedMember;
     }
 
-    async getSecretary(): Promise<any> {
+    getSecretary() {
         return this.secretaryGeneralInfo;
     }
 
@@ -226,7 +226,7 @@ export class CRCouncilService {
     }
 
     async fetchCandidates() {
-        if (this.nodeImages.length == 0) {
+        if (Object.keys(this.nodeImages).length == 0) {
             await this.fetchNodeAvatars();
         }
 
@@ -352,7 +352,7 @@ export class CRCouncilService {
             return;
         }
 
-        if (this.nodeImages[item.did]) {
+        if (this.nodeImages[item.did] && this.nodeImages[item.did].logo) {
             item.avatar = this.logoUrl + this.nodeImages[item.did].logo;
         }
 
@@ -651,7 +651,7 @@ export class CRCouncilService {
     async fetchNextCRs() {
         Logger.log(App.CRCOUNCIL_VOTING, 'Fetching next crs..');
 
-        if (this.nodeImages.length == 0) {
+        if (Object.keys(this.nodeImages).length == 0) {
             await this.fetchNodeAvatars();
         }
 
