@@ -430,7 +430,7 @@ export class CurrencyService {
     let cacheKey = network.key + coin.getContractAddress();
     if ((<EVMNetwork>network).getUniswapCurrencyProvider()) {
         this.queueUniswapTokenFetch(cacheKey, network, coin);
-    } else {
+    } else if ((<EVMNetwork>network).getDexScreenerCurrencyProvider()) {
         void this.dexScreenerTokenFetch(cacheKey, network, coin);
     }
     return;
