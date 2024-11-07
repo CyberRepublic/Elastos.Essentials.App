@@ -33,7 +33,7 @@ export class Config {
     public static UTXO_CONSOLIDATE_MIN_THRESHOLD = 100; // We don't recommend consolidating utxos if the number of UTXOs less than 100.
 
     public static SELA = 100000000; // Number of SELA per ELA.
-    public static SELAAsBigNumber = new BigNumber(Config.SELA);
+    public static SELAAsBigNumber = new BigNumber(100000000);
 
     public static WEI = 1000000000000000000; // 10 ^ 18
     public static GWEI = 1000000000; // 10 ^ 9
