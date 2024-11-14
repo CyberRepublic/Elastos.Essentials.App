@@ -4,7 +4,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Clipboard } from '@awesome-cordova-plugins/clipboard/ngx';
 import { IonicModule, Platform } from '@ionic/angular';
-import { IonicStorageModule } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { SharedComponentsModule } from '../components/sharedcomponents.module';
 import { DeleteComponent } from './components/delete/delete.component';
@@ -33,12 +33,6 @@ import { DeveloperToolsRoutingModule } from './routing';
     TranslateModule
   ],
   bootstrap: [],
-  entryComponents: [
-    HomePage,
-    CreateAppPage,
-    AppDetailsPage,
-    DeleteComponent
-  ],
   providers: [
     Platform,
     Clipboard

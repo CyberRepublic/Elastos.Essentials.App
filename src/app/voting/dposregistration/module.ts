@@ -4,7 +4,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { WebView } from '@awesome-cordova-plugins/ionic-webview/ngx';
 import { IonicModule, Platform } from '@ionic/angular';
-import { IonicStorageModule } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { SharedComponentsModule } from 'src/app/components/sharedcomponents.module';
 import { StdTransactionComponentModule } from 'src/app/wallet/components/std-transaction/module';
@@ -30,8 +30,6 @@ import { DPoSRegistrationRoutingModule } from './routing';
     StdTransactionComponentModule
   ],
   bootstrap: [],
-  entryComponents: [
-  ],
   providers: [
     Platform,
     WebView

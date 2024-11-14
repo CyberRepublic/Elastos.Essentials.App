@@ -20,11 +20,6 @@ import { WidgetModule } from './widgets/module';
     TipsPage,
     OnboardPage,
   ],
-  entryComponents: [
-    EmptyPage,
-    NotificationsPage,
-    TipsPage
-  ],
   imports: [
     CommonModule,
     IonicModule,

@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Clipboard } from '@awesome-cordova-plugins/clipboard/ngx';
 import { IonicModule, Platform } from '@ionic/angular';
-import { IonicStorageModule } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateModule } from '@ngx-translate/core';
 
 
@@ -14,8 +14,6 @@ import { TranslateModule } from '@ngx-translate/core';
     TranslateModule
   ],
   bootstrap: [],
-  entryComponents: [
-  ],
   providers: [
     Platform,
     Clipboard

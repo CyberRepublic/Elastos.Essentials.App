@@ -51,7 +51,6 @@ import { DIDSessionsRoutingModule } from './routing';
     DIDSessionsRoutingModule,
     InlineSVGModule
   ],
-  entryComponents: [],
   providers: [QRScanner, Platform, WebView, LoadingController],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

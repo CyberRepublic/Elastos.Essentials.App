@@ -23,7 +23,6 @@ import { SharedComponentsModule } from '../components/sharedcomponents.module';
   ],
   exports: [],
   bootstrap: [],
-  entryComponents: [],
   providers: [
     QRScanner,
     ModalController,

@@ -30,11 +30,6 @@ import { WarningComponent } from './warning/warning.component';
   ],
   providers: [
   ],
-  entryComponents: [
-    MnemonicPassCheckComponent,
-    OptionsComponent,
-    WarningComponent
-  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ComponentsModule { }

@@ -18,8 +18,5 @@ import { WalletAddressChooserComponent } from './wallet-address-chooser.componen
   ],
   providers: [
   ],
-  entryComponents: [
-    WalletAddressChooserComponent
-  ],
 })
 export class WalletAddressChooserComponentsModule { }

@@ -3,7 +3,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, Platform } from '@ionic/angular';
-import { IonicStorageModule } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { SharedComponentsModule } from '../components/sharedcomponents.module';
 import { GlobalDirectivesModule } from '../helpers/directives/module';
@@ -40,9 +40,6 @@ import { DAppBrowserRoutingModule } from './routing';
     GlobalDirectivesModule
   ],
   bootstrap: [],
-  entryComponents: [
-    HomePage
-  ],
   providers: [
     Platform
   ]

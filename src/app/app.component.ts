@@ -97,6 +97,8 @@ export class AppComponent {
     void this.platform.ready().then(async () => {
       Logger.log('Global', 'Main app component initialization is starting');
 
+      await this.storage.init();
+
       this.globalStartupService.init();
 
       // Force Essentials orientation to portrait only

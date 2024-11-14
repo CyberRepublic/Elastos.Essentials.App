@@ -18,8 +18,5 @@ import { CRMemberOptionsComponent } from './options/options.component';
     ],
     providers: [
     ],
-    entryComponents: [
-        CRMemberOptionsComponent
-    ],
 })
 export class ComponentsModule { }

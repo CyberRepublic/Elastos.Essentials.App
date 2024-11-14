@@ -7,8 +7,6 @@ import { WalletModule } from '../wallet/module';
     WalletModule // Because the wallet service uses WalletModule dependencies
   ],
   bootstrap: [],
-  entryComponents: [
-  ],
   providers: [],
   schemas: []
 })

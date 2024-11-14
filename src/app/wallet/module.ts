@@ -29,14 +29,13 @@ import { Clipboard } from '@awesome-cordova-plugins/clipboard/ngx';
 import { WebView } from '@awesome-cordova-plugins/ionic-webview/ngx';
 /****************** Ionic ******************/
 import { IonicModule } from '@ionic/angular';
-import { IonicStorageModule } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { WalletRoutingModule } from './routing';
 import { Native } from './services/native.service';
 import { LocalStorage } from './services/storage.service';
 @NgModule({
     declarations: [],
-    entryComponents: [],
     imports: [
         CommonModule,
         HttpClientModule,

@@ -20,8 +20,5 @@ import { NewsConfiguratorComponent } from './configurator.component';
   ],
   providers: [
   ],
-  entryComponents: [
-    NewsConfiguratorComponent
-  ],
 })
 export class NewsConfiguratorComponentsModule { }

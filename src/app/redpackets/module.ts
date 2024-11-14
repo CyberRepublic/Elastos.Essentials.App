@@ -16,7 +16,6 @@ import { RedPacketsRoutingModule } from './routing';
   ],
   exports: [],
   bootstrap: [],
-  entryComponents: [],
   providers: [
     ModalController,
     AngularDelegate,

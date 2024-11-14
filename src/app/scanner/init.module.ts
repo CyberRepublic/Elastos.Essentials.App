@@ -12,7 +12,6 @@ import { TranslateModule } from '@ngx-translate/core';
   ],
   exports: [],
   bootstrap: [],
-  entryComponents: [],
   providers: [
     QRScanner,
     ModalController,

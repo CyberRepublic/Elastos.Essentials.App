@@ -16,6 +16,5 @@ import { SharedComponentsModule } from 'src/app/components/sharedcomponents.modu
   exports: [],
   providers: [
   ],
-  entryComponents: [],
 })
 export class ComponentsModule { }

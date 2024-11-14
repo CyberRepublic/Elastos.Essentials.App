@@ -17,6 +17,5 @@ import { OrderComponent } from './order/order.component';
   exports: [PaymentPlanComponent, OrderComponent],
   providers: [
   ],
-  entryComponents: [PaymentPlanComponent, OrderComponent],
 })
 export class ComponentsModule { }

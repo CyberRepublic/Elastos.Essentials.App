@@ -3,7 +3,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, Platform } from '@ionic/angular';
-import { IonicStorageModule } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { SharedComponentsModule } from 'src/app/components/sharedcomponents.module';
 import { StdTransactionComponentModule } from 'src/app/wallet/components/std-transaction/module';
@@ -56,25 +56,6 @@ import { PopupService } from './services/popup.service';
     ComponentsModule,
   ],
   bootstrap: [],
-  entryComponents: [
-    // Pages
-    ProposalListPage,
-    ProposalDetailPage,
-    SuggestionListPage,
-    SuggestionDetailPage,
-
-    // Intents
-    CreateSuggestionPage,
-    CreateProposalPage,
-    ReviewProposalPage,
-    VoteForProposalPage,
-    UpdatMilestonePage,
-    ReviewMilestonePage,
-    WithdrawPage,
-
-    // Components
-    ProposalSearchResultComponent,
-  ],
   providers: [
     Platform,
     PopupService
