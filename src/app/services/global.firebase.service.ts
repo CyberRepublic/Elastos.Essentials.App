@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NavigationEnd, Router, RouterEvent } from '@angular/router';
+import { Event, NavigationEnd, Router, RouterEvent } from '@angular/router';
 import { AppVersion } from '@awesome-cordova-plugins/app-version/ngx';
 //import { FirebaseAnalytics } from '@awesome-cordova-plugins/firebase-analytics/ngx';
 import { FirebaseX } from '@awesome-cordova-plugins/firebase-x/ngx';
@@ -36,7 +36,7 @@ export class GlobalFirebaseService {
 
         // Every time the router route changes, update the current screen name in firebase analytics for more accurate screen context of other events.
         this.router.events.pipe(
-            filter((e: RouterEvent) => e instanceof NavigationEnd),
+            filter((e: Event): e is NavigationEnd => e instanceof NavigationEnd),
         ).subscribe((e: RouterEvent) => {
             void this.firebase.setScreenName(e.url)
         });

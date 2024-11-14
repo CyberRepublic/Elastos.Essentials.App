@@ -25,7 +25,6 @@ import { PacketPreviewComponent } from './packet-preview/packet-preview.componen
   ],
   providers: [
   ],
-  entryComponents: [],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ComponentsModule { }

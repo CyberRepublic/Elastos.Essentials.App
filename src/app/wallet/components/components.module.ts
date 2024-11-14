@@ -31,12 +31,6 @@ import { WarningComponent } from './warning/warning.component';
   exports: [],
   providers: [
   ],
-  entryComponents: [
-    OptionsComponent,
-    TxConfirmComponent,
-    TxSuccessComponent,
-    WarningComponent
-  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ComponentsModule { }

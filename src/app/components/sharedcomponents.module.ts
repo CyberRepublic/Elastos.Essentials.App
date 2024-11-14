@@ -53,16 +53,5 @@ import { TitlebarmenuitemComponent } from './titlebarmenuitem/titlebarmenuitem.c
   providers: [
     Clipboard
   ],
-  entryComponents: [
-    TitleBarComponent,
-    TitlebarmenuitemComponent,
-    DIDPublishingComponent,
-    SwitchNetworkComponent,
-    RestartPromptComponent,
-    ConfirmationPopupComponent,
-    MnemonicKeypadComponent,
-    EButtonComponent,
-    HelpComponent
-  ],
 })
 export class SharedComponentsModule { }
