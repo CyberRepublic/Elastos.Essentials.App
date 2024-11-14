@@ -4,7 +4,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { WebView } from '@awesome-cordova-plugins/ionic-webview/ngx';
 import { IonicModule, Platform } from '@ionic/angular';
-import { IonicStorageModule } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { InlineSVGModule } from 'ng-inline-svg-2';
 import { SharedComponentsModule } from 'src/app/components/sharedcomponents.module';
@@ -41,12 +41,6 @@ import { StakingRoutingModule } from './routing';
         WalletChooserComponentModule
     ],
     bootstrap: [],
-    entryComponents: [
-        StakingHomePage,
-        StakePage,
-        UnstakePage,
-        WithdrawPage,
-    ],
     providers: [
         Platform,
         WebView

@@ -12,7 +12,9 @@ import { ScreenOrientation } from '@awesome-cordova-plugins/screen-orientation/n
 import { StatusBar } from '@awesome-cordova-plugins/status-bar/ngx';
 import { IonicModule, IonicRouteStrategy, Platform } from '@ionic/angular';
 //import { iosTransitionAnimation } from '@ionic/core/dist/collection/utils/transition/ios.transition';
-import { IonicStorageModule } from '@ionic/storage';
+import { Drivers, Storage } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
+import CordovaSQLiteDriver from 'localforage-cordovasqlitedriver';
 import { MissingTranslationHandler, MissingTranslationHandlerParams, TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import * as Sentry from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
@@ -272,9 +274,6 @@ providers.push({ provide: ErrorHandler, useClass: SentryErrorHandler });
   declarations: [
     AppComponent
   ],
-  entryComponents: [
-    AppComponent
-  ],
   imports: [
     LauncherModule,
 
@@ -318,7 +317,7 @@ providers.push({ provide: ErrorHandler, useClass: SentryErrorHandler });
     }),
     IonicStorageModule.forRoot({
       name: '__essentials.db',
-      driverOrder: ['sqlite', 'indexeddb', 'localstorage', 'websql']
+      driverOrder: [CordovaSQLiteDriver._driver, Drivers.IndexedDB, Drivers.LocalStorage, 'websql']
     }),
     BrowserAnimationsModule
   ],

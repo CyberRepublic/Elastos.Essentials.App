@@ -52,7 +52,6 @@ const routes: Routes = [
     TranslateModule,
     RouterModule.forChild(routes),
   ],
-  entryComponents: [],
   declarations: [TabnavPage],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
