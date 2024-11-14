@@ -16,7 +16,6 @@ import { MigratorRoutingModule } from './routing';
   ],
   exports: [],
   bootstrap: [],
-  entryComponents: [],
   providers: [
     ModalController,
     AngularDelegate,

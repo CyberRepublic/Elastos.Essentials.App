@@ -90,8 +90,6 @@ import { TokenPriceTemplate } from "./plugins/templates/tokenprice/tokenprice";
   ],
   providers: [
   ],
-  entryComponents: [
-  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class WidgetModule { }
