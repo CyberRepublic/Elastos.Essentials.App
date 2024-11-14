@@ -16,7 +16,6 @@ import { EasyBridgeRoutingModule } from './routing';
   ],
   exports: [],
   bootstrap: [],
-  entryComponents: [],
   providers: [
     ModalController,
     AngularDelegate,

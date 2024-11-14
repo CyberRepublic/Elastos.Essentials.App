@@ -18,8 +18,6 @@ import { NgxHideOnScrollModule } from './ngx-hide-on-scroll/ngx-hide-on-scroll.m
     ImageCacheDirective,
     NgxHideOnScrollModule
   ],
-  entryComponents: [
-  ],
   providers: [
     HTTP
   ]

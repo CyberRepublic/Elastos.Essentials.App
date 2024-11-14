@@ -18,8 +18,5 @@ import { OptionsComponent } from './options.component';
   ],
   providers: [
   ],
-  entryComponents: [
-    OptionsComponent
-  ],
 })
 export class OptionsComponentsModule { }
