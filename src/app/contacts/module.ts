@@ -4,7 +4,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Clipboard } from '@awesome-cordova-plugins/clipboard/ngx';
 import { IonicModule } from '@ionic/angular';
-import { IonicStorageModule } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { QRCodeModule } from 'angularx-qrcode';
 import { InlineSVGModule } from 'ng-inline-svg-2';
@@ -49,12 +49,6 @@ import { ContactsRoutingModule } from './routing';
     InlineSVGModule
   ],
   bootstrap: [],
-  entryComponents: [
-    OptionsComponent,
-    DeleteComponent,
-    QRCodeComponent,
-    PictureComponent,
-  ],
   providers: [
     Clipboard,
   ],

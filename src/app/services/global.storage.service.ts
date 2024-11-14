@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Storage } from '@ionic/storage';
+import { Storage } from '@ionic/storage-angular';
+import { Drivers } from '@ionic/storage';
+import CordovaSQLiteDriver from 'localforage-cordovasqlitedriver'
 import { Logger } from '../logger';
 import { GlobalServiceManager } from './global.service.manager';
 
@@ -21,15 +23,29 @@ export type StorageLocation = 'ionic' | 'browserlocalstorage';
 export class GlobalStorageService {
   public static instance: GlobalStorageService; // Convenient way to get this service from non-injected classes
   public static ionicStorage: Storage; // Convenient way to get ionic storage from non-injected classes
+  public storage: Storage | null = null;
 
   // Local memory cache to reduce the number of calls to the (slow) sqlite cordova plugin.
   private cache: {
     [key: string]: any;
   } = {};
 
-  constructor(private storage: Storage) {
+  constructor() {
     GlobalStorageService.instance = this;
-    GlobalStorageService.ionicStorage = storage;
+  }
+
+  async init() {
+    const store = new Storage({
+      name: '__essentials.db',
+      driverOrder: [CordovaSQLiteDriver._driver, Drivers.IndexedDB, Drivers.LocalStorage, 'websql']
+    });
+
+    await store.defineDriver(CordovaSQLiteDriver);
+    const storage = await store.create();
+
+    this.storage = storage;
+
+    GlobalStorageService.ionicStorage = this.storage;
   }
 
   private getFullStorageKey(did: string | null, networkTemplate: string | null, context, key): string {

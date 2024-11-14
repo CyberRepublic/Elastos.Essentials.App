@@ -26,15 +26,13 @@ import { NgModule } from '@angular/core';
 /* import { Clipboard } from '@awesome-cordova-plugins/clipboard/ngx';
 import { WebView } from '@awesome-cordova-plugins/ionic-webview/ngx';
 import { IonicModule } from '@ionic/angular';
-import { IonicStorageModule } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { Native } from './services/native.service';
 import { LocalStorage } from './services/storage.service'; */
 
 @NgModule({
     declarations: [
-    ],
-    entryComponents: [
     ],
     imports: [
         /* IonicModule,

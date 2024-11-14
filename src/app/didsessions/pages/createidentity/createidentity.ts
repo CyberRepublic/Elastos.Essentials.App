@@ -38,7 +38,7 @@ export class CreateIdentityPage {
   public isfirst = true;
   public styling = Styling;
 
-  public passwordSheetState = DrawerState.Bottom;
+  public passwordSheetState = DrawerState.Bottom; // 0
   public passwordSheetMinHeight = 0;
   public passwordSheetDockedHeight = 350;
   public password = '';
