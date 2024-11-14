@@ -43,8 +43,6 @@ import { DIDSessionsRoutingModule } from './routing';
     DIDSessionsRoutingModule,
     InlineSVGModule
   ],
-  entryComponents: [
-  ],
   providers: [
     QRScanner,
     Platform,

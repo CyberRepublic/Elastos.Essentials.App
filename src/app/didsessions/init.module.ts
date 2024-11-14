@@ -9,8 +9,6 @@ import { TranslateModule } from '@ngx-translate/core';
     IonicModule,
     TranslateModule,
   ],
-  entryComponents: [
-  ],
   providers: [
     /* QRScanner,
     Platform,

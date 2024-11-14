@@ -32,12 +32,5 @@ import { VoteResultComponent } from './vote-result/vote-result.component';
     ],
     providers: [
     ],
-    entryComponents: [
-        CrVotesComponent,
-        VoteResultComponent,
-        MileStoneOptionsComponent,
-        TitleOptionsComponent,
-        ProposalTitleBarComponent,
-    ],
 })
 export class ComponentsModule { }
