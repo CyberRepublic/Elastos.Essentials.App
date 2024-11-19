@@ -129,7 +129,19 @@
               "bip32",
               "@chainge/sdk",
               "ethers/lib/utils",
-              "@unstoppabledomains/resolution"
+              "@unstoppabledomains/resolution",
+              "localforage-cordovasqlitedriver",
+              "secp256k1",
+              "bigint-buffer",
+              "bitcoinjs-message",
+              "domainchainjs",
+              "jszip",
+              "@cosmjs/encoding",
+              "@cosmjs/proto-signing",
+              "@cosmjs/stargate",
+              "moment",
+              "jsonpath",
+              "randombytes"
             ]
           },
           "configurations": {
@@ -179,15 +191,15 @@
         "serve": {
           "builder": "@angular-builders/custom-webpack:dev-server",
           "options": {
-            "browserTarget": "app:build"
+            "buildTarget": "app:build"
           },
           "configurations": {
             "development": {
-              "browserTarget": "app:build",
+              "buildTarget": "app:build",
               "port": 8132
             },
             "production": {
-              "browserTarget": "app:build:production"
+              "buildTarget": "app:build:production"
             },
             "ci": {
               "progress": false
@@ -198,7 +210,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "app:build"
+            "buildTarget": "app:build"
           }
         },
         "test": {
