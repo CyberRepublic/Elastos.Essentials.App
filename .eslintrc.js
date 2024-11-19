@@ -2,7 +2,9 @@ module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: __dirname + "/tsconfig.json"
+    project: __dirname + "/tsconfig.json",
+    ecmaVersion: 'latest',
+    sourceType: 'module'
   },
   plugins: [
     '@typescript-eslint',
@@ -43,12 +45,12 @@ module.exports = {
     // TS specific
     "@typescript-eslint/no-misused-promises": "error",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-unused-vars": "off",
-    "@typescript-eslint/no-empty-function": "off",
-    "@typescript-eslint/no-inferrable-types": "warn",
-    "@typescript-eslint/no-namespace": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-extra-semi": "warn",
+    "@typescript-eslint/no-unused-vars": ["warn", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_"
+    }],
+    "@typescript-eslint/no-extra-semi": "error",
+    "no-extra-semi": "off", // Disable base ESLint rule to prevent conflicts
     "@typescript-eslint/no-this-alias": "off",
     "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/no-non-null-assertion": "off",
@@ -57,13 +59,15 @@ module.exports = {
     // Import plugin
     "import/no-unresolved": "off",
     "import/no-extraneous-dependencies": "error",
-    // TOO SLOW
-    /* "import/no-cycle": [
-      "warn",
-      {
-        "maxDepth": 5,
-        "ignoreExternal": true
+  },
+  settings: {
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx']
+    },
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true
       }
-    ] */
+    }
   }
 };
