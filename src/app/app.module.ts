@@ -97,7 +97,8 @@ export class SentryErrorHandler implements ErrorHandler {
       if (stringifiedError.indexOf("QuotaExceededError") >= 0) {
           Logger.warn("Sentry", "QuotaExceededError, clear all localStorage");
           localStorage.clear();
-          lottie.splashscreen.show();
+          const lottie = (window as any).lottie;
+          void lottie.splashscreen.show();
           void GlobalServiceManager.getInstance().emitUserSignOut();
           window.location.href = "/";
           return true;

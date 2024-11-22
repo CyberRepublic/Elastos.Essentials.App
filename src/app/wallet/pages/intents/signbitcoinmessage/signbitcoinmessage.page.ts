@@ -142,12 +142,15 @@ export class SignBitcoinMessagePage implements OnInit {
 
   async signData() {
     try {
+      this.actionIsGoing = true;
       let signature = await (this.networkWallet.safe as unknown as BTCSafe).signMessage(this.message);
       // Logger.log('wallet', 'SignBitcoinMessagePage signature:', signature)
       await this.sendIntentResponse({ signature: signature, status: 'ok' });
     } catch (e) {
       Logger.warn('wallet', 'SignBitcoinMessagePage sign data error:', e)
       await this.sendIntentResponse({ signature: null, status: 'error' });
+    } finally {
+      this.actionIsGoing = false;
     }
   }
 

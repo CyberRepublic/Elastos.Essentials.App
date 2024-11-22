@@ -190,6 +190,8 @@ export class SignBitcoinDataPage implements OnInit {
 
   async signData() {
     try {
+      this.actionIsGoing = true;
+
       // let prevOutScripts = Buffer.from(this.intentParams.prevOutScript, 'hex')
       // // let scriptString = bitcoin.script.toASM(bitcoin.script.decompile(prevOutScripts))
       // // Logger.warn('wallet', 'SignBitcoinDataPage scriptString:', scriptString)
@@ -201,6 +203,8 @@ export class SignBitcoinDataPage implements OnInit {
     } catch (e) {
       Logger.warn('wallet', 'SignBitcoinDataPage sign data error:', e)
       await this.sendIntentResponse({ signature: null, status: 'error' });
+    } finally {
+      this.actionIsGoing = false;
     }
   }
 

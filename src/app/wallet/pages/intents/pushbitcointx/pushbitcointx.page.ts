@@ -151,12 +151,15 @@ export class PushBitcoinTxPage implements OnInit {
   async pushTx() {
     if (this.receivedIntent?.params?.payload?.params[0]) {
       try {
+        this.actionIsGoing = true;
         const result = await this.btcSubWallet.sendSignedTransaction(this.rawtx, null, false);
         await this.sendIntentResponse({ txid: result.txid, status: result.status });
       }
       catch (err) {
         Logger.error('wallet', 'PushBitcoinTxPage sendSignedTransaction error:', err)
         await this.sendIntentResponse({ txid: null, status: 'error' });
+      } finally {
+        this.actionIsGoing = false;
       }
     } else {
       await this.sendIntentResponse({ txid: null, status: 'error' });

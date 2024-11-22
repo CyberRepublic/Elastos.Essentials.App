@@ -117,7 +117,8 @@ export class GlobalStorageService {
             if (e.name == "QuotaExceededError") {
                 Logger.warn("StorageService", "QuotaExceededError, clear all localStorage");
                 localStorage.clear();
-                lottie.splashscreen.show();
+                const lottie = (window as any).lottie;
+                void lottie.splashscreen.show();
                 await GlobalServiceManager.getInstance().emitUserSignOut();
                 window.location.href = "/";
             }

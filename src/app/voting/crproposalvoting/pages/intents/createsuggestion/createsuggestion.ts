@@ -41,10 +41,10 @@ export class CreateSuggestionPage {
 
     public suggestionDetailFetched = false;
     public suggestionDetail: SuggestionDetail;
-    private onGoingCommand: CreateSuggestionCommand;
+    public onGoingCommand: CreateSuggestionCommand;
     public signingAndSendingSuggestionResponse = false;
-    public creationDate: string = "";
-    public bugetAmount: number = 0;
+    public creationDate = "";
+    public bugetAmount = 0;
     public Config = Config;
     public proposaltype: string;
 

@@ -58,7 +58,7 @@ export class MultiSigTxPage implements OnInit {
 
   private networkWallet: AnyNetworkWallet = null;
   private receivedIntent: MultiSigTxIntent;
-  private multiSigWallet: StandardMultiSigMasterWallet = null;
+  public multiSigWallet: StandardMultiSigMasterWallet = null;
 
   public initializationComplete = false;
   public txInfo: PendingMultiSigTransaction = null;

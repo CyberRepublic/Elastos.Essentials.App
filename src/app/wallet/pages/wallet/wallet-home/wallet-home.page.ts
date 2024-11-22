@@ -75,7 +75,7 @@ export class WalletHomePage implements OnInit, OnDestroy {
     private displayableSubWallets: AnySubWallet[] = null;
     public stakingAssets: StakingData[] = null;
 
-    private walletAddresses: WalletAddressInfo[] = null;
+    public walletAddresses: WalletAddressInfo[] = null;
 
     public stakedBalance = null; // Staked on ELA main chain or Tron
 

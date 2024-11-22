@@ -38,7 +38,7 @@ export class AppDetailsPage {
   showPassword = false;
   passwordToggle = 'eye';
   appDIDDocumentStatusWasChecked = false; // Whether the App DID document has been checked on chain or not yet
-  private publishedAppInfo: ApplicationDIDInfo = null;
+  public publishedAppInfo: ApplicationDIDInfo = null;
   developerDIDDocument: DIDPlugin.DIDDocument = null;
   signedInUserDID: string = null;
   public publishingDid = false;

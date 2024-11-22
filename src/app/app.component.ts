@@ -39,8 +39,6 @@ import { VoteService } from './voting/services/vote.service';
 import { GlobalUnisatApiService } from './services/global.unisat.service';
 
 
-declare let didManager: DIDPlugin.DIDManager;
-
 @Component({
   selector: 'app-root',
   template: '<ion-app><ion-router-outlet [swipeGesture]="false"></ion-router-outlet></ion-app>',

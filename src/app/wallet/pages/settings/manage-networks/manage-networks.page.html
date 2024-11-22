@@ -16,8 +16,7 @@
             </ion-col>
             <ion-col size="2" class="right-col">
                 <ion-toggle mode="ios" [(ngModel)]="networkWithVisibility.isShown"
-                    (ionChange)="onVisibilityChange($event, networkWithVisibility)" (click)="$event.stopPropagation()"
-                    [disabled]="clickOngoing">
+                    (ionChange)="onVisibilityChange($event, networkWithVisibility)" (click)="$event.stopPropagation()">
                 </ion-toggle>
             </ion-col>
             <ion-ripple-effect *ngIf="networkWithVisibility.isCustom"></ion-ripple-effect>

@@ -28,7 +28,7 @@
       (clicked)="cancelOperation()"
       [title]="'common.cancel' | translate">
     </ebutton>
-    <ebutton class="btn confirm" [disabled]="signingAndTransacting || actionIsGoing" (clicked)="pushTx()"
+    <ebutton class="btn confirm" [disabled]="actionIsGoing" (clicked)="pushTx()"
       [title]="'common.confirm' | translate"></ebutton>
   </ion-grid>
 </ion-content>

@@ -260,7 +260,8 @@ export class GlobalNavService {
 
     public async restartApp() {
         // navigator["app"].exitApp();
-        lottie.splashscreen.show();
+        const lottie = (window as any).lottie;
+        void lottie.splashscreen.show();
         await GlobalServiceManager.getInstance().emitUserSignOut();
         window.location.href = "/";
     }

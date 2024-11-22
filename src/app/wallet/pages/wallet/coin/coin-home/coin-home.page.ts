@@ -802,11 +802,11 @@ export class CoinHomePage implements OnInit {
         return WalletUtil.getFriendlyBalance(balance);
     }
 
-    public goStakeApp(s) {
-        this.stakingInitService.start()
+    public goStakeApp() {
+        void this.stakingInitService.start()
     }
 
-    public goTronResource(s) {
+    public goTronResource() {
         this.native.go('wallet-tron-resource');
     }
 }

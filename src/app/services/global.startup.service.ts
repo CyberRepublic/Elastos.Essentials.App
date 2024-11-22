@@ -34,9 +34,10 @@ export class GlobalStartupService {
   }
 
   init() {
+    const lottie = (window as any).lottie;
     lottie.splashscreen.on("lottieAnimationEnd", (event)=> {
         if (this.startupScreenReady)
-            lottie.splashscreen.hide();
+            void lottie.splashscreen.hide();
     })
   }
 
@@ -99,8 +100,9 @@ export class GlobalStartupService {
    */
   public setStartupScreenReady() {
     this.startupScreenReady = true;
+    const lottie = (window as any).lottie;
     if (lottie.splashscreen.animationEnded)
-        lottie.splashscreen.hide();
+        void lottie.splashscreen.hide();
   }
 
   public getStartupScreen(did: string): Promise<string> {
