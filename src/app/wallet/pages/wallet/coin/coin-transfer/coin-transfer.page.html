@@ -261,7 +261,7 @@
         </div>
 
         <!------------------ SEND AND RECHARGE BUTTON ------------------>
-        <div *ngIf="!native.popup && !keyboardIsVisible() && transferType !== 3" class="footer-container ion-no-border"
+        <div *ngIf="!native.popup && transferType !== 3" class="footer-container ion-no-border"
             [class.dark-footer]="theme.darkMode">
             <ion-row class="btn-container">
                 <ebutton (clicked)="goTransaction()" [title]="getButtonLabel() | translate" [disabled]="actionIsGoing">

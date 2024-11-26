@@ -1198,13 +1198,7 @@ export class CoinTransferPage implements OnInit, OnDestroy {
     }
 
     keyboardIsVisible() {
-        this.zone.run(() => {
-            if (this.keyboard.isVisible) {
-                return true;
-            } else {
-                return false;
-            }
-        })
+        return this.keyboard.isVisible;
     }
 
     /**
