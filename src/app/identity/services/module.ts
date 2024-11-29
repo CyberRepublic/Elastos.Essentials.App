@@ -8,7 +8,6 @@ import { IonicModule, Platform } from "@ionic/angular";
 import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateModule } from "@ngx-translate/core";
 import { QRCodeModule } from "angularx-qrcode";
-import { IonBottomDrawerModule } from "ion-bottom-drawer";
 import { ComponentsModule } from "../components/components.module";
 import { OptionsComponent } from "../components/options/options.component";
 import { SuccessComponent } from "../components/success/success.component";
@@ -38,7 +37,6 @@ import { LocalStorage } from "./localstorage";
   bootstrap: [],
   providers: [
     Clipboard,
-    IonBottomDrawerModule,
     LocalStorage,
     Platform,
     WebView

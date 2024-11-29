@@ -14,7 +14,7 @@ Logger.init(console);
 void defineCustomElements(window);
 
 // Enable production mode
-if (true && environment.production) {
+if (environment.production) {
   Logger.log("global", "Enabling angular PRODUCTION mode");
   enableProdMode();
 }
