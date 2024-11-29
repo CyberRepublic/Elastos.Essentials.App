@@ -2,7 +2,6 @@ import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { DrawerState } from 'ion-bottom-drawer';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import {
   BuiltInIcon,
@@ -38,7 +37,7 @@ export class CreateIdentityPage {
   public isfirst = true;
   public styling = Styling;
 
-  public passwordSheetState = DrawerState.Bottom; // 0
+  public passwordSheetState = 0; // DrawerState.Bottom
   public passwordSheetMinHeight = 0;
   public passwordSheetDockedHeight = 350;
   public password = '';
