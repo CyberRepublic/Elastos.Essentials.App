@@ -1,5 +1,4 @@
-import { Component, NgZone, OnInit, ViewChild } from '@angular/core';
-import { IonSlides } from '@ionic/angular';
+import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
@@ -18,8 +17,6 @@ import { PopupService } from '../../services/popup.service';
 import { UxService } from '../../services/ux.service';
 
 
-
-
 @Component({
   selector: 'app-friends',
   templateUrl: './friends.page.html',
@@ -27,7 +24,7 @@ import { UxService } from '../../services/ux.service';
 })
 export class FriendsPage implements OnInit {
   @ViewChild(TitleBarComponent, { static: false }) titleBar: TitleBarComponent;
-  @ViewChild('slider', { static: false }) slider: IonSlides;
+  @ViewChild('swiper') private swiperEl!: ElementRef;
 
   public favActive = false;
   private subscription: Subscription = null;
@@ -35,14 +32,6 @@ export class FriendsPage implements OnInit {
 
   public letters: string[] = [];
   public contacts: Contact[] = [];
-
-  slideOpts = {
-    initialSlide: 0,
-    speed: 200,
-    zoom: true,
-    centeredSlides: true,
-    slidesPerView: 3.5
-  };
 
   constructor(
     public friendsService: FriendsService,
@@ -116,8 +105,8 @@ export class FriendsPage implements OnInit {
   }
 
   async getActiveSlide() {
-    if (this.contacts.length && this.slider) {
-      const index = await this.slider.getActiveIndex();
+    if (this.contacts.length && this.swiperEl?.nativeElement?.swiper) {
+      const index = this.swiperEl?.nativeElement?.swiper?.activeIndex;;
       this.friendsService.activeSlide = this.contacts[index] || this.contacts[this.contacts.length - 1];
       Logger.log('contacts', 'friends.getActiveSlide - ', this.friendsService.activeSlide);
     }

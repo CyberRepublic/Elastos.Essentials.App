@@ -1,6 +1,5 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { RenewalVotesContentInfo, VotingInfo } from '@elastosfoundation/wallet-js-sdk/typings/transactions/payload/Voting';
-import { IonSlides } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Logger } from 'src/app/logger';
 import { App } from 'src/app/model/app.enum';
@@ -20,9 +19,8 @@ import { DPoS2Service } from '../../../services/dpos2.service';
     templateUrl: './node-slider.component.html',
     styleUrls: ['./node-slider.component.scss'],
 })
-export class NodeSliderComponent implements OnInit {
-
-    @ViewChild('slider', { static: false }) slider: IonSlides;
+export class NodeSliderComponent implements AfterViewInit, OnInit {
+    @ViewChild('swiper') private swiperEl!: ElementRef;
 
     @Output() buttonClick = new EventEmitter<number>();
 
@@ -37,12 +35,7 @@ export class NodeSliderComponent implements OnInit {
     public currentHeight = 0;
     private useMaxStakeDays = false;
 
-    slideOpts = {
-        initialSlide: 1,
-        speed: 400,
-        centeredSlides: true,
-        slidesPerView: 1.2
-    };
+    private initialSlide = 0;
 
     constructor(
         public uxService: UXService,
@@ -57,13 +50,18 @@ export class NodeSliderComponent implements OnInit {
 
     async ngOnInit() {
         this.displayedNodes = this._nodes.slice(0, this.nodeIndex + 2);
-        this.slideOpts.initialSlide = this.displayedNodes.indexOf(this.node);
+        this.initialSlide = this.displayedNodes.indexOf(this.node);
         this.currentHeight = await GlobalElastosAPIService.instance.getCurrentHeight();
 
         //reset inputStakeDays
         this._nodes.forEach(n => {
             n.inputStakeDays = n.lockDays;
         })
+    }
+
+    ngAfterViewInit() {
+        if (this.initialSlide > 0)
+            this.swiperEl?.nativeElement?.swiper?.slideTo(this.initialSlide, 0, false)
     }
 
     //// Increment nodes array when sliding forward ////

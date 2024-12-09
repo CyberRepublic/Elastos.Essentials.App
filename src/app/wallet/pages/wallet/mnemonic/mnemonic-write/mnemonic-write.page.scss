@@ -19,12 +19,12 @@
         text-align: center;
     }
 
-    ion-slides {
+    swiper-container {
         margin: 0;
         width: 100%;
         --bullet-background-active: var(--ion-text-color);
 
-        ion-slide {
+        swiper-slide {
             width: 100%;
             padding: 0 15px;
             display: flex;

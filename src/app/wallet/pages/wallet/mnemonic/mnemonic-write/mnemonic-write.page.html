@@ -2,8 +2,8 @@
     <app-titlebar></app-titlebar>
     <ion-grid class="ion-text-center container">
         <p>{{ 'wallet.type-menmonic-verify' | translate }}</p>
-        <ion-slides #slider pager [options]="slideOpts">
-            <ion-slide *ngFor="let slideNumber of [0,1,2]">
+        <swiper-container #swiper pager centered-slides="true" slides-per-view="1" speed="400">
+            <swiper-slide *ngFor="let slideNumber of [0,1,2]">
                 <ion-row *ngFor="let wordInput of [0,1,2,3]" class="input-row" (click)="showMnemonicInputKeypad()"
                     [class]="{currentInput: keypadShown && inputList.length === (slideNumber*4) + wordInput}">
                     <ion-col size="1">
@@ -15,8 +15,8 @@
                         </div>
                     </ion-col>
                 </ion-row>
-            </ion-slide>
-        </ion-slides>
+            </swiper-slide>
+        </swiper-container>
         <ion-row class="btn-container">
             <ebutton [disabled]="!allInputsFilled()" (clicked)="onCreate()"
                 [title]="'wallet.create-wallet' | translate"> </ebutton>

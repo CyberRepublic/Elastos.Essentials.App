@@ -43,7 +43,8 @@ export class GlobalNativeService {
             header: msgTranslated,
             duration: duration,
             position: 'bottom',
-            color: 'danger'
+            color: 'danger',
+            cssClass: 'custom-toast'
         }).then(toast => toast.present());
     }
 
@@ -54,7 +55,8 @@ export class GlobalNativeService {
             header: translation,
             duration: duration,
             position: 'bottom',
-            color: "primary"
+            color: "primary",
+            cssClass: 'custom-toast'
         }).then(toast => toast.present());
     }
 
@@ -67,7 +69,8 @@ export class GlobalNativeService {
             message: translatedMsg,
             duration: duration,
             position: 'bottom',
-            color: color
+            color: color,
+            cssClass: 'custom-toast'
         }).then(toast => toast.present());
     }
 

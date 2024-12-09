@@ -1,9 +1,9 @@
 @import 'src/app/didsessions/root.scss';
 
-ion-slides {
+swiper-container {
   height: calc(100% - (150px + 40px)); // Substract height of slides on approximate height of footer
 
-  ion-slide {
+  swiper-slide {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -121,7 +121,7 @@ ion-slides {
 }
 
 @media screen and (min-height: 670px) {
-  ion-slides {
+  swiper-container {
     .first-slide {
       .qr-container {
         #qrcode {

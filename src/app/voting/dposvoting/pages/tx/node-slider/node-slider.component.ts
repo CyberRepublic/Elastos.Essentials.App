@@ -18,12 +18,7 @@ export class NodeSliderComponent implements OnInit {
 
   public displayedArr: DPosNode[] = [];
 
-  slideOpts = {
-    initialSlide: null,
-    speed: 400,
-    centeredSlides: true,
-    slidesPerView: 1.2
-  };
+  private initialSlide = 0;
 
   constructor(
     public nodesService: NodesService,
@@ -33,7 +28,7 @@ export class NodeSliderComponent implements OnInit {
 
   ngOnInit() {
     this.displayedArr = this._nodes.slice(0, this.nodeIndex + 2);
-    this.slideOpts.initialSlide = this.displayedArr.indexOf(this.node);
+    this.initialSlide = this.displayedArr.indexOf(this.node);
   }
 
   //// Increment nodes array when sliding forward ////

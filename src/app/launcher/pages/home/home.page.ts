@@ -1,5 +1,5 @@
-import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { IonContent, IonSlides, ModalController, ToastController } from '@ionic/angular';
+import { Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { IonContent, ModalController, ToastController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
@@ -20,6 +20,7 @@ import { NotificationManagerService } from '../../services/notificationmanager.s
 import { WidgetContainerComponent } from '../../widgets/base/widget-container/widget-container.component';
 import { WidgetsServiceEvents } from '../../widgets/services/widgets.events';
 import { WidgetsService } from '../../widgets/services/widgets.service';
+import type { Swiper } from 'swiper';
 
 @Component({
   selector: 'app-home',
@@ -29,7 +30,7 @@ import { WidgetsService } from '../../widgets/services/widgets.service';
 export class HomePage implements OnInit {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
   @ViewChild(IonContent, { static: true }) ionContent: IonContent;
-  @ViewChild('widgetsslides', { static: true }) widgetsSlides: IonSlides;
+  @ViewChild('swiper') private swiperEl!: ElementRef; swiper: Swiper;
   @ViewChildren(WidgetContainerComponent) widgetContainersList: QueryList<WidgetContainerComponent>;
 
   private widgetContainers: WidgetContainerComponent[] = [];
@@ -44,11 +45,6 @@ export class HomePage implements OnInit {
 
   public showSwipeIndicator = false; // Whether to show the swipe animation or not (first time only for new identities)
 
-  public widgetsSlidesOpts = {
-    autoHeight: true,
-    spaceBetween: 10,
-    //initialSlide: 1 // Doesn't work well, shows slide 0 during a short time first...
-  };
   public slidesShown = false;
   public activeScreenIndex = 1;
   public editingWidgets = false;
@@ -105,7 +101,7 @@ export class HomePage implements OnInit {
       switch (icon.key) {
         case 'home':
           this.widgetsService.exitEditionMode(); // Exit edition mode if needed
-          void this.widgetsSlides.slideTo(1); // re-center on the middle screen
+          void this.swiper?.slideTo(1); // re-center on the middle screen
           return;
         case 'notifications':
           void this.showNotifications();
@@ -152,17 +148,19 @@ export class HomePage implements OnInit {
       });
     }
 
+    this.swiper = this.swiperEl?.nativeElement?.swiper;
+
     this.widgetsEditionModeSub = WidgetsServiceEvents.editionMode.subscribe(editionMode => {
       this.editingWidgets = editionMode;
 
       // Lock the slider during edition to avoid horizontal scrolling
-      void this.widgetsSlides.lockSwipes(editionMode);
+      this.swiper.allowTouchMove = !editionMode;
 
       // When the mode changes to edition, the active slide content will get higher
       // as new content is shown. We need to wait for this content (invisible widgets) to be shown then
       // force a recomputation of the slider height, otherwiser the user can't scroll down.
       setTimeout(() => {
-        void this.widgetsSlides.updateAutoHeight(0);
+        void this.swiper.updateAutoHeight(0);
       }, 500);
     });
 
@@ -174,9 +172,8 @@ export class HomePage implements OnInit {
     // We have to do this otherzise the "initialSlide" option doesn't work well and shows the first slide during
     // a short time.
     if (!this.slidesShown) { // First entrance only to not come back to middle slide when coming back from other screens
-      void this.widgetsSlides.slideTo(1, 0, false).then(() => {
-        this.slidesShown = true;
-      });
+      this.swiper.slideTo(1, 0, false)
+      this.slidesShown = true;
     }
   }
 
@@ -227,11 +224,11 @@ export class HomePage implements OnInit {
     this.widgetContainers[this.activeScreenIndex].addWidget();
   }
 
-  public async onSlideChange(evt) {
-    this.activeScreenIndex = await this.widgetsSlides.getActiveIndex();
+  public async onSlideChange() {
+    this.activeScreenIndex = this.swiper?.activeIndex;
     //void this.ionContent.scrollToTop(500);
 
-    void this.widgetsSlides.update();
+    void this.swiper.update();
 
     // User has swiped at least once so he knows. We can hide the swipe indicator and remember this.
     // Make sure to test the user reached the 0 index slide (left) because this event is received also when starting (main, 1)
