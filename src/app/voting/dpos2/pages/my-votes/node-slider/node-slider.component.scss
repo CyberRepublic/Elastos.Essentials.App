@@ -37,6 +37,7 @@ p {
   padding: 0 6px;
   background: var(--essentials-box-color);
   border: solid 1px var(--essentials-border-separator-color);
+  flex-wrap: nowrap;
 
   ion-input {
       text-align: right;

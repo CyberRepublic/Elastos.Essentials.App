@@ -1,10 +1,8 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { IonSlides } from '@ionic/angular';
+import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Logger } from 'src/app/logger';
 import { App } from 'src/app/model/app.enum';
 import { Util } from 'src/app/model/util';
 import { GlobalElastosAPIService, NodeType } from 'src/app/services/global.elastosapi.service';
-import { GlobalJsonRPCService } from 'src/app/services/global.jsonrpc.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 import { ProposalService } from 'src/app/voting/crproposalvoting/services/proposal.service';
 import { UXService } from 'src/app/voting/services/ux.service';
@@ -15,8 +13,8 @@ import { StakeService, VoteType } from '../../../services/stake.service';
     templateUrl: './vote-slider.component.html',
     styleUrls: ['./vote-slider.component.scss'],
 })
-export class VoteSliderComponent implements OnInit {
-    @ViewChild('slider', { static: false }) slider: IonSlides;
+export class VoteSliderComponent implements AfterViewInit, OnInit {
+    @ViewChild('swiper') private swiperEl!: ElementRef;
 
     @Input() voteInfos = [];
     // @Input() totalVotes = 0;
@@ -26,18 +24,11 @@ export class VoteSliderComponent implements OnInit {
     public displayedInfos: any[] = [];
     public dataFetched = false;
 
-    slideOpts = {
-        initialSlide: 1,
-        speed: 400,
-        centeredSlides: true,
-        slidesPerView: 1.2
-    };
+    private initialSlide = 0;
 
     constructor(
         public uxService: UXService,
         private stakeService: StakeService,
-        private globalElastosAPIService: GlobalElastosAPIService,
-        private globalJsonRPCService: GlobalJsonRPCService,
         private proposalService: ProposalService,
         public theme: GlobalThemeService
     ) {
@@ -47,7 +38,7 @@ export class VoteSliderComponent implements OnInit {
         this.voteInfos = this.stakeService.votesRight.voteInfos.slice(0, 4);
         let voteInfo = this.voteInfos[this.index];
         this.displayedInfos = this.voteInfos.slice(0, this.index + 2);
-        this.slideOpts.initialSlide = this.displayedInfos.indexOf(voteInfo);
+        this.initialSlide = this.displayedInfos.indexOf(voteInfo);
         void this.getDPoSV1Data();
         void this.getCRCandidateData();
         void this.getCRCouncilData();
@@ -55,6 +46,11 @@ export class VoteSliderComponent implements OnInit {
 
         // Logger.log(App.STAKING, 'displayedInfos', this.displayedInfos);
         // Logger.log(App.STAKING, 'index', this.index);
+    }
+
+    ngAfterViewInit() {
+        if (this.initialSlide > 0)
+            this.swiperEl?.nativeElement?.swiper?.slideTo(this.initialSlide, 0, false)
     }
 
     //// Increment nodes array when sliding forward ////
@@ -66,8 +62,8 @@ export class VoteSliderComponent implements OnInit {
         } else {
             return;
         }
-        Logger.log('dposvoting', 'last node', lastNode);
-        Logger.log('dposvoting', 'next node', this.voteInfos[nextNodeIndex]);
+        Logger.log(App.STAKING, 'last node', lastNode);
+        Logger.log(App.STAKING, 'next node', this.voteInfos[nextNodeIndex]);
     }
 
     async getDPoSV1Data() {
@@ -95,7 +91,7 @@ export class VoteSliderComponent implements OnInit {
     }
 
     async getCRCouncilData() {
-        Logger.log(App.CRCOUNCIL_VOTING, 'Fetching CRMembers..');
+        Logger.log(App.STAKING, 'Fetching CRMembers..');
 
         if (this.voteInfos[VoteType.CRImpeachment].list.length > 0) {
             try {

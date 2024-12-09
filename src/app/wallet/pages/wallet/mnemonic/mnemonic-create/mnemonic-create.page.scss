@@ -1,12 +1,12 @@
 @import "src/app/wallet/root.scss";
 
-ion-slides {
+swiper-container {
     position: relative;
     min-height: 100%;
     object-fit: cover;
     --ion-color-primary: var(--ion-text-color);
 
-    ion-slide {
+    swiper-slide {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -60,7 +60,7 @@ ion-slides {
 }
 
 @media screen and (max-height: 670px) {
-    ion-slides {
+    swiper-container {
         .mnemonic-container {
             .mnemonic-row {
                 ion-col {

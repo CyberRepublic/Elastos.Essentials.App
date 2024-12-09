@@ -1,6 +1,6 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonSlides, Platform } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
@@ -15,7 +15,6 @@ import { WalletCreationService } from 'src/app/wallet/services/walletcreation.se
 import { IdentityService } from '../../services/identity.service';
 import { DIDSessionsStore } from './../../../services/stores/didsessions.store';
 
-
 declare let didManager: DIDPlugin.DIDManager;
 
 // Minimal duration during which a slide remains shown before going to the next one.
@@ -28,7 +27,7 @@ const MIN_SLIDE_SHOW_DURATION_MS = 4000;
 })
 export class PrepareDIDPage {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-  @ViewChild(IonSlides, { static: false }) slide: IonSlides;
+  @ViewChild('swiper') private swiperEl!: ElementRef;
 
   private PUBLISH_DID_SLIDE_INDEX = 0;
   private SIGN_IN_SLIDE_INDEX = 1;
@@ -54,13 +53,6 @@ export class PrepareDIDPage {
 
   // UI
   public slideIndex = 0;
-  public slideOpts = {
-    initialSlide: 0,
-    speed: 400,
-    init: false,
-    allowTouchMove: false,
-    slidesPerView: 1
-  };
   public hidden = true;
 
   // Errors
@@ -99,7 +91,7 @@ export class PrepareDIDPage {
     });
 
     // Dirty hack because on iOS we are currently unable to understand why the
-    // ion-slides width is sometimes wrong when an app starts. Waiting a few
+    // swiper-container width is sometimes wrong when an app starts. Waiting a few
     // seconds (DOM fully rendered once...?) seems to solve this problem.
     if (this.platform.platforms().indexOf('ios') >= 0) {
       setTimeout(() => {
@@ -116,7 +108,7 @@ export class PrepareDIDPage {
     do {
       nextSlideIndex = await this.computeNextSlideIndex(nextSlideIndex);
       Logger.log("didsessions", "Next slide index will be:", nextSlideIndex);
-      await this.slide.slideTo(nextSlideIndex);
+      await this.goToSlide(nextSlideIndex);
       this.slideIndex = nextSlideIndex;
 
       switch (nextSlideIndex) {
@@ -162,20 +154,11 @@ export class PrepareDIDPage {
 
   showSlider() {
     Logger.log('didsessions', "Showing slider");
-    this.hidden = false
-    void this.slide.getSwiper().then((swiper) => {
-      swiper.init();
-      this.slideIndex = 0;
-      void this.slide.slideTo(this.slideIndex);
-    });
+    this.hidden = false;
   }
 
-  nextSlide() {
-    void this.slide.slideNext();
-  }
-
-  prevSlide() {
-    void this.slide.slidePrev();
+  async goToSlide(index: number) {
+    await this.swiperEl?.nativeElement?.swiper?.slideTo(index);
   }
 
   private resetErrors() {

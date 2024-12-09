@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonSlides, Platform } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import { GlobalDIDSessionsService } from 'src/app/services/global.didsessions.service';
@@ -17,18 +17,7 @@ import { DIDSessionsStore } from './../../../services/stores/didsessions.store';
 export class OnboardPage implements OnInit {
 
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-  @ViewChild('slider', { static: false }) slider: IonSlides;
-
-  hidden = true;
-
-  // Slider options
-  slideOpts = {
-    initialSlide: 0,
-    speed: 400,
-    centeredSlides: true,
-    slidesPerView: 1,
-    init: false
-  };
+  public hidden = true;
 
   constructor(
     public theme: GlobalThemeService,
@@ -47,7 +36,7 @@ export class OnboardPage implements OnInit {
 
   ionViewDidEnter() {
     // Dirty hack because on iOS we are currently unable to understand why the
-    // ion-slides width is sometimes wrong when an app starts. Waiting a few
+    // swiper-slides width is sometimes wrong when an app starts. Waiting a few
     // seconds (DOM fully rendered once...?) seems to solve this problem.
     if (this.platform.platforms().indexOf('ios') >= 0) {
       setTimeout(() => {
@@ -60,9 +49,6 @@ export class OnboardPage implements OnInit {
 
   showSlider() {
     this.hidden = false;
-    void this.slider.getSwiper().then((swiper) => {
-      swiper.init();
-    });
   }
 
   next(slide) {

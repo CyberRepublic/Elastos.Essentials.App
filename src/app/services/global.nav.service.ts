@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { NavController, PopoverController } from '@ionic/angular';
-import { NavigationOptions } from '@ionic/angular/providers/nav-controller';
+import { NavigationOptions } from '@ionic/angular/common/providers/nav-controller';
 import { App } from "src/app/model/app.enum";
 import { RestartPromptComponent } from '../components/restart-prompt/restart-prompt.component';
 import { Logger } from '../logger';

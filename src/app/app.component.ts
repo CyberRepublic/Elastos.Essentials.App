@@ -37,7 +37,7 @@ import { GlobalThemeService } from './services/theming/global.theme.service';
 import { GlobalWalletConnectService } from './services/walletconnect/global.walletconnect.service';
 import { VoteService } from './voting/services/vote.service';
 import { GlobalUnisatApiService } from './services/global.unisat.service';
-
+import { register } from 'swiper/element/bundle';
 
 @Component({
   selector: 'app-root',
@@ -87,6 +87,7 @@ export class AppComponent {
   ) { }
 
   ngOnInit() {
+    register(); // Register Swiper custom elements
     this.initializeApp();
   }
 

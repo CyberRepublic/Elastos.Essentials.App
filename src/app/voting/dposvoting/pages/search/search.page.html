@@ -15,8 +15,7 @@
     </app-node-slider-search>
 
     <ion-list lines="none" [class.blur]="showNode" class="node-list" [class.darkContainer]="theme.darkMode">
-      <ion-virtual-scroll [items]="filteredNodes" approxItemHeight="240px">
-        <ion-item *virtualItem="let node">
+        <ion-item *ngFor="let node of filteredNodes">
           <ion-grid class="ion-no-padding">
             <ion-row class="ion-no-padding">
               <ion-col size="1" class="rank-container ion-no-padding"
@@ -44,7 +43,6 @@
             </ion-row>
           </ion-grid>
         </ion-item>
-      </ion-virtual-scroll>
     </ion-list>
   </ion-grid>
 
