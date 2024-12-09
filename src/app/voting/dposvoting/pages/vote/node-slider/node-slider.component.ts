@@ -1,5 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { IonSlides } from '@ionic/angular';
+import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Logger } from 'src/app/logger';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 import { DPosNode } from '../../../model/nodes.model';
@@ -10,9 +9,9 @@ import { NodesService } from '../../../services/nodes.service';
   templateUrl: './node-slider.component.html',
   styleUrls: ['./node-slider.component.scss'],
 })
-export class NodeSliderComponent implements OnInit {
+export class NodeSliderComponent implements AfterViewInit, OnInit {
 
-  @ViewChild('slider', { static: false }) slider: IonSlides;
+  @ViewChild('swiper') private swiperEl!: ElementRef;
 
   @Input() _nodes: DPosNode[] = [];
   @Input() totalVotes = 0;
@@ -21,12 +20,7 @@ export class NodeSliderComponent implements OnInit {
 
   public displayedNodes: DPosNode[] = [];
 
-  slideOpts = {
-    initialSlide: 1,
-    speed: 400,
-    centeredSlides: true,
-    slidesPerView: 1.2
-  };
+  private initialSlide = 0;
 
   constructor(
     public nodesService: NodesService,
@@ -36,8 +30,13 @@ export class NodeSliderComponent implements OnInit {
 
   ngOnInit() {
     this.displayedNodes = this._nodes.slice(this.nodeIndex > 0 ? this.nodeIndex - 1 : 0, this.nodeIndex + 2);
-    this.slideOpts.initialSlide = this.displayedNodes.indexOf(this.node);
+    this.initialSlide = this.displayedNodes.indexOf(this.node);
   }
+
+  ngAfterViewInit() {
+    if (this.initialSlide > 0)
+      this.swiperEl?.nativeElement?.swiper?.slideTo(this.initialSlide, 0, false)
+}
 
   //// Increment nodes array when sliding forward ////
   loadNext() {
@@ -57,7 +56,7 @@ export class NodeSliderComponent implements OnInit {
     let prevNodeIndex: number = this._nodes.indexOf(firstNode) - 1;
     if (this._nodes[prevNodeIndex]) {
       this.displayedNodes.unshift(this._nodes[prevNodeIndex]);
-      void this.slider.slideTo(1, 0);
+      this.swiperEl?.nativeElement?.swiper?.slideTo(1, 0);
     }
   }
 

@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { AlertController, IonSlides, ModalController, NavController } from "@ionic/angular";
+import { AlertController, ModalController, NavController } from "@ionic/angular";
 import { TranslateService } from "@ngx-translate/core";
 import BigNumber from 'bignumber.js';
 import moment from 'moment';
@@ -34,7 +34,6 @@ import { RedPacketTheme, ThemeService } from '../../services/theme.service';
 })
 export class NewPacketPage {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-  @ViewChild('categorySlides', { read: IonSlides }) categorySlides: IonSlides;
 
   // Packet info
   public tokenSubwallet: AnySubWallet; // Subwallet of the token chosen by user for the red packet. By default, use the main EVM subwallet
@@ -59,20 +58,14 @@ export class NewPacketPage {
   private createdPacket: Packet = null;
   public unsupportedNetwork = false;
 
-  // UI
-  public slideOpts = {
-    slidesPerView: 2.7,
-    spaceBetween: 10,
-  };
-
   public distributionSelectOption: any = {
     header: this.translate.instant("redpackets.distribution"),
-    cssClass: this.theme.darkMode ? "darkSelect" : "select",
+    cssClass: "custom-alert",
   };
 
   public visibilitySelectOption: any = {
     header: this.translate.instant("redpackets.visibility"),
-    cssClass: this.theme.darkMode ? "darkSelect" : "select",
+    cssClass: "custom-alert",
   };
 
   // Callbacks

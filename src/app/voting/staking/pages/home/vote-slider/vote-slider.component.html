@@ -1,7 +1,7 @@
-<ion-slides #slider [options]="slideOpts" (ionSlideNextEnd)="loadNext()" class="vote-slides"
+<swiper-container #swiper centered-slides="true" slides-per-view="1.2" speed="400" (swiperslidenexttransitionend)="loadNext()" class="vote-slides"
     [class.dark-vote-slides]="theme.darkMode">
 
-    <ion-slide *ngFor="let info of displayedInfos">
+    <swiper-slide *ngFor="let info of displayedInfos">
         <ion-card class="ion-text-center">
             <ion-grid class="container ion-no-padding">
                 <ion-row>
@@ -30,5 +30,5 @@
 
             </ion-grid>
         </ion-card>
-    </ion-slide>
-</ion-slides>
+    </swiper-slide>
+</swiper-container>
