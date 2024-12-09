@@ -1,6 +1,5 @@
-import { Component, NgZone, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { IonSlides } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import { lazyElastosWalletSDKImport } from 'src/app/helpers/import.helper';
@@ -18,14 +17,7 @@ import { SelectableMnemonic, WalletCreationService } from '../../../../services/
 })
 export class MnemonicCreatePage implements OnInit {
     @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-    @ViewChild('slider', { static: false }) slider: IonSlides;
-
-    slideOpts = {
-        initialSlide: 0,
-        speed: 400,
-        centeredSlides: true,
-        slidesPerView: 1
-    };
+    @ViewChild('swiper') private swiperEl!: ElementRef;
 
     masterWalletId = "1";
     mnemonicList: SelectableMnemonic[] = [];
@@ -78,8 +70,8 @@ export class MnemonicCreatePage implements OnInit {
         this.native.go("/wallet/mnemonic/write");
     }
 
-    nextSlide(slide) {
-        slide.slideNext();
+    nextSlide() {
+        this.swiperEl?.nativeElement?.swiper.slideNext();
     }
 }
 

@@ -63,13 +63,13 @@ export class ELATransactionFactory {
       throw new Error(`feeAmountSats ${feeAmountSats} is not a number`);
     }
     const publicKey = await ELAAddressHelper.getPublic(privateKey);
-    const tx = this.createUnsignedSendToTx(unspentTransactionOutputs, sendToAddress, sendAmount, publicKey, feeAmountSats, feeAccount, txMemo);
+    const tx = ELATransactionFactory.createUnsignedSendToTx(unspentTransactionOutputs, sendToAddress, sendAmount, publicKey, feeAmountSats, feeAccount, txMemo);
     const signature = await ELATransactionSigner.getSignature(tx, privateKey);
     const encodedSignedTx = ELATransactionSigner.addSignatureToTx(tx, publicKey, signature);
 
-    // Logger.log('wallet', 'createSignedSendToTx.signedTx ' + JSON.stringify(tx));
+    // Logger.log('wallet', 'createSignedSendToTx signedTx ' + JSON.stringify(tx));
 
-    Logger.log('wallet', 'createSignedSendToTx.encodedSignedTx ' + JSON.stringify(encodedSignedTx));
+    Logger.log('wallet', 'createSignedSendToTx encodedSignedTx ' + JSON.stringify(encodedSignedTx));
     return encodedSignedTx;
   }
 
@@ -95,7 +95,7 @@ export class ELATransactionFactory {
     /* eslint-disable */
     const sendAmountSats = new BigNumber(sendAmount, 10);
     /* eslint-enable */
-    return await this.createUnsignedSendToTxSats(unspentTransactionOutputs, sendToAddress, sendAmountSats, publicKey, feeAmountSats, feeAccount, txMemo);
+    return await ELATransactionFactory.createUnsignedSendToTxSats(unspentTransactionOutputs, sendToAddress, sendAmountSats, publicKey, feeAmountSats, feeAccount, txMemo);
   };
 
   static async createUnsignedSendToTxSats(unspentTransactionOutputs, sendToAddress, sendAmountSats, publicKey, feeAmountStr, feeAccount, txMemo) {
@@ -299,13 +299,13 @@ export class ELATransactionFactory {
 
   static createSignedVoteTx = async (privateKey, unspentTransactionOutputs, feeAmountSats, candidates, feeAccount): Promise<string> => {
     const publicKey = await ELAAddressHelper.getPublic(privateKey);
-    const tx = this.createUnsignedVoteTx(unspentTransactionOutputs, publicKey, feeAmountSats, candidates, feeAccount);
+    const tx = ELATransactionFactory.createUnsignedVoteTx(unspentTransactionOutputs, publicKey, feeAmountSats, candidates, feeAccount);
     const signature = await ELATransactionSigner.getSignature(tx, privateKey);
     const encodedSignedTx = ELATransactionSigner.addSignatureToTx(tx, publicKey, signature);
 
-    // Logger.log('wallet', 'createSignedSendToTx.signedTx ' + JSON.stringify(tx));
+    // Logger.log('wallet', 'createSignedVoteTx signedTx ' + JSON.stringify(tx));
 
-    Logger.log('wallet', 'createSignedSendToTx.encodedSignedTx ' + JSON.stringify(encodedSignedTx));
+    Logger.log('wallet', 'createSignedVoteTx encodedSignedTx ' + JSON.stringify(encodedSignedTx));
     return encodedSignedTx;
   };
 }

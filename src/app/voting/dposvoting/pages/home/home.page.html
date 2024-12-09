@@ -1,13 +1,12 @@
 <ion-content>
   <ion-grid class="container">
-    <ion-slides
-      #slide
+    <swiper-container
+      #swiper
       pager="true"
-      [options]="slideOpts"
       [class.hidden]="hidden"
     >
 
-      <ion-slide>
+      <swiper-slide>
         <ion-card-title>
           <ion-row class="img-container">
             <img src="../assets/dposvoting/icon/onboard1.svg">
@@ -16,7 +15,7 @@
             <ion-col offset="1.25" size="9.5">
               <h4 class="title">{{ 'dposvoting.home-welcome' | translate }}</h4>
             </ion-col>
-            <ion-col size="1.25" class="arrow-container" (click)="next(slide)">
+            <ion-col size="1.25" class="arrow-container" (click)="next(swiper)">
               <ion-icon name="arrow-forward-outline"></ion-icon>
             </ion-col>
           </ion-row>
@@ -24,26 +23,26 @@
             {{ 'dposvoting.home-dpos-description' | translate }}
           </p>
           <ion-row class="btn-container">
-            <div class="btn" (click)="next(slide)">
+            <div class="btn" (click)="next(swiper)">
               <ion-label>{{ 'common.next' | translate }}</ion-label>
             </div>
           </ion-row>
         </ion-card-title>
-      </ion-slide>
+      </swiper-slide>
 
-      <ion-slide>
+      <swiper-slide>
         <ion-card-title>
           <ion-row class="img-container">
             <img src="../assets/dposvoting/icon/onboard2.svg">
           </ion-row>
           <ion-row>
-            <ion-col size="1.25" class="arrow-container" (click)="prev(slide)">
+            <ion-col size="1.25" class="arrow-container" (click)="prev(swiper)">
               <ion-icon name="arrow-back-outline"></ion-icon>
             </ion-col>
             <ion-col>
               <h4 class="title" size="9.5">{{ 'dposvoting.home-votes-ela' | translate }}</h4>
             </ion-col>
-            <ion-col size="1.25" class="arrow-container" (click)="next(slide)">
+            <ion-col size="1.25" class="arrow-container" (click)="next(swiper)">
               <ion-icon name="arrow-forward-outline"></ion-icon>
             </ion-col>
           </ion-row>
@@ -51,20 +50,20 @@
             {{ 'dposvoting.home-dpos-description-ela' | translate }}
           </p>
           <ion-row class="btn-container">
-            <div class="btn" (click)="next(slide)">
+            <div class="btn" (click)="next(swiper)">
               <ion-label>{{ 'common.next' | translate }}</ion-label>
             </div>
           </ion-row>
         </ion-card-title>
-      </ion-slide>
+      </swiper-slide>
 
-      <ion-slide>
+      <swiper-slide>
         <ion-card-title>
           <ion-row class="img-container">
             <img src="../assets/dposvoting/icon/onboard3.svg">
           </ion-row>
           <ion-row>
-            <ion-col size="1.25" class="arrow-container" (click)="prev(slide)">
+            <ion-col size="1.25" class="arrow-container" (click)="prev(swiper)">
               <ion-icon name="arrow-back-outline"></ion-icon>
             </ion-col>
             <ion-col>
@@ -82,8 +81,8 @@
             </div>
           </ion-row>
         </ion-card-title>
-      </ion-slide>
+      </swiper-slide>
 
-    </ion-slides>
+    </swiper-container>
   </ion-grid>
 </ion-content>
