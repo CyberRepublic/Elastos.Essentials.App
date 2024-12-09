@@ -1,8 +1,7 @@
 import { Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import QRCode from 'easyqrcodejs';
-
-import { IonSlides, ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import { BuiltInIcon, TitleBarIcon, TitleBarIconSlot, TitleBarMenuItem } from 'src/app/components/titlebar/titlebar.types';
@@ -24,7 +23,7 @@ import { UXService } from '../../services/ux.service';
 })
 export class BackupDIDPage {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-  @ViewChild(IonSlides, { static: false }) slide: IonSlides;
+  @ViewChild('swiper') private swiperEl!: ElementRef;
   @ViewChild('qrcode', { static: false }) qrcode: ElementRef;
 
   public qrcodeImg: string;
@@ -34,11 +33,6 @@ export class BackupDIDPage {
   public dataIsReady = false;
 
   public slideIndex = 0;
-  public slideOpts = {
-    initialSlide: 0,
-    speed: 400,
-    init: false
-  };
 
   private titleBarIconClickedListener: (icon: TitleBarIcon | TitleBarMenuItem) => void;
 
@@ -112,18 +106,18 @@ export class BackupDIDPage {
   }
 
   async getActiveSlide() {
-    this.slideIndex = await this.slide.getActiveIndex();
+    this.slideIndex = this.swiperEl?.nativeElement?.swiper?.activeIndex;
     this.slideIndex === 0 ?
       this.titleBar.setTitle(this.translate.instant('didsessions.your-private-qr-code')) :
       this.titleBar.setTitle(this.translate.instant('didsessions.your-private-key'));
   }
 
   nextSlide() {
-    return this.slide.slideNext();
+    return this.swiperEl?.nativeElement?.swiper?.slideNext();
   }
 
   prevSlide() {
-    return this.slide.slidePrev();
+    return this.swiperEl?.nativeElement?.swiper?.slidePrev();
   }
 
   nextClicked() {

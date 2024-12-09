@@ -87,6 +87,7 @@
 
         ion-input {
             flex-direction: row-reverse; // Icons on the right
+            display: flex;
 
             .icons {
                 height: 100%;

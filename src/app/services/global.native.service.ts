@@ -53,6 +53,7 @@ export class GlobalNativeService {
         duration: duration,
         position: "bottom",
         color: "danger",
+        cssClass: 'custom-toast'
       })
       .then((toast) => toast.present());
   }
@@ -66,6 +67,7 @@ export class GlobalNativeService {
         duration: duration,
         position: "bottom",
         color: "primary",
+        cssClass: 'custom-toast'
       })
       .then((toast) => toast.present());
   }
@@ -86,6 +88,7 @@ export class GlobalNativeService {
         duration: duration,
         position: "bottom",
         color: color,
+        cssClass: 'custom-toast'
       })
       .then((toast) => toast.present());
   }

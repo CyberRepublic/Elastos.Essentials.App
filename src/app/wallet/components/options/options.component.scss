@@ -3,23 +3,36 @@
 ion-grid {
   padding: 10px 0;
   display: flex;
-  justify-content: center;
   flex-direction: column;
+  width: 100%;
 
   ion-row {
-    padding: 10px 20px 10px 12px;
-    display: flex;
-    justify-content: space-between;
+    padding: 10px 12px;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between !important;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
 
-    ion-label {
+    > ion-label {
       margin-top: 3px;
       font-size: 14px;
       font-weight: 500;
+      text-align: left;
+      flex: 0 0 auto;
     }
 
-    img, ion-icon {
+    > img,
+    > ion-icon {
       width: 20px;
       height: 20px;
+      flex: 0 0 auto;
+    }
+
+    > ion-ripple-effect {
+      position: absolute;
+      inset: 0;
     }
   }
 }

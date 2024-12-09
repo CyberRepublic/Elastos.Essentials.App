@@ -1,5 +1,5 @@
-import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { IonContent, IonSlides, ModalController, ToastController } from '@ionic/angular';
+import { Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { IonContent, ToastController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
@@ -20,7 +20,6 @@ import {
   MAINNET_TEMPLATE,
   TESTNET_TEMPLATE
 } from 'src/app/services/global.networks.service';
-import { GlobalPreferencesService } from 'src/app/services/global.preferences.service';
 import { GlobalStartupService } from 'src/app/services/global.startup.service';
 import { GlobalStorageService } from 'src/app/services/global.storage.service';
 import { DIDSessionsStore } from 'src/app/services/stores/didsessions.store';
@@ -33,6 +32,7 @@ import { NotificationManagerService } from '../../services/notificationmanager.s
 import { WidgetContainerComponent } from '../../widgets/base/widget-container/widget-container.component';
 import { WidgetsServiceEvents } from '../../widgets/services/widgets.events';
 import { WidgetsService } from '../../widgets/services/widgets.service';
+import type { Swiper } from 'swiper';
 
 @Component({
   selector: 'app-home',
@@ -42,7 +42,7 @@ import { WidgetsService } from '../../widgets/services/widgets.service';
 export class HomePage implements OnInit {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
   @ViewChild(IonContent, { static: true }) ionContent: IonContent;
-  @ViewChild('widgetsslides', { static: false }) widgetsSlides: IonSlides | undefined;
+  @ViewChild('swiper') private swiperEl!: ElementRef; swiper: Swiper;
   @ViewChildren(WidgetContainerComponent) widgetContainersList: QueryList<WidgetContainerComponent>;
 
   private widgetContainers: WidgetContainerComponent[] = [];
@@ -52,16 +52,11 @@ export class HomePage implements OnInit {
 
   private titleBarIconClickedListener: (icon: TitleBarIcon | TitleBarMenuItem) => void;
   private themeSubscription: Subscription = null; // Subscription to theme change
-  private themeColorSubscription: Subscription = null;
   private widgetsEditionModeSub: Subscription = null;
+  private swiperTouchEndHandler: () => void = null;
 
   public showSwipeIndicator = false; // Whether to show the swipe animation or not (first time only for new identities)
 
-  public widgetsSlidesOpts = {
-    autoHeight: true,
-    spaceBetween: 10,
-    initialSlide: 1 // Start at middle slide (index 1)
-  };
   public slidesShown = false;
   public activeScreenIndex: number;
   public editingWidgets = false;
@@ -75,13 +70,11 @@ export class HomePage implements OnInit {
     public theme: GlobalThemeService,
     public appService: AppmanagerService,
     public didService: DIDManagerService,
-    private modalCtrl: ModalController,
     public walletUIService: UiService,
     private globalNetworksService: GlobalNetworksService,
     private globalNavService: GlobalNavService,
     private widgetsService: WidgetsService,
     private launcherNotificationsService: NotificationManagerService,
-    private globalPrefs: GlobalPreferencesService,
     private lightweightService: GlobalLightweightService
   ) {
     // Read lightweight mode synchronously from the service
@@ -138,22 +131,20 @@ export class HomePage implements OnInit {
       iconPath: BuiltInIcon.NOTIFICATIONS
     });
     this.titleBar.addOnItemClickedListener(
-      (this.titleBarIconClickedListener = icon => {
+      (this.titleBarIconClickedListener = (icon) => {
         switch (icon.key) {
           case 'home':
             this.widgetsService.exitEditionMode(); // Exit edition mode if needed
-            if (this.widgetsSlides && !this.lightweightMode) {
-              void this.widgetsSlides.slideTo(1); // re-center on the middle screen
-            }
+            void this.swiper?.slideTo(1); // re-center on the middle screen
             return;
           case 'notifications':
             void this.showNotifications();
             break;
           case 'scan':
-            void this.globalNavService.navigateTo(App.SCANNER, '/scanner/scan');
+            void this.globalNavService.navigateTo(App.SCANNER, "/scanner/scan");
             break;
           case 'settings':
-            void this.globalNavService.navigateTo(App.SETTINGS, '/settings/menu');
+            void this.globalNavService.navigateTo(App.SETTINGS, "/settings/menu");
             break;
         }
       })
@@ -193,19 +184,21 @@ export class HomePage implements OnInit {
       });
     }
 
+    this.swiper = this.swiperEl?.nativeElement?.swiper;
+
     this.widgetsEditionModeSub = WidgetsServiceEvents.editionMode.subscribe(editionMode => {
       this.editingWidgets = editionMode;
 
       // Only handle slides logic if not in lightweight mode
-      if (this.widgetsSlides && !this.lightweightMode) {
+      if (this.swiper && !this.lightweightMode) {
         // Lock the slider during edition to avoid horizontal scrolling
-        void this.widgetsSlides.lockSwipes(editionMode);
+        this.swiper.allowTouchMove = !editionMode;
 
         // When the mode changes to edition, the active slide content will get higher
         // as new content is shown. We need to wait for this content (invisible widgets) to be shown then
         // force a recomputation of the slider height, otherwiser the user can't scroll down.
         setTimeout(() => {
-          void this.widgetsSlides.updateAutoHeight(0);
+          void this.swiper.updateAutoHeight(0);
         }, 500);
       }
     });
@@ -231,6 +224,32 @@ export class HomePage implements OnInit {
       console.warn('Slides not shown in ionViewDidEnter, forcing visibility');
       this.initializeSlidesVisibility();
     }
+
+    // Setup touch end event listener on swiper instance
+    if (!this.lightweightMode) {
+      // Ensure swiper instance is available
+      if (!this.swiper && this.swiperEl?.nativeElement) {
+        this.swiper = this.swiperEl.nativeElement.swiper;
+      }
+
+      if (this.swiper && !this.swiperTouchEndHandler) {
+        this.swiperTouchEndHandler = () => {
+          this.onSlideTouchEnd();
+        };
+        this.swiper.on('touchEnd', this.swiperTouchEndHandler);
+      } else if (!this.swiper && this.swiperEl?.nativeElement) {
+        // If swiper instance is not ready yet, wait a bit and try again
+        setTimeout(() => {
+          this.swiper = this.swiperEl?.nativeElement?.swiper;
+          if (this.swiper && !this.swiperTouchEndHandler) {
+            this.swiperTouchEndHandler = () => {
+              this.onSlideTouchEnd();
+            };
+            this.swiper.on('touchEnd', this.swiperTouchEndHandler);
+          }
+        }, 100);
+      }
+    }
   }
 
   ionViewWillLeave() {
@@ -242,6 +261,12 @@ export class HomePage implements OnInit {
     if (this.widgetsEditionModeSub) {
       this.widgetsEditionModeSub.unsubscribe();
       this.widgetsEditionModeSub = null;
+    }
+
+    // Remove touch end event listener
+    if (this.swiper && this.swiperTouchEndHandler) {
+      this.swiper.off('touchEnd', this.swiperTouchEndHandler);
+      this.swiperTouchEndHandler = null;
     }
 
     this.titleBar.removeOnItemClickedListener(this.titleBarIconClickedListener);
@@ -289,6 +314,7 @@ export class HomePage implements OnInit {
     // With initialSlide: 1, slides should start at the correct position
     // Just show them after a brief delay to ensure they're properly initialized
     setTimeout(() => {
+      this.swiper.slideTo(this.activeScreenIndex, 0, false);
       this.slidesShown = true;
       console.log('Slides marked as shown after timeout');
     }, 50);
@@ -317,7 +343,7 @@ export class HomePage implements OnInit {
       'showSwipeIndicator:',
       this.showSwipeIndicator
     );
-    console.log('widgetsSlides exists:', !!this.widgetsSlides);
+    console.log('widgetsSlides exists:', !!this.swiper);
 
     // Only handle slide changes if not in lightweight mode
     if (!this.lightweightMode) {
@@ -330,12 +356,12 @@ export class HomePage implements OnInit {
       }
 
       // Try to get widgetsSlides if available
-      if (this.widgetsSlides) {
-        this.activeScreenIndex = await this.widgetsSlides.getActiveIndex();
+      if (this.swiper) {
+        this.activeScreenIndex = this.swiper?.activeIndex;
         console.log('Active screen index:', this.activeScreenIndex);
         //void this.ionContent.scrollToTop(500);
 
-        void this.widgetsSlides.update();
+        void this.swiper.update();
       } else {
         console.log('widgetsSlides not available yet, but still handling swipe indicator');
       }

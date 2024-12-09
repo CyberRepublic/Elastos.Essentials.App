@@ -17,13 +17,13 @@
       </div>
 
       <!-- Contacts Img Slider - if at least one contact -->
-      <ion-slides *ngIf="contacts.length" #slider [options]="slideOpts" (ionSlideDidChange)="getActiveSlide()">
-        <ion-slide *ngFor="let contact of contacts">
+      <swiper-container *ngIf="contacts.length" #swiper centered-slides="true" slides-per-view="3.5" speed="200" zoom="true" (swiperslidechange)="getActiveSlide()">
+        <swiper-slide *ngFor="let contact of contacts">
           <img [src]="uxService.getAvatar(contact)" class="inactiveSlide profile-img"
             [class.activeSlide]="contact === friendsService.activeSlide || shouldShowFirstContactInformation()"
             (click)="goToContact(contact)">
-        </ion-slide>
-      </ion-slides>
+        </swiper-slide>
+      </swiper-container>
 
       <!-- Contact management for active slides when detected -->
       <div class="slide-content" *ngIf="contacts.length && friendsService.activeSlide">

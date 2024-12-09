@@ -6,8 +6,8 @@
       <img src="assets/shared/essentials-black-circle.svg">
     </div>
 
-    <ion-slides #slide pager="true" [options]="slideOpts" [class.hidden]="hidden">
-      <ion-slide class="ion-padding">
+    <swiper-container #swiper pager="true" centered-slides="true" slides-per-view="1" speed="400" [class.hidden]="hidden">
+      <swiper-slide class="ion-padding">
         <div class="slide">
           <h1 class="ion-padding">{{'welcome-to-a'|translate}} <br> {{'secure-environment'| translate}}</h1>
           <p class="ion-padding">
@@ -20,7 +20,7 @@
             </ion-button>
           </div>
         </div>
-      </ion-slide>
-    </ion-slides>
+      </swiper-slide>
+    </swiper-container>
   </ion-grid>
 </ion-content>

@@ -113,6 +113,8 @@
           --padding-bottom: 3px;
           --padding-end: 5px;
           --padding-top: 3px;
+
+          min-height: 20px;
         }
 
         ion-input,
@@ -123,7 +125,6 @@
         ion-select {
           width: 150px;
           position: relative;
-          left: -20px;
         }
       }
 

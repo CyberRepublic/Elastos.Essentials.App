@@ -48,13 +48,13 @@
           <div class="form-flex-row-label-helper">{{ 'redpackets.theme-hint' | translate }}</div>
         </div>
 
-        <ion-slides #categorySlides [options]="slideOpts" class="themes-container">
-          <ion-slide class="category-slide-item" *ngFor="let theme of themes"
+        <swiper-container #swiper space-between="10" slides-per-view="2.7" class="themes-container">
+          <swiper-slide class="category-slide-item" *ngFor="let theme of themes"
             [ngClass]="{'active': packetTheme.key === theme.key}" (click)="useTheme(theme)">
             <img [src]="theme.thumbnailImage" />
             <div class="label">{{ 'redpackets.theme-'+theme.key | translate }}</div>
-          </ion-slide>
-        </ion-slides>
+          </swiper-slide>
+        </swiper-container>
       </div>
     </div>
 

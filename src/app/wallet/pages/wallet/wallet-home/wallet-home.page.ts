@@ -21,7 +21,7 @@
 */
 
 import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { IonSlides, PopoverController } from '@ionic/angular';
+import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import BigNumber from 'bignumber.js';
 import { Subscription } from 'rxjs';
@@ -59,7 +59,6 @@ import { UiService } from '../../../services/ui.service';
 import { WalletService } from '../../../services/wallet.service';
 import { WalletEditionService } from '../../../services/walletedition.service';
 import { LedgerConnectType } from '../ledger/ledger-connect/ledger-connect.page';
-import { Logger } from 'src/app/logger';
 
 @Component({
     selector: 'app-wallet-home',
@@ -68,7 +67,6 @@ import { Logger } from 'src/app/logger';
 })
 export class WalletHomePage implements OnInit, OnDestroy {
     @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-    @ViewChild('slider', { static: false }) slider: IonSlides;
 
     public masterWallet: MasterWallet = null;
     public networkWallet: AnyNetworkWallet = null;

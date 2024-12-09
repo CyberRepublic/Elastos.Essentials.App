@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
@@ -24,13 +24,6 @@ export class PrepareDIDPage {
 
   // UI
   public slideIndex = 0;
-  public slideOpts = {
-    initialSlide: 0,
-    speed: 400,
-    init: false,
-    allowTouchMove: false,
-    slidesPerView: 1
-  };
   public hidden = true;
   public isLightweightMode = false;
 
@@ -78,7 +71,7 @@ export class PrepareDIDPage {
     this.backButtonSub = this.platform.backButton.subscribeWithPriority(100, () => {});
 
     // Dirty hack because on iOS we are currently unable to understand why the
-    // ion-slides width is sometimes wrong when an app starts. Waiting a few
+    // swiper-container width is sometimes wrong when an app starts. Waiting a few
     // milliseconds (DOM fully rendered once...?) seems to solve this problem.
     if (this.platform.platforms().indexOf('ios') >= 0) {
       setTimeout(() => {

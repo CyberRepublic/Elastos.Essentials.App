@@ -39,6 +39,7 @@ import { GlobalWalletConnectService } from './services/walletconnect/global.wall
 import { VoteService } from './voting/services/vote.service';
 import { AppMinimize } from '@ionic-native/app-minimize/ngx';
 import { GlobalTranslationService } from './services/global.translation.service';
+import { register } from 'swiper/element/bundle';
 
 @Component({
   selector: 'app-root',
@@ -90,6 +91,7 @@ export class AppComponent {
   ) {}
 
   ngOnInit() {
+    register(); // Register Swiper custom elements
     this.initializeApp();
   }
 

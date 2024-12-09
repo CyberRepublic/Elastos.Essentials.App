@@ -1,5 +1,4 @@
-import { Component, NgZone, OnInit, ViewChild } from '@angular/core';
-import { IonSlides } from '@ionic/angular';
+import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import { WalletExceptionHelper } from 'src/app/helpers/wallet.helper';
@@ -29,14 +28,7 @@ export enum MnemonicLanguage {
 
 export class WalletImportPage implements OnInit {
     @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-    @ViewChild('slider', { static: false }) slider: IonSlides;
-
-    slideOpts = {
-        initialSlide: 0,
-        speed: 400,
-        centeredSlides: true,
-        slidesPerView: 1
-    };
+    @ViewChild('swiper') private swiperEl!: ElementRef;
 
     public slideIndex = 0;
     public keypadShown = false;
@@ -173,10 +165,8 @@ export class WalletImportPage implements OnInit {
         this.native.toast_trans('wallet.import-text-word-sucess');
     }
 
-    ionSlideDidChange() {
-        void this.zone.run(async () => {
-            this.slideIndex = await this.slider.getActiveIndex();
-        });
+    swiperSlideChange() {
+        this.slideIndex = this.swiperEl?.nativeElement?.swiper?.activeIndex;
     }
 
     /**
@@ -209,11 +199,11 @@ export class WalletImportPage implements OnInit {
      */
     private updateSliderPosition() {
         if (this.inputList.length < 4)
-            void this.slider.slideTo(0);
+            this.swiperEl?.nativeElement?.swiper?.slideTo(0);
         else if (this.inputList.length < 8)
-            void this.slider.slideTo(1);
+            this.swiperEl?.nativeElement?.swiper?.slideTo(1);
         else
-            void this.slider.slideTo(2);
+            this.swiperEl?.nativeElement?.swiper?.slideTo(2);
     }
 
     public async showMnemonicInputKeypad() {

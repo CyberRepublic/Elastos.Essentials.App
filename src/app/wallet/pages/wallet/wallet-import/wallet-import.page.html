@@ -2,8 +2,8 @@
     <app-titlebar></app-titlebar>
     <ion-grid class="ion-text-center container">
         <p>{{ 'wallet.type-menmonic-import' | translate }}</p>
-        <ion-slides #slider pager [options]="slideOpts" (ionSlideDidChange)="ionSlideDidChange()">
-            <ion-slide *ngFor="let slideNumber of [0,1,2]">
+        <swiper-container #swiper pager="true" centered-slides="true" slides-per-view="1" speed="400" (swiperslidechange)="swiperSlideChange()">
+            <swiper-slide *ngFor="let slideNumber of [0,1,2]">
                 <ion-row *ngFor="let wordInput of [0,1,2,3]" class="input-row" (click)="showMnemonicInputKeypad()"
                     [class]="{currentInput: keypadShown && inputList.length === (slideNumber*4) + wordInput}">
                     <ion-col size="1">
@@ -15,8 +15,16 @@
                         </div>
                     </ion-col>
                 </ion-row>
-            </ion-slide>
-        </ion-slides>
+            </swiper-slide>
+        </swiper-container>
+
+        <!-- why custom pagination? because the native pagination is not displayed below the swiper -->
+        <div class="swiper-pagination-custom">
+            <span *ngFor="let i of [0,1,2]"
+                  class="swiper-pagination-bullet-custom"
+                  [class.swiper-pagination-bullet-active-custom]="slideIndex === i">
+            </span>
+        </div>
         <ion-row class="btn-container">
             <ebutton [disabled]="!allInputsFilled()" (clicked)="onImport()"
                 [title]="'wallet.import-wallet' | translate"> </ebutton>

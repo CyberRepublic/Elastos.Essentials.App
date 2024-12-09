@@ -1,7 +1,7 @@
-import { Component, NgZone, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Keyboard } from '@awesome-cordova-plugins/keyboard/ngx';
-import { IonInput, IonSlides, ModalController } from '@ionic/angular';
+import { IonInput, ModalController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import { Logger } from 'src/app/logger';
@@ -21,15 +21,8 @@ import { WalletCreationService } from '../../../../services/walletcreation.servi
 })
 export class MnemonicWritePage implements OnInit {
     @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-    @ViewChild('slider', { static: false }) slider: IonSlides;
+    @ViewChild('swiper') private swiperEl!: ElementRef;
     @ViewChild('input', { static: false }) input: IonInput;
-
-    slideOpts = {
-        initialSlide: 0,
-        speed: 400,
-        centeredSlides: true,
-        slidesPerView: 1
-    };
 
     public inputList: string[] = [];
     public keypadShown = false;
@@ -152,11 +145,11 @@ export class MnemonicWritePage implements OnInit {
      */
     private updateSliderPosition() {
         if (this.inputList.length < 4)
-            void this.slider.slideTo(0);
+            this.swiperEl?.nativeElement?.swiper?.slideTo(0);
         else if (this.inputList.length < 8)
-            void this.slider.slideTo(1);
+            this.swiperEl?.nativeElement?.swiper?.slideTo(1);
         else
-            void this.slider.slideTo(2);
+            this.swiperEl?.nativeElement?.swiper?.slideTo(2);
     }
 
     private onMnemonicPaste(pastedMnemonicString: string) {

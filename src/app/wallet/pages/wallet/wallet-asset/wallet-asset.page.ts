@@ -21,7 +21,6 @@
  */
 
 import { Component, NgZone, OnDestroy, ViewChild } from '@angular/core';
-import { IonSlides } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { BigNumber } from 'bignumber.js';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
@@ -74,7 +73,6 @@ export type NetworkWalletAssetInfo = {
 })
 export class WalletAssetPage implements OnDestroy {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-  @ViewChild('slider', { static: false }) slider: IonSlides;
 
   public assetsInfo: NetworkWalletAssetInfo[] = [];
   public totalAmount = '';

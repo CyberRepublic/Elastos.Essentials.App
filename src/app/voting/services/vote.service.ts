@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NavigationOptions } from '@ionic/angular/providers/nav-controller';
+import { NavigationOptions } from '@ionic/angular/common/providers/nav-controller';
 import { TranslateService } from '@ngx-translate/core';
 import BigNumber from 'bignumber.js';
 import { BehaviorSubject } from 'rxjs';

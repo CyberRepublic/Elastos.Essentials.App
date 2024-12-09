@@ -15,40 +15,38 @@
     </app-node-slider-search>
 
     <ion-list lines="none" [class.blur]="showNode" class="node-list" [class.darkContainer]="theme.darkMode">
-      <ion-virtual-scroll [items]="filteredNodes" approxItemHeight="240px">
-        <ion-item *virtualItem="let node; index as i">
-          <ion-grid class="ion-no-padding">
-            <ion-row class="ion-no-padding row-list">
-              <ion-col size="1" class="rank-container ion-no-padding"
-                (click)="_showNode(i, node)">
-                {{ node.index }}
-              </ion-col>
-              <ion-col size="2" class="img-container" (click)="_showNode(i, node)">
-                <img-svg-fallback class="img" [src]="node.imageUrl" default="assets/launcher/default/default-avatar.svg"></img-svg-fallback>
-              </ion-col>
-              <ion-col size="7.5" class="label-col" (click)="_showNode(i, node)">
-                <h4>{{ node.nickname }}</h4>
-                <p>
-                  <!-- <span [class.inactive]="node.state !== 'Active'">
-                      <ion-icon name="navigate"></ion-icon> {{ node.Location }}
-                    </span>
-                    &#8226;  -->
-                    {{ showIntegerPart(node.dposv2votesNumber) }} {{ 'voting.vote-rights' | translate }} ({{ showIntegerPart(node.votesPercentage) }}%)
-                </p>
-                <p *ngIf="node.stakeuntilDate">
-                    {{ 'dposvoting.stake-until' | translate }}: {{ node.stakeuntilDate }}
-                </p>
-                <p *ngIf="node.stakeuntilExpiredIn" class="expired-in">
-                    {{ 'dposvoting.expired-in' | translate : { time: node.stakeuntilExpiredIn } }}
-                </p>
-              </ion-col>
-              <!-- <ion-col size="1.5" class="checkbox-container" *ngIf="node.state === 'Active'">
-                <ion-checkbox value="node" [(ngModel)]="node.isChecked" mode="ios"></ion-checkbox>
-              </ion-col> -->
-            </ion-row>
-          </ion-grid>
-        </ion-item>
-      </ion-virtual-scroll>
+      <ion-item *ngFor="let node of filteredNodes; index as i">
+        <ion-grid class="ion-no-padding">
+          <ion-row class="ion-no-padding row-list">
+            <ion-col size="1" class="rank-container ion-no-padding"
+              (click)="_showNode(i, node)">
+              {{ node.index }}
+            </ion-col>
+            <ion-col size="2" class="img-container" (click)="_showNode(i, node)">
+              <img-svg-fallback class="img" [src]="node.imageUrl" default="assets/launcher/default/default-avatar.svg"></img-svg-fallback>
+            </ion-col>
+            <ion-col size="7.5" class="label-col" (click)="_showNode(i, node)">
+              <h4>{{ node.nickname }}</h4>
+              <p>
+                <!-- <span [class.inactive]="node.state !== 'Active'">
+                    <ion-icon name="navigate"></ion-icon> {{ node.Location }}
+                  </span>
+                  &#8226;  -->
+                  {{ showIntegerPart(node.dposv2votesNumber) }} {{ 'voting.vote-rights' | translate }} ({{ showIntegerPart(node.votesPercentage) }}%)
+              </p>
+              <p *ngIf="node.stakeuntilDate">
+                  {{ 'dposvoting.stake-until' | translate }}: {{ node.stakeuntilDate }}
+              </p>
+              <p *ngIf="node.stakeuntilExpiredIn" class="expired-in">
+                  {{ 'dposvoting.expired-in' | translate : { time: node.stakeuntilExpiredIn } }}
+              </p>
+            </ion-col>
+            <!-- <ion-col size="1.5" class="checkbox-container" *ngIf="node.state === 'Active'">
+              <ion-checkbox value="node" [(ngModel)]="node.isChecked" mode="ios"></ion-checkbox>
+            </ion-col> -->
+          </ion-row>
+        </ion-grid>
+      </ion-item>
     </ion-list>
   </ion-grid>
 

@@ -54,7 +54,7 @@
             <ion-row class="profile-data">
                 <ion-col>
                     <h5>{{ 'dposvoting.node-location' | translate }}</h5>
-                    <ion-select [(ngModel)]="dposInfo.location" [attr.disabled]="needConfirm || onlyEditStakeUntil"
+                    <ion-select [interfaceOptions]="option" [(ngModel)]="dposInfo.location" [attr.disabled]="needConfirm || onlyEditStakeUntil"
                         placeholder="{{'dposvoting.node-location-placeholder' | translate}}"
                         [attr.ok-text]="'common.confirm' | translate" [attr.cancel-text]="'common.cancel' | translate">
                         <ion-select-option *ngFor="let code of areaList" [value]="code">

@@ -65,9 +65,9 @@ export class EditProfilePage {
 
   private titleBarIconClickedListener: (icon: TitleBarIcon | TitleBarMenuItem) => void;
 
-  option: any = {
+  public option: any = {
     header: this.translate.instant("identity.select-gender"),
-    cssClass: this.theme.darkMode ? "darkSelect" : "select",
+    cssClass: "custom-alert",
   };
 
   constructor(

@@ -9,9 +9,11 @@
     gap: 15px; // Added consistent gap between sections
 
     ion-card {
+        margin: 0;
+
         ion-card-header {
             position: relative;
-            margin: 60px 10px 20px; // Increased top margin to prevent clipping
+            margin: 50px 10px 10px; // Increased top margin to prevent clipping
 
             background: var(--essentials-box-color);
             display: flex;
@@ -83,7 +85,6 @@
     .wallet-info-row {
         border-radius: 17px;
         background-color: transparent;
-        margin-top: 10px;
 
         ion-col {
             display: flex;

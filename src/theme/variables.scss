@@ -149,7 +149,7 @@ $app-theme: mat.m2-define-light-theme((
     }
   }
 
-  /* ion-slides {
+  /* swiper-container {
     --bullet-background: #808080;
   } */
 }
@@ -253,7 +253,7 @@ body.dark {
     }
   }
 
-  /* ion-slides {
+  /* swiper-container {
     --bullet-background: #f5f5fd;
   } */
 }
@@ -379,5 +379,6 @@ ion-checkbox {
   --border-color-checked: var(--ion-text-color);
   --border-width: 1.5px;
   --checkmark-color: var(--ion-background-color);
-  --background-checked: var(--ion-text-color);
+  --checkbox-background-checked: var(--ion-text-color);
+  --size: 26px;
 }

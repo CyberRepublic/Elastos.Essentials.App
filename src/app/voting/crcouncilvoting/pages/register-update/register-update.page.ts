@@ -39,6 +39,11 @@ export class RegisterUpdatePage implements OnInit {
 
     public infoOpration = InfoOperation.Registration;
 
+    public option: any = {
+        header: this.translate.instant("crcouncilvoting.location-placeholder"),
+        cssClass: "custom-alert ion-select-max-height",
+    };
+
     constructor(
         public translate: TranslateService,
         public theme: GlobalThemeService,

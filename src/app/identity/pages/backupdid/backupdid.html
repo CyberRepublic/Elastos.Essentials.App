@@ -1,16 +1,16 @@
 <ion-content>
   <app-titlebar></app-titlebar>
-  <ion-slides #slide [options]="slideOpts" (ionSlideWillChange)="getActiveSlide()" class="ion-text-center"
+  <swiper-container #swiper speed="400" (swiperslidechange)="getActiveSlide()" class="ion-text-center"
     [class.dark-slides]="theme.darkMode">
-    <ion-slide class="ion-text-center first-slide">
+    <swiper-slide class="ion-text-center first-slide">
       <div class="qr-container" *ngIf="dataIsReady">
         <h1>{{ 'didsessions.decentralized-id' | translate }}</h1>
         <div #qrcode style="width:100%;"></div>
         <p>{{ mnemonic }}</p>
       </div>
       <h2>{{ 'didsessions.did-warning-info' | translate }}</h2>
-    </ion-slide>
-    <ion-slide class="ion-text-center second-slide">
+    </swiper-slide>
+    <swiper-slide class="ion-text-center second-slide">
       <ion-row class="mnemonic-row">
         <ion-col *ngFor="let mnemonic of mnemonicList" size="3.6"
           [class.bottom-row]="mnemonicList.indexOf(mnemonic) + 1 > 9">
@@ -22,8 +22,8 @@
         {{ 'common.your-mnemonic-prompt1' | translate }}<b>{{ 'common.your-mnemonic-prompt2' | translate }}</b>{{
         'common.your-mnemonic-prompt3' | translate }}
       </p>
-    </ion-slide>
-  </ion-slides>
+    </swiper-slide>
+  </swiper-container>
 
   <div class="footer" *ngIf="slideIndex < 1">
     <ebutton (clicked)="showPrintOptions()" [title]="'didsessions.print-qrcode' | translate"></ebutton>

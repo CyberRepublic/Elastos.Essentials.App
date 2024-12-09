@@ -3,21 +3,21 @@
 
   <ion-grid class="container" [class.light-container]="!theme.darkMode" [class.dark-container]="theme.darkMode">
     <!-- Non lightweight mode: 3 panels with slides -->
-    <ion-slides *ngIf="!lightweightMode" #widgetsslides [options]="widgetsSlidesOpts"
-      (ionSlideDidChange)="onSlideChange($event)" (ionSlideTouchEnd)="onSlideTouchEnd()"
+    <swiper-container *ngIf="!lightweightMode" #swiper auto-height="true" space-between="10"
+      (swiperslidechange)="onSlideChange()"
       class="widgets-containers-slides" [class.hidden]="!slidesShown">
-      <ion-slide>
+      <swiper-slide>
         <widget-container name="left"></widget-container>
-      </ion-slide>
-      <ion-slide>
+      </swiper-slide>
+      <swiper-slide>
         <lottie-player *ngIf="showSwipeIndicator" src="/assets/launcher/animations/104585-swipe.json"
           background="transparent" speed="0.8" style="width: 80px; height: 80px;" autoplay loop></lottie-player>
         <widget-container name="main"></widget-container>
-      </ion-slide>
-      <ion-slide>
+      </swiper-slide>
+      <swiper-slide>
         <widget-container name="right"></widget-container>
-      </ion-slide>
-    </ion-slides>
+      </swiper-slide>
+    </swiper-container>
 
     <!-- Lightweight mode: single container without slides -->
     <div *ngIf="lightweightMode" class="lightweight-container">

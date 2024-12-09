@@ -1,19 +1,8 @@
 @import "src/app/wallet/root.scss";
 
-ion-slides {
-    min-height: 100%;
-}
-
-ion-slide {
-    padding: 15px 7.5px;
-}
 
 .single-slide {
     padding: 15px 20px;
-}
-
-ion-slide,
-.single-slide {
     min-height: 100%;
     margin: 0;
     display: flex;

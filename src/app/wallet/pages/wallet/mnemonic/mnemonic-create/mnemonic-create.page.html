@@ -1,7 +1,7 @@
 <ion-content>
     <app-titlebar></app-titlebar>
-    <ion-slides #slide [options]="slideOpts">
-        <ion-slide class="message-container">
+    <swiper-container #swiper centered-slides="true" slides-per-view="1" speed="400">
+        <swiper-slide class="message-container">
             <h1>
                 {{ 'wallet.mnemonic-warning1' | translate }} <br>{{ 'wallet.mnemonic-warning2' | translate }}
             </h1>
@@ -9,10 +9,10 @@
                 {{ 'wallet.mnemonic-warning3' | translate }}
             </p>
             <ion-row class="btn-container">
-                <ebutton (clicked)="nextSlide(slide)" [title]="'wallet.view-mnemonic' | translate"> </ebutton>
+                <ebutton (clicked)="nextSlide()" [title]="'wallet.view-mnemonic' | translate"> </ebutton>
             </ion-row>
-        </ion-slide>
-        <ion-slide class="ion-text-center mnemonic-container">
+        </swiper-slide>
+        <swiper-slide class="ion-text-center mnemonic-container">
             <p>
                 {{ 'wallet.mnemonic-prompt1' | translate }}<b>{{ 'wallet.mnemonic-prompt2' | translate }}</b>{{
                 'wallet.mnemonic-prompt3' | translate }}<br><br>
@@ -26,6 +26,6 @@
             <ion-row class="btn-container">
                 <ebutton (clicked)="goToMnemonicWrite()" [title]="'wallet.memory-written-down' | translate"> </ebutton>
             </ion-row>
-        </ion-slide>
-    </ion-slides>
+        </swiper-slide>
+    </swiper-container>
 </ion-content>

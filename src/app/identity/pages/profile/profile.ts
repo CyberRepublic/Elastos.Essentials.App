@@ -33,7 +33,6 @@ export class ProfilePage {
 
   public hasCredential = false;
   public creatingIdentity = false;
-  public slideOpts: any;
   public avatarDataUrl: string = null;
 
   public fetchingApps = false;
@@ -138,11 +137,6 @@ export class ProfilePage {
 
       //this.buildDetailEntries();
       //this.buildCredentialEntries(publishAvatar);
-
-      this.slideOpts = {
-        slidesPerView: 4,
-        speed: 400,
-      };
 
       this.profileService.getAvatarDataUrl().subscribe(dataUrl => {
         this.avatarDataUrl = dataUrl;

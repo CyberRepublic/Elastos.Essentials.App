@@ -103,9 +103,9 @@
     <ion-row class="capsules" *ngIf="profileService.appCreds.length">
       <ion-col>
         <ion-content>
-          <ion-slides pager="false" [options]="slideOpts">
+          <swiper-container pager="false" slides-per-view="4" speed="400">
             <div *ngFor="let appCred of profileService.appCreds">
-              <ion-slide>
+              <swiper-slide>
                 <ion-grid>
                   <ion-row class="ion-align-items-center">
                     <ion-col>
@@ -121,9 +121,9 @@
                 </ion-grid>
 
 
-              </ion-slide>
+              </swiper-slide>
             </div>
-          </ion-slides>
+          </swiper-container>
         </ion-content>
       </ion-col>
     </ion-row>

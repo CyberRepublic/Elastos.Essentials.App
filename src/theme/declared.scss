@@ -19,6 +19,12 @@ ion-footer {
   box-shadow: none;
 }
 
+/********************** SELECT CONTROLLER **********************/
+ion-select::part(icon) {
+  width: 24px;
+  height: 24px;
+}
+
 a {
   color: var(--ion-text-color);
 }
@@ -52,6 +58,47 @@ a {
   --spinner-color: var(--ion-text-color);
   --background: var(--essentials-box-color);
   color: var(--ion-text-color);
+}
+
+/********************** TOAST **********************/
+.custom-toast {
+  font-size: 14px;
+}
+
+/********************** ALERT **********************/
+.custom-alert {
+  --ion-font-size: 16px; // Adjust as needed
+
+  .alert-message {
+    font-size: 16px; // Specifically target message text
+  }
+
+  .alert-title {
+    font-size: 18px; // Specifically target title text
+  }
+
+  .alert-button {
+    font-size: 18px; // Specifically target title text
+    height: 45px;
+  }
+
+  .alert-sub-title {
+    font-size: 16px; // Specifically target sub title text
+  }
+
+  .select-interface-option {
+    font-size: 16px;
+  }
+
+  .alert-input {
+    font-size: 16px;
+  }
+}
+
+.ion-select-max-height {
+  .alert-radio-group {
+    max-height: 100%!important;
+  }
 }
 
 /********************** LAUNCHER **********************/
@@ -539,4 +586,9 @@ a {
     width: 85vw !important;
     max-width: 400px;
   }
+}
+
+/************ OPTION COMPONENTS *************/
+.popover-viewport {
+  background: var(--essentials-box-color)
 }

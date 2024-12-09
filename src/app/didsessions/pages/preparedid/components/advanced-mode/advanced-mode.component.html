@@ -18,8 +18,8 @@
     </ion-col>
   </ion-row>
 
-  <ion-slides #slide [options]="slideOpts" [class.hidden]="hidden">
-    <ion-slide class="ion-text-center">
+  <swiper-container #swiper [options]="slideOpts" [class.hidden]="hidden" (swiperslidechange)="getActiveSlide()">
+    <swiper-slide class="ion-text-center">
       <div class="slide-card">
         <img
           [src]="!theme.darkMode ? 'assets/didsessions/onboard/slide1.svg' : 'assets/didsessions/onboard/dark_mode/slide1.svg'">
@@ -30,9 +30,9 @@
           <span class="error">{{ publishError }}</span>
         </div>
       </div>
-    </ion-slide>
+    </swiper-slide>
 
-    <ion-slide class="ion-text-center">
+    <swiper-slide class="ion-text-center">
       <div class="slide-card">
         <img src="assets/didsessions/onboard/slide2.svg">
         <h1>{{ 'didsessions.prepare.sign-in-title' | translate }}</h1>
@@ -42,9 +42,9 @@
           <span class="error">{{ signInError }}</span>
         </div>
       </div>
-    </ion-slide>
+    </swiper-slide>
 
-    <ion-slide class="ion-text-center">
+    <swiper-slide class="ion-text-center">
       <div class="slide-card">
         <img class="img-3" src="assets/didsessions/onboard/slide3.svg">
         <h1>{{ 'didsessions.prepare.hive-title' | translate }}</h1>
@@ -54,9 +54,9 @@
           <span class="error">{{ hiveError }}</span>
         </div>
       </div>
-    </ion-slide>
+    </swiper-slide>
 
-    <ion-slide class="ion-text-center">
+    <swiper-slide class="ion-text-center">
       <div class="slide-card">
         <img src="assets/didsessions/onboard/slide4.svg">
         <h1>{{ 'didsessions.prepare.wallet-title' | translate }}</h1>
@@ -66,9 +66,9 @@
           <span class="error">{{ signInError }}</span>
         </div>
       </div>
-    </ion-slide>
+    </swiper-slide>
 
-    <ion-slide class="ion-text-center">
+    <swiper-slide class="ion-text-center">
       <div class="slide-card">
         <img src="assets/shared/essentials-black-circle.svg">
         <h1>{{ 'didsessions.prepare.done-title' | translate }}</h1>
@@ -76,9 +76,9 @@
         <ebutton (clicked)="onFinalizePreparation()" *ngIf="!finalizingPreparation"
           [title]="'common.continue' | translate"></ebutton>
       </div>
-    </ion-slide>
+    </swiper-slide>
 
-  </ion-slides>
+  </swiper-container>
 
   <ion-row *ngIf="(slideIndex < 4 || finalizingPreparation) && !(signInError || hiveError || publishError)"
     class="slide-circle-row">

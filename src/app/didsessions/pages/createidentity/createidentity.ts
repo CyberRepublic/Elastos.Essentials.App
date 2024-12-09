@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
@@ -17,6 +17,7 @@ import { Util } from 'src/app/model/util';
 import { GlobalPreferencesService } from 'src/app/services/global.preferences.service';
 import { GlobalStartupService } from 'src/app/services/global.startup.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
+import type { Swiper } from 'swiper';
 
 @Component({
   selector: 'page-createidentity',
@@ -25,14 +26,11 @@ import { GlobalThemeService } from 'src/app/services/theming/global.theme.servic
 })
 export class CreateIdentityPage {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
+  @ViewChild('swiper') private swiperEl!: ElementRef; swiper: Swiper
 
   public hidden = true;
   public slideIndex = 0;
-  public slideOpts = {
-    initialSlide: 0,
-    speed: 400,
-    init: false
-  };
+  private initialSlide = 0;
 
   public isfirst = true;
   public styling = Styling;
@@ -59,7 +57,13 @@ export class CreateIdentityPage {
     if (!Util.isEmptyObject(navigation.extras.state)) {
       this.isfirst = false;
       Logger.log('didsessions', 'Setting create identity screen initial slide to index 1');
-      this.slideOpts.initialSlide = 1;
+      this.initialSlide = 1;
+    }
+  }
+
+  ngAfterViewInit() {
+    if (this.initialSlide > 0) {
+      this.swiperEl?.nativeElement?.swiper?.slideTo(this.initialSlide, 0, false)
     }
   }
 
@@ -83,8 +87,10 @@ export class CreateIdentityPage {
       })
     );
 
+    this.swiper = this.swiperEl?.nativeElement?.swiper;
+
     // Dirty hack because on iOS we are currently unable to understand why the
-    // ion-slides width is sometimes wrong when an app starts. Waiting a few
+    // swiper-slides width is sometimes wrong when an app starts. Waiting a few
     // seconds (DOM fully rendered once...?) seems to solve this problem.
     if (this.platform.platforms().indexOf('ios') >= 0) {
       setTimeout(() => {
@@ -107,6 +113,16 @@ export class CreateIdentityPage {
   showSlider() {
     Logger.log('didsessions', 'Showing created identity screen slider');
     this.hidden = false;
+  }
+
+  async getActiveSlide() {
+    this.slideIndex = this.swiper?.activeIndex || 0;
+    Logger.log('didsessions', '----getActiveSlide:', this.slideIndex);
+  }
+
+  nextSlide() {
+    this.swiper?.slideNext();
+    Logger.log('didsessions', '----nextSlide:');
   }
 
   onSlideIndexChange(slideIndex: number) {
