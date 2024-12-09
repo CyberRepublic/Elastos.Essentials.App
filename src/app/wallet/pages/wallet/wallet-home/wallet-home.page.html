@@ -22,13 +22,6 @@
         </div>
 
         <ion-grid class="single-slide" [class.dark-slide]="theme.darkMode" [class.blur]="native.popup">
-            <!-- <ion-row class="main-title-row">
-            <ion-col size="12">
-                <h1>{{ 'wallet.wallet-overview' | translate }}</h1>
-                <p>{{ 'wallet.you-have-n-wallets' | translate: {walletsCount: networkWallet.getSubWallets().length} }}</p>
-            </ion-col>
-        </ion-row> -->
-
             <!-- Header -->
             <ion-row class="card-row">
                 <img class="blurred-network-logo" *ngIf="currentNetwork" [src]="currentNetwork.logo" />

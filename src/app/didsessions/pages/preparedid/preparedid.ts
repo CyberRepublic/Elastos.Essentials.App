@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
@@ -24,13 +24,6 @@ export class PrepareDIDPage {
 
   // UI
   public slideIndex = 0;
-  public slideOpts = {
-    initialSlide: 0,
-    speed: 400,
-    init: false,
-    allowTouchMove: false,
-    slidesPerView: 1
-  };
   public hidden = true;
   public isLightweightMode = false;
 

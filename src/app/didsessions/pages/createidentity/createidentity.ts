@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
@@ -28,11 +28,7 @@ export class CreateIdentityPage {
 
   public hidden = true;
   public slideIndex = 0;
-  public slideOpts = {
-    initialSlide: 0,
-    speed: 400,
-    init: false
-  };
+  private initialSlide = 0;
 
   public isfirst = true;
   public styling = Styling;
@@ -84,7 +80,7 @@ export class CreateIdentityPage {
     );
 
     // Dirty hack because on iOS we are currently unable to understand why the
-    // ion-slides width is sometimes wrong when an app starts. Waiting a few
+    // swiper-slides width is sometimes wrong when an app starts. Waiting a few
     // seconds (DOM fully rendered once...?) seems to solve this problem.
     if (this.platform.platforms().indexOf('ios') >= 0) {
       setTimeout(() => {
