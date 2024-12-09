@@ -23,7 +23,7 @@ export class GlobalPopupService {
                 header: this.translate.instant(title),
                 subHeader: subTitle ? this.translate.instant(subTitle) : '',
                 backdropDismiss: false,
-                cssClass: 'alert',
+                cssClass: 'alert custom-alert',
                 mode: 'ios',
                 buttons: [
                     {
@@ -51,7 +51,7 @@ export class GlobalPopupService {
             this.alertPopup = this.alertCtrl.create({
                 header: this.translate.instant(title),
                 message: this.translate.instant(message),
-                cssClass: 'alert',
+                cssClass: 'alert custom-alert',
                 backdropDismiss: false,
                 mode: 'ios',
                 buttons: [
@@ -83,7 +83,7 @@ export class GlobalPopupService {
                 header: this.translate.instant(title),
                 subHeader: subTitle,
                 message: this.translate.instant(message),
-                cssClass: 'alert',
+                cssClass: 'alert custom-alert',
                 mode: 'ios',
                 buttons: [
                     {
