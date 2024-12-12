@@ -85,7 +85,7 @@ export class SentryErrorHandler implements ErrorHandler {
       return true;
 
     // walletconnect error.
-    if (stringifiedError.indexOf("s.terminate is not a function") >= 0)
+    if (stringifiedError.indexOf(".terminate is not a function") >= 0)
       return true;
 
     return false;

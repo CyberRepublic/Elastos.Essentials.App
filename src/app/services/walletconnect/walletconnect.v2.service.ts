@@ -3,7 +3,7 @@ import type WalletConnect from "@walletconnect/client";
 import type { SignClient } from '@walletconnect/sign-client/dist/types/client';
 import type { PairingTypes, ProposalTypes, SessionTypes } from '@walletconnect/types';
 import moment from 'moment';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { GlobalConfig } from 'src/app/config/globalconfig';
 import { lazyWalletConnectSignClientImport } from 'src/app/helpers/import.helper';
 import { IdentityEntry } from 'src/app/model/didsessions/identityentry';
@@ -125,6 +125,8 @@ export class WalletConnectV2Service implements GlobalService {
   private signClient: SignClient;
   private activeWalletSubscription: Subscription = null;
 
+  public signClientBS = new BehaviorSubject<SignClient>(null);
+
   constructor(
     private zone: NgZone,
     private nav: GlobalNavService,
@@ -143,12 +145,13 @@ export class WalletConnectV2Service implements GlobalService {
 
   public init(): Promise<void> {
     GlobalServiceManager.getInstance().registerService(this);
-
+    // In order to start faster, we do not wait for the signclient to be created.
     void this.createSignClient(REGIONALIZED_RELAYER_ENDPOINTS[0].value).then(async client => {
       this.signClient = client;
-
-      if (this.signClient)
+      if (this.signClient) {
         await this.restoreSessions();
+        this.signClientBS.next(this.signClient);
+      }
     });
 
     return;
@@ -172,6 +175,17 @@ export class WalletConnectV2Service implements GlobalService {
       this.activeWalletSubscription = null;
     }
     return;
+  }
+
+  private waitForSignClient(): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+        this.signClientBS.subscribe((c) => {
+          if (c) {
+            this.signClientBS.unsubscribe();
+            resolve(true);
+          }
+        });
+    });
   }
 
   private async restoreSessions() {
@@ -231,6 +245,9 @@ export class WalletConnectV2Service implements GlobalService {
    */
   public async handleWCURIRequest(uri: string, source: WalletConnectSessionRequestSource, receivedIntent?: EssentialsIntentPlugin.ReceivedIntent) {
     Logger.log("walletconnectv2", "Handling V2 uri request", uri, source);
+
+    // If app is started through intent, the signclient may not be created yet and need to wait.
+    await this.waitForSignClient();
 
     await this.signClient.pair({ uri });
 

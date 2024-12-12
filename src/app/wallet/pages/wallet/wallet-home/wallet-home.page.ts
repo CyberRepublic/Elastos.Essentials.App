@@ -99,8 +99,6 @@ export class WalletHomePage implements OnInit, OnDestroy {
 
     private updateInterval = null;
 
-    public shownSubWalletDetails: AnySubWallet = null;
-
     // Dummy Current Network
     public currentNetwork: AnyNetwork = null;
 
