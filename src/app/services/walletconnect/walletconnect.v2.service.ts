@@ -178,13 +178,33 @@ export class WalletConnectV2Service implements GlobalService {
   }
 
   private waitForSignClient(): Promise<boolean> {
-    return new Promise<boolean>((resolve) => {
-        this.signClientBS.subscribe((c) => {
-          if (c) {
-            this.signClientBS.unsubscribe();
+    return new Promise<boolean>((resolve, reject) => {
+      // If sign client is already created, resolve immediately
+      if (this.signClient) {
+        resolve(true);
+        return;
+      }
+
+      // Set a timeout to prevent indefinite waiting
+      const timeoutId = setTimeout(() => {
+        subscription.unsubscribe();
+        reject(new Error('Timeout waiting for SignClient'));
+      }, 10000); // 10 seconds timeout
+
+      const subscription = this.signClientBS.subscribe({
+        next: (client) => {
+          if (client) {
+            clearTimeout(timeoutId);
+            subscription.unsubscribe();
             resolve(true);
           }
-        });
+        },
+        error: (error) => {
+          clearTimeout(timeoutId);
+          subscription.unsubscribe();
+          reject(error);
+        }
+      });
     });
   }
 

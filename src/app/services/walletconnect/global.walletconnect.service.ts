@@ -11,6 +11,7 @@ import { WalletConnectInstance } from './instances';
 import { walletConnectStore } from './store';
 import { WalletConnectV1Service } from './walletconnect.v1.service';
 import { WalletConnectV2Service } from './walletconnect.v2.service';
+import { GlobalNativeService } from '../global.native.service';
 
 /**
  * Indicates from where a request to initiate a new WC session came from
@@ -30,7 +31,7 @@ export class GlobalWalletConnectService extends GlobalService {
   constructor(
     private zone: NgZone,
     private nav: GlobalNavService,
-    private storage: GlobalStorageService,
+    private globalNativeService: GlobalNativeService,
     private globalIntentService: GlobalIntentService,
     private v1: WalletConnectV1Service,
     private v2: WalletConnectV2Service
@@ -152,6 +153,15 @@ export class GlobalWalletConnectService extends GlobalService {
     // We support both WC v1 and 2. Detect which one is received here.
     const { version } = parseUri(uri);
 
+    if ((version !== 1) && (version !== 2)) {
+      if (Number.isNaN(version)) {
+        this.globalNativeService.genericToast(`Invalid wallet connect URL: ${uri}!`, 5000)
+      } else {
+        this.globalNativeService.genericToast(`Unsupported wallet connect version ${version}!`, 5000)
+      }
+      return;
+    }
+
     // While we are waiting to receive the "session_request" command, which could possibly take
     // between a few ms and a few seconds depending on the network, we want to show a temporary screen
     // to let the user wait.
@@ -169,12 +179,13 @@ export class GlobalWalletConnectService extends GlobalService {
       else if (version === 2) {
         await this.v2.handleWCURIRequest(uri, source, receivedIntent);
       }
-      else {
-        throw new Error(`Unsupported wallet connect version ${version}!`);
-      }
     }
     catch (e) {
       Logger.error("WalletConnect initialization error: ", e);
+      let message = typeof (e) === "string" ? e : e.message;
+      if (message && message.includes('Expired')) {
+        this.globalNativeService.genericToast(message, 5000)
+      }
     }
   }
 

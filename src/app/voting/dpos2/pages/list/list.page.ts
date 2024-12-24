@@ -78,7 +78,7 @@ export class ListPage implements OnInit {
         this.sortNodes(NodesSortType.VotesDec);
         await this.getSelectedNodes();
 
-        this.prepareActionMenu();
+        await this.prepareActionMenu();
 
         if (!this.voteService.isMuiltWallet()) {
             this.titleBar.setIcon(TitleBarIconSlot.OUTER_RIGHT, {
@@ -139,7 +139,7 @@ export class ListPage implements OnInit {
             });
           }
           else if (this.dpos2Service.dposInfo.state == 'Canceled' && this.dpos2Service.dposInfo.identity == "DPoSV1") {
-              let status = await this.voteService.dPoSStatus.value;
+              let status = this.voteService.dPoSStatus.value;
               if (status == DposStatus.DPoSV2) {
                   this.available = await this.dpos2Service.getDepositcoin();
                   if (this.available > 0) {
@@ -263,7 +263,7 @@ export class ListPage implements OnInit {
             Logger.log(App.DPOS2, ' dposInfo:', dposInfo);
             if (dposInfo) {
                 // Can't register BPoS node again. remove 'Register' from menu.
-                this.prepareActionMenu();
+                await this.prepareActionMenu();
 
                 if ((dposInfo.state == 'Canceled') && (dposInfo.identity == "DPoSV1")) {
                     this.available = await this.dpos2Service.getDepositcoin();
