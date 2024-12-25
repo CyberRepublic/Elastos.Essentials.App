@@ -36,6 +36,15 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     walletConnectSupported: true,
     networks: ["elastossmartchain"]
   },
+  {
+    icon: '/assets/browser/dapps/chainge.png',
+    title: 'Chainge Web dApp',
+    description: 'Trade smarter, Not harder.',
+    url: 'https://dapp.chainge.finance/',
+    useExternalBrowser: false,
+    walletConnectSupported: true,
+    networks: ["arbitrum", "avalanchecchain", "bsc", "eth", "elastossmartchain", "fusion", "polygon", "tron"]
+  },
   // {
   //   icon: '/assets/browser/dapps/pasar.png',
   //   title: 'Pasar Protocol',
@@ -79,7 +88,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://anyswap.exchange/',
     useExternalBrowser: false,
     walletConnectSupported: true,
-    networks: ["arbitrum", "avalanchecchain", "bsc", "eth", "heco", "fusion", "fantom", "polygon", "telos"]
+    networks: ["arbitrum", "avalanchecchain", "bsc", "eth", "fusion", "fantom", "polygon", "telos"]
   },
   {
     icon: '/assets/browser/dapps/creda.png',
@@ -97,7 +106,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://app.elk.finance/',
     useExternalBrowser: false,
     walletConnectSupported: false,
-    networks: ["elastossmartchain", "heco", "bsc", "avalanchecchain", "fantom", "polygon", "telos"]
+    networks: ["elastossmartchain", "bsc", "avalanchecchain", "fantom", "polygon", "telos"]
   },
   {
     icon: '/assets/browser/dapps/filda.png',
@@ -106,7 +115,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://app.filda.io/',
     useExternalBrowser: false,
     walletConnectSupported: true,
-    networks: ["heco", "bsc", "elastossmartchain"]
+    networks: ["bsc", "elastossmartchain"]
   },
   {
     icon: '/assets/browser/dapps/idriss.png',
@@ -141,7 +150,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://ht.mdex.co/',
     useExternalBrowser: false,
     walletConnectSupported: false,
-    networks: ["heco"]
+    networks: ["bsc", "eth", "heco"]
   },
   {
     icon: '/assets/browser/dapps/mdex.png',
@@ -150,7 +159,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://bsc.mdex.co/',
     useExternalBrowser: false,
     walletConnectSupported: false,
-    networks: ["bsc"]
+    networks: ["bsc", "eth"]
   },
   // {
   //     icon: '/assets/browser/dapps/rocketx.png',
@@ -177,7 +186,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://tokbridge.net/',
     useExternalBrowser: false,
     walletConnectSupported: false, // Seems to be supported on the website but not working
-    networks: ["elastossmartchain", "heco", "bsc", "ethereum"]
+    networks: ["elastossmartchain", "bsc", "ethereum"]
   },
   {
     icon: '/assets/browser/dapps/tokswap.png',
