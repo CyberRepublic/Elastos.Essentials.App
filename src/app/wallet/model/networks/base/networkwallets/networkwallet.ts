@@ -29,6 +29,7 @@ import { TronNetworkBase } from '../../tron/network/tron.base.network';
 import { AnySubWallet, SerializedSubWallet } from '../subwallets/subwallet';
 import { SubWalletBuilder } from '../subwallets/subwalletbuilder';
 import { DIDSessionsStore } from './../../../../../services/stores/didsessions.store';
+import { EVMService } from 'src/app/wallet/services/evm/evm.service';
 
 export class ExtendedNetworkWalletInfo {
     /** List of serialized subwallets added earlier to this network wallet */
@@ -527,6 +528,10 @@ export abstract class NetworkWallet<MasterWalletType extends MasterWallet, Walle
      * If it exists, updates it with recent information as well.
      */
     public async upsertNFT(nftType: NFTType, contractAddress: string, balance: number, tokenIDs: string[], name: string = null): Promise<NFT> {
+        let isAddressValid = await EVMService.instance.isContractAddress(this.network, contractAddress);
+        if (!isAddressValid)
+            return null;
+
         let nft = this.nfts.find(nft => nft.contractAddress === contractAddress);
         if (!nft) {
             nft = await this.createNFT(nftType, contractAddress, balance);
@@ -716,9 +721,12 @@ export abstract class NetworkWallet<MasterWalletType extends MasterWallet, Walle
             if (this.network.supportsERCNFTs()) {
                 if (extendedInfo.nfts) {
                     for (let serializedNFT of extendedInfo.nfts) {
-                        let nft: NFT = NFT.parse(serializedNFT);
-                        if (nft) {
-                            this.nfts.push(nft);
+                        let isAddressValid = await EVMService.instance.isContractAddress(this.network, serializedNFT.contractAddress);
+                        if (isAddressValid) {
+                            let nft: NFT = NFT.parse(serializedNFT);
+                            if (nft) {
+                                this.nfts.push(nft);
+                            }
                         }
                     }
                 }

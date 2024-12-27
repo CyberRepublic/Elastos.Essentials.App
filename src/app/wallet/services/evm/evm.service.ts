@@ -437,6 +437,7 @@ export class EVMService {
   }
 
   public async isContractAddress(network: AnyNetwork, address: string): Promise<boolean> {
+    if (!network || !address) return false;
     const contractCode = await (await this.getWeb3(network)).eth.getCode(address);
     return contractCode === '0x' ? false : true;
   }
