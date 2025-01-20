@@ -721,8 +721,9 @@ export abstract class NetworkWallet<MasterWalletType extends MasterWallet, Walle
             if (this.network.supportsERCNFTs()) {
                 if (extendedInfo.nfts) {
                     for (let serializedNFT of extendedInfo.nfts) {
-                        let isAddressValid = await EVMService.instance.isContractAddress(this.network, serializedNFT.contractAddress);
-                        if (isAddressValid) {
+                        // let isAddressValid = await EVMService.instance.isContractAddress(this.network, serializedNFT.contractAddress);
+                        // EVMService.instance.isContractAddress is slow, so we just make a simple judgment
+                        if (serializedNFT.contractAddress) {
                             let nft: NFT = NFT.parse(serializedNFT);
                             if (nft) {
                                 this.nfts.push(nft);
