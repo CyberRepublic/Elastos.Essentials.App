@@ -1,14 +1,17 @@
+import * as BTC from 'bitcoinjs-lib';
+import { bitcoin, testnet } from "bitcoinjs-lib/src/networks";
 import { lazyEthersImport, lazyEthersLibUtilImport } from 'src/app/helpers/import.helper';
 import { Logger } from 'src/app/logger';
 import { AESDecrypt, AESEncrypt } from '../../../helpers/crypto/aes';
 import { WalletNetworkService } from '../../services/network.service';
 import { SafeService, StandardWalletSafe } from '../../services/safe.service';
 import { LocalStorage } from '../../services/storage.service';
-import { BitcoinAddressType } from '../btc.types';
+import { BitcoinAddressType, BTC_MAINNET_PATHS } from '../btc.types';
 import { BTCNetworkBase } from '../networks/btc/network/btc.base.network';
 import { WalletJSSDKHelper } from '../networks/elastos/wallet.jssdk.helper';
 import { AnyNetwork } from '../networks/network';
 import { BTCWalletNetworkOptions, PrivateKeyType, SerializedMasterWallet, SerializedStandardMasterWallet, Theme, WalletCreator, WalletNetworkOptions, WalletType } from './wallet.types';
+import { GlobalNetworksService, TESTNET_TEMPLATE } from 'src/app/services/global.networks.service';
 
 export const defaultWalletName = (): string => {
     return 'Anonymous wallet';
@@ -271,6 +274,46 @@ export class StandardMasterWallet extends MasterWallet {
         let derivePath = path ? path : defaultPath;
         let hdWalelt = new Wallet(HDNode.fromSeed(seedByte).derivePath(derivePath));
         return hdWalelt.privateKey;
+    }
+
+    /**
+     * Returns the private key for Bitcoin network.
+     */
+    public async getBTCPrivateKey(decryptedWithPayPassword?: string): Promise<string> {
+        if (!this.getSafe().mnemonic)
+            return null;
+
+        let seed = await this.getSeed(decryptedWithPayPassword);
+        return await this.getBTCPrivateKeyFromSeed(seed);
+    }
+
+    private async getBTCPrivateKeyFromSeed(seed: string) {
+        let btcNetwork = bitcoin;
+        let networkTemplate = GlobalNetworksService.instance.getActiveNetworkTemplate()
+        if (networkTemplate === TESTNET_TEMPLATE) {
+            btcNetwork = testnet;
+        }
+
+        try {
+            // tiny-secp256k1 v2 is an ESM module, so we can't "require", and must import async
+            const ecc = await import('tiny-secp256k1');
+            const { BIP32Factory } = await import('bip32');
+            const bip32 = BIP32Factory(ecc);
+
+            // For taproot
+            BTC.initEccLib(ecc)
+
+            let root = bip32.fromSeed(Buffer.from(seed, "hex"), btcNetwork)
+
+            let btcAddressType = this.getBitcoinAddressType()
+            let derivePath = BTC_MAINNET_PATHS[btcAddressType];
+            const keyPair = root.derivePath(derivePath)
+            return keyPair.privateKey.toString('hex');
+        } catch (e) {
+            Logger.warn('wallet', 'get btc private key exception:', e)
+        }
+
+        return null;
     }
 
     public getBitcoinAddressType(): BitcoinAddressType {

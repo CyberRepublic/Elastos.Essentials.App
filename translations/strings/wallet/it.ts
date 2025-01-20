@@ -676,8 +676,9 @@ export const it = {
         "help:import-password": "La Passphrase è una parola a tua scelta che è fortemente associata al tuo mnemonico. Ignora questa opzione se non hai utilizzato una Passphrase durante la creazione del tuo portafoglio.",
         // "help:mnemonic-password": 'This is an optional password bound to your mnemonic words, to give your wallet extra security. Save it carefully, it is NOT recoverable if lost.',
         "privatekey-tap-to-copy": "Tocca la Chiave Privata per copiarla",
-        "export-private-key-intro": "Puoi anche scegliere di utilizzare la seguente Chiave Privata in alcune applicazioni. Tocca per copiare.",
+        "export-private-key-intro": "Puoi anche scegliere di utilizzare la seguente Chiave Privata evm in alcune applicazioni. Tocca per copiare.",
         "export-tron-private-key-intro": "Tron network private key",
+        "export-btc-private-key-intro": "Bitcoin network private key",
         "import-paste-from-keypad": "Note: you can paste a whole mnemonic sentence from the keypad",
 
         /***********************

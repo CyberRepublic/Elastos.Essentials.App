@@ -676,8 +676,9 @@ export const fr = {
         "help:create-password": "Il s'agit d'un mot de passe optionnel qui augmente la sécurité du mnémonique. Considérez-le comme un 13e mot du mnémonique. Notez bien que ce mot de passe ne pas pas être retrouvé si vous l\'oubliez. Saisir un mauvais mot de passe de mnémonique dans l\'avenir lorsque vous importerez votre portefeuille ne génèrera pas d\'erreur mais créera une adresse de portefeuille différente, et vous ne verrez pas vos fonds.",
         "help:import-password": "Le mot de passe du mnémonique est un mot de votre choix qui est fortement associé à votre mnémonique. Ne tenez pas compte de cette option si vous n\'avez pas utilisé de mot de passe de mnémonique lors de la création de votre portefeuille.",
         "privatekey-tap-to-copy": "Toucher la clé privée pour copier",
-        "export-private-key-intro": "Vous pouvez aussi choisir d'utiliser la clé privée suivante dans certaines applications. Touchez pour copier.",
+        "export-private-key-intro": "Vous pouvez aussi choisir d'utiliser la clé privée evm suivante dans certaines applications. Touchez pour copier.",
         "export-tron-private-key-intro": "Clé privée du réseau Tron",
+        "export-btc-private-key-intro": "Clé privée du réseau Bitcoin",
         "import-paste-from-keypad": "Note: vous pouvez coller une clé papier en entier depuis le clavier",
 
         /***********************
