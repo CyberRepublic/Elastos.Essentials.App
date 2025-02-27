@@ -214,6 +214,7 @@ export const zh = {
         'crosschain-note': "Elastos跨链转账一般需要15到25分钟。在此期间，您将无法看到这笔资金，请耐心等待",
         "balance-locked": "( {{ locked }} 确认中 )",
         "ela-coinbase-warning": "请确保不要将 Elastos Smart Chain 的 ELA 发送到 Coinbase 地址，因为 Coinbase 上的 ELA 是基于以太坊网络的 ERC20 ELA。",
+        "ela-eid-warning": "请确认接收地址属于 Elastos Identity Chain，不要将 Elastos Identity Chain 上的 ELA 直接转到 Elastos Smart Chain 或其他 EVM 链。",
         "nft-transaction-creation-error": "似乎无法对此 NFT 进行转让操作。一些 NFT 被锁定，需要特殊条件才能转让。请咨询原始 NFT 市场或 NFT 创建者。",
         "btc-feerate": "费率",
         "btc-feerate-fast": "快速",

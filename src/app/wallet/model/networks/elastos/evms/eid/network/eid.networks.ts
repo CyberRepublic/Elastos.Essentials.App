@@ -12,6 +12,8 @@ import { AnyNetworkWallet } from "../../../../base/networkwallets/networkwallet"
 import { ElastosEVMNetwork } from "../../../network/elastos.evm.network";
 
 export abstract class ElastosIdentityChainNetworkBase extends ElastosEVMNetwork<WalletNetworkOptions> {
+  public static NETWORK_KEY = "elastosidchain";
+
   public async newNetworkWallet(masterWallet: MasterWallet): Promise<AnyNetworkWallet> {
     switch (masterWallet.type) {
       case WalletType.STANDARD:
@@ -78,7 +80,7 @@ export abstract class ElastosIdentityChainNetworkBase extends ElastosEVMNetwork<
 export class ElastosIdentityChainMainNetNetwork extends ElastosIdentityChainNetworkBase {
   constructor() {
     super(
-      "elastosidchain",
+      ElastosIdentityChainNetworkBase.NETWORK_KEY,
       "Elastos Identity Chain",
       "EID",
       "assets/wallet/networks/elastos-eid.png",
@@ -107,7 +109,7 @@ export class ElastosIdentityChainMainNetNetwork extends ElastosIdentityChainNetw
 export class ElastosIdentityChainTestNetNetwork extends ElastosIdentityChainNetworkBase {
   constructor() {
     super(
-      "elastosidchain",
+      ElastosIdentityChainNetworkBase.NETWORK_KEY,
       "Elastos Identity Chain Testnet",
       "EID Testnet",
       "assets/wallet/networks/elastos-eid.png",

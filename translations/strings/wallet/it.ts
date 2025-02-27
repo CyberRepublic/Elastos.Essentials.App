@@ -214,6 +214,7 @@ export const it = {
         'crosschain-note': "I trasferimenti cross-chain di ELA richiedono solitamente dai 15 ai 25 minuti. Durante questo periodo non vedrai i tuoi fondi, per favore sii paziente",
         "balance-locked": "( {{ locked }} locked )",
         "ela-coinbase-warning": "Make sure to not send Elastos Smart Chain ELA to a Coinbase address, as the ELA on Coinbase is a wrapped ethereum ERC20 ELA.",
+        "ela-eid-warning": "Please confirm that the receiver address is on the Elastos Identity Chain and do not directly send the ELA on Elastos Identity Chain to Elastos Smart Chain or other EVM chains.",
         "nft-transaction-creation-error": "It seems like the transfer operation cannot be done for this NFT. Some NFTs are locked and require special conditions to be transferred. Please check with the original NFT marketplace or with the NFT creator.",
         "btc-feerate": "Fee rate",
         "btc-feerate-fast": "Fast",

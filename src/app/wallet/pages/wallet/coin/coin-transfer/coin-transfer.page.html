@@ -260,6 +260,11 @@
             <p>{{ 'wallet.ela-coinbase-warning' | translate }}</p>
         </div>
 
+        <div *ngIf="shouldShowEIDELAWarning()" class="note ela-coinbase-warning">
+            <img src="assets/settings/default/warning.svg" />
+            <p>{{ 'wallet.ela-eid-warning' | translate }}</p>
+        </div>
+
         <!------------------ SEND AND RECHARGE BUTTON ------------------>
         <div *ngIf="!native.popup && transferType !== 3" class="footer-container ion-no-border"
             [class.dark-footer]="theme.darkMode">

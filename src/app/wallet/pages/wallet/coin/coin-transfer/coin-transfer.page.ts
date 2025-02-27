@@ -84,6 +84,7 @@ import { UiService } from '../../../../services/ui.service';
 import { WalletService } from '../../../../services/wallet.service';
 import { NetworkInfo } from '../coin-select/coin-select.page';
 import { satsToBtc } from 'src/app/wallet/model/networks/btc/conversions';
+import { ElastosIdentityChainNetworkBase } from 'src/app/wallet/model/networks/elastos/evms/eid/network/eid.networks';
 
 @Component({
     selector: 'app-coin-transfer',
@@ -1308,6 +1309,28 @@ export class CoinTransferPage implements OnInit, OnDestroy {
             return false;
 
         if (!this.fromSubWallet || this.fromSubWallet.id !== StandardCoinName.ETHSC)
+            return false;
+
+        if (this.transferType !== TransferType.SEND)
+            return false;
+
+        return true;
+    }
+
+    /**
+     * We show a warning to usersto make sure they don't send EID ELA to esc or other chains.
+     *
+     * This warning is shown if:
+     * - network is EID
+     * - sending coin is ELA
+     * - transfer type is SEND
+     */
+    public shouldShowEIDELAWarning(): boolean {
+        // Network should be EID
+        if (!this.networkWallet || this.networkWallet.network.key !== ElastosIdentityChainNetworkBase.NETWORK_KEY)
+            return false;
+
+        if (!this.fromSubWallet || this.fromSubWallet.id !== StandardCoinName.ETHDID)
             return false;
 
         if (this.transferType !== TransferType.SEND)
