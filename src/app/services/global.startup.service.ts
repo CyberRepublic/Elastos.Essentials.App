@@ -21,6 +21,7 @@ export class GlobalStartupService {
   public static instance: GlobalStartupService;
 
   private startupScreenReady = false;
+  private splashAnimationEnded = false;
 
   constructor(
     private storage: GlobalStorageService,
@@ -34,8 +35,10 @@ export class GlobalStartupService {
   }
 
   init() {
+    this.splashAnimationEnded = false;
     const lottie = (window as any).lottie;
     lottie.splashscreen.on("lottieAnimationEnd", (event)=> {
+        this.splashAnimationEnded = true;
         if (this.startupScreenReady)
             void lottie.splashscreen.hide();
     })
@@ -100,8 +103,7 @@ export class GlobalStartupService {
    */
   public setStartupScreenReady() {
     this.startupScreenReady = true;
-    const lottie = (window as any).lottie;
-    if (lottie.splashscreen.animationEnded)
+    if (this.splashAnimationEnded)
         void lottie.splashscreen.hide();
   }
 
