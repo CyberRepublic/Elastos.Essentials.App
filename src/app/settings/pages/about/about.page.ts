@@ -18,9 +18,9 @@ export class AboutPage implements OnInit {
     {
       type: 'settings.developer',
       links: [
-        { title: 'Elaphant Limited', link: null },
-        { title: 'common.website', link: 'https://d.web3essentials.io/' },
-        { title: 'common.email', link: 'contact@elaphant.app' },
+        { title: 'Cyber Republic DAO LLC', link: null },
+        { title: 'common.website', link: 'Cyberrepublic.org' },
+        { title: 'common.email', link: 'secretariat@cyberrepublic.org' },
       ]
     },
     {
