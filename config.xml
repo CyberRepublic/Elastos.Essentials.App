@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget android-packageName="io.web3essentials.app" android-versionCode="301120" id="org.elastos.essentials.app" ios-CFBundleVersion="100" version="3.1.12.d" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+<widget android-packageName="io.web3essentials.app" android-versionCode="302001" id="org.elastos.essentials.app" ios-CFBundleVersion="100" version="3.2.0.d" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <name>Essentials</name>
     <description>
         Essentials web3 wallet
     </description>
-    <author email="contact@web3essentials.io" href="https://web3essentials.io">
-        Elaphant Limited.
+    <author email="secretariat@cyberrepublic.org" href="https://www.cyberrepublic.org">
+        Cyber Republic DAO LLC
     </author>
     <content src="index.html" />
     <access origin="*" />
@@ -40,7 +40,7 @@
         <preference name="GradleVersion" value="8.4" />
         <preference name="GradlePluginKotlinEnabled" value="true" />
         <preference name="LottieEnableHardwareAcceleration" value="true" />
-        <preference name="android-targetSdkVersion" value="33" />
+        <preference name="android-targetSdkVersion" value="34" />
         <preference name="android-minSdkVersion" value="24" />
         <preference name="SplashScreenDelay" value="1" />
         <preference name="AndroidWindowSplashScreenBackground" value="#000000" />
