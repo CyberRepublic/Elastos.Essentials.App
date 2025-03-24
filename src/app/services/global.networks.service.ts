@@ -25,7 +25,8 @@ export class GlobalNetworksService {
     private availableNetworkTemplate = [
         MAINNET_TEMPLATE, // All operations use main nets for all chains
         TESTNET_TEMPLATE, // All operations use a test net for all chains
-        LRW_TEMPLATE // Long Run Weather - Environment to test Cyber Republic features
+        // LRW_TEMPLATE: Only used for internal testing. Before testing, the test environment and API server need to be rebuilt.
+        // LRW_TEMPLATE // Long Run Weather - Environment to test Cyber Republic features
     ]
 
     constructor(private prefs: GlobalPreferencesService) {
