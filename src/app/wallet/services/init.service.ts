@@ -161,7 +161,7 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new ElastosIdentityChainMainNetNetwork());
     await this.createAndRegisterNetwork(new BTCMainNetNetwork());
     await this.createAndRegisterNetwork(new EthereumMainNetNetwork());
-    await this.createAndRegisterNetwork(new HECOMainNetNetwork());
+    // await this.createAndRegisterNetwork(new HECOMainNetNetwork());
     await this.createAndRegisterNetwork(new BSCMainNetNetwork());
     await this.createAndRegisterNetwork(new FusionMainNetNetwork());
     await this.createAndRegisterNetwork(new ArbitrumMainNetNetwork());
@@ -186,7 +186,7 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new ElastosIdentityChainTestNetNetwork());
     await this.createAndRegisterNetwork(new BTCTestNetNetwork());
     await this.createAndRegisterNetwork(new EthereumGoerliNetwork());
-    await this.createAndRegisterNetwork(new HECOTestNetNetwork());
+    // await this.createAndRegisterNetwork(new HECOTestNetNetwork());
     await this.createAndRegisterNetwork(new BSCTestNetNetwork());
     await this.createAndRegisterNetwork(new FusionTestNetNetwork());
     await this.createAndRegisterNetwork(new ArbitrumTestNetNetwork());
