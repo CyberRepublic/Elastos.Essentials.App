@@ -39,6 +39,7 @@
         <preference name="AndroidXEnabled" value="true" />
         <preference name="GradleVersion" value="8.4" />
         <preference name="GradlePluginKotlinEnabled" value="true" />
+        <preference name="AndroidGradlePluginVersion" value="8.3.1" />
         <preference name="LottieEnableHardwareAcceleration" value="true" />
         <preference name="android-targetSdkVersion" value="34" />
         <preference name="android-minSdkVersion" value="24" />
