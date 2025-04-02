@@ -34,7 +34,7 @@ const patch_dirs = [
   },
   {
     "hook": "before_plugin_install",
-    "platform": "android",
+    "platform": "all",
     "plugin_id": "cordova-plugin-lottie-splashscreen",
     "patch_dir": "patches/before_plugin_install_lottie-splashscreen"
   },
