@@ -223,6 +223,9 @@
         <config-file parent="NSPhotoLibraryUsageDescription" target="*-Info.plist">
             <string>Maybe access the photo library</string>
         </config-file>
+        <config-file parent="NSCameraUsageDescription" target="*-Info.plist">
+            <string>Need camera access to take pictures</string>
+        </config-file>
         <preference name="SwiftVersion" value="5.2" />
         <preference name="UseSwiftLanguageVersion" value="5.2" />
         <config-file parent="com.apple.developer.associated-domains" target="*-Debug.plist">

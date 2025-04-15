@@ -198,7 +198,7 @@
     "cordova-plugin-advanced-http": "^3.3.1",
     "cordova-plugin-app-version": "0.1.12",
     "cordova-plugin-ble-central": "^1.5.2",
-    "cordova-plugin-camera": "6.0.0",
+    "cordova-plugin-camera": "8.0.0",
     "cordova-plugin-file": "^7.0.0",
     "cordova-plugin-firebasex": "15.0.0-cli",
     "cordova-plugin-ionic-keyboard": "2.2.0",
