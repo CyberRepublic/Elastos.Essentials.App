@@ -651,14 +651,20 @@ export class WalletConnectV2Service implements GlobalService {
 
     // Possibly, the session is rejected before getting proposal info (if user cancels the "connecting" screen). In this case we do nothing (TBC!)
     if (proposal) {
-      // Reject session proposal
-      await this.signClient.reject({
-        id: proposal.id,
-        reason: {
-          code: 1,
-          message: "rejected",
-        },
-      });
+      try {
+        // Reject session proposal
+        await this.signClient.reject({
+          id: proposal.id,
+          reason: {
+            code: 1,
+            message: "rejected",
+          },
+        });
+      }
+      catch (e) {
+        // Expired：Missing or invalid. Record was recently deleted
+        Logger.warn("walletconnectv2", "Failed to reject client", e);
+      }
     }
   }
 
