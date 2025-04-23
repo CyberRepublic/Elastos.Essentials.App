@@ -54,12 +54,13 @@ export class WithdrawPage {
         }
         if (this.isNodeReward) {
             this.available = this.stakeService.nodeRewardInfo.claimable;
-            this.address = this.stakeService.ownerAddress;
         }
         else {
             this.available = this.stakeService.rewardInfo.claimable;
-            this.address = this.stakeService.firstAddress;
         }
+
+        // Withdraw to the first external address so that users can stake directly
+        this.address = this.stakeService.firstAddress;
     }
 
     ionViewWillEnter() {

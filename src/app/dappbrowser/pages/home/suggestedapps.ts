@@ -112,7 +112,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     icon: '/assets/browser/dapps/filda.png',
     title: 'FilDA',
     description: 'Multi-assets lending and borrowing DeFi platform',
-    url: 'https://app.filda.io/',
+    url: 'https://app.filda.io/bank/',
     useExternalBrowser: false,
     walletConnectSupported: true,
     networks: ["bsc", "elastossmartchain"]
