@@ -42,7 +42,7 @@ export class EscSubWallet extends ElastosEVMSubWallet {
 
   public async updateMintNFTTx(data: MintBPoSNFTTxInfo) {
     if (this.mintNFTTxCache.get(data.txid)) {
-      this.saveMintNFTTxToCache(data)
+      await this.saveMintNFTTxToCache(data)
     }
   }
 
@@ -67,10 +67,10 @@ export class EscSubWallet extends ElastosEVMSubWallet {
         // Do nothing
       } else if ('0' == ret) {
         txList[i].status = MintBPoSNFTTxStatus.Claimed;
-        this.updateMintNFTTx(txList[i]);
+        await this.updateMintNFTTx(txList[i]);
       } else {
         txList[i].status = MintBPoSNFTTxStatus.Claimable;
-        this.updateMintNFTTx(txList[i]);
+        await this.updateMintNFTTx(txList[i]);
       }
     }
   }

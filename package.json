@@ -250,7 +250,7 @@
       "@elastosfoundation/elastos-cordova-plugin-did": {},
       "cordova-clipboard": {},
       "cordova-plugin-camera": {
-        "ANDROID_SUPPORT_V4_VERSION": "27.+"
+        "ANDROIDX_CORE_VERSION": "1.6.0"
       },
       "cordova-plugin-ionic-keyboard": {},
       "cordova-plugin-ionic-webview": {},
