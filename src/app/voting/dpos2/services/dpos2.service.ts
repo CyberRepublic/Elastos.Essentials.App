@@ -47,6 +47,8 @@ export type VotesInfo = {
     timestamp: number,
     stakeAddress: string,
     votes: any[]
+    voteStakeAboutExpire?: string,
+    voteStakeExpired30?: string
 }
 
 @Injectable({
@@ -150,8 +152,8 @@ export class DPoS2Service {
             await this.fetchNodes();
             await this.fetchNodeAvatars();
             this.updateSelectedNode()
-            // For faster startup, don't get my votes on init.
-            // await this.geMyVoteds();
+            // For faster startup, do not await
+            void this.geMyVoteds();
         }
         catch (err) {
             Logger.warn('dposvoting', 'Initialize node error:', err);
@@ -434,6 +436,9 @@ export class DPoS2Service {
         var stakeAddress = await this.voteService.sourceSubwallet.getOwnerStakeAddress()
         let currentTimestamp = moment().valueOf() / 1000;
         if (this.myVotes[stakeAddress] && (this.myVotes[stakeAddress].timestamp + 120 >= currentTimestamp)) {
+            // Load data from cache
+            this.voteStakeAboutExpire = this.myVotes[stakeAddress].voteStakeAboutExpire;
+            this.voteStakeExpired30 = this.myVotes[stakeAddress].voteStakeExpired30;
             return this.myVotes[stakeAddress].votes;
         } else {
             if (this.isFetchingMyvotes) return [];
@@ -518,9 +523,11 @@ export class DPoS2Service {
             if (expired30 < 720 * 30) {
                 if (expired30 <= 15) {
                     this.voteStakeAboutExpire = this.translate.instant('dposvoting.vote-about-exprie');
+                    this.myVotes[stakeAddress].voteStakeAboutExpire = this.voteStakeAboutExpire;
                 }
                 else {
                     this.voteStakeExpired30 = await this.voteService.getRemainingTimeString(expired30);
+                    this.myVotes[stakeAddress].voteStakeExpired30 = this.voteStakeExpired30;
                 }
             }
         }
