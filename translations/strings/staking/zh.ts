@@ -6,9 +6,9 @@ export const zh = {
         'your-rewards': '总收益',
         'available-reward': '可取回收益',
         'staked-for-votes': '投票占比', //投票使用了多少质押的ELA
-        'cr-impeachment': "CR弹劾",
-        'cr-council': 'CR选举',
-        'cr-proposal': 'CR提案',
+        'cr-impeachment': "Elastos 委员弹劾",
+        'cr-council': 'Elastos 委员选举',
+        'cr-proposal': '提案',
         'details': '详情',
         'locked-ela': '锁定的ELA',
         'date': '日期',
@@ -38,7 +38,7 @@ export const zh = {
         'unstake-memo': "备注：需要三次网络确认才能收到质押的ELA，大约6分钟",
         'withdraw-memo': "备注：需要三次网络确认才能取回收益，大约6分钟",
 
-        'unvote-message': '确定取消DPoS 1.0、CR选举、CR委员弹劾、CR提案反对票这四种投票吗?',
+        'unvote-message': '确定取消 Elastos 委员选举、Elastos 委员弹劾、提案反对票吗?',
     }
 
 };

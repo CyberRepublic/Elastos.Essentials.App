@@ -99,7 +99,7 @@ export class CreateSuggestionPage {
     async signAndCreateSuggestion() {
         this.signingAndSendingSuggestionResponse = true;
 
-        // Sign the digest with user's DID, and get a JWT ready to be sent back to the CR website
+        // Sign the digest with user's DID, and get a JWT ready to be sent back to the Elastos DAO website
         try {
             // Create the suggestion/proposal digest - ask the SPVSDK to do this with a silent intent.
 

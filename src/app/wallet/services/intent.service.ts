@@ -290,7 +290,7 @@ export class IntentService {
     }
 
     /**
-     * Intent that gets a CR proposal object as input and returns a HEX digest of it.
+     * Intent that gets a proposal object as input and returns a HEX digest of it.
      * Usually used to create a digest representation of a proposal before signing it and/or
      * publishing it in a transaction.
      */

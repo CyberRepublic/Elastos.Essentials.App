@@ -64,13 +64,13 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
   //   networks: ["elastossmartchain"]
   // },
   {
-    icon: '/assets/browser/dapps/cyberrepublic.svg',
-    title: 'Cyber Republic',
-    description: 'Cyber Republic (CR) is the community that has naturally formed around Elastos.',
-    url: 'https://www.cyberrepublic.org/',
+    icon: '/assets/browser/dapps/elastosdao.svg',
+    title: 'Elastos DAO',
+    description: 'Elastos DAO (DAO) is the community that has naturally formed around Elastos.',
+    url: 'https://elastos.com/',
     useExternalBrowser: false,
     walletConnectSupported: true, // Not really, but we can open on ios, as this is a non web3 dapps
-    networks: ["elastossmartchain"]
+    networks: [] // All networks
   },
   {
     icon: '/assets/browser/dapps/escription.svg',

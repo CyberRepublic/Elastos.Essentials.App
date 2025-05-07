@@ -136,9 +136,9 @@ export const en = {
         "coin-op-transfered-token": "Transferred",
         "coin-op-vote": "Vote",
         "coin-op-dpos-vote": "DPoS Vote",
-        "coin-op-crc-vote": "CRC Vote",
-        "coin-op-cr-proposal-against": "CR Proposal against",
-        "coin-op-crc-impeachment": "CRC Impeachment",
+        "coin-op-crc-vote": "Elastos Council Vote",
+        "coin-op-cr-proposal-against": "Proposal against",
+        "coin-op-crc-impeachment": "Elastos Council Impeachment",
         "coin-op-identity": "Identity publication",
         "coin-op-contract-create": "Contract Creation",
         "coin-op-contract-token-transfer": "ERC20 Token Transfer",
@@ -148,16 +148,16 @@ export const en = {
         "coin-op-producer-cancel": "BPoS Node Cancellation",
         "coin-op-producer-update": "BPoS Node Update",
         "coin-op-producer-return": "BPoS Node Deposit Retrieve",
-        "coin-op-cr-register": "CR Registration",
-        "coin-op-cr-cancel": "CR Cancellation",
-        "coin-op-cr-update": "CR Update",
-        "coin-op-cr-return": "CR Deposit Retrieve",
+        "coin-op-cr-register": "Elastos DAO Registration",
+        "coin-op-cr-cancel": "Elastos DAO Cancellation",
+        "coin-op-cr-update": "Elastos DAO Update",
+        "coin-op-cr-return": "Elastos DAO Deposit Retrieve",
         "coin-op-cr-claim-node": "Claim BPoS Node",
         "coin-op-proposal": "New Proposal",
         "coin-op-proposal-review": "Review Proposal",
         "coin-op-proposal-tracking": "Proposal Tracking",
         "coin-op-proposal-withdraw": "Proposal Fund Withdrawal",
-        "coin-op-crc-claim": "CR Council Member Transaction",
+        "coin-op-crc-claim": "Elastos Council Member Transaction",
         "coin-op-stake": "Stake",
         "coin-op-dpos2-voting": "BPoS Voting",
         "coin-op-dpos2-voting-update": "BPoS Voting Update",
@@ -565,9 +565,9 @@ export const en = {
         "dposvote-with": "With:",
 
         /***********************
-        * CRCrouncil Voting Transaction Page *
+        * Elastos Council Voting Transaction Page *
         ************************/
-        "crcouncilvote-title": "Vote for CR Council",
+        "crcouncilvote-title": "Vote for Elastos Council",
         "crcouncilvote-voting-with": "You are voting with:",
 
         /***********************

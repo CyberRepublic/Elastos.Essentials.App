@@ -136,9 +136,9 @@ export const zh = {
         "coin-op-transfered-token": "钱包内部转账",
         "coin-op-vote": "投票",
         "coin-op-dpos-vote": "DPoS投票",
-        "coin-op-crc-vote": "CR委员投票",
-        "coin-op-cr-proposal-against": "CR提案反对票",
-        "coin-op-crc-impeachment": "CR委员弹劾",
+        "coin-op-crc-vote": "Elastos 委员投票",
+        "coin-op-cr-proposal-against": "提案反对票",
+        "coin-op-crc-impeachment": "Elastos 委员弹劾",
         "coin-op-identity": "发布 DID",
         "coin-op-contract-create": "创建合约",
         "coin-op-contract-token-transfer": "ERC20币种转账",
@@ -148,16 +148,16 @@ export const zh = {
         "coin-op-producer-cancel": "取消DPoS参选",
         "coin-op-producer-update": "BPoS节点更新",
         "coin-op-producer-return": "提取 BPoS 质押金",
-        "coin-op-cr-register": "注册CR委员",
-        "coin-op-cr-cancel": "取消CR委员",
-        "coin-op-cr-update": "CR委员更新",
-        "coin-op-cr-return": "提取CR委员质押金",
+        "coin-op-cr-register": "注册 Elastos 委员",
+        "coin-op-cr-cancel": "取消 Elastos 委员",
+        "coin-op-cr-update": "Elastos 委员更新",
+        "coin-op-cr-return": "提取 Elastos 委员质押金",
         "coin-op-cr-claim-node": "绑定BPoS节点",
         "coin-op-proposal": "发起提案",
         "coin-op-proposal-review": "评审提案",
         "coin-op-proposal-tracking": "提案反馈",
         "coin-op-proposal-withdraw": "提取提案资金",
-        "coin-op-crc-claim": "CR委员节点交易",
+        "coin-op-crc-claim": "Elastos 委员节点交易",
         "coin-op-stake": "质押",
         "coin-op-dpos2-voting": "BPoS 投票",
         "coin-op-dpos2-voting-update": "更新 BPoS 投票",
@@ -565,9 +565,9 @@ export const zh = {
         "dposvote-with": "使用:",
 
         /***********************
-        * CRCrouncil Voting Transaction Page *
+        * Elastos Council Voting Transaction Page *
         ************************/
-        "crcouncilvote-title": "CR委员投票",
+        "crcouncilvote-title": "Elastos 委员投票",
         "crcouncilvote-voting-with": "用于投票的 ELA 金额：",
 
         /***********************

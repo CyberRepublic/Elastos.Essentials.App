@@ -6,9 +6,9 @@ export const fr = {
         'your-rewards': 'Your Rewards',
         'available-reward': 'Available Reward',
         'staked-for-votes': 'ELA staked for votes',
-        'cr-impeachment': "CR Impeachment",
-        'cr-council': 'CR Election',
-        'cr-proposal': 'CR Proposal',
+        'cr-impeachment': "Elastos Council Impeachment",
+        'cr-council': 'Elastos Council Election',
+        'cr-proposal': 'Proposal',
         'details': 'Details',
         'locked-ela': 'Locked ELA',
         'date': 'Date',
@@ -38,7 +38,7 @@ export const fr = {
         'unstake-memo': "Note: Three confirmations are required to receive the unstaked ELA, usually take 6 minutes",
         'withdraw-memo': "Note: Three confirmations are required to receive the reward, usually take 6 minutes",
 
-        'unvote-message': 'Are you sure to cancel the four votes of DPoS 1.0, CR election, CR member impeachment, and CR proposal opposition vote?',
+        'unvote-message': 'Are you sure to cancel the four votes of Elastos Council election, Elastos Council impeachment, and proposal opposition vote?',
     }
 
 };

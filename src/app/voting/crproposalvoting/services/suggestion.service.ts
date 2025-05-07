@@ -159,7 +159,7 @@ export class SuggestionService {
     }
 
     /**
-     * Returns a JWT result to a given callback url, as a response to a CR command/action.
+     * Returns a JWT result to a given callback url, as a response to a Elastos DAO command/action.
      * Ex: scan "createsuggestion" qr code -> return the response to the callback.
      */
     public async postSignSuggestionCommandResponse(jwtToken: string): Promise<void> {
