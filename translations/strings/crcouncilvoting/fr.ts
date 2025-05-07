@@ -1,7 +1,7 @@
 export const fr = {
 
         'crcouncilvoting': {
-                'council-voting': 'Election des dirigeants Elastos DAO',
+                'council-voting': 'Election des dirigeants Elastos',
                 'council-candidates': 'Candidats à l\'élection',
                 'council-members': 'Membres élus',
                 'my-candidates': 'Mes Candidats',
