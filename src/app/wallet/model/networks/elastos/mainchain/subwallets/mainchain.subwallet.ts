@@ -159,7 +159,7 @@ export class MainChainSubWallet extends MainCoinSubWallet<ElastosTransaction, El
 
     // To delete?
     protected async getTransactionName(transaction: ElastosTransaction, translate: TranslateService): Promise<string> {
-        return ElastosTransactionsHelper.getTransactionName(transaction, this);
+        return await ElastosTransactionsHelper.getTransactionName(transaction, this);
     }
 
     public isSingleAddress(): boolean {
@@ -227,9 +227,9 @@ export class MainChainSubWallet extends MainCoinSubWallet<ElastosTransaction, El
                 break;
         }
         if (transaction.txtype == RawTransactionType.MintNFT) {
-            this.saveMintNFTTxToCache({txid: transaction.txid, status: MintBPoSNFTTxStatus.Unconfirmed})
+            await this.saveMintNFTTxToCache({txid: transaction.txid, status: MintBPoSNFTTxStatus.Unconfirmed})
         }
-        return await transactionInfo;
+        return transactionInfo;
     }
 
     public async getTransactionInfoForOfflineTransaction(transaction: AnyOfflineTransaction): Promise<TransactionInfo> {
@@ -445,22 +445,8 @@ export class MainChainSubWallet extends MainCoinSubWallet<ElastosTransaction, El
     }
 
     public async createDepositTransaction(toSubWalletId: StandardCoinName, toAddress: string, amount: number, memo = ""): Promise<string> {
-        let toAmount = 0;
-        let au: AvalaibleUtxos = null;
-
-        if (amount == -1) {
-            // toAmount = Math.floor(this.balance.minus(20000).toNumber());
-            au = await this.getAvailableUtxo(-1);
-            toAmount = au.value - 20000;// 20000: fee, cross transafer need more fee.
-        } else {
-            toAmount = Util.accMul(amount, Config.SELA);
-            au = await this.getAvailableUtxo(toAmount + 20000);// 20000: fee, cross transafer need more fee.
-        }
-        if (!au.utxo) await this.throwUtxoNotEnoughError();
-
-        Logger.log('wallet', 'createDepositTransaction toAmount:', toAmount);
-
         let lockAddress = '';
+        let crossChainfee = 10000;
         switch (toSubWalletId) {
             case StandardCoinName.ETHSC:
                 lockAddress = Config.ETHSC_DEPOSIT_ADDRESS;
@@ -468,10 +454,29 @@ export class MainChainSubWallet extends MainCoinSubWallet<ElastosTransaction, El
             case StandardCoinName.ETHDID:
                 lockAddress = Config.ETHDID_DEPOSIT_ADDRESS;
                 break;
+            case StandardCoinName.ETHECO:
+                lockAddress = Config.ETHECO_DEPOSIT_ADDRESS;
+                crossChainfee = 1500000; //
+                break;
             default:
                 Logger.error('wallet', 'createDepositTransaction not support ', toSubWalletId);
                 return null;
         }
+
+        let toAmount = 0;
+        let au: AvalaibleUtxos = null;
+
+        // The cross chain fee includes two parts:
+        // 1: main chain fee, 10000 sela
+        // 2: target chain fee
+        if (amount == -1) {
+            au = await this.getAvailableUtxo(-1);
+            toAmount = au.value - 10000 - crossChainfee;
+        } else {
+            toAmount = Util.accMul(amount, Config.SELA);
+            au = await this.getAvailableUtxo(toAmount + 10000 + crossChainfee);
+        }
+        if (!au.utxo) await this.throwUtxoNotEnoughError();
 
         return (this.networkWallet.safe as unknown as ElastosMainChainSafe).createDepositTransaction(
             au.utxo,

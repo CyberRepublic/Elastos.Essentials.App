@@ -8,7 +8,6 @@ import { GlobalNetworksService, MAINNET_TEMPLATE, TESTNET_TEMPLATE } from 'src/a
 import { GlobalService, GlobalServiceManager } from 'src/app/services/global.service.manager';
 import { CryptoNameResolver } from '../model/address-resolvers';
 import { ELADomainResolver } from '../model/address-resolvers/resolvers/ELADomainAddressResolver';
-import { ENSResolver } from '../model/address-resolvers/resolvers/ENSAddressResolver';
 import { IdrissResolver } from '../model/address-resolvers/resolvers/IdrissAddressResolver';
 import { UnstoppableDomainsAddressResolver } from '../model/address-resolvers/resolvers/UnstoppableDomainsAddressResolver';
 import { ArbitrumMainNetNetwork } from '../model/networks/arbitrum/network/arbitrum.mainnet.network';
@@ -39,8 +38,6 @@ import { FuseMainNetNetwork } from '../model/networks/fuse/network/fuse.mainnet.
 import { FusionMainNetNetwork } from '../model/networks/fusion/network/fusion.mainnet.network';
 import { FusionTestNetNetwork } from '../model/networks/fusion/network/fusion.testnet.network';
 import { GnosisMainNetNetwork } from '../model/networks/gnosis/network/gnosis.mainnet.network';
-import { HECOMainNetNetwork } from '../model/networks/heco/network/heco.mainnet.network';
-import { HECOTestNetNetwork } from '../model/networks/heco/network/heco.testnet.network';
 import { IoTeXMainNetNetwork } from '../model/networks/iotex/network/iotex.mainnet.network';
 import { IoTeXTestNetNetwork } from '../model/networks/iotex/network/iotex.testnet.network';
 import { KavaMainNetNetwork } from '../model/networks/kava/network/kava.mainnet.network';
@@ -71,6 +68,7 @@ import { TRC20CoinService } from './tvm/trc20coin.service';
 import { UiService } from './ui.service';
 import { WalletService } from './wallet.service';
 import { WalletUIService } from './wallet.ui.service';
+import { ElastosECOMainNetNetwork } from '../model/networks/elastos/evms/eco/network/eco.networks';
 
 @Injectable({
   providedIn: 'root'
@@ -159,6 +157,7 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new ElastosMainChainMainNetNetwork());
     await this.createAndRegisterNetwork(new ElastosSmartChainMainNetNetwork(), networkTemplate === MAINNET_TEMPLATE);
     await this.createAndRegisterNetwork(new ElastosIdentityChainMainNetNetwork());
+    await this.createAndRegisterNetwork(new ElastosECOMainNetNetwork());
     await this.createAndRegisterNetwork(new BTCMainNetNetwork());
     await this.createAndRegisterNetwork(new EthereumMainNetNetwork());
     // await this.createAndRegisterNetwork(new HECOMainNetNetwork());
@@ -184,6 +183,7 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new ElastosMainChainTestNetNetwork());
     await this.createAndRegisterNetwork(new ElastosSmartChainTestNetNetwork(), networkTemplate === TESTNET_TEMPLATE);
     await this.createAndRegisterNetwork(new ElastosIdentityChainTestNetNetwork());
+    // await this.createAndRegisterNetwork(new ElastosECOTestNetNetwork());
     await this.createAndRegisterNetwork(new BTCTestNetNetwork());
     await this.createAndRegisterNetwork(new EthereumGoerliNetwork());
     // await this.createAndRegisterNetwork(new HECOTestNetNetwork());

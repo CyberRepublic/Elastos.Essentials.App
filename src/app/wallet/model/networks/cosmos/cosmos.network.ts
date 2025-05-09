@@ -45,7 +45,7 @@ export abstract class CosmosNetwork extends Network<WalletNetworkOptions> {
     const activeNetworkTemplate = GlobalNetworksService.instance.activeNetworkTemplate.value;
     this.localStorageKey = this.key + '-' + activeNetworkTemplate;
 
-    await this.initCoins();
+    this.initCoins();
   }
 
   public getDefaultWalletNetworkOptions(): WalletNetworkOptions {
@@ -75,7 +75,7 @@ export abstract class CosmosNetwork extends Network<WalletNetworkOptions> {
     return this.builtInCoins || [];
   }
 
-  private async initCoins() {
+  private initCoins() {
     this.availableCoins = [];
   }
 

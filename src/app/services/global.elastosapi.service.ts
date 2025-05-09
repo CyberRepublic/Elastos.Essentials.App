@@ -34,12 +34,17 @@ export enum ElastosApiUrlType {
     // DID 2.0 EID chain
     EID_RPC = "eidChainRPC",
     EID_BROWSER = "eidBrowserRPC",
+    // ECO chain
+    ECO_RPC = "ecoRPC",
+    ECO_ORACLE = "ecoOracleRPC",
+    ECO_BROWSER = "ecoBrowserRPC",
     // Cyber republic
     CR_RPC = "crRPC",
     // Block Explorer
     ELA_BLOCK_EXPLORER = 'elaBlockExplorer',
     ESC_BLOCK_EXPLORER = 'escBlockExplorer',
     EID_BLOCK_EXPLORER = 'eidBlockExplorer',
+    ECO_BLOCK_EXPLORER = 'ecoBlockExplorer',
     // widget
     WIDGETS = 'widgets',
     IMAGES = 'images',
@@ -65,12 +70,17 @@ export type ElastosAPIProvider = {
             escRPC: string;
             escOracleRPC: string;
             escBrowserRPC: string;
+            // ECO chain
+            ecoRPC: string;
+            ecoOracleRPC: string;
+            ecoBrowserRPC: string;
             // Cyber Republic
             crRPC: string;
             // Block Explorer
             elaBlockExplorer: string;
             escBlockExplorer: string;
             eidBlockExplorer: string;
+            ecoBlockExplorer: string;
             // Widgets
             widgets: string;
             images: string; // nodes or CRC avatar
@@ -166,10 +176,14 @@ export class GlobalElastosAPIService extends GlobalService {
                         escRPC: 'https://api.elastos.io/esc',
                         escOracleRPC: 'https://api.elastos.io/esc-oracle',
                         escBrowserRPC: 'https://esc.elastos.io/api',
+                        ecoRPC: 'https://api.elastos.io/eco',
+                        ecoOracleRPC: 'https://api.elastos.io/eco-oracle',
+                        ecoBrowserRPC: 'https://eco.elastos.io/api',
                         crRPC: 'https://api.cyberrepublic.org',
                         elaBlockExplorer: 'https://blockchain.elastos.io',
                         escBlockExplorer: 'https://esc.elastos.io',
                         eidBlockExplorer: 'https://eid.elastos.io',
+                        ecoBlockExplorer: 'https://eco.elastos.io',
                         widgets: 'https://api.elastos.io/widgets',
                         images: 'https://api.elastos.io/images',
                     },
@@ -182,10 +196,14 @@ export class GlobalElastosAPIService extends GlobalService {
                         escRPC: 'https://api-testnet.elastos.io/esc',
                         escOracleRPC: 'https://api-testnet.elastos.io/esc-oracle',
                         escBrowserRPC: 'https://esc-testnet.elastos.io/api',
+                        ecoRPC: 'https://api-testnet.elastos.io/eco',
+                        ecoOracleRPC: 'https://api-testnet.elastos.io/eco-oracle',
+                        ecoBrowserRPC: 'https://eco-testnet.elastos.io/api',
                         crRPC: 'https://api.cyberrepublic.org',
                         elaBlockExplorer: 'https://blockchain-testnet.elastos.io',
                         escBlockExplorer: 'https://esc-testnet.elastos.io',
                         eidBlockExplorer: 'https://eid-testnet.elastos.io',
+                        ecoBlockExplorer: 'https://eco-testnet.elastos.io',
                         widgets: 'https://api-testnet.elastos.io/widgets',
                         images: 'https://api.elastos.io/images',
                     },
@@ -198,10 +216,14 @@ export class GlobalElastosAPIService extends GlobalService {
                         escRPC: '',
                         escOracleRPC: '',
                         escBrowserRPC: '',
+                        ecoRPC: '',
+                        ecoOracleRPC: '',
+                        ecoBrowserRPC: '',
                         crRPC: 'https://crapi.longrunweather.com:18443',
                         elaBlockExplorer: '',
                         escBlockExplorer: '',
                         eidBlockExplorer: '',
+                        ecoBlockExplorer: '',
                         widgets: 'https://api.elastos.io/widgets',
                         images: 'https://api.elastos.io/images',
                     },
@@ -221,10 +243,14 @@ export class GlobalElastosAPIService extends GlobalService {
                         escRPC: 'https://api2.elastos.io/esc',
                         escOracleRPC: 'https://api2.elastos.io/esc-oracle',
                         escBrowserRPC: 'https://esc.elastos.io/api',
+                        ecoRPC: 'https://api2.elastos.io/eco',
+                        ecoOracleRPC: 'https://api2.elastos.io/eco-oracle',
+                        ecoBrowserRPC: 'https://eco.elastos.io/api',
                         crRPC: 'https://api.cyberrepublic.org',
                         elaBlockExplorer: 'https://blockchain.elastos.io',
                         escBlockExplorer: 'https://esc.elastos.io',
                         eidBlockExplorer: 'https://eid.elastos.io',
+                        ecoBlockExplorer: 'https://eco.elastos.io',
                         widgets: 'https://api2.elastos.io/widgets',
                         images: 'https://api2.elastos.io/images',
                     },
@@ -237,10 +263,14 @@ export class GlobalElastosAPIService extends GlobalService {
                         escRPC: 'https://api2-testnet.elastos.io/esc',
                         escOracleRPC: 'https://api2-testnet.elastos.io/esc-oracle',
                         escBrowserRPC: 'https://esc-testnet.elastos.io/api',
+                        ecoRPC: 'https://api2-testnet.elastos.io/eco',
+                        ecoOracleRPC: 'https://api2-testnet.elastos.io/eco-oracle',
+                        ecoBrowserRPC: 'https://eco-testnet.elastos.io/api',
                         crRPC: 'https://api.cyberrepublic.org',
                         elaBlockExplorer: 'https://blockchain-testnet.elastos.io',
                         escBlockExplorer: 'https://esc-testnet.elastos.io',
                         eidBlockExplorer: 'https://eid-testnet.elastos.io',
+                        ecoBlockExplorer: 'https://eco-testnet.elastos.io',
                         widgets: 'https://api2-testnet.elastos.io/widgets',
                         images: 'https://api2.elastos.io/images',
                     },
@@ -253,10 +283,14 @@ export class GlobalElastosAPIService extends GlobalService {
                         escRPC: '',
                         escOracleRPC: '',
                         escBrowserRPC: '',
+                        ecoRPC: '',
+                        ecoOracleRPC: '',
+                        ecoBrowserRPC: '',
                         crRPC: 'https://crapi.longrunweather.com:18443',
                         elaBlockExplorer: '',
                         escBlockExplorer: '',
                         eidBlockExplorer: '',
+                        ecoBlockExplorer: '',
                         widgets: 'https://api.elastos.io/widgets',
                         images: 'https://api.elastos.io/images',
                     },
@@ -520,6 +554,8 @@ export class GlobalElastosAPIService extends GlobalService {
                 return ElastosApiUrlType.ETHSC_RPC;
             case StandardCoinName.ETHDID:
                 return ElastosApiUrlType.EID_RPC;
+            case StandardCoinName.ETHECO:
+                return ElastosApiUrlType.ECO_RPC;
             default:
                 throw new Error('RPC can not support elastos chain code ' + elastosChainCode);
         }
@@ -533,6 +569,9 @@ export class GlobalElastosAPIService extends GlobalService {
                 break;
             case StandardCoinName.ETHDID:
                 apiUrlType = ElastosApiUrlType.EID_BROWSER;
+                break;
+            case StandardCoinName.ETHECO:
+                apiUrlType = ElastosApiUrlType.ECO_BROWSER;
                 break;
             default:
                 throw new Error('Elastos API: Browser api can not support ' + elastosChainCode);
@@ -551,6 +590,9 @@ export class GlobalElastosAPIService extends GlobalService {
                 break;
             case StandardCoinName.ETHDID:
                 apiUrlType = ElastosApiUrlType.EID_BLOCK_EXPLORER;
+                break;
+            case StandardCoinName.ETHECO:
+                apiUrlType = ElastosApiUrlType.ECO_BLOCK_EXPLORER;
                 break;
             default:
                 throw new Error('Elastos API: Block explorer api can not support ' + elastosChainCode);

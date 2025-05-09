@@ -18,8 +18,6 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
   private ethscWithdrawContract: any = null;
 
   constructor(networkWallet: AnyEVMNetworkWallet, id: StandardCoinName, friendlyName: string) {
-    //let rpcApiUrl = GlobalElastosAPIService.instance.getApiUrlForChainCode(id);
-
     super(networkWallet, id, friendlyName);
 
     this.tokenDecimals = 18;
@@ -34,6 +32,13 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
 
   public getAverageBlocktime(): number {
     return 5;
+  }
+
+  /*
+   * Unit: sela
+   */
+  public getCrossChainFee(): number {
+    return 10000;
   }
 
   public async getTransactionDetails(txid: string): Promise<EthTransaction> {
@@ -66,14 +71,15 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
   public async estimateWithdrawTransactionGas(toAddress: string) {
     const ethscWithdrawContract = await this.getWithdrawContract()
 
-    const method = ethscWithdrawContract.methods.receivePayload(toAddress, '100000000000000000000', Config.ETHSC_WITHDRAW_GASPRICE);
+    const method = ethscWithdrawContract.methods.receivePayload(toAddress, '1000000000000000000', Config.ETHSC_WITHDRAW_GASPRICE);
+
     let estimateGas = 30000;
     try {
       // Can not use method.estimateGas(), must set the "value"
       let tx = {
         data: method.encodeABI(),
         to: this.withdrawContractAddress,
-        value: '100000000000000000000',
+        value: '1000000000000000000',
       }
       let tempGasLimit = await this.estimateGas(tx);
       // Make sure the gaslimit is big enough - add a bit of margin for fluctuating gas price

@@ -120,6 +120,9 @@ export class ElastosTransactionsHelper {
               case Config.ETHSC_DEPOSIT_ADDRESS:
                 transactionName = "wallet.coin-dir-from-ethsc";
                 break;
+              case Config.ETHECO_DEPOSIT_ADDRESS:
+                transactionName = "wallet.coin-dir-from-eco";
+                break;
               default:
                 transactionName = 'wallet.coin-op-received-token';
             }
@@ -156,6 +159,9 @@ export class ElastosTransactionsHelper {
                 break;
               case Config.ETHSC_DEPOSIT_ADDRESS:
                 transactionName = "wallet.coin-dir-to-ethsc";
+                break;
+              case Config.ETHECO_DEPOSIT_ADDRESS:
+                transactionName = "wallet.coin-dir-to-eco";
                 break;
               default:
                 transactionName = "wallet.coin-dir-to-mainchain";

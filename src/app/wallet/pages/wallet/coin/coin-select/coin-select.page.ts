@@ -111,6 +111,13 @@ export class CoinSelectPage implements OnInit {
             let escsubwallet = escNetworkWallet.getSubWallet(StandardCoinName.ETHSC);
             subwallets.push(escsubwallet);
         }
+
+        let ecoChain = WalletNetworkService.instance.getNetworkByKey('elastoseco');
+        let ecoNetworkWallet = await ecoChain.createNetworkWallet(this.networkWallet.masterWallet, false);
+        if (ecoNetworkWallet) {
+            let ecosubwallet = ecoNetworkWallet.getSubWallet(StandardCoinName.ETHECO);
+            subwallets.push(ecosubwallet);
+        }
         return subwallets;
     }
 
@@ -130,5 +137,12 @@ export class CoinSelectPage implements OnInit {
             friendName: 'Smart Chain',
             logo: escChain.logo,
             tokenSymbol: escChain.getMainTokenSymbol()})
+        let ecoChain = WalletNetworkService.instance.getNetworkByKey('elastoseco');
+        this.destNetworks.push({
+            id: StandardCoinName.ETHECO,
+            chainId: (<EVMNetwork>ecoChain).getMainChainID(),
+            friendName: 'ECO SideChain',
+            logo: ecoChain.logo,
+            tokenSymbol: ecoChain.getMainTokenSymbol()})
     }
 }

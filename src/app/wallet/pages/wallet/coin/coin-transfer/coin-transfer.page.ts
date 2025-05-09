@@ -341,7 +341,9 @@ export class CoinTransferPage implements OnInit, OnDestroy {
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 this.transaction = this.createRechargeTransaction;
 
-                this.feeOfELA = '0.0002'; // ELA
+                let crossChainfee = (this.toSubWallet as ElastosEVMSubWallet).getCrossChainFee();
+                let fee = 10000 + crossChainfee;
+                this.feeOfELA = Util.toELA(fee)
 
                 Logger.log('wallet', 'Transferring from..', this.fromSubWallet);
                 Logger.log('wallet', 'Transferring To..', this.toSubWallet);
@@ -1256,6 +1258,9 @@ export class CoinTransferPage implements OnInit, OnDestroy {
                 break;
             case StandardCoinName.ETHSC:
                 networkKey = 'elastossmartchain';
+                break;
+            case StandardCoinName.ETHECO:
+                networkKey = 'elastoseco';
                 break;
             default:
                 break;
