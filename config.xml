@@ -4,8 +4,8 @@
     <description>
         Essentials web3 wallet
     </description>
-    <author email="secretariat@cyberrepublic.org" href="https://www.cyberrepublic.org">
-        Cyber Republic DAO LLC
+    <author email="secretariat@elastos.com" href="https://www.elastos.com">
+        Elastos DAO LLC
     </author>
     <content src="index.html" />
     <access origin="*" />
