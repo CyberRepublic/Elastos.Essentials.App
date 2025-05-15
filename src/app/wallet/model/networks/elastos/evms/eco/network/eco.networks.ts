@@ -64,7 +64,7 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
   }
 
   public getMainColor(): string {
-    return 'cfb15b';
+    return '535353';
   }
 }
 
@@ -77,7 +77,7 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
       ElastosECONetworkBase.NETWORK_KEY,
       "Elastos ECO Chain",
       "ECO",
-      "assets/wallet/networks/elastos-eco.png",
+      "assets/wallet/networks/elastos-eco.svg",
       MAINNET_TEMPLATE,
       12343
     );
@@ -115,7 +115,7 @@ export class ElastosECOTestNetNetwork extends ElastosECONetworkBase {
       ElastosECONetworkBase.NETWORK_KEY,
       "ECO Testnet",
       "ECO Testnet",
-      "assets/wallet/networks/elastos-eco.png",
+      "assets/wallet/networks/elastos-eco.svg",
       TESTNET_TEMPLATE,
       800007
     );

@@ -15,7 +15,7 @@ export class EcoERC20SubWallet extends ERC20SubWallet {
   }
 
   public getMainIcon(): string {
-    return "assets/wallet/networks/elastos-eco.png";
+    return "assets/wallet/networks/elastos-eco.svg";
   }
 
   public getSecondaryIcon(): string {

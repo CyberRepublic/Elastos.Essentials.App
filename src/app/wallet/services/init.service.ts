@@ -68,7 +68,7 @@ import { TRC20CoinService } from './tvm/trc20coin.service';
 import { UiService } from './ui.service';
 import { WalletService } from './wallet.service';
 import { WalletUIService } from './wallet.ui.service';
-import { ElastosECOMainNetNetwork } from '../model/networks/elastos/evms/eco/network/eco.networks';
+import { ElastosECOMainNetNetwork, ElastosECOTestNetNetwork } from '../model/networks/elastos/evms/eco/network/eco.networks';
 
 @Injectable({
   providedIn: 'root'
@@ -183,7 +183,7 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new ElastosMainChainTestNetNetwork());
     await this.createAndRegisterNetwork(new ElastosSmartChainTestNetNetwork(), networkTemplate === TESTNET_TEMPLATE);
     await this.createAndRegisterNetwork(new ElastosIdentityChainTestNetNetwork());
-    // await this.createAndRegisterNetwork(new ElastosECOTestNetNetwork());
+    await this.createAndRegisterNetwork(new ElastosECOTestNetNetwork());
     await this.createAndRegisterNetwork(new BTCTestNetNetwork());
     await this.createAndRegisterNetwork(new EthereumGoerliNetwork());
     // await this.createAndRegisterNetwork(new HECOTestNetNetwork());
