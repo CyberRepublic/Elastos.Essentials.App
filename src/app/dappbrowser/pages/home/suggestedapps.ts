@@ -36,15 +36,15 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     walletConnectSupported: true,
     networks: ["elastossmartchain"]
   },
-  {
-    icon: '/assets/browser/dapps/chainge.png',
-    title: 'Chainge Web dApp',
-    description: 'Trade smarter, Not harder.',
-    url: 'https://dapp.chainge.finance/',
-    useExternalBrowser: false,
-    walletConnectSupported: true,
-    networks: ["arbitrum", "avalanchecchain", "bsc", "eth", "elastossmartchain", "fusion", "polygon", "tron"]
-  },
+  // {
+  //   icon: '/assets/browser/dapps/chainge.png',
+  //   title: 'Chainge Web dApp',
+  //   description: 'Trade smarter, Not harder.',
+  //   url: 'https://dapp.chainge.finance/',
+  //   useExternalBrowser: false,
+  //   walletConnectSupported: true,
+  //   networks: ["arbitrum", "avalanchecchain", "bsc", "eth", "elastossmartchain", "fusion", "polygon", "tron"]
+  // },
   // {
   //   icon: '/assets/browser/dapps/pasar.png',
   //   title: 'Pasar Protocol',
@@ -143,15 +143,6 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
       useExternalBrowser: false,
       networks: ["elastossmartchain"]
   }, */
-  {
-    icon: '/assets/browser/dapps/mdex.png',
-    title: 'Mdex',
-    description: 'An AMM-based decentralized transaction protocol that integrates DEX, IMO & DAO',
-    url: 'https://ht.mdex.co/',
-    useExternalBrowser: false,
-    walletConnectSupported: false,
-    networks: ["bsc", "eth", "heco"]
-  },
   {
     icon: '/assets/browser/dapps/mdex.png',
     title: 'Mdex',

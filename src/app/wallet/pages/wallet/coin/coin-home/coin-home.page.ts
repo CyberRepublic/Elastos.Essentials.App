@@ -142,7 +142,7 @@ export class CoinHomePage implements OnInit {
         private globalStorage: GlobalStorageService,
         private globalNav: GlobalNavService,
         private didSessions: GlobalDIDSessionsService,
-        private chaingeSwapService: ChaingeSwapService,
+        // private chaingeSwapService: ChaingeSwapService,
         private dAppBrowserService: DappBrowserService,
         private platform: Platform,
         public stakingInitService: StakingInitService,
@@ -206,7 +206,7 @@ export class CoinHomePage implements OnInit {
     }
 
     // Cannot be async
-    async init() {
+    init() {
         const navigation = this.router.getCurrentNavigation();
         if (!Util.isEmptyObject(navigation.extras.state)) {
             let masterWalletId = navigation.extras.state.masterWalletId;
@@ -642,7 +642,7 @@ export class CoinHomePage implements OnInit {
 
     public swapsColumnSize(): number {
         let item = 0;
-        if (this.canSwap()) item++;
+        // if (this.canSwap()) item++;
         if (this.canEarn()) item++;
         if (this.canStakeELA()) item++;
         if (this.canStakeTRX()) item++;
@@ -661,7 +661,7 @@ export class CoinHomePage implements OnInit {
      * Tells if this subwallet can do one of earn, swap or bridge operations
      */
     public canEarnSwapOrBridge(): boolean {
-        return this.canEarn() || this.canSwap() || this.canStakeELA()  || this.canStakeTRX()/* || this.canBridge() */;
+        return this.canEarn() || this.canStakeELA()  || this.canStakeTRX()/* || this.canSwap() || this.canBridge() */;
     }
 
     public canEarn(): boolean {
@@ -669,10 +669,12 @@ export class CoinHomePage implements OnInit {
     }
 
     public canSwap(): boolean {
-        if (this.isIOS && !this.canBrowseInApp) {
-            return false;
-        }
-        return this.chaingeSwapService.isNetworkSupported(this.networkWallet.network);
+        // Disable chainge
+        return false;
+        // if (this.isIOS && !this.canBrowseInApp) {
+        //     return false;
+        // }
+        // return this.chaingeSwapService.isNetworkSupported(this.networkWallet.network);
     }
 
     public canStakeELA(): boolean {

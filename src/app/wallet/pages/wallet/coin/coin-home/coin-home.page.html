@@ -157,11 +157,11 @@
             </ion-col>
         </ion-row>
         <ion-row class="card-btn-row" *ngIf="shouldShowAllActions && canEarnSwapOrBridge()">
-            <ion-col [size]="swapsColumnSize()" *ngIf="canSwap()">
+            <!-- <ion-col [size]="swapsColumnSize()" *ngIf="canSwap()">
                 <ebutton class="btn-box" [uppercase]="true" (clicked)="swap(subWallet)"
                     topicon="assets/wallet/buttons/curcol-swap.svg" [title]="'wallet.swap' | translate">
                 </ebutton>
-            </ion-col>
+            </ion-col> -->
             <ion-col [size]="swapsColumnSize()" *ngIf="canEarn()">
                 <ebutton class="btn-box" [uppercase]="true" (clicked)="earn(subWallet)"
                     topicon="assets/wallet/buttons/curcol-earn.svg" [title]="'wallet.earn' | translate">
