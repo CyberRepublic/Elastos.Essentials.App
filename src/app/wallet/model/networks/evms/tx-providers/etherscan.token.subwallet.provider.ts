@@ -6,10 +6,11 @@ import { SubWalletTransactionProvider } from "../../../tx-providers/subwallet.pr
 import { TransactionProvider } from "../../../tx-providers/transaction.provider";
 import { NetworkAPIURLType } from "../../base/networkapiurltype";
 import { AnySubWallet } from "../../base/subwallets/subwallet";
-import { ERCTokenInfo, EthTokenTransaction, EthTransaction } from "../evm.types";
+import { ERCTokenInfo, EtherscanAPIVersion, EthTokenTransaction, EthTransaction } from "../evm.types";
 import { ERC20SubWallet } from "../subwallets/erc20.subwallet";
 import { MainCoinEVMSubWallet } from "../subwallets/evm.subwallet";
 import { EtherscanHelper } from "./etherscan.helper";
+import { EVMNetwork } from "../evm.network";
 
 const MAX_RESULTS_PER_FETCH = 30
 
@@ -38,9 +39,14 @@ enum AccountAction {
 
 export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEVMSubWallet<any>> extends SubWalletTransactionProvider<SubWalletType, EthTransaction> {
   protected canFetchMore = true;
+  private chainid = -1;
 
-  constructor(provider: TransactionProvider<any>, subWallet: SubWalletType, private fetchMode: FetchMode = FetchMode.Compatibility1, private apiKey?: string) {
+  constructor(provider: TransactionProvider<any>, subWallet: SubWalletType, private fetchMode: FetchMode = FetchMode.Compatibility1, private apiKey?: string, private apiVersion = EtherscanAPIVersion.V1) {
     super(provider, subWallet);
+
+    if (apiVersion === EtherscanAPIVersion.V2) {
+      this.chainid = (this.subWallet.networkWallet.network as EVMNetwork).getMainChainID()
+    }
 
     // Discover new transactions globally for all tokens at once, in order to notify user
     // of NEW tokens received, and NEW payments received for existing tokens.
@@ -94,8 +100,15 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
 
     if (this.fetchMode === FetchMode.Compatibility1) {
       // Mode 1: use 'tokenlist' and nothing else. All tokens are mixed.
-      const tokenListUrl = this.subWallet.networkWallet.network.getAPIUrlOfType(NetworkAPIURLType.ETHERSCAN) +
+      let tokenListUrl = this.subWallet.networkWallet.network.getAPIUrlOfType(NetworkAPIURLType.ETHERSCAN) +
         '?module=account&action=tokenlist&address=' + address;
+
+      if (this.apiKey)
+        tokenListUrl += '&apikey=' + this.apiKey;
+
+      if (this.apiVersion === EtherscanAPIVersion.V2) {
+        tokenListUrl += `&chainid=${this.chainid}`
+      }
 
       try {
         let result = await GlobalJsonRPCService.instance.httpGet(tokenListUrl, this.subWallet.networkWallet.network.key);
@@ -235,6 +248,12 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
     if (this.apiKey)
       tokensEventUrl += '&apikey=' + this.apiKey;
 
+    if (this.apiVersion === EtherscanAPIVersion.V2) {
+      tokensEventUrl += `&chainid=${this.chainid}`
+    }
+
+    // Logger.log('wallet', ' getTokenTransferEventsByAction tokensEventUrl:', tokensEventUrl)
+
     try {
       let result = await GlobalJsonRPCService.instance.httpGet(tokensEventUrl, this.subWallet.networkWallet.network.key);
       if (result.result instanceof Array) {
@@ -255,7 +274,11 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
     if (this.apiKey)
       tokensEventUrl += '&apikey=' + this.apiKey;
 
-    //console.log(tokensEventUrl)
+    if (this.apiVersion === EtherscanAPIVersion.V2) {
+      tokensEventUrl += `&chainid=${this.chainid}`
+    }
+
+    // Logger.log('wallet', ' getTokenTransferEventsByContractAddress tokensEventUrl:', tokensEventUrl)
 
     try {
       let result = await GlobalJsonRPCService.instance.httpGet(tokensEventUrl, this.subWallet.networkWallet.network.key);

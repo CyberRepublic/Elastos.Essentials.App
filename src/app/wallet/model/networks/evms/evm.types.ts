@@ -99,3 +99,8 @@ export enum TransactionListType {
   NORMAL = 0,
   INTERNAL = 1, // contract internal transaction.
 }
+
+export enum EtherscanAPIVersion {
+  V1 = 0,
+  V2 = 1,
+}

@@ -5,15 +5,21 @@ import { SubWalletTransactionProvider } from "../../../tx-providers/subwallet.pr
 import { TransactionProvider } from "../../../tx-providers/transaction.provider";
 import { NetworkAPIURLType } from "../../base/networkapiurltype";
 import { AnySubWallet } from "../../base/subwallets/subwallet";
-import { EthTransaction } from "../evm.types";
+import { EtherscanAPIVersion, EthTransaction } from "../evm.types";
+import { EVMNetwork } from "../evm.network";
 
 const MAX_RESULTS_PER_FETCH = 30;
 
 export class EtherscanEVMSubWalletProvider<SubWalletType extends AnySubWallet> extends SubWalletTransactionProvider<SubWalletType, EthTransaction> {
   protected canFetchMore = true;
+  private chainid=  -1;
 
-  constructor(provider: TransactionProvider<any>, subWallet: SubWalletType, private apiKey?: string) {
+  constructor(provider: TransactionProvider<any>, subWallet: SubWalletType, private apiKey?: string, private apiVersion = EtherscanAPIVersion.V1) {
     super(provider, subWallet);
+
+    if (apiVersion === EtherscanAPIVersion.V2) {
+      this.chainid = (this.subWallet.networkWallet.network as EVMNetwork).getMainChainID()
+    }
   }
 
   protected getProviderTransactionInfo(transaction: EthTransaction): ProviderTransactionInfo {
@@ -56,6 +62,10 @@ export class EtherscanEVMSubWalletProvider<SubWalletType extends AnySubWallet> e
 
     if (this.apiKey)
       txListUrl += '&apikey=' + this.apiKey;
+
+    if (this.apiVersion === EtherscanAPIVersion.V2) {
+      txListUrl += `&chainid=${this.chainid}`
+    }
 
     try {
       // Logger.warn('wallet', 'fetchTransactions txListUrl:', txListUrl)

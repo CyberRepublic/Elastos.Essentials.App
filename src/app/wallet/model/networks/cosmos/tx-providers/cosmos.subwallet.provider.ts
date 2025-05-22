@@ -49,7 +49,6 @@ export class CosmosSubWalletProvider<SubWalletType extends AnySubWallet> extends
         try {
             // Logger.warn('wallet', 'fetchTransactions txListUrl:', txListUrl)
             let transactions = await (this.subWallet.networkWallet.safe as unknown as CosmosSafe).searchTx() as CosmosTransaction[];
-            Logger.warn('wallet', 'fetchTransactions:', transactions);
             if (!(transactions instanceof Array)) {
                 Logger.warn('wallet', 'TronSubWalletProvider fetchTransactions invalid transactions:', transactions)
                 return null;
