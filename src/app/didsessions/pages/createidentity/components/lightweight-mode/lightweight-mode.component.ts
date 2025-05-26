@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  ElementRef,
   EventEmitter,
   Input,
   OnChanges,
@@ -8,7 +9,7 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import { IonSlides } from '@ionic/angular';
+import type { Swiper } from 'swiper';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 
 @Component({
@@ -17,7 +18,7 @@ import { GlobalThemeService } from 'src/app/services/theming/global.theme.servic
   styleUrls: ['./lightweight-mode.component.scss']
 })
 export class LightweightModeComponent implements OnChanges, AfterViewInit {
-  @ViewChild(IonSlides, { static: false }) private slide: IonSlides;
+  @ViewChild('swiper', { static: false }) private swiperEl!: ElementRef;
 
   @Input() hidden = true;
   @Input() slideIndex = 0;
@@ -36,40 +37,42 @@ export class LightweightModeComponent implements OnChanges, AfterViewInit {
 
   ngAfterViewInit() {
     // Initialize slides when component is ready
-    if (!this.hidden && this.slide) {
-      void this.slide.getSwiper().then(swiper => {
-        swiper.init();
-        // Reset to first slide
-        swiper.slideTo(0, 0);
-        this.slideIndex = 0;
-        this.slideIndexChange.emit(this.slideIndex);
-      });
+    if (!this.hidden && this.swiperEl?.nativeElement?.swiper) {
+      const swiper = this.swiperEl.nativeElement.swiper as Swiper;
+      // Reset to first slide
+      swiper.slideTo(0, 0);
+      this.slideIndex = 0;
+      this.slideIndexChange.emit(this.slideIndex);
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
     // Only reset slides when hidden changes from true to false (screen re-enters)
-    if (changes.hidden && !changes.hidden.firstChange && !this.hidden && this.slide) {
+    if (changes.hidden && !changes.hidden.firstChange && !this.hidden && this.swiperEl?.nativeElement?.swiper) {
       setTimeout(() => {
-        void this.slide.getSwiper().then(swiper => {
-          swiper.init();
-          // Reset to first slide
-          swiper.slideTo(0, 0);
-          this.slideIndex = 0;
-          this.slideIndexChange.emit(this.slideIndex);
-        });
+        const swiper = this.swiperEl.nativeElement.swiper as Swiper;
+        // Reset to first slide
+        swiper.slideTo(0, 0);
+        this.slideIndex = 0;
+        this.slideIndexChange.emit(this.slideIndex);
       }, 100);
     }
   }
 
-  async getActiveSlide() {
-    this.slideIndex = await this.slide.getActiveIndex();
-    this.slideIndexChange.emit(this.slideIndex);
+  getActiveSlide() {
+    const swiper = this.swiperEl?.nativeElement?.swiper as Swiper;
+    if (swiper) {
+      this.slideIndex = swiper.activeIndex;
+      this.slideIndexChange.emit(this.slideIndex);
+    }
   }
 
   onNextSlide() {
-    void this.slide.slideNext();
-    this.nextSlide.emit();
+    const swiper = this.swiperEl?.nativeElement?.swiper as Swiper;
+    if (swiper) {
+      swiper.slideNext();
+      this.nextSlide.emit();
+    }
   }
 
   onCreateWallet() {

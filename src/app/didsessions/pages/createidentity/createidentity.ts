@@ -17,6 +17,7 @@ import { Util } from 'src/app/model/util';
 import { GlobalPreferencesService } from 'src/app/services/global.preferences.service';
 import { GlobalStartupService } from 'src/app/services/global.startup.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
+import type { Swiper } from 'swiper';
 
 @Component({
   selector: 'page-createidentity',
@@ -25,6 +26,7 @@ import { GlobalThemeService } from 'src/app/services/theming/global.theme.servic
 })
 export class CreateIdentityPage {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
+  @ViewChild('swiper') private swiperEl!: ElementRef; swiper: Swiper
 
   public hidden = true;
   public slideIndex = 0;
@@ -55,7 +57,13 @@ export class CreateIdentityPage {
     if (!Util.isEmptyObject(navigation.extras.state)) {
       this.isfirst = false;
       Logger.log('didsessions', 'Setting create identity screen initial slide to index 1');
-      this.slideOpts.initialSlide = 1;
+      this.initialSlide = 1;
+    }
+  }
+
+  ngAfterViewInit() {
+    if (this.initialSlide > 0) {
+      this.swiperEl?.nativeElement?.swiper?.slideTo(this.initialSlide, 0, false)
     }
   }
 
@@ -78,6 +86,8 @@ export class CreateIdentityPage {
         this.uxService.onTitleBarItemClicked(icon);
       })
     );
+
+    this.swiper = this.swiperEl?.nativeElement?.swiper;
 
     // Dirty hack because on iOS we are currently unable to understand why the
     // swiper-slides width is sometimes wrong when an app starts. Waiting a few
@@ -103,6 +113,16 @@ export class CreateIdentityPage {
   showSlider() {
     Logger.log('didsessions', 'Showing created identity screen slider');
     this.hidden = false;
+  }
+
+  async getActiveSlide() {
+    this.slideIndex = this.swiper?.activeIndex || 0;
+    Logger.log('didsessions', '----getActiveSlide:', this.slideIndex);
+  }
+
+  nextSlide() {
+    this.swiper?.slideNext();
+    Logger.log('didsessions', '----nextSlide:');
   }
 
   onSlideIndexChange(slideIndex: number) {

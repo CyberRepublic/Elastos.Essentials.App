@@ -429,3 +429,30 @@ ion-spinner {
   justify-content: center;
   align-items: center;
 }
+
+ion-radio {
+    --width: 20px;
+    --height: 20px;
+    --border-width: 1.5px;
+    --color: var(--ion-text-color);
+    --color-checked: var(--ion-text-color);
+    --border-color: var(--ion-text-color);
+    --border-color-checked: var(--ion-text-color);
+    --checkmark-color: var(--ion-background-color);
+    --radio-background-checked: var(--ion-text-color);
+
+    &::part(container) {
+        width: 20px !important;
+        height: 20px !important;
+        }
+    }
+
+    ::ng-deep ion-radio {
+        width: 20px !important;
+        height: 20px !important;
+
+        .radio-icon {
+        width: 20px !important;
+        height: 20px !important;
+    }
+}

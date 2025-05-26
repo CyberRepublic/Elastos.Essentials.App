@@ -3,7 +3,8 @@
 
   <ion-grid class="container" [class.light-container]="!theme.darkMode" [class.dark-container]="theme.darkMode">
     <!-- Non lightweight mode: 3 panels with slides -->
-    <swiper-container *ngIf="!lightweightMode" #swiper auto-height="true" space-between="10" (swiperslidechange)="onSlideChange()"
+    <swiper-container *ngIf="!lightweightMode" #swiper auto-height="true" space-between="10"
+      (swiperslidechange)="onSlideChange()"
       class="widgets-containers-slides" [class.hidden]="!slidesShown">
       <swiper-slide>
         <widget-container name="left"></widget-container>

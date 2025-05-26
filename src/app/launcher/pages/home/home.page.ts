@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { IonContent, ModalController, ToastController } from '@ionic/angular';
+import { IonContent, ToastController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
@@ -20,7 +20,6 @@ import {
   MAINNET_TEMPLATE,
   TESTNET_TEMPLATE
 } from 'src/app/services/global.networks.service';
-import { GlobalPreferencesService } from 'src/app/services/global.preferences.service';
 import { GlobalStartupService } from 'src/app/services/global.startup.service';
 import { GlobalStorageService } from 'src/app/services/global.storage.service';
 import { DIDSessionsStore } from 'src/app/services/stores/didsessions.store';
@@ -53,8 +52,8 @@ export class HomePage implements OnInit {
 
   private titleBarIconClickedListener: (icon: TitleBarIcon | TitleBarMenuItem) => void;
   private themeSubscription: Subscription = null; // Subscription to theme change
-  private themeColorSubscription: Subscription = null;
   private widgetsEditionModeSub: Subscription = null;
+  private swiperTouchEndHandler: () => void = null;
 
   public showSwipeIndicator = false; // Whether to show the swipe animation or not (first time only for new identities)
 
@@ -71,13 +70,11 @@ export class HomePage implements OnInit {
     public theme: GlobalThemeService,
     public appService: AppmanagerService,
     public didService: DIDManagerService,
-    private modalCtrl: ModalController,
     public walletUIService: UiService,
     private globalNetworksService: GlobalNetworksService,
     private globalNavService: GlobalNavService,
     private widgetsService: WidgetsService,
     private launcherNotificationsService: NotificationManagerService,
-    private globalPrefs: GlobalPreferencesService,
     private lightweightService: GlobalLightweightService
   ) {
     // Read lightweight mode synchronously from the service
@@ -227,6 +224,32 @@ export class HomePage implements OnInit {
       console.warn('Slides not shown in ionViewDidEnter, forcing visibility');
       this.initializeSlidesVisibility();
     }
+
+    // Setup touch end event listener on swiper instance
+    if (!this.lightweightMode) {
+      // Ensure swiper instance is available
+      if (!this.swiper && this.swiperEl?.nativeElement) {
+        this.swiper = this.swiperEl.nativeElement.swiper;
+      }
+
+      if (this.swiper && !this.swiperTouchEndHandler) {
+        this.swiperTouchEndHandler = () => {
+          this.onSlideTouchEnd();
+        };
+        this.swiper.on('touchEnd', this.swiperTouchEndHandler);
+      } else if (!this.swiper && this.swiperEl?.nativeElement) {
+        // If swiper instance is not ready yet, wait a bit and try again
+        setTimeout(() => {
+          this.swiper = this.swiperEl?.nativeElement?.swiper;
+          if (this.swiper && !this.swiperTouchEndHandler) {
+            this.swiperTouchEndHandler = () => {
+              this.onSlideTouchEnd();
+            };
+            this.swiper.on('touchEnd', this.swiperTouchEndHandler);
+          }
+        }, 100);
+      }
+    }
   }
 
   ionViewWillLeave() {
@@ -238,6 +261,12 @@ export class HomePage implements OnInit {
     if (this.widgetsEditionModeSub) {
       this.widgetsEditionModeSub.unsubscribe();
       this.widgetsEditionModeSub = null;
+    }
+
+    // Remove touch end event listener
+    if (this.swiper && this.swiperTouchEndHandler) {
+      this.swiper.off('touchEnd', this.swiperTouchEndHandler);
+      this.swiperTouchEndHandler = null;
     }
 
     this.titleBar.removeOnItemClickedListener(this.titleBarIconClickedListener);
@@ -281,6 +310,14 @@ export class HomePage implements OnInit {
       console.log('Slides already shown, returning');
       return; // Already initialized
     }
+
+    // With initialSlide: 1, slides should start at the correct position
+    // Just show them after a brief delay to ensure they're properly initialized
+    setTimeout(() => {
+      this.swiper.slideTo(this.activeScreenIndex, 0, false);
+      this.slidesShown = true;
+      console.log('Slides marked as shown after timeout');
+    }, 50);
   }
 
   public onSlideTouchEnd() {

@@ -71,7 +71,7 @@ export class PrepareDIDPage {
     this.backButtonSub = this.platform.backButton.subscribeWithPriority(100, () => {});
 
     // Dirty hack because on iOS we are currently unable to understand why the
-    // ion-slides width is sometimes wrong when an app starts. Waiting a few
+    // swiper-container width is sometimes wrong when an app starts. Waiting a few
     // milliseconds (DOM fully rendered once...?) seems to solve this problem.
     if (this.platform.platforms().indexOf('ios') >= 0) {
       setTimeout(() => {

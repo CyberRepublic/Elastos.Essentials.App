@@ -32,6 +32,7 @@
                 <ion-col>
                     <h5>{{ 'crcouncilvoting.location' | translate }}</h5>
                     <ion-select [(ngModel)]="info.location" [attr.disabled]="needConfirm"
+                        [interfaceOptions]="option"
                         placeholder="{{'crcouncilvoting.location-placeholder' | translate}}"
                         [attr.ok-text]="'common.confirm' | translate" [attr.cancel-text]="'common.cancel' | translate">
                         <ion-select-option *ngFor="let code of getAreaList()" [value]="code">

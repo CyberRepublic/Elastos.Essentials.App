@@ -9,22 +9,22 @@
     </ion-col>
   </ion-row>
 
-  <ion-slides #slide [options]="slideOpts" [class.hidden]="hidden">
-    <ion-slide class="ion-text-center">
+  <swiper-container #swiper [options]="slideOpts" [class.hidden]="hidden" (swiperslidechange)="getActiveSlide()">
+    <swiper-slide class="ion-text-center">
       <div class="slide-card">
         <img src="assets/didsessions/onboard/slide4.svg">
         <h1>{{ 'didsessions.prepare.wallet-title' | translate }}</h1>
         <p>{{ 'didsessions.prepare.lightweight-message-1' | translate }}</p>
       </div>
-    </ion-slide>
+    </swiper-slide>
 
-    <ion-slide class="ion-text-center">
+    <swiper-slide class="ion-text-center">
       <div class="slide-card">
         <img src="assets/didsessions/onboard/slide4.svg">
         <span>{{ 'common.ready-soon' | translate }}</span>
       </div>
-    </ion-slide>
-  </ion-slides>
+    </swiper-slide>
+  </swiper-container>
 
   <ion-row class="slide-circle-row">
     <ion-col size="12">

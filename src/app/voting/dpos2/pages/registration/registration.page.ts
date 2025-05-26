@@ -55,7 +55,7 @@ export class DPoS2RegistrationPage implements OnInit {
 
     public option: any = {
         header: this.translate.instant("dposvoting.node-location-placeholder"),
-        cssClass: "custom-alert",
+        cssClass: "custom-alert ion-select-max-height",
       };
 
     constructor(
