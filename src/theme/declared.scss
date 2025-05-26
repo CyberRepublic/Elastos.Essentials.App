@@ -91,6 +91,12 @@ a {
   }
 }
 
+.ion-select-max-height {
+  .alert-radio-group {
+    max-height: 100%!important;
+  }
+}
+
 /********************** LAUNCHER **********************/
 .launcher-options-component {
   //--background: #ffffff;
