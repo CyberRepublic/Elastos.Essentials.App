@@ -88,6 +88,8 @@ import { Native } from '../../../../services/native.service';
 import { UiService } from '../../../../services/ui.service';
 import { WalletService } from '../../../../services/wallet.service';
 import { NetworkInfo } from '../coin-select/coin-select.page';
+import { ERC20CoinService } from 'src/app/wallet/services/evm/erc20coin.service';
+import { ElastosPGPNetworkBase } from 'src/app/wallet/model/networks/elastos/evms/pgp/network/pgp.networks';
 
 @Component({
   selector: 'app-coin-transfer',
@@ -219,7 +221,8 @@ export class CoinTransferPage implements OnInit, OnDestroy {
     private erc721Service: ERC721Service,
     private erc1155Service: ERC1155Service,
     private ethTransactionService: EVMService,
-    private erc721service: ERC721Service
+    private erc721service: ERC721Service,
+    private erc20CoinService: ERC20CoinService,
   ) {}
 
   async ngOnInit() {
@@ -956,6 +959,10 @@ export class CoinTransferPage implements OnInit, OnDestroy {
             this.navigateHomeAfterCompletion = true;
             if (!ret) return;
           }
+        } else if (this.transferType == TransferType.WITHDRAW) {
+          if (this.networkWallet.network instanceof ElastosPGPNetworkBase) {
+              await this.approveSpendingIfNeeded(this.fromSubWallet.getCurrentReceiverAddress())
+          }
         }
         void this.showConfirm();
       }
@@ -1295,20 +1302,22 @@ export class CoinTransferPage implements OnInit, OnDestroy {
   // for elastos cross chain transaction.
   getELANetworkByID(id: StandardCoinName) {
     let networkKey = 'elastos';
-    switch (id) {
-      case StandardCoinName.ETHDID:
-        networkKey = 'elastosidchain';
-        break;
-      case StandardCoinName.ETHSC:
-        networkKey = 'elastossmartchain';
-        break;
-      case StandardCoinName.ETHECO:
-        networkKey = 'elastoseco';
-        break;
-      default:
-        break;
+      switch (id) {
+        case StandardCoinName.ETHDID:
+          networkKey = 'elastosidchain';
+          break;
+        case StandardCoinName.ETHSC:
+          networkKey = 'elastossmartchain';
+          break;
+        case StandardCoinName.ETHECO:
+          networkKey = 'elastoseco';
+          break;
+        case StandardCoinName.ETHECOPGP:
+          networkKey = 'elastosecopgp';
+          break;
+        default:
+          break;
     }
-
     return WalletNetworkService.instance.getNetworkByKey(networkKey);
   }
 
@@ -1571,5 +1580,14 @@ export class CoinTransferPage implements OnInit, OnDestroy {
    */
   public isAccountAbstractionWallet(): boolean {
     return this.networkWallet.masterWallet instanceof AccountAbstractionMasterWallet;
+  }
+
+  /**
+   * The ELA on the PGP chain is an ERC20 token, and approval is required for withdrawal
+   */
+  private async approveSpendingIfNeeded(targetAddress: string): Promise<boolean> {
+      let mainCoinSubWallet = this.networkWallet.getMainEvmSubWallet();
+      let amount = new BigNumber(this.amount).multipliedBy(this.fromSubWallet.tokenDecimals)
+      return await this.erc20CoinService.approveSpendingIfNeeded(mainCoinSubWallet, this.fromSubWallet.id, this.fromSubWallet.tokenDecimals, targetAddress, amount);
   }
 }

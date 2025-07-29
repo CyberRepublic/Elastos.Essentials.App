@@ -501,6 +501,10 @@ export class MainChainSubWallet extends MainCoinSubWallet<ElastosTransaction, El
         lockAddress = Config.ETHECO_DEPOSIT_ADDRESS;
         crossChainfee = 150000; //
         break;
+      case StandardCoinName.ETHECOPGP:
+        lockAddress = Config.ETHECOPGP_DEPOSIT_ADDRESS;
+        crossChainfee = 150000; //
+        break;
       default:
         Logger.error('wallet', 'createDepositTransaction not support ', toSubWalletId);
         return null;
