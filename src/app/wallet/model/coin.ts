@@ -18,12 +18,13 @@ export enum CoinType {
 }
 
 export enum StandardCoinName {
-  ELA = "ELA",
-  ETHSC = "ETHSC",
-  ETHDID = "ETHDID",
-  ETHECO = "ETHECO",
-  BTC = "BTC",
-  TRON = "TRON",
+    ELA = 'ELA',
+    ETHSC = 'ETHSC',
+    ETHDID = 'ETHDID',
+    ETHECO = 'ETHECO',
+    ETHECOPGP = 'ETHECOPGP',
+    BTC = 'BTC',
+    TRON = 'TRON'
 }
 
 export namespace StandardCoinName {

@@ -1,0 +1,152 @@
+import { GlobalElastosAPIService } from "src/app/services/global.elastosapi.service";
+import { CoinID, StandardCoinName } from "../../../../../coin";
+import { AnyNetworkWallet } from "../../../../base/networkwallets/networkwallet";
+import { ERC20SubWallet } from "../../../../evms/subwallets/erc20.subwallet";
+import { EVMService } from "src/app/wallet/services/evm/evm.service";
+import { Logger } from "src/app/logger";
+import { Config } from "src/app/wallet/config/Config";
+import { Util } from "src/app/model/util";
+import { EVMSafe } from "../../../../evms/safes/evm.safe";
+import BigNumber from 'bignumber.js';
+import { ElastosPGPNetworkBase } from "../network/pgp.networks";
+
+/**
+ * Subwallet for Eco-ERC20 tokens.
+ */
+export class PGPERC20SubWallet extends ERC20SubWallet {
+  private withdrawContract: any;
+  private withdrawContractAddress: string;
+
+  constructor(networkWallet: AnyNetworkWallet, coinID: CoinID) {
+    let rpcApiUrl = GlobalElastosAPIService.instance.getApiUrlForChainCode(StandardCoinName.ETHECOPGP);
+    super(networkWallet, coinID, rpcApiUrl, "PGP-ERC20 token");
+
+    this.spvConfigEVMCode = StandardCoinName.ETHECOPGP;
+    this.withdrawContractAddress = Config.ETHECOPGP_WITHDRAW_ADDRESS.toLowerCase();
+    this.tokenAmountMulipleTimes = new BigNumber(10).pow(this.tokenDecimals)
+  }
+
+  public getMainIcon(): string {
+    if (this.isELAToken()) {
+      return "assets/wallet/networks/elastos.png";
+    }
+    return "assets/wallet/coins/pga.png";
+  }
+
+  public getSecondaryIcon(): string {
+    return null;
+  }
+
+  public getDisplayableERC20TokenInfo(): string {
+    return "";// GlobalLanguageService.instance.translate('wallet.ela-erc20'); // "Elastos ERC20 token" is confusing.
+  }
+
+  public supportInternalTransactions() {
+    return false;
+  }
+
+  private isELAToken() {
+    let elaTokenAddress = (this.networkWallet.network as ElastosPGPNetworkBase).getELATokenContract();
+    if (this.coin.getContractAddress() === elaTokenAddress) return true;
+
+    return false;
+  }
+
+  public supportsCrossChainTransfers(): boolean {
+    if (this.isELAToken()) {
+      // Only wallets imported with mnemonic have cross chain capability because we then have both mainchain
+      // and sidechains addresses.
+      return this.networkWallet.masterWallet.hasMnemonicSupport()
+    }
+    else return false;
+  }
+
+  protected async getWithdrawContract() {
+    if (!this.withdrawContract) {
+      const contractAbi = [{
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "_addr",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_fee",
+            "type": "uint256"
+          }
+        ],
+        "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }];
+      this.withdrawContract = new (this.highPriorityWeb3.eth.Contract)(contractAbi, this.withdrawContractAddress);
+    }
+    Logger.warn('wallet', ' ----pgp getWithdrawContract')
+    return await this.withdrawContract;
+  }
+
+  public async estimateWithdrawTransactionGas(toAddress: string) {
+    const ethscWithdrawContract = await this.getWithdrawContract()
+    const method = ethscWithdrawContract.methods.withdraw(toAddress, '100000', Config.PGP_WITHDRAW_GASPRICE);
+
+    let estimateGas = 3000000;
+    try {
+      // Can not use method.estimateGas(), must set the "value"
+      let tx = {
+        data: method.encodeABI(),
+        to: this.withdrawContractAddress,
+        value: '100000',
+      }
+      let tempGasLimit = await this.highPriorityWeb3.eth.estimateGas(tx);
+      // Make sure the gaslimit is big enough - add a bit of margin for fluctuating gas price
+      estimateGas = Util.ceil(tempGasLimit * 1.5, 100);
+
+    } catch (error) {
+        Logger.error('wallet', 'pgp estimateWithdrawTransactionGas error:', error);
+    }
+Logger.warn("wallet", ' -- estimateGas', estimateGas)
+    return estimateGas;
+  }
+
+  public async createWithdrawTransaction(toAddress: string, toAmount: number, memo: string, gasPriceArg: string, gasLimitArg: string, nonceArg = -1): Promise<string> {
+    const withdrawContract = await this.getWithdrawContract()
+    Logger.warn("wallet", ' --createWithdrawTransaction  toAddress', toAddress, ' toAmount:', toAmount)
+    let gasPrice = gasPriceArg;
+    if (gasPrice === null) {
+      gasPrice = await this.getGasPrice();
+    }
+
+    Logger.warn("wallet", '------->>gasPrice', gasPrice)
+
+    let gasLimit = gasLimitArg;
+    if (gasLimit === null) {
+      let estimateGas = await this.estimateWithdrawTransactionGas(toAddress);
+      gasLimit = estimateGas.toString();
+    }
+    Logger.warn("wallet", ' --createWithdrawTransaction  gasLimit', gasLimit, ' gasPrice:', gasPrice)
+
+    let amountWithDecimals: BigNumber;
+    if (toAmount === -1) { //-1: send all.
+        amountWithDecimals = this.balance;
+    } else {
+        amountWithDecimals = new BigNumber(toAmount).multipliedBy(this.tokenAmountMulipleTimes);
+    }
+
+    const method = withdrawContract.methods.withdraw(toAddress, amountWithDecimals, Config.PGP_WITHDRAW_GASPRICE);
+
+    let nonce = nonceArg;
+    if (nonce === -1) {
+      nonce = await EVMService.instance.getNonce(this.networkWallet.network, this.networkWallet.getAddresses()[0].address);
+    }
+    Logger.log('wallet', 'pgp createWithdrawTransaction gasPrice:', gasPrice.toString(), ' toAmountSend:', amountWithDecimals.toString(), ' nonce:', nonce, ' withdrawContractAddress:', this.withdrawContractAddress);
+    return null;
+    return (this.networkWallet.safe as unknown as EVMSafe).createContractTransaction(this.withdrawContractAddress, '0', gasPrice, gasLimit, nonce, method.encodeABI());
+  }
+}

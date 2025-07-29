@@ -116,6 +116,13 @@ export class CoinSelectPage implements OnInit {
       let ecosubwallet = ecoNetworkWallet.getSubWallet(StandardCoinName.ETHECO);
       subwallets.push(ecosubwallet);
     }
+
+    let ecoPGPChain = WalletNetworkService.instance.getNetworkByKey('elastosecopgp');
+    let ecoPGPNetworkWallet = await ecoPGPChain.createNetworkWallet(this.networkWallet.masterWallet, false);
+    if (ecoPGPNetworkWallet) {
+      let ecoPGPsubwallet = ecoPGPNetworkWallet.getSubWallet(StandardCoinName.ETHECOPGP);
+      subwallets.push(ecoPGPsubwallet);
+    }
     return subwallets;
   }
 
@@ -145,5 +152,12 @@ export class CoinSelectPage implements OnInit {
       logo: ecoChain.logo,
       tokenSymbol: ecoChain.getMainTokenSymbol()
     });
+    let ecoPGPChain = WalletNetworkService.instance.getNetworkByKey('elastosecopgp');
+    this.destNetworks.push({
+      id: StandardCoinName.ETHECOPGP,
+      chainId: (<EVMNetwork>ecoChain).getMainChainID(),
+      friendName: 'PGP Chain',
+      logo: ecoPGPChain.logo,
+      tokenSymbol: ecoPGPChain.getMainTokenSymbol()})
   }
 }

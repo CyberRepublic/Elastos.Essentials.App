@@ -60,7 +60,7 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
     return this.withdrawContractAddress;
   }
 
-  private async getWithdrawContract() {
+  protected async getWithdrawContract() {
     if (!this.ethscWithdrawContract) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const contractAbi = require('src/assets/wallet/ethereum/ETHSCWithdrawABI.json');
