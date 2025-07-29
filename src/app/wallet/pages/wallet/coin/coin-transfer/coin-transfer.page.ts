@@ -83,8 +83,9 @@ import { Native } from '../../../../services/native.service';
 import { UiService } from '../../../../services/ui.service';
 import { WalletService } from '../../../../services/wallet.service';
 import { NetworkInfo } from '../coin-select/coin-select.page';
-import { satsToBtc } from 'src/app/wallet/model/networks/btc/conversions';
 import { ElastosIdentityChainNetworkBase } from 'src/app/wallet/model/networks/elastos/evms/eid/network/eid.networks';
+import { ERC20CoinService } from 'src/app/wallet/services/evm/erc20coin.service';
+import { ElastosPGPNetworkBase } from 'src/app/wallet/model/networks/elastos/evms/pgp/network/pgp.networks';
 
 @Component({
     selector: 'app-coin-transfer',
@@ -217,6 +218,7 @@ export class CoinTransferPage implements OnInit, OnDestroy {
         private erc1155Service: ERC1155Service,
         private ethTransactionService: EVMService,
         private erc721service: ERC721Service,
+        private erc20CoinService: ERC20CoinService,
     ) {
     }
 
@@ -922,6 +924,10 @@ export class CoinTransferPage implements OnInit, OnDestroy {
                         this.navigateHomeAfterCompletion = true;
                         if (!ret) return;
                     }
+                } else if (this.transferType == TransferType.WITHDRAW) {
+                    if (this.networkWallet.network instanceof ElastosPGPNetworkBase) {
+                        await this.approveSpendingIfNeeded(this.fromSubWallet.getCurrentReceiverAddress())
+                    }
                 }
                 void this.showConfirm();
             }
@@ -1262,6 +1268,9 @@ export class CoinTransferPage implements OnInit, OnDestroy {
             case StandardCoinName.ETHECO:
                 networkKey = 'elastoseco';
                 break;
+            case StandardCoinName.ETHECOPGP:
+                networkKey = 'elastosecopgp';
+                break;
             default:
                 break;
         }
@@ -1513,5 +1522,14 @@ export class CoinTransferPage implements OnInit, OnDestroy {
       }
 
       return true;
+    }
+
+    /**
+     * The ELA on the PGP chain is an ERC20 token, and approval is required for withdrawal
+     */
+    private async approveSpendingIfNeeded(targetAddress: string): Promise<boolean> {
+        let mainCoinSubWallet = this.networkWallet.getMainEvmSubWallet();
+        let amount = new BigNumber(this.amount).multipliedBy(this.fromSubWallet.tokenDecimals)
+        return await this.erc20CoinService.approveSpendingIfNeeded(mainCoinSubWallet, this.fromSubWallet.id, this.fromSubWallet.tokenDecimals, targetAddress, amount);
     }
 }

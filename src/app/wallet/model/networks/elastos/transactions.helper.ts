@@ -123,6 +123,9 @@ export class ElastosTransactionsHelper {
               case Config.ETHECO_DEPOSIT_ADDRESS:
                 transactionName = "wallet.coin-dir-from-eco";
                 break;
+              case Config.ETHECOPGP_DEPOSIT_ADDRESS:
+                transactionName = "wallet.coin-dir-from-pgp";
+                break;
               default:
                 transactionName = 'wallet.coin-op-received-token';
             }
@@ -162,6 +165,9 @@ export class ElastosTransactionsHelper {
                 break;
               case Config.ETHECO_DEPOSIT_ADDRESS:
                 transactionName = "wallet.coin-dir-to-eco";
+                break;
+              case Config.ETHECOPGP_DEPOSIT_ADDRESS:
+                transactionName = "wallet.coin-dir-to-pgp";
                 break;
               default:
                 transactionName = "wallet.coin-dir-to-mainchain";

@@ -17,6 +17,7 @@ export enum StandardCoinName {
     ETHSC = 'ETHSC',
     ETHDID = 'ETHDID',
     ETHECO = 'ETHECO',
+    ETHECOPGP = 'ETHECOPGP',
     BTC = 'BTC',
     TRON = 'TRON'
 }

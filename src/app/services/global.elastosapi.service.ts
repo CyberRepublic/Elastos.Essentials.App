@@ -38,6 +38,10 @@ export enum ElastosApiUrlType {
     ECO_RPC = "ecoRPC",
     ECO_ORACLE = "ecoOracleRPC",
     ECO_BROWSER = "ecoBrowserRPC",
+    // ECO pgp chain
+    ECOPGP_RPC = "ecoPGPRPC",
+    ECOPGP_ORACLE = "ecoPGPOracleRPC",
+    ECOPGP_BROWSER = "ecoPGPBrowserRPC",
     // Cyber republic
     CR_RPC = "crRPC",
     // Block Explorer
@@ -45,6 +49,7 @@ export enum ElastosApiUrlType {
     ESC_BLOCK_EXPLORER = 'escBlockExplorer',
     EID_BLOCK_EXPLORER = 'eidBlockExplorer',
     ECO_BLOCK_EXPLORER = 'ecoBlockExplorer',
+    ECOPGP_BLOCK_EXPLORER = 'ecoPGPBlockExplorer',
     // widget
     WIDGETS = 'widgets',
     IMAGES = 'images',
@@ -74,6 +79,10 @@ export type ElastosAPIProvider = {
             ecoRPC: string;
             ecoOracleRPC: string;
             ecoBrowserRPC: string;
+            // ECO PGP chain
+            ecoPGPRPC: string;
+            ecoPGPOracleRPC: string;
+            ecoPGPBrowserRPC: string;
             // Cyber Republic
             crRPC: string;
             // Block Explorer
@@ -179,6 +188,9 @@ export class GlobalElastosAPIService extends GlobalService {
                         ecoRPC: 'https://api.elastos.io/eco',
                         ecoOracleRPC: 'https://api.elastos.io/eco-oracle',
                         ecoBrowserRPC: 'https://eco.elastos.io/api',
+                        ecoPGPRPC: 'https://api.elastos.io/pgp',
+                        ecoPGPOracleRPC: 'https://api.elastos.io/pgp-oracle',
+                        ecoPGPBrowserRPC: 'https://pgp.elastos.io/api',
                         crRPC: 'https://api.cyberrepublic.org',
                         elaBlockExplorer: 'https://blockchain.elastos.io',
                         escBlockExplorer: 'https://esc.elastos.io',
@@ -199,6 +211,9 @@ export class GlobalElastosAPIService extends GlobalService {
                         ecoRPC: 'https://api2-testnet.elastos.io/eco',
                         ecoOracleRPC: 'https://api2-testnet.elastos.io/eco-oracle',
                         ecoBrowserRPC: 'https://eco-testnet.elastos.io/api',
+                        ecoPGPRPC: 'https://api-testnet.elastos.io/pgp',
+                        ecoPGPOracleRPC: 'https://api-testnet.elastos.io/pgp-oracle',
+                        ecoPGPBrowserRPC: 'https://pgp-testnet.elastos.io/api',
                         crRPC: 'https://api.cyberrepublic.org',
                         elaBlockExplorer: 'https://blockchain-testnet.elastos.io',
                         escBlockExplorer: 'https://esc-testnet.elastos.io',
@@ -219,6 +234,9 @@ export class GlobalElastosAPIService extends GlobalService {
                         ecoRPC: '',
                         ecoOracleRPC: '',
                         ecoBrowserRPC: '',
+                        ecoPGPRPC: '',
+                        ecoPGPOracleRPC: '',
+                        ecoPGPBrowserRPC: '',
                         crRPC: 'https://crapi.longrunweather.com:18443',
                         elaBlockExplorer: '',
                         escBlockExplorer: '',
@@ -246,6 +264,9 @@ export class GlobalElastosAPIService extends GlobalService {
                         ecoRPC: 'https://api2.elastos.io/eco',
                         ecoOracleRPC: 'https://api2.elastos.io/eco-oracle',
                         ecoBrowserRPC: 'https://eco.elastos.io/api',
+                        ecoPGPRPC: 'https://api2.elastos.io/pgp',
+                        ecoPGPOracleRPC: 'https://api2.elastos.io/pgp-oracle',
+                        ecoPGPBrowserRPC: 'https://pgp.elastos.io/api',
                         crRPC: 'https://api.cyberrepublic.org',
                         elaBlockExplorer: 'https://blockchain.elastos.io',
                         escBlockExplorer: 'https://esc.elastos.io',
@@ -266,6 +287,9 @@ export class GlobalElastosAPIService extends GlobalService {
                         ecoRPC: 'https://api2-testnet.elastos.io/eco',
                         ecoOracleRPC: 'https://api2-testnet.elastos.io/eco-oracle',
                         ecoBrowserRPC: 'https://eco-testnet.elastos.io/api',
+                        ecoPGPRPC: 'https://api-testnet.elastos.io/pgp',
+                        ecoPGPOracleRPC: 'https://api-testnet.elastos.io/pgp-oracle',
+                        ecoPGPBrowserRPC: 'https://pgp-testnet.elastos.io/api',
                         crRPC: 'https://api.cyberrepublic.org',
                         elaBlockExplorer: 'https://blockchain-testnet.elastos.io',
                         escBlockExplorer: 'https://esc-testnet.elastos.io',
@@ -286,6 +310,9 @@ export class GlobalElastosAPIService extends GlobalService {
                         ecoRPC: '',
                         ecoOracleRPC: '',
                         ecoBrowserRPC: '',
+                        ecoPGPRPC: '',
+                        ecoPGPOracleRPC: '',
+                        ecoPGPBrowserRPC: '',
                         crRPC: 'https://crapi.longrunweather.com:18443',
                         elaBlockExplorer: '',
                         escBlockExplorer: '',
@@ -556,6 +583,8 @@ export class GlobalElastosAPIService extends GlobalService {
                 return ElastosApiUrlType.EID_RPC;
             case StandardCoinName.ETHECO:
                 return ElastosApiUrlType.ECO_RPC;
+            case StandardCoinName.ETHECOPGP:
+                return ElastosApiUrlType.ECOPGP_RPC;
             default:
                 throw new Error('RPC can not support elastos chain code ' + elastosChainCode);
         }
@@ -572,6 +601,9 @@ export class GlobalElastosAPIService extends GlobalService {
                 break;
             case StandardCoinName.ETHECO:
                 apiUrlType = ElastosApiUrlType.ECO_BROWSER;
+                break;
+            case StandardCoinName.ETHECOPGP:
+                apiUrlType = ElastosApiUrlType.ECOPGP_BROWSER;
                 break;
             default:
                 throw new Error('Elastos API: Browser api can not support ' + elastosChainCode);
@@ -593,6 +625,9 @@ export class GlobalElastosAPIService extends GlobalService {
                 break;
             case StandardCoinName.ETHECO:
                 apiUrlType = ElastosApiUrlType.ECO_BLOCK_EXPLORER;
+                break;
+            case StandardCoinName.ETHECOPGP:
+                apiUrlType = ElastosApiUrlType.ECOPGP_BLOCK_EXPLORER;
                 break;
             default:
                 throw new Error('Elastos API: Block explorer api can not support ' + elastosChainCode);
