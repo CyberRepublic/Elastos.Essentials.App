@@ -76,7 +76,7 @@ export class EtherscanEVMSubWalletInternalTransactionProvider<SubWalletType exte
       let result = await GlobalJsonRPCService.instance.httpGet(txListUrl, this.subWallet.networkWallet.network.key);
       let transactions = result.result as EthTransaction[];
       if (!(transactions instanceof Array)) {
-        Logger.warn('wallet', 'fetchTransactions invalid transactions:', transactions)
+        Logger.warn('wallet', 'Etherscan internal transaction fetchTransactions: invalid transactions:', transactions)
         return null;
       }
       if (transactions.length < MAX_RESULTS_PER_FETCH) {

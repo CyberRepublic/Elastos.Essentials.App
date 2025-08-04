@@ -23,7 +23,7 @@ export class EtherscanHelper {
       let transactions = result.result as EthTransaction[];
 
       if (!(transactions instanceof Array)) {
-        Logger.warn('wallet', 'fetchTransactions invalid transactions:', transactions)
+        Logger.warn('wallet', 'EtherscanHelper fetchTransactions invalid transactions:', transactions, txListUrl)
         return { transactions: null };
       }
 
