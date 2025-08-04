@@ -19,8 +19,8 @@ export class EcoSubWallet extends ElastosEVMSubWallet {
   }
 
   public getCrossChainFee(): number {
-    // The minimum gas price set for eco sidechain is 500, The gas limit for cross chain transactions is approximately 21512,
-    // so the fee set in the SDK is 1500000.
-    return 1500000;
+    // The minimum gas price set for eco sidechain is 50, The gas limit for cross chain transactions is approximately 21512,
+    // so the fee set in the SDK is 150000.
+    return 150000;
   }
 }

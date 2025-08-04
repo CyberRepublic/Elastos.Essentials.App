@@ -105,7 +105,8 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
   // When the user manually sets the gas price, it cannot be less than this value.
   // The unit is gwei.
   public getMinGasprice(): number {
-    return 500;
+    // return 50;
+    return 1;
   }
 }
 
@@ -143,6 +144,7 @@ export class ElastosECOTestNetNetwork extends ElastosECONetworkBase {
   // When the user manually sets the gas price, it cannot be less than this value.
   // The unit is gwei.
   public getMinGasprice(): number {
-    return 500;
+    // return 50;
+    return 1;
   }
 }
