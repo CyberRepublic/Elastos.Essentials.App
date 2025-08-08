@@ -26,7 +26,7 @@ export class ElastosTokenSubWalletProvider extends SubWalletTransactionProvider<
   }
 
   /**
-   * For now, the elastos network gets tokens only from the ESC chain, not from EID.
+   * For now, the elastos network gets tokens only from the ESC, ECO chain, not from EID.
    */
   public async discoverTokens(): Promise<void> {
     let tokenSubWallet = this.subWallet;
@@ -34,7 +34,6 @@ export class ElastosTokenSubWalletProvider extends SubWalletTransactionProvider<
 
     try {
       let tokenList = await GlobalElastosAPIService.instance.getERC20TokenList(StandardCoinName.ETHECO, address);
-      Logger.warn('wallet', 'eco discoverTokens', tokenList)
       // Let the provider know what we have found
       await this.provider.onTokenInfoFound(tokenList);
     }
