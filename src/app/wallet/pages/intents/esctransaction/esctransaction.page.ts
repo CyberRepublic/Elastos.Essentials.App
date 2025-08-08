@@ -238,7 +238,7 @@ export class EscTransactionPage implements OnInit {
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.publicationStatusSub = EVMService.instance.ethTransactionStatus.subscribe(async (status) => {
-      Logger.warn('wallet', 'EscTransactionPage ethTransactionStatus:', status)
+      Logger.log('wallet', 'EscTransactionPage ethTransactionStatus:', status)
       switch (status.status) {
         case ETHTransactionStatus.PACKED:
           let resultOk = {
@@ -263,7 +263,7 @@ export class EscTransactionPage implements OnInit {
     });
 
     this.ethTransactionSpeedupSub = EVMService.instance.ethTransactionSpeedup.subscribe((status) => {
-      Logger.warn('wallet', 'EscTransactionPage ethTransactionStatus:', status)
+      Logger.log('wallet', 'EscTransactionPage ethTransactionStatus:', status)
       if (status) {
         this.gasPrice = status.gasPrice;
         this.gasLimit = status.gasLimit;
