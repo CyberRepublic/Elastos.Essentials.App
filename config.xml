@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget android-packageName="io.web3essentials.app" android-versionCode="302030" id="org.elastos.essentials.app" ios-CFBundleVersion="100" version="3.2.3" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+<widget android-packageName="io.web3essentials.app" android-versionCode="302031" id="org.elastos.essentials.app" ios-CFBundleVersion="100" version="3.2.3" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <name>Essentials</name>
     <description>
         Essentials web3 wallet
@@ -41,7 +41,7 @@
         <preference name="GradlePluginKotlinEnabled" value="true" />
         <preference name="AndroidGradlePluginVersion" value="8.3.1" />
         <preference name="LottieEnableHardwareAcceleration" value="true" />
-        <preference name="android-targetSdkVersion" value="34" />
+        <preference name="android-targetSdkVersion" value="35" />
         <preference name="android-minSdkVersion" value="24" />
         <preference name="SplashScreenDelay" value="1" />
         <preference name="AndroidWindowSplashScreenBackground" value="#000000" />
