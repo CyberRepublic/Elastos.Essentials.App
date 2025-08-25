@@ -9,10 +9,10 @@ import { GlobalThemeService } from "src/app/services/theming/global.theme.servic
 import { MasterWallet } from "src/app/wallet/model/masterwallets/masterwallet";
 import { WalletType } from "src/app/wallet/model/masterwallets/wallet.types";
 import {
-  AAAccountRegistryService,
-  AAChainConfig,
-  AAImplementation,
-} from "src/app/wallet/services/aa/aa.account.registry.service";
+  AccountAbstractionProvider,
+  AccountAbstractionProviderChainConfig,
+} from "src/app/wallet/model/networks/evms/account-abstraction-provider";
+import { AccountAbstractionService } from "src/app/wallet/services/account-abstraction/account-abstraction.service";
 import { AuthService } from "src/app/wallet/services/auth.service";
 import { EVMService } from "src/app/wallet/services/evm/evm.service";
 import { Native } from "src/app/wallet/services/native.service";
@@ -29,22 +29,24 @@ import { WalletCreationService } from "src/app/wallet/services/walletcreation.se
 export class AACreatePage implements OnInit {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
   @ViewChild("chainSelect", { static: false }) chainSelect: IonSelect;
-  @ViewChild("implementationSelect", { static: false })
-  implementationSelect: IonSelect;
+  @ViewChild("providerSelect", { static: false })
+  providerSelect: IonSelect;
 
   public wallet = {
     name: "", // Will be set from wallet creation service
     controllerWalletId: "",
     chainId: null,
-    implementation: null as AAImplementation | null,
+    provider: null as AccountAbstractionProvider | null,
+    providerName: "", // Store the provider name for display
     aaContractAddress: "",
-    isDeployed: false,
   };
 
-  public availableChains: AAChainConfig[] = [];
-  public availableImplementations: AAImplementation[] = [];
+  public availableChains: AccountAbstractionProviderChainConfig[] = [];
+  public availableProviders: AccountAbstractionProvider[] = [];
+  public filteredProviders: AccountAbstractionProvider[] = []; // Providers filtered by chain
   public controllerWallets: MasterWallet[] = [];
-  public selectedChain: AAChainConfig | null = null;
+  public selectedChain: AccountAbstractionProviderChainConfig | null = null;
+  public isFetchingAddress = false;
 
   public walletIsCreating = false;
 
@@ -57,7 +59,7 @@ export class AACreatePage implements OnInit {
     private native: Native,
     private events: GlobalEvents,
     private globalPopupService: GlobalPopupService,
-    private aaRegistry: AAAccountRegistryService,
+    private accountAbstractionService: AccountAbstractionService,
     private evmService: EVMService,
     private walletNetworkService: WalletNetworkService,
     private walletCreationService: WalletCreationService
@@ -72,12 +74,24 @@ export class AACreatePage implements OnInit {
   }
 
   private initData() {
-    // Get available chains
-    this.availableChains = this.aaRegistry.getSupportedChains();
+    // Get all available providers
+    this.availableProviders = this.accountAbstractionService.getProviders();
+    Logger.log("wallet", "All available providers:", this.availableProviders);
 
-    // Get available implementations
-    this.availableImplementations =
-      this.aaRegistry.getAvailableImplementations();
+    // Initialize filtered providers (empty initially)
+    this.filteredProviders = [];
+
+    // Get all unique chains from all providers
+    const allChains = new Map<number, AccountAbstractionProviderChainConfig>();
+    this.availableProviders.forEach((provider) => {
+      provider.supportedChains.forEach((chainConfig) => {
+        if (!allChains.has(chainConfig.chainId)) {
+          allChains.set(chainConfig.chainId, chainConfig);
+        }
+      });
+    });
+    this.availableChains = Array.from(allChains.values());
+    Logger.log("wallet", "Available chains:", this.availableChains);
 
     // Get controller wallets (standard and ledger wallets that can control AA wallets)
     this.controllerWallets = this.walletService
@@ -87,96 +101,116 @@ export class AACreatePage implements OnInit {
           wallet.type === WalletType.STANDARD ||
           wallet.type === WalletType.LEDGER
       );
+    Logger.log("wallet", "Controller wallets:", this.controllerWallets);
   }
 
   public onChainChanged(event: any) {
     const chainId = parseInt(event.detail.value);
-    this.selectedChain = this.aaRegistry.getChainConfig(chainId);
+    Logger.log("wallet", "Chain changed to:", chainId);
+
+    this.selectedChain =
+      this.availableChains.find((chain) => chain.chainId === chainId) || null;
 
     if (this.selectedChain) {
-      // Filter implementations for this chain
-      this.availableImplementations =
-        this.aaRegistry.getImplementationsForChain(chainId);
-
-      // Reset implementation selection
-      this.wallet.implementation = null;
-
-      // Auto-detect contract address for this chain
-      this.autoDetectContractAddress(chainId);
-    }
-  }
-
-  public onImplementationChanged(event: any) {
-    const factoryAddress = event.detail.value;
-    this.wallet.implementation =
-      this.aaRegistry.getImplementationByFactory(factoryAddress);
-
-    // Auto-detect if account is deployed
-    if (this.wallet.implementation && this.wallet.aaContractAddress) {
-      void this.autoDetectAccountDeployment();
-    }
-  }
-
-  public onDeployedChanged(event: any) {
-    this.wallet.isDeployed = event.detail.checked;
-  }
-
-  /**
-   * Auto-detect the contract address for the selected chain
-   */
-  private autoDetectContractAddress(chainId: number) {
-    // For now, use a hardcoded address for ECO chain (12343)
-    // TODO: Implement proper contract address detection logic
-    if (chainId === 12343) {
-      this.wallet.aaContractAddress =
-        "0x0000000000000000000000000000000000000000"; // TODO: Set actual ECO AA contract address
-    } else {
-      this.wallet.aaContractAddress = "";
-    }
-  }
-
-  /**
-   * Auto-detect if the AA account is already deployed
-   */
-  private async autoDetectAccountDeployment() {
-    if (!this.wallet.aaContractAddress || !this.wallet.chainId) {
-      return;
-    }
-
-    try {
-      // Get the network for the selected chain
-      const network = this.walletNetworkService.getNetworkByChainId(
-        this.wallet.chainId
-      );
-      if (!network) {
-        Logger.warn(
-          "wallet",
-          "Network not found for chain ID:",
-          this.wallet.chainId
-        );
-        return;
-      }
-
-      // Check if the contract address has code (indicating it's deployed)
-      const isDeployed = await this.evmService.isContractAddress(
-        network,
-        this.wallet.aaContractAddress
-      );
-      this.wallet.isDeployed = isDeployed;
+      // Filter providers for this chain
+      this.filteredProviders =
+        this.accountAbstractionService.getProvidersForChain(chainId);
 
       Logger.log(
         "wallet",
-        "Auto-detected account deployment status:",
-        isDeployed
+        "Available providers for chain:",
+        this.filteredProviders
       );
-    } catch (error) {
-      Logger.error(
+
+      // Reset provider selection and contract address
+      this.wallet.provider = null;
+      this.wallet.providerName = ""; // Reset provider name
+      this.wallet.aaContractAddress = "";
+
+      Logger.log(
         "wallet",
-        "Failed to auto-detect account deployment:",
-        error
+        "Reset provider selection. Provider name:",
+        this.wallet.providerName
       );
-      // Keep the current isDeployed value if detection fails
     }
+  }
+
+  public onProviderChanged(event: any) {
+    const providerName = event.detail.value;
+    Logger.log("wallet", "Provider changed to:", providerName);
+
+    // Set the provider name first
+    this.wallet.providerName = providerName;
+
+    // Then get the provider object
+    this.wallet.provider =
+      this.accountAbstractionService.getProviderByName(providerName);
+
+    Logger.log("wallet", "Provider object:", this.wallet.provider);
+    Logger.log("wallet", "Provider name:", this.wallet.providerName);
+
+    // Now that we have a provider, we can compute the account address
+    if (this.wallet.provider && this.wallet.controllerWalletId) {
+      void this.computeAccountAddress();
+    }
+  }
+
+  public onControllerWalletChanged(event: any) {
+    const controllerWalletId = event.detail.value;
+    this.wallet.controllerWalletId = controllerWalletId;
+
+    // Reset contract address when controller wallet changes
+    this.wallet.aaContractAddress = "";
+    this.wallet.providerName = ""; // Reset provider name
+    this.wallet.provider = null; // Reset provider object
+
+    // If we have a provider selected, compute the new address
+    if (this.wallet.provider && this.wallet.controllerWalletId) {
+      void this.computeAccountAddress();
+    }
+  }
+
+  /**
+   * Compute the account address using the selected provider
+   */
+  private async computeAccountAddress() {
+    if (
+      !this.wallet.provider ||
+      !this.wallet.controllerWalletId ||
+      !this.wallet.chainId
+    ) {
+      return;
+    }
+
+    this.isFetchingAddress = true;
+
+    try {
+      // For now, we'll use a placeholder EOA address since we can't get it from the wallet yet
+      // In a real implementation, this would be the EOA address that will control the AA wallet
+      // The provider should be able to compute the deterministic AA address from this EOA
+      const placeholderEoaAddress =
+        "0x0000000000000000000000000000000000000000"; // TODO: Get actual EOA address
+
+      // Use the provider to compute the AA account address
+      this.wallet.aaContractAddress =
+        await this.wallet.provider.getAccountAddress(
+          placeholderEoaAddress,
+          this.wallet.chainId
+        );
+    } catch (error) {
+      Logger.error("wallet", "Failed to compute account address:", error);
+      this.wallet.aaContractAddress = "";
+    } finally {
+      this.isFetchingAddress = false;
+    }
+  }
+
+  /**
+   * Get the display name for a chain
+   */
+  public getChainDisplayName(chainId: number): string {
+    const network = this.walletNetworkService.getNetworkByChainId(chainId);
+    return network ? network.name : `Chain ${chainId}`;
   }
 
   public allInputsValid(): boolean {
@@ -184,7 +218,7 @@ export class AACreatePage implements OnInit {
       this.wallet.name &&
       this.wallet.controllerWalletId &&
       this.wallet.chainId &&
-      this.wallet.implementation &&
+      this.wallet.providerName &&
       this.wallet.aaContractAddress
     );
   }
@@ -219,13 +253,13 @@ export class AACreatePage implements OnInit {
         this.translate.instant("common.please-wait")
       );
 
-      // Create the AA wallet
+      // Create the AA wallet (always assume not deployed for now)
       await this.walletService.newAccountAbstractionWallet(
         walletId,
         this.wallet.name,
         this.wallet.controllerWalletId,
         this.wallet.chainId,
-        this.wallet.isDeployed
+        false // Always assume not deployed
       );
 
       await this.native.hideLoading();

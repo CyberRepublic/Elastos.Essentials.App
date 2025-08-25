@@ -6,69 +6,75 @@
   <ion-grid class="ion-text-center container">
     <ion-row>
       <ion-col>
-        <p>{{ 'wallet.aa.create.description' | translate }}</p>
+        <h2 class="page-title">{{ 'wallet.aa.create.title' | translate }}</h2>
+        <p class="page-description">{{ 'wallet.aa.create.description' | translate }}</p>
       </ion-col>
     </ion-row>
 
     <!-- Controller Wallet Selection -->
-    <ion-row>
+    <ion-row class="form-row">
       <ion-col>
-        <p>{{ 'wallet.aa.create.controller-wallet' | translate }}</p>
-        <ion-select [(ngModel)]="wallet.controllerWalletId"
-          placeholder="{{ 'wallet.aa.create.controller-wallet-placeholder' | translate }}" interface="popover">
-          <ion-select-option *ngFor="let controllerWallet of controllerWallets" [value]="controllerWallet.id">
-            {{ controllerWallet.name }} ({{ controllerWallet.type }})
-          </ion-select-option>
-        </ion-select>
+        <div class="form-group">
+          <label class="form-label">{{ 'wallet.aa.create.controller-wallet' | translate }}</label>
+          <ion-select [(ngModel)]="wallet.controllerWalletId" (ionChange)="onControllerWalletChanged($event)"
+            placeholder="{{ 'wallet.aa.create.controller-wallet-placeholder' | translate }}" interface="popover"
+            class="form-select">
+            <ion-select-option *ngFor="let controllerWallet of controllerWallets" [value]="controllerWallet.id">
+              {{ controllerWallet.name }} ({{ controllerWallet.type }})
+            </ion-select-option>
+          </ion-select>
+        </div>
       </ion-col>
     </ion-row>
 
     <!-- Chain Selection -->
-    <ion-row>
+    <ion-row class="form-row">
       <ion-col>
-        <p>{{ 'wallet.aa.create.chain' | translate }}</p>
-        <ion-select #chainSelect [(ngModel)]="wallet.chainId" (ionChange)="onChainChanged($event)"
-          placeholder="{{ 'wallet.aa.create.chain-placeholder' | translate }}" interface="popover">
-          <ion-select-option *ngFor="let chain of availableChains" [value]="chain.chainId">
-            {{ chain.chainName }}
-          </ion-select-option>
-        </ion-select>
+        <div class="form-group">
+          <label class="form-label">{{ 'wallet.aa.create.chain' | translate }}</label>
+          <ion-select #chainSelect [(ngModel)]="wallet.chainId" (ionChange)="onChainChanged($event)"
+            placeholder="{{ 'wallet.aa.create.chain-placeholder' | translate }}" interface="popover"
+            class="form-select">
+            <ion-select-option *ngFor="let chain of availableChains" [value]="chain.chainId">
+              {{ getChainDisplayName(chain.chainId) }}
+            </ion-select-option>
+          </ion-select>
+        </div>
       </ion-col>
     </ion-row>
 
-    <!-- Implementation Selection -->
-    <ion-row *ngIf="wallet.chainId">
+    <!-- Provider Selection -->
+    <ion-row class="form-row" *ngIf="wallet.chainId">
       <ion-col>
-        <p>{{ 'wallet.aa.create.implementation' | translate }}</p>
-        <ion-select #implementationSelect [(ngModel)]="wallet.implementation"
-          (ionChange)="onImplementationChanged($event)"
-          placeholder="{{ 'wallet.aa.create.implementation-placeholder' | translate }}" interface="popover">
-          <ion-select-option *ngFor="let impl of availableImplementations" [value]="impl.factoryAddress">
-            {{ impl.name }} - {{ impl.description }}
-          </ion-select-option>
-        </ion-select>
+        <div class="form-group">
+          <label class="form-label">{{ 'wallet.aa.create.provider' | translate }}</label>
+          <ion-select #providerSelect [(ngModel)]="wallet.providerName" (ionChange)="onProviderChanged($event)"
+            placeholder="{{ 'wallet.aa.create.provider-placeholder' | translate }}" interface="popover"
+            class="form-select">
+            <ion-select-option *ngFor="let provider of filteredProviders" [value]="provider.name">
+              {{ provider.name }}
+            </ion-select-option>
+          </ion-select>
+        </div>
       </ion-col>
     </ion-row>
 
-    <!-- AA Contract Address (Auto-detected or hardcoded) -->
-    <ion-row>
+    <!-- AA Account Address -->
+    <ion-row class="form-row">
       <ion-col>
-        <p>{{ 'wallet.aa.create.contract-address' | translate }}</p>
-        <ion-input type="text" [(ngModel)]="wallet.aaContractAddress"
-          placeholder="{{ 'wallet.aa.create.contract-address-placeholder' | translate }}" clearInput="true"
-          readonly="true">
-        </ion-input>
-        <small class="help-text">{{ 'wallet.aa.create.contract-address-help' | translate }}</small>
-      </ion-col>
-    </ion-row>
-
-    <!-- Is Deployed Toggle -->
-    <ion-row>
-      <ion-col>
-        <p>{{ 'wallet.aa.create.is-deployed' | translate }}</p>
-        <ion-toggle [(ngModel)]="wallet.isDeployed" (ionChange)="onDeployedChanged($event)">
-        </ion-toggle>
-        <small class="help-text">{{ 'wallet.aa.create.is-deployed-help' | translate }}</small>
+        <div class="form-group">
+          <label class="form-label">{{ 'wallet.aa.create.account-address' | translate }}</label>
+          <div class="address-input-container">
+            <ion-input type="text" [(ngModel)]="wallet.aaContractAddress"
+              placeholder="{{ 'wallet.aa.create.account-address-placeholder' | translate }}" clearInput="true"
+              readonly="true" class="form-input">
+            </ion-input>
+            <div class="spinner-container" *ngIf="isFetchingAddress">
+              <ion-spinner name="crescent"></ion-spinner>
+            </div>
+          </div>
+          <small class="help-text">{{ 'wallet.aa.create.account-address-help' | translate }}</small>
+        </div>
       </ion-col>
     </ion-row>
 

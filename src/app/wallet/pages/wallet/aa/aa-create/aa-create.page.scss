@@ -1,5 +1,5 @@
 .container {
-  padding: 20px;
+  padding: 24px;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -8,63 +8,107 @@ ion-grid {
   height: 100%;
 }
 
-ion-row {
-  margin-bottom: 20px;
-  align-items: center;
+.form-row {
+  margin-bottom: 32px;
+  align-items: flex-start;
 }
 
 ion-col {
+  text-align: left;
+}
+
+.page-title {
+  color: var(--ion-color-primary);
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
   text-align: center;
 }
 
-p {
+.page-description {
   color: var(--ion-color-medium);
-  margin-bottom: 16px;
-  line-height: 1.5;
+  margin-bottom: 32px;
+  line-height: 1.6;
   font-size: 16px;
+  text-align: center;
 }
 
-ion-select {
+.form-group {
+  width: 100%;
+}
+
+.form-label {
+  display: block;
+  color: var(--ion-color-dark);
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.form-select,
+.form-input {
   --color: var(--ion-color-dark);
   --placeholder-color: var(--ion-color-medium);
   --background: var(--ion-color-light-shade);
-  --border-radius: 8px;
+  --border-radius: 12px;
   --padding-start: 16px;
   --padding-end: 16px;
-  --padding-top: 12px;
-  --padding-bottom: 12px;
-  margin: 0 auto;
-  max-width: 400px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: transparent;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 100%;
 }
 
-ion-input {
-  --color: var(--ion-color-dark);
-  --placeholder-color: var(--ion-color-medium);
-  --background: var(--ion-color-light-shade);
-  --border-radius: 8px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --padding-top: 12px;
-  --padding-bottom: 12px;
-  margin: 0 auto;
-  max-width: 400px;
+.form-select:focus-within,
+.form-input:focus-within {
+  --border-color: var(--ion-color-primary);
+  --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.15);
 }
 
-ion-toggle {
-  --handle-width: 20px;
-  --handle-height: 20px;
-  margin: 0 auto;
+.form-select {
+  --icon-color: var(--ion-color-primary);
+}
+
+.address-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.spinner-container {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-container ion-spinner {
+  --color: var(--ion-color-primary);
+  width: 20px;
+  height: 20px;
 }
 
 .help-text {
   color: var(--ion-color-medium);
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 8px;
-  font-style: italic;
+  font-style: normal;
+  line-height: 1.4;
+  display: block;
+  text-align: left;
 }
 
 .btn-row {
-  margin-top: 30px;
+  margin-top: 40px;
+  margin-bottom: 24px;
 }
 
 .btn-row ion-col {
@@ -73,38 +117,52 @@ ion-toggle {
 
 ebutton {
   margin: 0 auto;
-}
-
-.help-text-container {
-  background: var(--ion-color-warning-tint);
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 20px;
-}
-
-.help-text-container p {
-  color: var(--ion-color-warning-contrast);
-  margin: 8px 0;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.help-text-container p:first-child {
-  margin-top: 0;
-}
-
-.help-text-container p:last-child {
-  margin-bottom: 0;
+  --border-radius: 12px;
+  --padding-start: 32px;
+  --padding-end: 32px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-weight: 600;
+  font-size: 16px;
 }
 
 // Dark theme adjustments
 @media (prefers-color-scheme: dark) {
-  ion-select,
-  ion-input {
+  .form-select,
+  .form-input {
     --background: var(--ion-color-dark-tint);
+    --color: var(--ion-color-light);
+    --placeholder-color: var(--ion-color-medium);
   }
 
-  .help-text-container {
-    background: var(--ion-color-warning-shade);
+  .form-label {
+    color: var(--ion-color-light);
+  }
+
+  .page-title {
+    color: var(--ion-color-primary-tint);
+  }
+
+  .page-description {
+    color: var(--ion-color-medium);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .form-row {
+    margin-bottom: 24px;
+  }
+
+  .btn-row {
+    margin-top: 32px;
   }
 }

@@ -1,77 +1,97 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { Logger } from 'src/app/logger';
-import { IdentityEntry } from 'src/app/model/didsessions/identityentry';
-import { GlobalEvents } from 'src/app/services/global.events.service';
-import { GlobalNetworksService, MAINNET_TEMPLATE, TESTNET_TEMPLATE } from 'src/app/services/global.networks.service';
-import { GlobalService, GlobalServiceManager } from 'src/app/services/global.service.manager';
-import { CryptoNameResolver } from '../model/address-resolvers';
-import { ELADomainResolver } from '../model/address-resolvers/resolvers/ELADomainAddressResolver';
-import { IdrissResolver } from '../model/address-resolvers/resolvers/IdrissAddressResolver';
-import { UnstoppableDomainsAddressResolver } from '../model/address-resolvers/resolvers/UnstoppableDomainsAddressResolver';
-import { ArbitrumMainNetNetwork } from '../model/networks/arbitrum/network/arbitrum.mainnet.network';
-import { ArbitrumTestNetNetwork } from '../model/networks/arbitrum/network/arbitrum.testnet.network';
-import { AvalancheCChainMainNetNetwork } from '../model/networks/avalanchecchain/network/avalanchecchain.mainnet.network';
-import { AvalancheCChainTestNetNetwork } from '../model/networks/avalanchecchain/network/avalanchecchain.testnet.network';
-import { BSCMainNetNetwork } from '../model/networks/bsc/network/bsc.mainnet.network';
-import { BSCTestNetNetwork } from '../model/networks/bsc/network/bsc.testnet.network';
-import { BTCMainNetNetwork } from '../model/networks/btc/network/btc.mainnet.network';
-import { BTCTestNetNetwork } from '../model/networks/btc/network/btc.testnet.network';
-import { BttcMainNetNetwork } from '../model/networks/bttc/network/bttc.mainnet.network';
-import { BttcTestNetNetwork } from '../model/networks/bttc/network/bttc.testnet.network';
-import { CeloMainNetNetwork } from '../model/networks/celo/network/celo.mainnet.network';
-import { CeloTestNetNetwork } from '../model/networks/celo/network/celo.testnet.network';
-import { CronosMainNetNetwork } from '../model/networks/cronos/network/cronos.mainnet.network';
-import { CronosTestNetNetwork } from '../model/networks/cronos/network/cronos.testnet.network';
-import { ElastosIdentityChainMainNetNetwork, ElastosIdentityChainTestNetNetwork } from '../model/networks/elastos/evms/eid/network/eid.networks';
-import { ElastosSmartChainMainNetNetwork, ElastosSmartChainTestNetNetwork } from '../model/networks/elastos/evms/esc/network/esc.networks';
-import { ElastosLRWNetwork } from '../model/networks/elastos/lrw/network/elastos.lrw.network';
-import { ElastosMainChainMainNetNetwork, ElastosMainChainTestNetNetwork } from '../model/networks/elastos/mainchain/network/elastos.networks';
-import { EthereumGoerliNetwork } from '../model/networks/ethereum/network/ethereum.goerli.network';
-import { EthereumMainNetNetwork } from '../model/networks/ethereum/network/ethereum.mainnet.network';
-import { EvmosMainNetNetwork } from '../model/networks/evmos/network/evmos.mainnet.network';
-import { EvmosTestNetNetwork } from '../model/networks/evmos/network/evmos.testnet.network';
-import { FantomMainNetNetwork } from '../model/networks/fantom/network/fantom.mainnet.network';
-import { FantomTestNetNetwork } from '../model/networks/fantom/network/fantom.testnet.network';
-import { FuseMainNetNetwork } from '../model/networks/fuse/network/fuse.mainnet.network';
-import { FusionMainNetNetwork } from '../model/networks/fusion/network/fusion.mainnet.network';
-import { FusionTestNetNetwork } from '../model/networks/fusion/network/fusion.testnet.network';
-import { GnosisMainNetNetwork } from '../model/networks/gnosis/network/gnosis.mainnet.network';
-import { IoTeXMainNetNetwork } from '../model/networks/iotex/network/iotex.mainnet.network';
-import { IoTeXTestNetNetwork } from '../model/networks/iotex/network/iotex.testnet.network';
-import { KavaMainNetNetwork } from '../model/networks/kava/network/kava.mainnet.network';
-import { KavaTestNetNetwork } from '../model/networks/kava/network/kava.testnet.network';
-import { AnyNetwork } from '../model/networks/network';
-import { PolygonMainNetNetwork } from '../model/networks/polygon/network/polygon.mainnet.network';
-import { PolygonTestNetNetwork } from '../model/networks/polygon/network/polygon.testnet.network';
-import { TelosMainNetNetwork } from '../model/networks/telos/network/telos.mainnet.network';
-import { TelosTestNetNetwork } from '../model/networks/telos/network/telos.testnet.network';
-import { TronMainNetNetwork } from '../model/networks/tron/network/tron.mainnet.network';
-import { TronShastaTestNetNetwork } from '../model/networks/tron/network/tron.shasta.network';
-import { ContactsService } from './contacts.service';
-import { CurrencyService } from './currency.service';
-import { BridgeService } from './evm/bridge.service';
-import { CustomNetworkService } from './evm/customnetwork.service';
-import { DefiService } from './evm/defi.service';
-import { EarnService } from './evm/earn.service';
-import { ERC20CoinService } from './evm/erc20coin.service';
-import { EVMService } from './evm/evm.service';
-import { SwapService } from './evm/swap.service';
-import { UniswapCurrencyService } from './evm/uniswap.currency.service';
-import { IntentService } from './intent.service';
-import { NameResolvingService } from './nameresolving.service';
-import { NavService } from './nav.service';
-import { WalletNetworkService } from './network.service';
-import { WalletPrefsService } from './pref.service';
-import { TRC20CoinService } from './tvm/trc20coin.service';
-import { UiService } from './ui.service';
-import { WalletService } from './wallet.service';
-import { WalletUIService } from './wallet.ui.service';
-import { ElastosECOMainNetNetwork, ElastosECOTestNetNetwork } from '../model/networks/elastos/evms/eco/network/eco.networks';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Subscription } from "rxjs";
+import { Logger } from "src/app/logger";
+import { IdentityEntry } from "src/app/model/didsessions/identityentry";
+import { GlobalEvents } from "src/app/services/global.events.service";
+import {
+  GlobalNetworksService,
+  MAINNET_TEMPLATE,
+  TESTNET_TEMPLATE,
+} from "src/app/services/global.networks.service";
+import {
+  GlobalService,
+  GlobalServiceManager,
+} from "src/app/services/global.service.manager";
+import { CryptoNameResolver } from "../model/address-resolvers";
+import { ELADomainResolver } from "../model/address-resolvers/resolvers/ELADomainAddressResolver";
+import { IdrissResolver } from "../model/address-resolvers/resolvers/IdrissAddressResolver";
+import { UnstoppableDomainsAddressResolver } from "../model/address-resolvers/resolvers/UnstoppableDomainsAddressResolver";
+import { ArbitrumMainNetNetwork } from "../model/networks/arbitrum/network/arbitrum.mainnet.network";
+import { ArbitrumTestNetNetwork } from "../model/networks/arbitrum/network/arbitrum.testnet.network";
+import { AvalancheCChainMainNetNetwork } from "../model/networks/avalanchecchain/network/avalanchecchain.mainnet.network";
+import { AvalancheCChainTestNetNetwork } from "../model/networks/avalanchecchain/network/avalanchecchain.testnet.network";
+import { BSCMainNetNetwork } from "../model/networks/bsc/network/bsc.mainnet.network";
+import { BSCTestNetNetwork } from "../model/networks/bsc/network/bsc.testnet.network";
+import { BTCMainNetNetwork } from "../model/networks/btc/network/btc.mainnet.network";
+import { BTCTestNetNetwork } from "../model/networks/btc/network/btc.testnet.network";
+import { BttcMainNetNetwork } from "../model/networks/bttc/network/bttc.mainnet.network";
+import { BttcTestNetNetwork } from "../model/networks/bttc/network/bttc.testnet.network";
+import { CeloMainNetNetwork } from "../model/networks/celo/network/celo.mainnet.network";
+import { CeloTestNetNetwork } from "../model/networks/celo/network/celo.testnet.network";
+import { CronosMainNetNetwork } from "../model/networks/cronos/network/cronos.mainnet.network";
+import { CronosTestNetNetwork } from "../model/networks/cronos/network/cronos.testnet.network";
+import {
+  ElastosECOMainNetNetwork,
+  ElastosECOTestNetNetwork,
+} from "../model/networks/elastos/evms/eco/network/eco.networks";
+import {
+  ElastosIdentityChainMainNetNetwork,
+  ElastosIdentityChainTestNetNetwork,
+} from "../model/networks/elastos/evms/eid/network/eid.networks";
+import {
+  ElastosSmartChainMainNetNetwork,
+  ElastosSmartChainTestNetNetwork,
+} from "../model/networks/elastos/evms/esc/network/esc.networks";
+import { ElastosLRWNetwork } from "../model/networks/elastos/lrw/network/elastos.lrw.network";
+import {
+  ElastosMainChainMainNetNetwork,
+  ElastosMainChainTestNetNetwork,
+} from "../model/networks/elastos/mainchain/network/elastos.networks";
+import { EthereumGoerliNetwork } from "../model/networks/ethereum/network/ethereum.goerli.network";
+import { EthereumMainNetNetwork } from "../model/networks/ethereum/network/ethereum.mainnet.network";
+import { EvmosMainNetNetwork } from "../model/networks/evmos/network/evmos.mainnet.network";
+import { EvmosTestNetNetwork } from "../model/networks/evmos/network/evmos.testnet.network";
+import { FantomMainNetNetwork } from "../model/networks/fantom/network/fantom.mainnet.network";
+import { FantomTestNetNetwork } from "../model/networks/fantom/network/fantom.testnet.network";
+import { FuseMainNetNetwork } from "../model/networks/fuse/network/fuse.mainnet.network";
+import { FusionMainNetNetwork } from "../model/networks/fusion/network/fusion.mainnet.network";
+import { FusionTestNetNetwork } from "../model/networks/fusion/network/fusion.testnet.network";
+import { GnosisMainNetNetwork } from "../model/networks/gnosis/network/gnosis.mainnet.network";
+import { IoTeXMainNetNetwork } from "../model/networks/iotex/network/iotex.mainnet.network";
+import { IoTeXTestNetNetwork } from "../model/networks/iotex/network/iotex.testnet.network";
+import { KavaMainNetNetwork } from "../model/networks/kava/network/kava.mainnet.network";
+import { KavaTestNetNetwork } from "../model/networks/kava/network/kava.testnet.network";
+import { AnyNetwork } from "../model/networks/network";
+import { PolygonMainNetNetwork } from "../model/networks/polygon/network/polygon.mainnet.network";
+import { PolygonTestNetNetwork } from "../model/networks/polygon/network/polygon.testnet.network";
+import { TelosMainNetNetwork } from "../model/networks/telos/network/telos.mainnet.network";
+import { TelosTestNetNetwork } from "../model/networks/telos/network/telos.testnet.network";
+import { TronMainNetNetwork } from "../model/networks/tron/network/tron.mainnet.network";
+import { TronShastaTestNetNetwork } from "../model/networks/tron/network/tron.shasta.network";
+import { AccountAbstractionService } from "./account-abstraction/account-abstraction.service";
+import { ContactsService } from "./contacts.service";
+import { CurrencyService } from "./currency.service";
+import { BridgeService } from "./evm/bridge.service";
+import { CustomNetworkService } from "./evm/customnetwork.service";
+import { DefiService } from "./evm/defi.service";
+import { EarnService } from "./evm/earn.service";
+import { ERC20CoinService } from "./evm/erc20coin.service";
+import { EVMService } from "./evm/evm.service";
+import { SwapService } from "./evm/swap.service";
+import { UniswapCurrencyService } from "./evm/uniswap.currency.service";
+import { IntentService } from "./intent.service";
+import { NameResolvingService } from "./nameresolving.service";
+import { NavService } from "./nav.service";
+import { WalletNetworkService } from "./network.service";
+import { WalletPrefsService } from "./pref.service";
+import { TRC20CoinService } from "./tvm/trc20coin.service";
+import { UiService } from "./ui.service";
+import { WalletService } from "./wallet.service";
+import { WalletUIService } from "./wallet.ui.service";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class WalletInitService extends GlobalService {
   private walletServiceInitialized = false;
@@ -100,7 +120,8 @@ export class WalletInitService extends GlobalService {
     private erc20CoinService: ERC20CoinService,
     private tron20CoinSerice: TRC20CoinService,
     private walletUIService: WalletUIService, // IMPORTANT: unused, but keep it here for initialization
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private aaProviderRegistryService: AccountAbstractionService
   ) {
     super();
   }
@@ -125,6 +146,9 @@ export class WalletInitService extends GlobalService {
     // Register name resolvers
     this.registerNameResolvers();
 
+    // Initialize AA provider registry
+    await this.aaProviderRegistryService.init();
+
     await this.currencyService.init(); // Currency cache must be ready for other services
     // Do not await.
     void this.uniswapCurrencyService.init();
@@ -134,10 +158,13 @@ export class WalletInitService extends GlobalService {
     await this.uiService.init();
 
     // TODO: dirty, rework this
-    this.subscription = this.events.subscribe("walletmanager:initialized", () => {
-      Logger.log("wallet", "walletmanager:initialized event received");
-      this.walletServiceInitialized = true;
-    });
+    this.subscription = this.events.subscribe(
+      "walletmanager:initialized",
+      () => {
+        Logger.log("wallet", "walletmanager:initialized event received");
+        this.walletServiceInitialized = true;
+      }
+    );
 
     void this.walletManager.init().then(async () => {
       await this.intentService.init();
@@ -150,13 +177,19 @@ export class WalletInitService extends GlobalService {
   }
 
   private async registerNetworks(): Promise<void> {
-    let networkTemplate = this.globalNetworksService.activeNetworkTemplate.value;
+    let networkTemplate =
+      this.globalNetworksService.activeNetworkTemplate.value;
 
     // Register all networks, no matter if they are for the active network template or not,
     // as they are sometimes needed.
     await this.createAndRegisterNetwork(new ElastosMainChainMainNetNetwork());
-    await this.createAndRegisterNetwork(new ElastosSmartChainMainNetNetwork(), networkTemplate === MAINNET_TEMPLATE);
-    await this.createAndRegisterNetwork(new ElastosIdentityChainMainNetNetwork());
+    await this.createAndRegisterNetwork(
+      new ElastosSmartChainMainNetNetwork(),
+      networkTemplate === MAINNET_TEMPLATE
+    );
+    await this.createAndRegisterNetwork(
+      new ElastosIdentityChainMainNetNetwork()
+    );
     await this.createAndRegisterNetwork(new ElastosECOMainNetNetwork());
     await this.createAndRegisterNetwork(new BTCMainNetNetwork());
     await this.createAndRegisterNetwork(new EthereumMainNetNetwork());
@@ -181,8 +214,13 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new BttcMainNetNetwork());
 
     await this.createAndRegisterNetwork(new ElastosMainChainTestNetNetwork());
-    await this.createAndRegisterNetwork(new ElastosSmartChainTestNetNetwork(), networkTemplate === TESTNET_TEMPLATE);
-    await this.createAndRegisterNetwork(new ElastosIdentityChainTestNetNetwork());
+    await this.createAndRegisterNetwork(
+      new ElastosSmartChainTestNetNetwork(),
+      networkTemplate === TESTNET_TEMPLATE
+    );
+    await this.createAndRegisterNetwork(
+      new ElastosIdentityChainTestNetNetwork()
+    );
     await this.createAndRegisterNetwork(new ElastosECOTestNetNetwork());
     await this.createAndRegisterNetwork(new BTCTestNetNetwork());
     await this.createAndRegisterNetwork(new EthereumGoerliNetwork());
@@ -204,19 +242,25 @@ export class WalletInitService extends GlobalService {
     // await this.createAndRegisterNetwork(new AtomTestNetNetwork());
     await this.createAndRegisterNetwork(new BttcTestNetNetwork());
 
-    await this.createAndRegisterNetwork(new ElastosLRWNetwork(), networkTemplate === "LRW");
+    await this.createAndRegisterNetwork(
+      new ElastosLRWNetwork(),
+      networkTemplate === "LRW"
+    );
 
     this.networkService.notifyAllNetworksRegistered();
   }
 
-  private async createAndRegisterNetwork(network: AnyNetwork, isDefault = false): Promise<void> {
-    let networkTemplate = this.globalNetworksService.activeNetworkTemplate.value;
+  private async createAndRegisterNetwork(
+    network: AnyNetwork,
+    isDefault = false
+  ): Promise<void> {
+    let networkTemplate =
+      this.globalNetworksService.activeNetworkTemplate.value;
 
     //Logger.log("wallet", "Register network in", network.key);
 
     // Initialize the network, only if the network belongs to the active network template
-    if (network.networkTemplate === networkTemplate)
-      await network.init();
+    if (network.networkTemplate === networkTemplate) await network.init();
 
     //Logger.log("wallet", "Register network before register", network.key);
 
@@ -228,8 +272,12 @@ export class WalletInitService extends GlobalService {
   }
 
   private registerNameResolvers() {
-    this.nameResolvingService.registerNameResolver(new CryptoNameResolver(this.httpClient));
-    this.nameResolvingService.registerNameResolver(new UnstoppableDomainsAddressResolver(this.httpClient));
+    this.nameResolvingService.registerNameResolver(
+      new CryptoNameResolver(this.httpClient)
+    );
+    this.nameResolvingService.registerNameResolver(
+      new UnstoppableDomainsAddressResolver(this.httpClient)
+    );
     this.nameResolvingService.registerNameResolver(new IdrissResolver());
     // TODO : build error (HookWebpackError: Cannot read properties of undefined) with @ensdomains/ensjs": "3.0.0-alpha.20"
     // Temporarily remove ENSResolver, Try to upgrade @ensdomains/ensjs later
@@ -238,7 +286,7 @@ export class WalletInitService extends GlobalService {
   }
 
   public async stop(): Promise<void> {
-    Logger.log('wallet', 'init service stopping')
+    Logger.log("wallet", "init service stopping");
     await this.prefs.stop();
     this.currencyService.stop();
     await this.walletManager.stop();
@@ -252,7 +300,7 @@ export class WalletInitService extends GlobalService {
       this.subscription = null;
     }
     this.walletServiceInitialized = true;
-    Logger.log('wallet', 'init service stopped')
+    Logger.log("wallet", "init service stopped");
   }
 
   public start() {
@@ -262,14 +310,23 @@ export class WalletInitService extends GlobalService {
       if (!this.waitForServiceInitialized) {
         this.waitForServiceInitialized = true;
         // Wait until the wallet manager is ready before showing the first screen.
-        let subscription = this.events.subscribe("walletmanager:initialized", () => {
-          Logger.log("wallet", "walletmanager:initialized event received, showStartupScreen");
-          this.navService.showStartupScreen();
-          this.waitForServiceInitialized = false;
-          subscription.unsubscribe();
-        });
+        let subscription = this.events.subscribe(
+          "walletmanager:initialized",
+          () => {
+            Logger.log(
+              "wallet",
+              "walletmanager:initialized event received, showStartupScreen"
+            );
+            this.navService.showStartupScreen();
+            this.waitForServiceInitialized = false;
+            subscription.unsubscribe();
+          }
+        );
       } else {
-        Logger.log("wallet", "Wallet init service is initializing, The Wallet will be displayed when the service is initialized.");
+        Logger.log(
+          "wallet",
+          "Wallet init service is initializing, The Wallet will be displayed when the service is initialized."
+        );
       }
     }
   }
