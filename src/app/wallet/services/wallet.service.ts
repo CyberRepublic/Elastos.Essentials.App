@@ -107,6 +107,13 @@ export enum WalletStateOperation {
   BECAME_ACTIVE,
 }
 
+export type AASafe = {
+  deployedAddresses: { [networkKey: string]: string }; // Network key -> deployed address mapping
+  implementationAddresses: { [networkKey: string]: string }; // Network key -> implementation address mapping
+  deploymentTxHashes: { [networkKey: string]: string }; // Network key -> deployment tx hash mapping
+  deploymentTimestamps: { [networkKey: string]: number }; // Network key -> deployment timestamp mapping
+};
+
 @Injectable({
   providedIn: "root",
 })
@@ -783,7 +790,10 @@ export class WalletService {
     walletName: string,
     controllerWalletId: string,
     chainId: number,
-    isDeployed: boolean = false
+    isDeployed: boolean = false,
+    deployedAddress?: string,
+    implementationAddress?: string,
+    deploymentTxHash?: string
   ): Promise<MasterWallet> {
     Logger.log("wallet", "Creating a new Account Abstraction master wallet");
 
@@ -799,11 +809,26 @@ export class WalletService {
       ],
       creator: WalletCreator.USER,
       controllerMasterWalletId: controllerWalletId,
-      chainId,
-      isDeployed,
     };
 
-    return this.createMasterWalletFromSerializedInfo(masterWalletInfo);
+    // Create the wallet first
+    const wallet = this.createMasterWalletFromSerializedInfo(masterWalletInfo);
+
+    // If we have deployment info, save it to the safe
+    if (deployedAddress && isDeployed) {
+      const networkKey = this.getNetworkKeyByChainId(chainId);
+      if (networkKey) {
+        void SafeService.instance.updateAADeployedAddress(
+          masterId,
+          networkKey,
+          deployedAddress,
+          implementationAddress,
+          deploymentTxHash
+        );
+      }
+    }
+
+    return wallet;
   }
 
   /**
@@ -993,5 +1018,17 @@ export class WalletService {
     transfer.payPassword = payPassword;
 
     return payPassword;
+  }
+
+  private getNetworkKeyByChainId(chainId: number): string | null {
+    // Map chain ID to network key
+    const networkMap: { [chainId: number]: string } = {
+      1: "ethereum",
+      56: "bsc",
+      137: "polygon",
+      12343: "eco", // Elastos ECO
+      // Add more mappings as needed
+    };
+    return networkMap[chainId] || null;
   }
 }

@@ -1,3 +1,4 @@
+import { SafeService } from "../../services/safe.service";
 import { WalletJSSDKHelper } from "../networks/elastos/wallet.jssdk.helper";
 import { EVMNetwork } from "../networks/evms/evm.network";
 import { AnyNetwork } from "../networks/network";
@@ -10,7 +11,6 @@ import { SerializedAccountAbstractionMasterWallet } from "./wallet.types";
 export class AccountAbstractionMasterWallet extends MasterWallet {
   public controllerWalletId: string;
   public chainId: number;
-  public isDeployed: boolean;
 
   public static newFromSerializedWallet(
     serialized: SerializedAccountAbstractionMasterWallet
@@ -24,6 +24,9 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
   }
 
   public async destroy() {
+    // Clean up safe data
+    await SafeService.instance.saveAASafe(this.id);
+
     // Destroy the wallet in the wallet js sdk if it exists
     try {
       await WalletJSSDKHelper.destroyWallet(this.id);
@@ -36,8 +39,10 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
     super.deserialize(serialized);
 
     this.controllerWalletId = serialized.controllerMasterWalletId;
-    this.chainId = serialized.chainId;
-    this.isDeployed = serialized.isDeployed;
+    // Remove chainId and isDeployed from here since they're network-specific
+
+    // Load safe data
+    void SafeService.instance.loadAASafe(this.id);
   }
 
   public serialize(): SerializedAccountAbstractionMasterWallet {
@@ -47,8 +52,7 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
     super._serialize(serialized as SerializedAccountAbstractionMasterWallet);
 
     serialized.controllerMasterWalletId = this.controllerWalletId;
-    serialized.chainId = this.chainId;
-    serialized.isDeployed = this.isDeployed;
+    // Remove chainId and isDeployed since they're now in safe
 
     return serialized;
   }
@@ -87,9 +91,16 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
   }
 
   /**
-   * Check if this AA wallet is deployed on-chain
+   * Get deployed address for a specific network
    */
-  public isWalletDeployed(): boolean {
-    return this.isDeployed;
+  public getDeployedAddress(networkKey: string): string | null {
+    return SafeService.instance.getAADeployedAddress(this.id, networkKey);
+  }
+
+  /**
+   * Check if wallet is deployed on a specific network
+   */
+  public isDeployed(networkKey: string): boolean {
+    return SafeService.instance.isAAWalletDeployed(this.id, networkKey);
   }
 }

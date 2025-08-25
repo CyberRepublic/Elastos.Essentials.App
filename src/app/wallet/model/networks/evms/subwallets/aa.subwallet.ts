@@ -69,8 +69,8 @@ export class AASubWallet<
   }
 
   public getAccountAddress(): string {
-    // AA wallets use the contract address
-    return this.aaNetworkWallet.getAAContractAddress();
+    // AA wallets use the address returned by the AA contract.
+    return this.aaNetworkWallet.getDeployedAAAddress();
   }
 
   public getAccountPublicKey(): string {
@@ -176,8 +176,8 @@ export class AASubWallet<
   }
 
   public createAddress(): string {
-    // AA wallets use the contract address
-    return this.aaNetworkWallet.getAAContractAddress();
+    // AA wallets use the address returned by the AA contract.
+    return this.aaNetworkWallet.getDeployedAAAddress();
   }
 
   public update(): void {
@@ -249,8 +249,8 @@ export class AASubWallet<
   public getCurrentReceiverAddress(
     usage: AddressUsage | string = AddressUsage.DEFAULT
   ): string {
-    // AA wallets use the contract address as the receiver address
-    return this.aaNetworkWallet.getAAContractAddress();
+    // AA wallets use the address returned by the AA contract.
+    return this.aaNetworkWallet.getDeployedAAAddress();
   }
 
   public getAverageBlocktime(): number {

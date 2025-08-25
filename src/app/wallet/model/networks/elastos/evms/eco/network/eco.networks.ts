@@ -19,6 +19,7 @@ import {
 } from "src/app/wallet/model/masterwallets/wallet.types";
 import { NetworkAPIURLType } from "../../../../base/networkapiurltype";
 import type { AnyNetworkWallet } from "../../../../base/networkwallets/networkwallet";
+import { AASafe } from "../../../../evms/safes/aa.safe";
 import { ERC20SubWallet } from "../../../../evms/subwallets/erc20.subwallet";
 import { ElastosEVMNetwork } from "../../../network/elastos.evm.network";
 import { EcoERC20SubWallet } from "../subwallets/eco.erc20.subwallet";
@@ -52,7 +53,10 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
         ).AANetworkWallet;
         return new ElastosECOAccountAbstractionNetworkWallet(
           masterWallet as AccountAbstractionMasterWallet,
-          this
+          this,
+          new AASafe(masterWallet),
+          "ECO",
+          "Account Abstraction"
         );
       default:
         Logger.warn(

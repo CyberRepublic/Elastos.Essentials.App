@@ -10,6 +10,7 @@ import {
 } from "../../base/networkwallets/networkwallet";
 import { AnySubWallet } from "../../base/subwallets/subwallet";
 import type { EVMNetwork } from "../evm.network";
+import { AASafe } from "../safes/aa.safe";
 import { AASubWallet } from "../subwallets/aa.subwallet";
 import { MainCoinEVMSubWallet } from "../subwallets/evm.subwallet";
 
@@ -58,19 +59,63 @@ export class AANetworkWallet extends NetworkWallet<
     // Add both subwallets
     this.subWallets[this.mainTokenSubWallet.id] = this.mainTokenSubWallet;
     this.subWallets[this.aaSubWallet.id] = this.aaSubWallet;
+
+    return await void 0;
   }
 
   public getAddresses(): WalletAddressInfo[] {
-    return [
+    const addresses: WalletAddressInfo[] = [
       {
         title: "EVM",
         address: this.mainTokenSubWallet.getAccountAddress(),
       },
-      {
-        title: "AA Contract",
-        address: this.masterWallet.(),
-      },
     ];
+
+    // Add AA contract address if deployed
+    const aaSafe = this.safe as AASafe;
+    if (aaSafe && aaSafe.isDeployed(this.network.key)) {
+      addresses.push({
+        title: "AA Contract",
+        address: aaSafe.getDeployedAddress(this.network.key),
+      });
+    }
+
+    return addresses;
+  }
+
+  /**
+   * Get the deployed AA account address for this network
+   */
+  public getDeployedAAAddress(): string | null {
+    const aaSafe = this.safe as AASafe;
+    return aaSafe ? aaSafe.getDeployedAddress(this.network.key) : null;
+  }
+
+  /**
+   * Check if this AA wallet is deployed on the current network
+   */
+  public isWalletDeployed(): boolean {
+    const aaSafe = this.safe as AASafe;
+    return aaSafe ? aaSafe.isDeployed(this.network.key) : false;
+  }
+
+  /**
+   * Update the deployed address after deployment
+   */
+  public async updateDeployedAddress(
+    deployedAddress: string,
+    implementationAddress?: string,
+    deploymentTxHash?: string
+  ): Promise<void> {
+    const aaSafe = this.safe as AASafe;
+    if (aaSafe) {
+      await aaSafe.updateDeployedAddress(
+        this.network.key,
+        deployedAddress,
+        implementationAddress,
+        deploymentTxHash
+      );
+    }
   }
 
   public async convertAddressForUsage(
@@ -125,12 +170,5 @@ export class AANetworkWallet extends NetworkWallet<
    */
   public getControllerWalletId(): string {
     return this.masterWallet.getControllerWalletId();
-  }
-
-  /**
-   * Check if this AA wallet is deployed on-chain
-   */
-  public isWalletDeployed(): boolean {
-    return this.masterWallet.isWalletDeployed();
   }
 }

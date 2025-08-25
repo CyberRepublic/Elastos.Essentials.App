@@ -20,15 +20,23 @@
  * SOFTWARE.
  */
 
-import { Injectable } from '@angular/core';
-import { PrivateKeyType } from '../model/masterwallets/wallet.types';
+import { Injectable } from "@angular/core";
+import { PrivateKeyType } from "../model/masterwallets/wallet.types";
+import { LocalStorage } from "./storage.service";
 
 export type StandardWalletSafe = {
-    seed?: string;
-    mnemonic?: string;
-    privateKey?: string;
-    privateKeyType?: PrivateKeyType;
-}
+  seed?: string;
+  mnemonic?: string;
+  privateKey?: string;
+  privateKeyType?: PrivateKeyType;
+};
+
+export type AASafe = {
+  deployedAddresses: { [networkKey: string]: string }; // Network key -> deployed address mapping
+  implementationAddresses: { [networkKey: string]: string }; // Network key -> implementation address mapping
+  deploymentTxHashes: { [networkKey: string]: string }; // Network key -> deployment tx hash mapping
+  deploymentTimestamps: { [networkKey: string]: number }; // Network key -> deployment timestamp mapping
+};
 
 /**
  * Service used to store sensitive wallet information such as seeds.
@@ -36,27 +44,105 @@ export type StandardWalletSafe = {
  * in wallet objects, as those object tend to be logged often. Secret wallet information should not be
  * output to logs.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class SafeService {
-    public static instance: SafeService = null;
+  public static instance: SafeService = null;
 
-    private standardWalletSafes: { [walletId: string]: StandardWalletSafe } = {};
+  private standardWalletSafes: { [walletId: string]: StandardWalletSafe } = {};
+  private aaSafes: { [walletId: string]: AASafe } = {};
 
-    constructor() {
-        SafeService.instance = this;
+  constructor(private localStorage: LocalStorage) {
+    SafeService.instance = this;
+  }
+
+  /**
+   * Gets a safe entry that is initialized with empty content if not yet existing.
+   * This entry can be edited directly.
+   */
+  public getStandardWalletSafe(walletId: string): StandardWalletSafe {
+    let safe = this.standardWalletSafes[walletId];
+    if (!safe) {
+      safe = {};
+      this.standardWalletSafes[walletId] = safe;
     }
 
-    /**
-     * Gets a safe entry that is initialized with empty content if not yet existing.
-     * This entry can be edited directly.
-     */
-    public getStandardWalletSafe(walletId: string): StandardWalletSafe {
-        let safe = this.standardWalletSafes[walletId];
-        if (!safe) {
-            safe = {};
-            this.standardWalletSafes[walletId] = safe;
-        }
+    return safe;
+  }
 
-        return safe;
+  public getAASafe(walletId: string): AASafe {
+    let safe = this.aaSafes[walletId];
+    if (!safe) {
+      safe = {
+        deployedAddresses: {},
+        implementationAddresses: {},
+        deploymentTxHashes: {},
+        deploymentTimestamps: {},
+      };
+      this.aaSafes[walletId] = safe;
     }
+    return safe;
+  }
+
+  /**
+   * Save AA safe data to persistent storage
+   */
+  public async saveAASafe(walletId: string): Promise<void> {
+    const safe = this.aaSafes[walletId];
+    if (safe) {
+      await this.localStorage.saveAASafe(walletId, safe);
+    }
+  }
+
+  /**
+   * Load AA safe data from persistent storage
+   */
+  public async loadAASafe(walletId: string): Promise<void> {
+    const safe = await this.localStorage.loadAASafe(walletId);
+    if (safe) {
+      this.aaSafes[walletId] = safe;
+    }
+  }
+
+  /**
+   * Update deployed address for a specific network
+   */
+  public async updateAADeployedAddress(
+    walletId: string,
+    networkKey: string,
+    deployedAddress: string,
+    implementationAddress?: string,
+    deploymentTxHash?: string
+  ): Promise<void> {
+    const safe = this.getAASafe(walletId);
+    safe.deployedAddresses[networkKey] = deployedAddress;
+    if (implementationAddress) {
+      safe.implementationAddresses[networkKey] = implementationAddress;
+    }
+    if (deploymentTxHash) {
+      safe.deploymentTxHashes[networkKey] = deploymentTxHash;
+    }
+    safe.deploymentTimestamps[networkKey] = Date.now();
+
+    // Persist to disk
+    await this.saveAASafe(walletId);
+  }
+
+  /**
+   * Get deployed address for a specific network
+   */
+  public getAADeployedAddress(
+    walletId: string,
+    networkKey: string
+  ): string | null {
+    const safe = this.aaSafes[walletId];
+    return safe?.deployedAddresses[networkKey] || null;
+  }
+
+  /**
+   * Check if AA wallet is deployed on a specific network
+   */
+  public isAAWalletDeployed(walletId: string, networkKey: string): boolean {
+    const safe = this.aaSafes[walletId];
+    return !!safe?.deployedAddresses[networkKey];
+  }
 }
