@@ -185,16 +185,51 @@ export class AACreatePage implements OnInit {
     this.isFetchingAddress = true;
 
     try {
-      // For now, we'll use a placeholder EOA address since we can't get it from the wallet yet
-      // In a real implementation, this would be the EOA address that will control the AA wallet
-      // The provider should be able to compute the deterministic AA address from this EOA
-      const placeholderEoaAddress =
-        "0x0000000000000000000000000000000000000000"; // TODO: Get actual EOA address
+      // Get the EVM network by chain ID
+      const network = this.walletNetworkService.getNetworkByChainId(
+        this.wallet.chainId
+      );
+      if (!network) {
+        throw new Error(
+          `Network not found for chain ID: ${this.wallet.chainId}`
+        );
+      }
+
+      // Get the master wallet
+      const masterWallet = this.walletService.getMasterWallet(
+        this.wallet.controllerWalletId
+      );
+      if (!masterWallet) {
+        throw new Error(
+          `Master wallet not found: ${this.wallet.controllerWalletId}`
+        );
+      }
+
+      // Create a network wallet instance
+      const networkWallet = await network.createNetworkWallet(
+        masterWallet,
+        false
+      );
+      if (!networkWallet) {
+        throw new Error(
+          `Failed to create network wallet for chain ID: ${this.wallet.chainId}`
+        );
+      }
+
+      // Get the EOA account address from the network wallet
+      const addresses = networkWallet.getAddresses();
+      if (!addresses || addresses.length === 0) {
+        throw new Error(`No addresses found in network wallet`);
+      }
+
+      // Get the first address (main EOA address)
+      const eoaAddress = addresses[0].address;
+      Logger.log("wallet", "Retrieved EOA address:", eoaAddress);
 
       // Use the provider to compute the AA account address
       this.wallet.aaContractAddress =
         await this.wallet.provider.getAccountAddress(
-          placeholderEoaAddress,
+          eoaAddress,
           this.wallet.chainId
         );
     } catch (error) {

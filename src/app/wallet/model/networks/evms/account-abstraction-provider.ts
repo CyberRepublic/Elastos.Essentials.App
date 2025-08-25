@@ -3,6 +3,7 @@ export type AccountAbstractionProviderChainConfig = {
   entryPointAddress: string;
   bundlerRpcUrl: string;
   paymasterAddress: string;
+  factoryAddress: string;
 };
 
 export abstract class AccountAbstractionProvider {
