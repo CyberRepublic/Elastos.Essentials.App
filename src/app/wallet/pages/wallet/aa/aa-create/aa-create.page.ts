@@ -17,6 +17,9 @@ import { AuthService } from "src/app/wallet/services/auth.service";
 import { Native } from "src/app/wallet/services/native.service";
 import { WalletService } from "src/app/wallet/services/wallet.service";
 import { WalletUIService } from "src/app/wallet/services/wallet.ui.service";
+import { EVMService } from "src/app/wallet/services/evm/evm.service";
+import { WalletNetworkService } from "src/app/wallet/services/network.service";
+import { WalletCreationService } from "src/app/wallet/services/walletcreation.service";
 
 @Component({
   selector: "app-aa-create",
@@ -25,13 +28,12 @@ import { WalletUIService } from "src/app/wallet/services/wallet.ui.service";
 })
 export class AACreatePage implements OnInit {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-  @ViewChild("walletNameInput", { static: false }) walletNameInput: IonInput;
   @ViewChild("chainSelect", { static: false }) chainSelect: IonSelect;
   @ViewChild("implementationSelect", { static: false })
   implementationSelect: IonSelect;
 
   public wallet = {
-    name: "",
+    name: "", // Will be set from wallet creation service
     controllerWalletId: "",
     chainId: null,
     implementation: null as AAImplementation | null,
@@ -55,13 +57,18 @@ export class AACreatePage implements OnInit {
     private native: Native,
     private events: GlobalEvents,
     private globalPopupService: GlobalPopupService,
-    private aaRegistry: AAAccountRegistryService
+    private aaRegistry: AAAccountRegistryService,
+    private evmService: EVMService,
+    private walletNetworkService: WalletNetworkService,
+    private walletCreationService: WalletCreationService
   ) {
     this.initData();
   }
 
   ngOnInit() {
     this.titleBar.setTitle(this.translate.instant("wallet.aa.create.title"));
+    // Get wallet name from wallet creation service
+    this.wallet.name = this.walletCreationService.name;
   }
 
   private initData() {
@@ -93,6 +100,9 @@ export class AACreatePage implements OnInit {
 
       // Reset implementation selection
       this.wallet.implementation = null;
+      
+      // Auto-detect contract address for this chain
+      this.autoDetectContractAddress(chainId);
     }
   }
 
@@ -100,14 +110,55 @@ export class AACreatePage implements OnInit {
     const factoryAddress = event.detail.value;
     this.wallet.implementation =
       this.aaRegistry.getImplementationByFactory(factoryAddress);
-  }
-
-  public onContractAddressChanged(event: any) {
-    this.wallet.aaContractAddress = event.detail.value;
+    
+    // Auto-detect if account is deployed
+    if (this.wallet.implementation && this.wallet.aaContractAddress) {
+      void this.autoDetectAccountDeployment();
+    }
   }
 
   public onDeployedChanged(event: any) {
     this.wallet.isDeployed = event.detail.checked;
+  }
+
+  /**
+   * Auto-detect the contract address for the selected chain
+   */
+  private autoDetectContractAddress(chainId: number) {
+    // For now, use a hardcoded address for ECO chain (12343)
+    // TODO: Implement proper contract address detection logic
+    if (chainId === 12343) {
+      this.wallet.aaContractAddress = "0x0000000000000000000000000000000000000000"; // TODO: Set actual ECO AA contract address
+    } else {
+      this.wallet.aaContractAddress = "";
+    }
+  }
+
+  /**
+   * Auto-detect if the AA account is already deployed
+   */
+  private async autoDetectAccountDeployment() {
+    if (!this.wallet.aaContractAddress || !this.wallet.chainId) {
+      return;
+    }
+
+    try {
+      // Get the network for the selected chain
+      const network = this.walletNetworkService.getNetworkByChainId(this.wallet.chainId);
+      if (!network) {
+        Logger.warn("wallet", "Network not found for chain ID:", this.wallet.chainId);
+        return;
+      }
+
+      // Check if the contract address has code (indicating it's deployed)
+      const isDeployed = await this.evmService.isContractAddress(network, this.wallet.aaContractAddress);
+      this.wallet.isDeployed = isDeployed;
+      
+      Logger.log("wallet", "Auto-detected account deployment status:", isDeployed);
+    } catch (error) {
+      Logger.error("wallet", "Failed to auto-detect account deployment:", error);
+      // Keep the current isDeployed value if detection fails
+    }
   }
 
   public allInputsValid(): boolean {
@@ -184,16 +235,6 @@ export class AACreatePage implements OnInit {
     } finally {
       this.walletIsCreating = false;
     }
-  }
-
-  public getSelectedChainName(): string {
-    if (!this.selectedChain) return "";
-    return this.selectedChain.chainName;
-  }
-
-  public getSelectedImplementationName(): string {
-    if (!this.wallet.implementation) return "";
-    return this.wallet.implementation.name;
   }
 
   public getControllerWalletName(walletId: string): string {

@@ -515,7 +515,9 @@ export class WalletService {
       // return all network wallets.
       return Object.values(this.networkWallets);
     } else {
-      if (!WalletNetworkService.instance.activeNetwork.value) return [];
+      if (!WalletNetworkService.instance.activeNetwork.value) {
+        return [];
+      }
 
       return Object.values(this.networkWallets).filter((nw) =>
         nw?.masterWallet.supportsNetwork(nw.network)

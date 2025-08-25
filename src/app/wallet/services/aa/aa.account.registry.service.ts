@@ -26,145 +26,29 @@ export interface AAChainConfig {
 export class AAAccountRegistryService {
   private static instance: AAAccountRegistryService = null;
 
-  // Popular AA implementations
+  // PG AA Account implementation
   private aaImplementations: AAImplementation[] = [
     {
-      name: "Safe Account",
-      description:
-        "Multi-signature smart contract wallet with advanced security features",
-      factoryAddress: "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-      implementationAddress: "0x3E5c63644E683549055b9Be6653c6d1bC2eC8C9C",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedChains: [1, 137, 10, 42161, 56, 43114, 250, 100, 1101, 8453],
-      isVerified: true,
-      website: "https://safe.global",
-      documentation: "https://docs.safe.global",
-    },
-    {
-      name: "Biconomy Account",
-      description: "Gasless transactions and social recovery features",
-      factoryAddress: "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      implementationAddress: "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      entryPointAddress: "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      supportedChains: [1, 137, 10, 42161, 56, 43114, 250, 100, 1101, 8453],
-      isVerified: true,
-      website: "https://biconomy.io",
-      documentation: "https://docs.biconomy.io",
-    },
-    {
-      name: "Argent Account",
-      description: "Social recovery and daily spending limits",
-      factoryAddress: "0x0000000000000000000000000000000000000000", // Placeholder
-      implementationAddress: "0x0000000000000000000000000000000000000000", // Placeholder
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedChains: [1, 137, 10, 42161],
-      isVerified: true,
-      website: "https://argent.xyz",
-      documentation: "https://docs.argent.xyz",
-    },
-    {
-      name: "Zerodev Account",
-      description: "Modular account with plugin system",
-      factoryAddress: "0x0000000000000000000000000000000000000000", // Placeholder
-      implementationAddress: "0x0000000000000000000000000000000000000000", // Placeholder
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedChains: [1, 137, 10, 42161, 56, 43114, 250, 100, 1101, 8453],
-      isVerified: true,
-      website: "https://zerodev.app",
-      documentation: "https://docs.zerodev.app",
+      name: "PG AA Account",
+      description: "Account Abstraction wallet implementation",
+      factoryAddress: "0x0000000000000000000000000000000000000000", // TODO: Set actual factory address
+      implementationAddress: "0x0000000000000000000000000000000000000000", // TODO: Set actual implementation address
+      entryPointAddress: "0x0000000000000000000000000000000000000000", // TODO: Set actual entry point address
+      supportedChains: [12343], // Only ECO chain
+      isVerified: false, // TODO: Verify when contracts are deployed
+      website: undefined, // TODO: Add website when available
+      documentation: undefined, // TODO: Add documentation when available
     },
   ];
 
-  // Chain configurations
+  // Chain configuration for ECO chain only
   private chainConfigs: AAChainConfig[] = [
     {
-      chainId: 1,
-      chainName: "Ethereum Mainnet",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+      chainId: 12343,
+      chainName: "Elastos ECO Chain",
+      entryPointAddress: "0x0000000000000000000000000000000000000000", // TODO: Set actual entry point address
       supportedImplementations: [
-        "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-        "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      ],
-    },
-    {
-      chainId: 137,
-      chainName: "Polygon",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedImplementations: [
-        "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-        "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      ],
-    },
-    {
-      chainId: 10,
-      chainName: "Optimism",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedImplementations: [
-        "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-        "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      ],
-    },
-    {
-      chainId: 42161,
-      chainName: "Arbitrum One",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedImplementations: [
-        "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-        "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      ],
-    },
-    {
-      chainId: 56,
-      chainName: "BNB Smart Chain",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedImplementations: [
-        "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-        "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      ],
-    },
-    {
-      chainId: 43114,
-      chainName: "Avalanche C-Chain",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedImplementations: [
-        "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-        "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      ],
-    },
-    {
-      chainId: 250,
-      chainName: "Fantom",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedImplementations: [
-        "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-        "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      ],
-    },
-    {
-      chainId: 100,
-      chainName: "Gnosis Chain",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedImplementations: [
-        "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-        "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      ],
-    },
-    {
-      chainId: 1101,
-      chainName: "Polygon zkEVM",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedImplementations: [
-        "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-        "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
-      ],
-    },
-    {
-      chainId: 8453,
-      chainName: "Base",
-      entryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      supportedImplementations: [
-        "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-        "0x000000F9ee1842Bb72F6BBDD75e6D3d4b3a1D953",
+        "0x0000000000000000000000000000000000000000", // TODO: Set actual factory address
       ],
     },
   ];
