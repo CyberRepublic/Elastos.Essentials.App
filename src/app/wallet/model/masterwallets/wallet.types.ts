@@ -134,19 +134,10 @@ export type SerializedStandardMultiSigMasterWallet = SerializedMasterWallet & {
 export type SerializedAccountAbstractionMasterWallet =
   SerializedMasterWallet & {
     type: WalletType.ACCOUNT_ABSTRACTION;
-
-    /** Existing EOA wallet (standard, ledger) used as controller for this AA wallet */
-    controllerWalletId: string;
-    /** The AA contract address on the specific chain */
-    aaContractAddress: string;
-    /** The chain ID where this AA wallet exists */
+    /** Existing EOA wallet (standard) used as controller for this AA wallet */
+    controllerMasterWalletId: string;
+    /** The chain ID where this AA wallet exists. Wallet can be used only on this chain. */
     chainId: number;
-    /** The factory contract address used to create this AA wallet */
-    factoryAddress: string;
-    /** The entry point contract address for this chain */
-    entryPointAddress: string;
-    /** The AA wallet implementation contract address */
-    implementationAddress: string;
     /** Whether this is a deployed AA wallet or just an imported one */
     isDeployed: boolean;
   };

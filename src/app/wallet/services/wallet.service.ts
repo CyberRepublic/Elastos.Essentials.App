@@ -782,11 +782,7 @@ export class WalletService {
     masterId: string,
     walletName: string,
     controllerWalletId: string,
-    aaContractAddress: string,
     chainId: number,
-    factoryAddress: string,
-    entryPointAddress: string,
-    implementationAddress: string,
     isDeployed: boolean = false
   ): Promise<MasterWallet> {
     Logger.log("wallet", "Creating a new Account Abstraction master wallet");
@@ -802,12 +798,8 @@ export class WalletService {
         },
       ],
       creator: WalletCreator.USER,
-      controllerWalletId,
-      aaContractAddress,
+      controllerMasterWalletId: controllerWalletId,
       chainId,
-      factoryAddress,
-      entryPointAddress,
-      implementationAddress,
       isDeployed,
     };
 

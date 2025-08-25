@@ -68,7 +68,7 @@ export class AANetworkWallet extends NetworkWallet<
       },
       {
         title: "AA Contract",
-        address: this.masterWallet.getAAContractAddress(),
+        address: this.masterWallet.(),
       },
     ];
   }
@@ -125,13 +125,6 @@ export class AANetworkWallet extends NetworkWallet<
    */
   public getControllerWalletId(): string {
     return this.masterWallet.getControllerWalletId();
-  }
-
-  /**
-   * Get the AA contract address
-   */
-  public getAAContractAddress(): string {
-    return this.masterWallet.getAAContractAddress();
   }
 
   /**

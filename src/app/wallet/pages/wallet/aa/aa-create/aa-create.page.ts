@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
-import { IonInput, IonSelect } from "@ionic/angular";
+import { IonSelect } from "@ionic/angular";
 import { TranslateService } from "@ngx-translate/core";
 import { TitleBarComponent } from "src/app/components/titlebar/titlebar.component";
 import { Logger } from "src/app/logger";
@@ -14,11 +14,11 @@ import {
   AAImplementation,
 } from "src/app/wallet/services/aa/aa.account.registry.service";
 import { AuthService } from "src/app/wallet/services/auth.service";
+import { EVMService } from "src/app/wallet/services/evm/evm.service";
 import { Native } from "src/app/wallet/services/native.service";
+import { WalletNetworkService } from "src/app/wallet/services/network.service";
 import { WalletService } from "src/app/wallet/services/wallet.service";
 import { WalletUIService } from "src/app/wallet/services/wallet.ui.service";
-import { EVMService } from "src/app/wallet/services/evm/evm.service";
-import { WalletNetworkService } from "src/app/wallet/services/network.service";
 import { WalletCreationService } from "src/app/wallet/services/walletcreation.service";
 
 @Component({
@@ -100,7 +100,7 @@ export class AACreatePage implements OnInit {
 
       // Reset implementation selection
       this.wallet.implementation = null;
-      
+
       // Auto-detect contract address for this chain
       this.autoDetectContractAddress(chainId);
     }
@@ -110,7 +110,7 @@ export class AACreatePage implements OnInit {
     const factoryAddress = event.detail.value;
     this.wallet.implementation =
       this.aaRegistry.getImplementationByFactory(factoryAddress);
-    
+
     // Auto-detect if account is deployed
     if (this.wallet.implementation && this.wallet.aaContractAddress) {
       void this.autoDetectAccountDeployment();
@@ -128,7 +128,8 @@ export class AACreatePage implements OnInit {
     // For now, use a hardcoded address for ECO chain (12343)
     // TODO: Implement proper contract address detection logic
     if (chainId === 12343) {
-      this.wallet.aaContractAddress = "0x0000000000000000000000000000000000000000"; // TODO: Set actual ECO AA contract address
+      this.wallet.aaContractAddress =
+        "0x0000000000000000000000000000000000000000"; // TODO: Set actual ECO AA contract address
     } else {
       this.wallet.aaContractAddress = "";
     }
@@ -144,19 +145,36 @@ export class AACreatePage implements OnInit {
 
     try {
       // Get the network for the selected chain
-      const network = this.walletNetworkService.getNetworkByChainId(this.wallet.chainId);
+      const network = this.walletNetworkService.getNetworkByChainId(
+        this.wallet.chainId
+      );
       if (!network) {
-        Logger.warn("wallet", "Network not found for chain ID:", this.wallet.chainId);
+        Logger.warn(
+          "wallet",
+          "Network not found for chain ID:",
+          this.wallet.chainId
+        );
         return;
       }
 
       // Check if the contract address has code (indicating it's deployed)
-      const isDeployed = await this.evmService.isContractAddress(network, this.wallet.aaContractAddress);
+      const isDeployed = await this.evmService.isContractAddress(
+        network,
+        this.wallet.aaContractAddress
+      );
       this.wallet.isDeployed = isDeployed;
-      
-      Logger.log("wallet", "Auto-detected account deployment status:", isDeployed);
+
+      Logger.log(
+        "wallet",
+        "Auto-detected account deployment status:",
+        isDeployed
+      );
     } catch (error) {
-      Logger.error("wallet", "Failed to auto-detect account deployment:", error);
+      Logger.error(
+        "wallet",
+        "Failed to auto-detect account deployment:",
+        error
+      );
       // Keep the current isDeployed value if detection fails
     }
   }
@@ -206,11 +224,7 @@ export class AACreatePage implements OnInit {
         walletId,
         this.wallet.name,
         this.wallet.controllerWalletId,
-        this.wallet.aaContractAddress,
         this.wallet.chainId,
-        this.wallet.implementation.factoryAddress,
-        this.wallet.implementation.entryPointAddress,
-        this.wallet.implementation.implementationAddress,
         this.wallet.isDeployed
       );
 

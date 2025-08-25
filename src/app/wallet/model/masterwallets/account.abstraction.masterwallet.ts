@@ -1,15 +1,15 @@
 import { WalletJSSDKHelper } from "../networks/elastos/wallet.jssdk.helper";
+import { EVMNetwork } from "../networks/evms/evm.network";
 import { AnyNetwork } from "../networks/network";
 import { MasterWallet } from "./masterwallet";
 import { SerializedAccountAbstractionMasterWallet } from "./wallet.types";
 
+/**
+ * One AA master wallet can work only on ONE chain (network wallet).
+ */
 export class AccountAbstractionMasterWallet extends MasterWallet {
   public controllerWalletId: string;
-  public aaContractAddress: string;
   public chainId: number;
-  public factoryAddress: string;
-  public entryPointAddress: string;
-  public implementationAddress: string;
   public isDeployed: boolean;
 
   public static newFromSerializedWallet(
@@ -35,12 +35,8 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
   protected deserialize(serialized: SerializedAccountAbstractionMasterWallet) {
     super.deserialize(serialized);
 
-    this.controllerWalletId = serialized.controllerWalletId;
-    this.aaContractAddress = serialized.aaContractAddress;
+    this.controllerWalletId = serialized.controllerMasterWalletId;
     this.chainId = serialized.chainId;
-    this.factoryAddress = serialized.factoryAddress;
-    this.entryPointAddress = serialized.entryPointAddress;
-    this.implementationAddress = serialized.implementationAddress;
     this.isDeployed = serialized.isDeployed;
   }
 
@@ -50,12 +46,8 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
 
     super._serialize(serialized as SerializedAccountAbstractionMasterWallet);
 
-    serialized.controllerWalletId = this.controllerWalletId;
-    serialized.aaContractAddress = this.aaContractAddress;
+    serialized.controllerMasterWalletId = this.controllerWalletId;
     serialized.chainId = this.chainId;
-    serialized.factoryAddress = this.factoryAddress;
-    serialized.entryPointAddress = this.entryPointAddress;
-    serialized.implementationAddress = this.implementationAddress;
     serialized.isDeployed = this.isDeployed;
 
     return serialized;
@@ -67,29 +59,17 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
 
   public supportsNetwork(network: AnyNetwork): boolean {
     // AA wallets are only supported on EVM networks
-    if (
-      network.key === "ethereum" ||
-      network.key === "bsc" ||
-      network.key === "polygon" ||
-      network.key === "arbitrum" ||
-      network.key === "optimism" ||
-      network.key === "avalanche" ||
-      network.key === "fantom" ||
-      network.key === "cronos" ||
-      network.key === "fuse" ||
-      network.key === "gnosis" ||
-      network.key === "evmos" ||
-      network.key === "celo" ||
-      network.key === "bttc" ||
-      network.key === "kava" ||
-      network.key === "telos" ||
-      network.key === "iotex" ||
-      network.key === "fusion" ||
-      network.key === "elastos"
-    ) {
-      return true;
+    if (!network.isEVMNetwork()) {
+      return false;
     }
-    return false;
+
+    const evmNetwork = network as EVMNetwork;
+
+    if (evmNetwork.getMainChainID() !== this.chainId) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -97,13 +77,6 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
    */
   public getControllerWalletId(): string {
     return this.controllerWalletId;
-  }
-
-  /**
-   * Get the AA contract address
-   */
-  public getAAContractAddress(): string {
-    return this.aaContractAddress;
   }
 
   /**
