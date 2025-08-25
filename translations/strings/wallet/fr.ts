@@ -95,8 +95,10 @@ export const fr = {
         "settings-add-wallet-standard-wallet": "Portefeuille Standard",
         "settings-add-wallet-multi-sig-wallet": "Portefeuille Multi Signatures",
         "settings-add-wallet-hardware-wallet": "Portefeuille physique",
+        "settings-add-wallet-aa-wallet": "Portefeuille d'Abstraction de Compte",
         "settings-add-wallet-new-wallet": "Nouveau portefeuille",
         "settings-add-wallet-mnemonic": "Mnémonique / clé papier",
+        "settings-add-wallet-create-aa-wallet": "Créer un portefeuille AA",
 
         /***********************
         * Select-Currency Page *

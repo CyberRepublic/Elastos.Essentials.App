@@ -1,0 +1,158 @@
+.container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-container {
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  color: var(--ion-color-primary);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.description {
+  color: var(--ion-color-medium);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.form-item {
+  --background: var(--ion-color-light-shade);
+  --border-radius: 8px;
+  margin-bottom: 16px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+}
+
+ion-label {
+  color: var(--ion-color-dark);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+ion-input,
+ion-select {
+  --color: var(--ion-color-dark);
+  --placeholder-color: var(--ion-color-medium);
+}
+
+ion-toggle {
+  --handle-width: 20px;
+  --handle-height: 20px;
+}
+
+.selected-options {
+  background: var(--ion-color-primary-tint);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.selected-options h3 {
+  color: var(--ion-color-primary);
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.option-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ion-color-primary-shade);
+}
+
+.option-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.option-item strong {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+}
+
+.option-item span {
+  color: var(--ion-color-dark);
+  text-align: right;
+  word-break: break-all;
+}
+
+.address {
+  font-family: monospace;
+  font-size: 12px;
+  background: var(--ion-color-light);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.button-container {
+  margin: 24px 0;
+}
+
+.create-button {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+  --border-radius: 8px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.create-button:disabled {
+  --background: var(--ion-color-medium);
+  --color: var(--ion-color-medium-contrast);
+}
+
+.help-text {
+  background: var(--ion-color-warning-tint);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.help-text p {
+  color: var(--ion-color-warning-contrast);
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.help-text p:first-child {
+  margin-top: 0;
+}
+
+.help-text p:last-child {
+  margin-bottom: 0;
+}
+
+// Dark theme adjustments
+@media (prefers-color-scheme: dark) {
+  .form-container {
+    background: var(--ion-color-dark-shade);
+  }
+
+  .form-item {
+    --background: var(--ion-color-dark-tint);
+  }
+
+  .selected-options {
+    background: var(--ion-color-primary-shade);
+  }
+
+  .help-text {
+    background: var(--ion-color-warning-shade);
+  }
+}
