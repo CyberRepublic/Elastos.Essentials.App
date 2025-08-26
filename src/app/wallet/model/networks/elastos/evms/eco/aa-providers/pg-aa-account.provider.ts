@@ -1,8 +1,9 @@
-import {
-  lazyEthersContractImport,
-  lazyEthersImport,
-} from "src/app/helpers/import.helper";
+import { lazyEthersImport } from "src/app/helpers/import.helper";
 import { Logger } from "src/app/logger";
+import {
+  EntryPoint__factory,
+  SimpleAccountFactory__factory,
+} from "src/app/wallet/services/account-abstraction/typechain";
 import { EVMService } from "src/app/wallet/services/evm/evm.service";
 import { WalletNetworkService } from "src/app/wallet/services/network.service";
 import { AccountAbstractionProvider } from "../../../../evms/account-abstraction-provider";
@@ -46,106 +47,88 @@ export class PGAAAccountProvider extends AccountAbstractionProvider {
       );
     }
 
+    // Get the chain configuration
+    const chainConfig = this.supportedChains.find(
+      (chain) => chain.chainId === chainId
+    );
+
+    if (!chainConfig) {
+      throw new Error(`Chain configuration not found for chain ${chainId}`);
+    }
+
+    // Retrieve network for given chain id.
+    const network = WalletNetworkService.instance.getNetworkByChainId(chainId);
+    if (!network) {
+      throw new Error(`Network not found for chain ${chainId}`);
+    }
+
+    // Get Web3 instance
+    const web3 = await EVMService.instance.getWeb3(network);
+
+    // Import ethers.js
+    const { providers } = await lazyEthersImport();
+
+    // Create provider and signer
+    const originalProvider = new providers.Web3Provider(web3.currentProvider);
+
+    const entryPoint = EntryPoint__factory.connect(
+      chainConfig.entryPointAddress,
+      originalProvider
+    );
+
+    const factory = SimpleAccountFactory__factory.connect(
+      chainConfig.factoryAddress,
+      originalProvider
+    );
+
+    // Generate proper initCode: factory address + encoded function data
+    const encodedFunctionData = factory.interface.encodeFunctionData(
+      "createAccount",
+      [
+        eoaAddress,
+        0, // salt
+      ]
+    );
+
+    // initCode should be: factory address (20 bytes) + encoded function data
+    const factoryAddressHex = chainConfig.factoryAddress.slice(2); // Remove 0x prefix
+    const initCode = "0x" + factoryAddressHex + encodedFunctionData.slice(2);
+
+    Logger.log("wallet", `PGAAAccountProvider: initCode: ${initCode}`);
+
+    let senderAddress: string;
     try {
-      // Get the chain configuration
-      const chainConfig = this.supportedChains.find(
-        (chain) => chain.chainId === chainId
+      await entryPoint.callStatic.getSenderAddress(initCode);
+      Logger.warn(
+        "wallet",
+        `PGAAAccountProvider: senderAddress success from direct call, abnormal!`
       );
-
-      if (!chainConfig) {
-        throw new Error(`Chain configuration not found for chain ${chainId}`);
-      }
-
-      // Get the network instance
-      const network =
-        WalletNetworkService.instance.getNetworkByChainId(chainId);
-      if (!network) {
-        throw new Error(`Network not found for chain ${chainId}`);
-      }
-
-      // Get Web3 instance
-      const web3 = await EVMService.instance.getWeb3(network);
-
-      // Import ethers.js
-      const { providers } = await lazyEthersImport();
-      const Contract = await lazyEthersContractImport();
-
-      // Create provider and signer
-      const originalProvider = new providers.Web3Provider(web3.currentProvider);
-      const originalSigner = originalProvider.getSigner();
-
-      // Create contract instances
-      const entryPoint = new Contract(
-        chainConfig.entryPointAddress,
-        [
-          "function getSenderAddress(bytes calldata initCode) external view returns (address sender)",
-        ],
-        originalProvider
-      );
-
-      const factory = new Contract(
-        chainConfig.factoryAddress,
-        [
-          "function createAccount(address owner, uint256 salt) external returns (address)",
-        ],
-        originalProvider
-      );
-
-      // Generate proper initCode: factory address + encoded function data
-      const encodedFunctionData = factory.interface.encodeFunctionData(
-        "createAccount",
-        [
-          eoaAddress,
-          0, // salt
-        ]
-      );
-
-      // initCode should be: factory address (20 bytes) + encoded function data
-      const factoryAddressHex = chainConfig.factoryAddress.slice(2); // Remove 0x prefix
-      const initCode = "0x" + factoryAddressHex + encodedFunctionData.slice(2);
-
-      Logger.log("wallet", `PGAAAccountProvider: initCode: ${initCode}`);
-
-      let senderAddress: string;
-      try {
-        senderAddress = await entryPoint.callStatic.getSenderAddress(initCode);
-        Logger.log(
-          "wallet",
-          `PGAAAccountProvider: senderAddress from direct call: ${senderAddress}`
-        );
-      } catch (e: any) {
-        Logger.log(
-          "wallet",
-          `PGAAAccountProvider: getSenderAddress error: ${e.message}`
-        );
-        if (e.errorArgs && e.errorArgs.sender) {
-          senderAddress = e.errorArgs.sender;
-          Logger.log(
-            "wallet",
-            `PGAAAccountProvider: senderAddress from error: ${senderAddress}`
-          );
-        } else {
-          Logger.log(
-            "wallet",
-            `PGAAAccountProvider: No sender in error args, full error:`,
-            e
-          );
-          throw e;
-        }
-      }
-
+    } catch (e: any) {
       Logger.log(
         "wallet",
-        `PGAAAccountProvider: Final senderAddress: ${senderAddress}`
+        `PGAAAccountProvider: getSenderAddress error: ${e.message}`
       );
-      return senderAddress;
-    } catch (error) {
-      Logger.error(
-        "wallet",
-        `PGAAAccountProvider: Error getting AA account address:`,
-        error
-      );
-      throw error;
+      console.error("whole error", e);
+      if (e.errorArgs && e.errorArgs.sender) {
+        senderAddress = e.errorArgs.sender;
+        Logger.log(
+          "wallet",
+          `PGAAAccountProvider: senderAddress from error: ${senderAddress}`
+        );
+      } else {
+        Logger.log(
+          "wallet",
+          `PGAAAccountProvider: No sender in error args, full error:`,
+          e
+        );
+        throw e;
+      }
     }
+
+    Logger.log(
+      "wallet",
+      `PGAAAccountProvider: Final senderAddress: ${senderAddress}`
+    );
+    return senderAddress;
   }
 }
