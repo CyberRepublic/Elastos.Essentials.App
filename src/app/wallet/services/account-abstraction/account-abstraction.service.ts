@@ -62,6 +62,15 @@ export class AccountAbstractionService {
   }
 
   /**
+   * Get an account abstraction provider by ID
+   * @param id The provider ID
+   * @returns The provider instance or null if not found
+   */
+  public getProviderById(id: string): AccountAbstractionProvider | null {
+    return this.providers.find((p) => p.id === id) || null;
+  }
+
+  /**
    * Get account abstraction providers that support a specific chain
    * @param chainId The chain ID
    * @returns Array of supported providers

@@ -7,19 +7,18 @@ import { AnySubWallet } from "../networks/base/subwallets/subwallet";
 import { AddressUsage } from "./addressusage";
 import { SignTransactionResult } from "./safe.types";
 
-
 /**
  * Hosts and manipulates sensitive wallet information such as mnemonic, seed, private keys.
- * Wallets use different safes depending if they the wallet credentials are stored locally in the app,
+ * Wallets use different safes depending if wallet credentials are stored locally in the app,
  * or in a hardware wallet.
  *
  * The way to get public addresses (derivation) is also managed by safes, like everything that depends
  * on wallet private keys.
  */
 export abstract class Safe {
-  protected networkWallet: AnyNetworkWallet = null;;
+  protected networkWallet: AnyNetworkWallet = null;
 
-  constructor(protected masterWallet: MasterWallet) { }
+  constructor(protected masterWallet: MasterWallet) {}
 
   /**
    * Initialization method that can be overriden by subclasses.
@@ -38,7 +37,12 @@ export abstract class Safe {
    *
    * @param usage Most of the time, networks have only one kind of address so they don't need to handle this. But some networks (eg: iotex) use several address formats and need to return different address styles depending on situations.
    */
-  public abstract getAddresses(startIndex: number, count: number, internalAddresses: boolean, usage: AddressUsage | string): string[];
+  public abstract getAddresses(
+    startIndex: number,
+    count: number,
+    internalAddresses: boolean,
+    usage: AddressUsage | string
+  ): string[];
 
   /**
    * Returns wallet's public key string.
@@ -60,7 +64,11 @@ export abstract class Safe {
    * @param digest : SHA256
    * @param password
    */
-  public signDigest(address: string, digest: string, password: string): Promise<string> {
+  public signDigest(
+    address: string,
+    digest: string,
+    password: string
+  ): Promise<string> {
     return null;
   }
 
@@ -80,7 +88,13 @@ export abstract class Safe {
    * @param forcePasswordPrompt Should be true by default
    * @param visualFeedback Should be true by default
    */
-  public abstract signTransaction(subWallet: AnySubWallet, rawTx: string | TxData | BTCTxData, transfer: Transfer, forcePasswordPrompt?: boolean, visualFeedback?: boolean): Promise<SignTransactionResult>;
+  public abstract signTransaction(
+    subWallet: AnySubWallet,
+    rawTx: string | TxData | BTCTxData,
+    transfer: Transfer,
+    forcePasswordPrompt?: boolean,
+    visualFeedback?: boolean
+  ): Promise<SignTransactionResult>;
 
   /**
    * Gives a last chance to the safe to modify the signed transaction in a payload that can be published.
@@ -89,7 +103,10 @@ export abstract class Safe {
    *
    * By default, this returns the original signed transaction.
    */
-  public async convertSignedTransactionToPublishableTransaction(subWallet: AnySubWallet, signedTx: string): Promise<string> {
+  public async convertSignedTransactionToPublishableTransaction(
+    subWallet: AnySubWallet,
+    signedTx: string
+  ): Promise<string> {
     return await signedTx;
   }
 }

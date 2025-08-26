@@ -7,6 +7,7 @@ import { AnySubWallet } from "../../base/subwallets/subwallet";
 
 /**
  * Safe specialized for Account Abstraction wallets
+ * Note: Address management is now handled by the AA network wallet through the account abstraction service
  */
 export class AASafe extends Safe {
   private safeService = SafeService.instance;
@@ -22,11 +23,11 @@ export class AASafe extends Safe {
     usage: any
   ): string[] {
     // AA wallets don't derive addresses like standard wallets
-    // They use the deployed contract address
+    // They use the address returned by the AA provider
     return [];
   }
 
-  public async signTransaction(
+  public signTransaction(
     subWallet: AnySubWallet,
     rawTx: any,
     transfer: Transfer,
@@ -38,51 +39,5 @@ export class AASafe extends Safe {
     throw new Error(
       "AA wallets don't sign transactions directly. Use the controller wallet."
     );
-  }
-
-  /**
-   * Get deployed address for a specific network
-   */
-  public getDeployedAddress(networkKey: string): string | null {
-    return this.safeService.getAADeployedAddress(
-      this.masterWallet.id,
-      networkKey
-    );
-  }
-
-  /**
-   * Check if wallet is deployed on a specific network
-   */
-  public isDeployed(networkKey: string): boolean {
-    return this.safeService.isAAWalletDeployed(
-      this.masterWallet.id,
-      networkKey
-    );
-  }
-
-  /**
-   * Update deployed address for a network
-   */
-  public async updateDeployedAddress(
-    networkKey: string,
-    deployedAddress: string,
-    implementationAddress?: string,
-    deploymentTxHash?: string
-  ): Promise<void> {
-    await this.safeService.updateAADeployedAddress(
-      this.masterWallet.id,
-      networkKey,
-      deployedAddress,
-      implementationAddress,
-      deploymentTxHash
-    );
-  }
-
-  /**
-   * Get all deployed addresses across networks
-   */
-  public getAllDeployedAddresses(): { [networkKey: string]: string } {
-    const safe = this.safeService.getAASafe(this.masterWallet.id);
-    return { ...safe.deployedAddresses };
   }
 }

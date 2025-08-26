@@ -14,7 +14,7 @@ import { AccountAbstractionProvider } from "../../../../evms/account-abstraction
  */
 export class PGAAAccountProvider extends AccountAbstractionProvider {
   constructor() {
-    super("PG AA Account", [
+    super("pg", "PG AA Account", [
       {
         chainId: 12343,
         entryPointAddress: "0x1Cf34692a73D0edf3d01C5f991441D891469950a",
@@ -94,27 +94,16 @@ export class PGAAAccountProvider extends AccountAbstractionProvider {
     const factoryAddressHex = chainConfig.factoryAddress.slice(2); // Remove 0x prefix
     const initCode = "0x" + factoryAddressHex + encodedFunctionData.slice(2);
 
-    Logger.log("wallet", `PGAAAccountProvider: initCode: ${initCode}`);
-
     let senderAddress: string;
     try {
       await entryPoint.callStatic.getSenderAddress(initCode);
-      Logger.warn(
+      Logger.error(
         "wallet",
-        `PGAAAccountProvider: senderAddress success from direct call, abnormal!`
+        `PGAAAccountProvider: senderAddress success from direct call, abnormal, it should always revert!`
       );
     } catch (e: any) {
-      Logger.log(
-        "wallet",
-        `PGAAAccountProvider: getSenderAddress error: ${e.message}`
-      );
-      console.error("whole error", e);
       if (e.errorArgs && e.errorArgs.sender) {
         senderAddress = e.errorArgs.sender;
-        Logger.log(
-          "wallet",
-          `PGAAAccountProvider: senderAddress from error: ${senderAddress}`
-        );
       } else {
         Logger.log(
           "wallet",
@@ -125,10 +114,6 @@ export class PGAAAccountProvider extends AccountAbstractionProvider {
       }
     }
 
-    Logger.log(
-      "wallet",
-      `PGAAAccountProvider: Final senderAddress: ${senderAddress}`
-    );
     return senderAddress;
   }
 }

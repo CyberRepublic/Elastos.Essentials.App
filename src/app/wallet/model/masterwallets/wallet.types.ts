@@ -136,4 +136,6 @@ export type SerializedAccountAbstractionMasterWallet =
     type: WalletType.ACCOUNT_ABSTRACTION;
     /** Existing EOA wallet (standard) used as controller for this AA wallet */
     controllerMasterWalletId: string;
+    /** ID of the AA provider used by this wallet */
+    aaProviderId: string;
   };

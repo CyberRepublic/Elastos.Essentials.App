@@ -2,79 +2,177 @@
   padding: 24px;
   max-width: 600px;
   margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-ion-grid {
-  height: 100%;
+// Header Section
+.header-section {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 32px 0;
 }
 
-.form-row {
-  margin-bottom: 32px;
-  align-items: flex-start;
-}
+.header-icon {
+  margin-bottom: 24px;
 
-ion-col {
-  text-align: left;
+  ion-icon {
+    font-size: 64px;
+    color: var(--ion-color-primary);
+    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-tint));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
 
 .page-title {
-  color: var(--ion-color-primary);
-  font-size: 28px;
+  color: var(--ion-color-dark);
+  font-size: 32px;
   font-weight: 700;
   margin-bottom: 16px;
-  text-align: center;
+  line-height: 1.2;
 }
 
 .page-description {
   color: var(--ion-color-medium);
-  margin-bottom: 32px;
+  margin-bottom: 0;
   line-height: 1.6;
   font-size: 16px;
-  text-align: center;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.form-group {
-  width: 100%;
+// Form Section
+.form-section {
+  flex: 1;
+  margin-bottom: 32px;
 }
 
-.form-label {
-  display: block;
+.form-card {
+  background: var(--ion-color-light);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--ion-color-light-shade);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.card-icon {
+  font-size: 24px;
+  color: var(--ion-color-primary);
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.card-title {
   color: var(--ion-color-dark);
+  font-size: 18px;
   font-weight: 600;
-  font-size: 16px;
-  margin-bottom: 12px;
-  text-align: left;
+  margin: 0;
+  line-height: 1.3;
 }
 
+// Form Controls
 .form-select,
 .form-input {
   --color: var(--ion-color-dark);
   --placeholder-color: var(--ion-color-medium);
+  --placeholder-opacity: 0.6;
   --background: var(--ion-color-light-shade);
   --border-radius: 12px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --padding-top: 16px;
-  --padding-bottom: 16px;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --padding-top: 18px;
+  --padding-bottom: 18px;
   --border-width: 2px;
   --border-style: solid;
   --border-color: transparent;
-  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   transition: all 0.2s ease;
   width: 100%;
   max-width: 100%;
+  font-size: 16px;
+
+  // Improve text visibility in pickers
+  --min-height: 56px;
+
+  &::part(placeholder) {
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.6;
+  }
+
+  &::part(text) {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
 }
 
 .form-select:focus-within,
 .form-input:focus-within {
   --border-color: var(--ion-color-primary);
-  --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.15);
+  --box-shadow: 0 4px 20px rgba(var(--ion-color-primary-rgb), 0.15);
+  transform: translateY(-1px);
 }
 
-.form-select {
-  --icon-color: var(--ion-color-primary);
+// Additional styles for form controls
+.form-input {
+  --color: var(--ion-color-dark);
+  --placeholder-color: var(--ion-color-medium);
+  --placeholder-opacity: 0.6;
+  --background: var(--ion-color-light-shade);
+  --border-radius: 12px;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --padding-top: 18px;
+  --padding-bottom: 18px;
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: transparent;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+  font-size: 16px;
+  --min-height: 56px;
 }
 
+.form-input:focus-within {
+  --border-color: var(--ion-color-primary);
+  --box-shadow: 0 4px 20px rgba(var(--ion-color-primary-rgb), 0.15);
+  transform: translateY(-1px);
+}
+
+// Dark theme adjustments for form inputs
+@media (prefers-color-scheme: dark) {
+  .form-input {
+    --background: var(--ion-color-dark-shade);
+    --color: var(--ion-color-light);
+    --placeholder-color: var(--ion-color-medium);
+  }
+}
+
+// Address Input Container
 .address-input-container {
   position: relative;
   width: 100%;
@@ -82,7 +180,7 @@ ion-col {
 
 .spinner-container {
   position: absolute;
-  right: 16px;
+  right: 20px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -92,59 +190,71 @@ ion-col {
 
 .spinner-container ion-spinner {
   --color: var(--ion-color-primary);
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
-.help-text {
-  color: var(--ion-color-medium);
-  font-size: 13px;
-  margin-top: 8px;
-  font-style: normal;
-  line-height: 1.4;
-  display: block;
-  text-align: left;
-}
-
-.btn-row {
-  margin-top: 40px;
-  margin-bottom: 24px;
-}
-
-.btn-row ion-col {
+// Action Section
+.action-section {
   text-align: center;
+  padding: 24px 0;
+  margin-top: auto;
 }
 
-ebutton {
+.create-button {
   margin: 0 auto;
-  --border-radius: 12px;
-  --padding-start: 32px;
-  --padding-end: 32px;
-  --padding-top: 16px;
-  --padding-bottom: 16px;
+  --border-radius: 16px;
+  --padding-start: 48px;
+  --padding-end: 48px;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
+  box-shadow: 0 8px 24px rgba(var(--ion-color-primary-rgb), 0.3);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.4);
+  }
 }
 
 // Dark theme adjustments
 @media (prefers-color-scheme: dark) {
+  .form-card {
+    background: var(--ion-color-dark-tint);
+    border-color: var(--ion-color-dark-shade);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+  }
+
   .form-select,
   .form-input {
-    --background: var(--ion-color-dark-tint);
+    --background: var(--ion-color-dark-shade);
     --color: var(--ion-color-light);
     --placeholder-color: var(--ion-color-medium);
   }
 
-  .form-label {
+  .card-title {
     color: var(--ion-color-light);
   }
 
   .page-title {
-    color: var(--ion-color-primary-tint);
+    color: var(--ion-color-light);
   }
 
   .page-description {
     color: var(--ion-color-medium);
+  }
+
+  .header-icon ion-icon {
+    background: linear-gradient(135deg, var(--ion-color-primary-tint), var(--ion-color-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 
@@ -154,15 +264,165 @@ ebutton {
     padding: 16px;
   }
 
+  .header-section {
+    margin-bottom: 24px;
+    padding: 20px 0;
+  }
+
+  .header-icon ion-icon {
+    font-size: 48px;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .form-section {
+    margin-bottom: 24px;
+  }
+
+  .form-card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-size: 16px;
+  }
+
+  .form-select,
+  .form-input {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    --min-height: 52px;
+    font-size: 15px;
+
+    &::part(placeholder) {
+      font-size: 15px;
+    }
+
+    &::part(text) {
+      font-size: 15px;
+    }
+  }
+
+  .create-button {
+    --padding-start: 32px;
+    --padding-end: 32px;
+    --padding-top: 18px;
+    --padding-bottom: 18px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header-section {
+    margin-bottom: 20px;
+    padding: 16px 0;
+  }
+
   .page-title {
     font-size: 24px;
   }
 
-  .form-row {
-    margin-bottom: 24px;
+  .page-description {
+    font-size: 14px;
   }
 
-  .btn-row {
-    margin-top: 32px;
+  .form-section {
+    margin-bottom: 20px;
+  }
+
+  .form-card {
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .card-header {
+    margin-bottom: 12px;
+  }
+
+  .card-icon {
+    font-size: 20px;
+    margin-right: 12px;
+  }
+
+  .card-title {
+    font-size: 15px;
+  }
+}
+
+// Custom select button styling
+.custom-select-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 18px 20px;
+  background: var(--ion-color-light-shade);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 56px;
+
+  &:hover {
+    background: var(--ion-color-light-tint);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.select-text {
+  color: var(--ion-color-dark);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  flex: 1;
+  text-align: left;
+}
+
+.select-placeholder {
+  color: var(--ion-color-medium);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  flex: 1;
+  text-align: left;
+  opacity: 0.6;
+}
+
+.select-icon {
+  color: var(--ion-color-primary);
+  font-size: 20px;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+// Dark theme adjustments for custom select buttons
+@media (prefers-color-scheme: dark) {
+  .custom-select-button {
+    background: var(--ion-color-dark-shade);
+
+    &:hover {
+      background: var(--ion-color-dark-tint);
+    }
+  }
+
+  .select-text {
+    color: var(--ion-color-light);
+  }
+
+  .select-placeholder {
+    color: var(--ion-color-medium);
   }
 }

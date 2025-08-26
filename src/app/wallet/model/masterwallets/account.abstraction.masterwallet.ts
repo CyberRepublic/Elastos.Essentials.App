@@ -1,3 +1,4 @@
+import { AccountAbstractionService } from "../../services/account-abstraction/account-abstraction.service";
 import { SafeService } from "../../services/safe.service";
 import { WalletJSSDKHelper } from "../networks/elastos/wallet.jssdk.helper";
 import { EVMNetwork } from "../networks/evms/evm.network";
@@ -10,7 +11,7 @@ import { SerializedAccountAbstractionMasterWallet } from "./wallet.types";
  */
 export class AccountAbstractionMasterWallet extends MasterWallet {
   public controllerWalletId: string;
-  public chainId: number;
+  public aaProviderId: string;
 
   public static newFromSerializedWallet(
     serialized: SerializedAccountAbstractionMasterWallet
@@ -39,6 +40,7 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
     super.deserialize(serialized);
 
     this.controllerWalletId = serialized.controllerMasterWalletId;
+    this.aaProviderId = serialized.aaProviderId;
     // Remove chainId and isDeployed from here since they're network-specific
 
     // Load safe data
@@ -52,7 +54,7 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
     super._serialize(serialized as SerializedAccountAbstractionMasterWallet);
 
     serialized.controllerMasterWalletId = this.controllerWalletId;
-    // Remove chainId and isDeployed since they're now in safe
+    serialized.aaProviderId = this.aaProviderId;
 
     return serialized;
   }
@@ -68,12 +70,24 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
     }
 
     const evmNetwork = network as EVMNetwork;
+    const chainId = evmNetwork.getMainChainID();
 
-    if (evmNetwork.getMainChainID() !== this.chainId) {
+    // Check if the AA provider used by this wallet supports the given chain
+    const provider = AccountAbstractionService.instance.getProviderById(
+      this.aaProviderId
+    );
+    if (!provider) {
       return false;
     }
 
-    return true;
+    return provider.supportsChain(chainId);
+  }
+
+  /**
+   * Get the AA provider ID used by this wallet
+   */
+  public getAAProviderId(): string {
+    return this.aaProviderId;
   }
 
   /**
@@ -81,26 +95,5 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
    */
   public getControllerWalletId(): string {
     return this.controllerWalletId;
-  }
-
-  /**
-   * Get the chain ID where this AA wallet exists
-   */
-  public getChainId(): number {
-    return this.chainId;
-  }
-
-  /**
-   * Get deployed address for a specific network
-   */
-  public getDeployedAddress(networkKey: string): string | null {
-    return SafeService.instance.getAADeployedAddress(this.id, networkKey);
-  }
-
-  /**
-   * Check if wallet is deployed on a specific network
-   */
-  public isDeployed(networkKey: string): boolean {
-    return SafeService.instance.isAAWalletDeployed(this.id, networkKey);
   }
 }

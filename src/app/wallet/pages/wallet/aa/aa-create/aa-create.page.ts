@@ -1,6 +1,10 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
-import { IonSelect } from "@ionic/angular";
+import { IonSelect, ModalController } from "@ionic/angular";
 import { TranslateService } from "@ngx-translate/core";
+import {
+  MenuSheetComponent,
+  MenuSheetMenu,
+} from "src/app/components/menu-sheet/menu-sheet.component";
 import { TitleBarComponent } from "src/app/components/titlebar/titlebar.component";
 import { Logger } from "src/app/logger";
 import { GlobalEvents } from "src/app/services/global.events.service";
@@ -62,7 +66,8 @@ export class AACreatePage implements OnInit {
     private accountAbstractionService: AccountAbstractionService,
     private evmService: EVMService,
     private walletNetworkService: WalletNetworkService,
-    private walletCreationService: WalletCreationService
+    private walletCreationService: WalletCreationService,
+    private modalCtrl: ModalController
   ) {
     this.initData();
   }
@@ -244,8 +249,13 @@ export class AACreatePage implements OnInit {
    * Get the display name for a chain
    */
   public getChainDisplayName(chainId: number): string {
-    const network = this.walletNetworkService.getNetworkByChainId(chainId);
-    return network ? network.name : `Chain ${chainId}`;
+    const chain = this.availableChains.find((c) => c.chainId === chainId);
+    return chain ? chain.chainId.toString() : chainId.toString();
+  }
+
+  public getControllerWalletName(walletId: string): string {
+    const wallet = this.controllerWallets.find((w) => w.id === walletId);
+    return wallet ? `${wallet.name} (${wallet.type})` : walletId;
   }
 
   public allInputsValid(): boolean {
@@ -293,6 +303,7 @@ export class AACreatePage implements OnInit {
         walletId,
         this.wallet.name,
         this.wallet.controllerWalletId,
+        this.wallet.provider.id, // Pass the AA provider ID
         this.wallet.chainId,
         false // Always assume not deployed
       );
@@ -320,8 +331,86 @@ export class AACreatePage implements OnInit {
     }
   }
 
-  public getControllerWalletName(walletId: string): string {
-    const wallet = this.controllerWallets.find((w) => w.id === walletId);
-    return wallet ? wallet.name : walletId;
+  // Custom select methods using MenuSheetComponent
+  async showControllerWalletSelect() {
+    const menuItems: MenuSheetMenu[] = this.controllerWallets.map((wallet) => ({
+      title: `${wallet.name} (${wallet.type})`,
+      routeOrAction: () => {
+        this.wallet.controllerWalletId = wallet.id;
+        this.onControllerWalletChanged({ detail: { value: wallet.id } });
+      },
+    }));
+
+    const menu: MenuSheetMenu = {
+      title: this.translate.instant("wallet.aa.create.controller-wallet"),
+      items: menuItems,
+    };
+
+    const modal = await this.modalCtrl.create({
+      component: MenuSheetComponent,
+      componentProps: { menu },
+      backdropDismiss: true,
+      cssClass: !this.theme.darkMode
+        ? "menu-chooser-component"
+        : "menu-chooser-component-dark",
+    });
+
+    await modal.present();
+  }
+
+  async showChainSelect() {
+    const menuItems: MenuSheetMenu[] = this.availableChains.map((chain) => ({
+      title: this.getChainDisplayName(chain.chainId),
+      routeOrAction: () => {
+        this.wallet.chainId = chain.chainId;
+        this.onChainChanged({ detail: { value: chain.chainId } });
+      },
+    }));
+
+    const menu: MenuSheetMenu = {
+      title: this.translate.instant("wallet.aa.create.chain"),
+      items: menuItems,
+    };
+
+    const modal = await this.modalCtrl.create({
+      component: MenuSheetComponent,
+      componentProps: { menu },
+      backdropDismiss: true,
+      cssClass: !this.theme.darkMode
+        ? "menu-chooser-component"
+        : "menu-chooser-component-dark",
+    });
+
+    await modal.present();
+  }
+
+  async showProviderSelect() {
+    if (!this.wallet.chainId) return;
+
+    const menuItems: MenuSheetMenu[] = this.filteredProviders.map(
+      (provider) => ({
+        title: provider.name,
+        routeOrAction: () => {
+          this.wallet.providerName = provider.name;
+          this.onProviderChanged({ detail: { value: provider.name } });
+        },
+      })
+    );
+
+    const menu: MenuSheetMenu = {
+      title: this.translate.instant("wallet.aa.create.provider"),
+      items: menuItems,
+    };
+
+    const modal = await this.modalCtrl.create({
+      component: MenuSheetComponent,
+      componentProps: { menu },
+      backdropDismiss: true,
+      cssClass: !this.theme.darkMode
+        ? "menu-chooser-component"
+        : "menu-chooser-component-dark",
+    });
+
+    await modal.present();
   }
 }

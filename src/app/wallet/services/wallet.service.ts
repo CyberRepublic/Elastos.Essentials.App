@@ -789,8 +789,9 @@ export class WalletService {
     masterId: string,
     walletName: string,
     controllerWalletId: string,
+    aaProviderId: string,
     chainId: number,
-    isDeployed: boolean = false,
+    isDeployed = false,
     deployedAddress?: string,
     implementationAddress?: string,
     deploymentTxHash?: string
@@ -802,31 +803,17 @@ export class WalletService {
       id: masterId,
       name: walletName,
       theme: defaultWalletTheme(),
-      networkOptions: [
-        {
-          network: "ethereum", // Default to ethereum, will be overridden by specific chain
-        },
-      ],
+      networkOptions: [],
       creator: WalletCreator.USER,
       controllerMasterWalletId: controllerWalletId,
+      aaProviderId: aaProviderId,
     };
 
     // Create the wallet first
     const wallet = this.createMasterWalletFromSerializedInfo(masterWalletInfo);
 
-    // If we have deployment info, save it to the safe
-    if (deployedAddress && isDeployed) {
-      const networkKey = this.getNetworkKeyByChainId(chainId);
-      if (networkKey) {
-        void SafeService.instance.updateAADeployedAddress(
-          masterId,
-          networkKey,
-          deployedAddress,
-          implementationAddress,
-          deploymentTxHash
-        );
-      }
-    }
+    // Note: Address saving/recovery is now handled by the AA network wallet
+    // through the account abstraction service, not through the safe
 
     return wallet;
   }

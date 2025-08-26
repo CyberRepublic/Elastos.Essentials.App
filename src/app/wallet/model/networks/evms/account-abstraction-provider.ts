@@ -7,13 +7,16 @@ export type AccountAbstractionProviderChainConfig = {
 };
 
 export abstract class AccountAbstractionProvider {
+  readonly id: string;
   readonly name: string;
   readonly supportedChains: AccountAbstractionProviderChainConfig[];
 
   constructor(
+    id: string,
     name: string,
     supportedChains: AccountAbstractionProviderChainConfig[]
   ) {
+    this.id = id;
     this.name = name;
     this.supportedChains = supportedChains;
   }

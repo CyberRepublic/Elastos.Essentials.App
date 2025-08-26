@@ -1,4 +1,4 @@
-import BigNumber from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import Queue from "promise-queue";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { Logger } from "src/app/logger";
@@ -159,7 +159,16 @@ export abstract class NetworkWallet<
     //     void this.fetchAndRearmStakingAssets();
     // }
 
-    this.getTransactionDiscoveryProvider().start();
+    const txDiscoveryProvider = this.getTransactionDiscoveryProvider();
+    if (txDiscoveryProvider) {
+      txDiscoveryProvider.start();
+    } else {
+      Logger.warn(
+        "wallet",
+        "No transaction discovery provider configured for network wallet " +
+          this.id
+      );
+    }
 
     return;
   }

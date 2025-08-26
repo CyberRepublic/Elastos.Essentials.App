@@ -69,8 +69,8 @@ export class AASubWallet<
   }
 
   public getAccountAddress(): string {
-    // AA wallets use the address returned by the AA contract.
-    return this.aaNetworkWallet.getDeployedAAAddress();
+    // AA wallets use the address returned by the AA provider.
+    return this.aaNetworkWallet.getAddresses()[0].address;
   }
 
   public getAccountPublicKey(): string {
@@ -87,7 +87,7 @@ export class AASubWallet<
     toAddress: string,
     amount: string,
     fee: string,
-    memo: string = ""
+    memo = ""
   ): Promise<EthTransaction> {
     // TODO: Implement AA transaction creation
     throw new Error("AA transaction creation not yet implemented");
@@ -100,7 +100,7 @@ export class AASubWallet<
 
   protected publishTransaction(
     signedTransaction: string,
-    visualFeedback: boolean = true
+    visualFeedback = true
   ): Promise<string> {
     // TODO: Implement AA transaction publishing
     throw new Error("AA transaction publishing not yet implemented");
@@ -113,10 +113,7 @@ export class AASubWallet<
     return Promise.resolve(null);
   }
 
-  public getTransactions(
-    limit: number = 50,
-    offset: number = 0
-  ): Promise<EthTransaction[]> {
+  public getTransactions(limit = 50, offset = 0): Promise<EthTransaction[]> {
     // TODO: Implement AA transaction history
     return Promise.resolve([]);
   }
@@ -177,7 +174,7 @@ export class AASubWallet<
 
   public createAddress(): string {
     // AA wallets use the address returned by the AA contract.
-    return this.aaNetworkWallet.getDeployedAAAddress();
+    return this.aaNetworkWallet.getAddresses()[0].address;
   }
 
   public update(): void {
@@ -250,7 +247,7 @@ export class AASubWallet<
     usage: AddressUsage | string = AddressUsage.DEFAULT
   ): string {
     // AA wallets use the address returned by the AA contract.
-    return this.aaNetworkWallet.getDeployedAAAddress();
+    return this.aaNetworkWallet.getAddresses()[0].address;
   }
 
   public getAverageBlocktime(): number {
