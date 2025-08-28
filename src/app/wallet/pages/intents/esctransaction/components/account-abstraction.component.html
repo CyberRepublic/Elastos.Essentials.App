@@ -1,0 +1,40 @@
+<!-- Account Abstraction Transaction Component -->
+<div class="msg-container">
+  <p>{{ 'wallet.esctransaction-you-are-using' | translate }}</p>
+  <h1><span>{{ uiService.getFixedBalance(totalTransactionCost.totalAsBigNumber) }}</span> {{
+    getCurrencyInUse() }}</h1>
+
+  <!-- Account Abstraction specific transaction details -->
+  <div class="item-row ripple ion-activatable">
+    <div class="item-label">{{ 'wallet.esctransaction-value' | translate }}</div>
+    <div class="item-value">
+      <span>{{ uiService.getFixedBalance(totalTransactionCost.valueAsBigNumber) }} {{ getCurrencyInUse() }}</span>
+    </div>
+  </div>
+
+  <!-- Paymaster section - placeholder for future configurability -->
+  <div class="item-row ripple ion-activatable">
+    <div class="item-label">{{ 'wallet.esctransaction-fees' | translate }}</div>
+    <div class="item-value">
+      <span>{{ 'wallet.esctransaction-covered-by-paymaster' | translate }}</span>
+    </div>
+  </div>
+
+  <!-- Gas fees for AA (may be covered by paymaster) -->
+  <div class="item-row ripple ion-activatable">
+    <div class="item-label">{{ 'wallet.esctransaction-fees' | translate }}</div>
+    <div class="item-value">
+      <div class="fee-primary">
+        <span>{{ 'wallet.esctransaction-covered-by-paymaster' | translate }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Balance remaining -->
+  <div class="item-row ripple ion-activatable">
+    <div class="item-label">{{ 'wallet.balance-remaining' | translate }}</div>
+    <div class="item-value">
+      <span>{{ uiService.getFixedBalance(balance) } {{ getCurrencyInUse() }}}</span>
+    </div>
+  </div>
+</div>
