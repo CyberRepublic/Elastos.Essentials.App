@@ -9,11 +9,12 @@ import { AnyNetworkWallet } from "../../base/networkwallets/networkwallet";
 import { AnySubWallet } from "../../base/subwallets/subwallet";
 import { AccountAbstractionProvider } from "../account-abstraction-provider";
 import { EVMNetwork } from "../evm.network";
+import { EVMSafe } from "./evm.safe";
 
 /**
  * Safe specialized for Account Abstraction wallets
  */
-export class AASafe extends Safe {
+export class AASafe extends Safe implements EVMSafe {
   private safeService = SafeService.instance;
   private aaProvider: AccountAbstractionProvider;
   private aaAddress: string;
@@ -77,6 +78,27 @@ export class AASafe extends Safe {
     } else {
       return [];
     }
+  }
+
+  public createTransferTransaction(
+    toAddress: string,
+    amount: string,
+    gasPrice: string,
+    gasLimit: string,
+    nonce: number
+  ): Promise<any> {
+    throw new Error("createTransferTransaction not implemented by AA Safe");
+  }
+
+  public createContractTransaction(
+    contractAddress: string,
+    amount: string,
+    gasPrice: string,
+    gasLimit: string,
+    nonce: number,
+    data: any
+  ): Promise<any> {
+    throw new Error("createContractTransaction not implemented by AA Safe");
   }
 
   public signTransaction(

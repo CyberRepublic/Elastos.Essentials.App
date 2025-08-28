@@ -26,11 +26,11 @@ import { WalletUIService } from "src/app/wallet/services/wallet.ui.service";
 import { WalletCreationService } from "src/app/wallet/services/walletcreation.service";
 
 @Component({
-  selector: "app-aa-create",
-  templateUrl: "./aa-create.page.html",
-  styleUrls: ["./aa-create.page.scss"],
+  selector: "app-account-abstraction-create",
+  templateUrl: "./account-abstraction-create.page.html",
+  styleUrls: ["./account-abstraction-create.page.scss"],
 })
-export class AACreatePage implements OnInit {
+export class AccountAbstractionCreatePage implements OnInit {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
   @ViewChild("chainSelect", { static: false }) chainSelect: IonSelect;
   @ViewChild("providerSelect", { static: false })

@@ -250,9 +250,11 @@ const routes: Routes = [
 
   // AA Wallet
   {
-    path: "aa",
+    path: "account-abstraction",
     loadChildren: () =>
-      import("./pages/wallet/aa/module").then((m) => m.AAModule),
+      import("./pages/wallet/account-abstraction/module").then(
+        (m) => m.AccountAbstractionModule
+      ),
   },
 
   // Ledger

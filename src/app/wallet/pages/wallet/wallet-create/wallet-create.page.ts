@@ -171,7 +171,7 @@ export class WalletCreatePage implements OnInit {
     } else if (
       this.walletCreationService.type === NewWallet.ACCOUNT_ABSTRACTION
     ) {
-      this.native.go("/wallet/aa/create");
+      this.native.go("/wallet/account-abstraction/create");
     } else {
       if (this.importByPrivateKey) {
         this.native.go("/wallet/wallet-import-privatekey");

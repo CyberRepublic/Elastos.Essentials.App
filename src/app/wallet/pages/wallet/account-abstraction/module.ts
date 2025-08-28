@@ -5,7 +5,7 @@ import { IonicModule } from "@ionic/angular";
 import { TranslateModule } from "@ngx-translate/core";
 
 import { SharedComponentsModule } from "src/app/components/sharedcomponents.module";
-import { AACreatePage } from "./aa-create/aa-create.page";
+import { AccountAbstractionCreatePage } from "./create/account-abstraction-create.page";
 import { AAModuleRoutingModule } from "./routing";
 
 @NgModule({
@@ -17,7 +17,7 @@ import { AAModuleRoutingModule } from "./routing";
     TranslateModule,
     AAModuleRoutingModule,
   ],
-  declarations: [AACreatePage],
+  declarations: [AccountAbstractionCreatePage],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class AAModule {}
+export class AccountAbstractionModule {}
