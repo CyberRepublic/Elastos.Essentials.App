@@ -1,5 +1,4 @@
 import { AccountAbstractionService } from "../../services/account-abstraction/account-abstraction.service";
-import { SafeService } from "../../services/safe.service";
 import { WalletJSSDKHelper } from "../networks/elastos/wallet.jssdk.helper";
 import { EVMNetwork } from "../networks/evms/evm.network";
 import { AnyNetwork } from "../networks/network";
@@ -25,9 +24,6 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
   }
 
   public async destroy() {
-    // Clean up safe data
-    await SafeService.instance.saveAASafe(this.id);
-
     // Destroy the wallet in the wallet js sdk if it exists
     try {
       await WalletJSSDKHelper.destroyWallet(this.id);
@@ -41,10 +37,6 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
 
     this.controllerWalletId = serialized.controllerMasterWalletId;
     this.aaProviderId = serialized.aaProviderId;
-    // Remove chainId and isDeployed from here since they're network-specific
-
-    // Load safe data
-    void SafeService.instance.loadAASafe(this.id);
   }
 
   public serialize(): SerializedAccountAbstractionMasterWallet {

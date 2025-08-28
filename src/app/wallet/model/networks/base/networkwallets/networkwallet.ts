@@ -186,7 +186,7 @@ export abstract class NetworkWallet<
     clearTimeout(this.fetchMainTokenTimer);
     clearTimeout(this.fetchStakingAssetTimer);
 
-    await this.getTransactionDiscoveryProvider().stop();
+    await this.getTransactionDiscoveryProvider()?.stop();
   }
 
   private async fetchAndRearmMainTokenValue(): Promise<void> {

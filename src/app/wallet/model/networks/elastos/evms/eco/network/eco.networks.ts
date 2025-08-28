@@ -48,15 +48,17 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
           this
         );
       case WalletType.ACCOUNT_ABSTRACTION:
-        const ElastosECOAccountAbstractionNetworkWallet = (
-          await import("../../../../evms/networkwallets/aa.networkwallet")
-        ).AANetworkWallet;
-        return new ElastosECOAccountAbstractionNetworkWallet(
+        const AccountAbstractionNetworkWallet = (
+          await import(
+            "../../../../evms/networkwallets/account-abstraction.networkwallet"
+          )
+        ).AccountAbstractionNetworkWallet;
+        return new AccountAbstractionNetworkWallet(
           masterWallet as AccountAbstractionMasterWallet,
           this,
           new AASafe(masterWallet),
-          "ECO",
-          "Account Abstraction"
+          "ELA",
+          "Elastos ECO Chain"
         );
       default:
         Logger.warn(

@@ -1,33 +1,26 @@
-import { EVMService } from "src/app/wallet/services/evm/evm.service";
+import { Logger } from "src/app/logger";
+import { LocalStorage } from "src/app/wallet/services/storage.service";
 import { AccountAbstractionService } from "../../../../services/account-abstraction/account-abstraction.service";
 import { WalletService } from "../../../../services/wallet.service";
-import { ExtendedTransactionInfo } from "../../../extendedtxinfo";
 import { AccountAbstractionMasterWallet } from "../../../masterwallets/account.abstraction.masterwallet";
 import { WalletNetworkOptions } from "../../../masterwallets/wallet.types";
 import { AddressUsage } from "../../../safes/addressusage";
 import { Safe } from "../../../safes/safe";
-import {
-  NetworkWallet,
-  WalletAddressInfo,
-} from "../../base/networkwallets/networkwallet";
+import { WalletAddressInfo } from "../../base/networkwallets/networkwallet";
 import { AnySubWallet } from "../../base/subwallets/subwallet";
 import { AccountAbstractionProvider } from "../account-abstraction-provider";
 import type { EVMNetwork } from "../evm.network";
-import { AASubWallet } from "../subwallets/aa.subwallet";
+import { AccountAbstractionSubWallet } from "../subwallets/account-abstraction.subwallet";
 import { MainCoinEVMSubWallet } from "../subwallets/evm.subwallet";
-import { AnyEVMNetworkWallet } from "./evm.networkwallet";
+import { AnyEVMNetworkWallet, EVMNetworkWallet } from "./evm.networkwallet";
 
 /**
  * Network wallet type for Account Abstraction wallets on EVM networks
  */
-export class AANetworkWallet extends NetworkWallet<
+export class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
   AccountAbstractionMasterWallet,
   WalletNetworkOptions
 > {
-  protected mainTokenSubWallet: MainCoinEVMSubWallet<WalletNetworkOptions> =
-    null;
-  protected aaSubWallet: AASubWallet<WalletNetworkOptions> = null;
-
   // Store the AA provider and AA address
   protected aaProvider: AccountAbstractionProvider = null;
   protected aaAddress: string = null;
@@ -37,10 +30,10 @@ export class AANetworkWallet extends NetworkWallet<
     public network: EVMNetwork,
     safe: Safe,
     displayToken: string,
-    public mainSubWalletFriendlyName: string,
+    mainSubWalletFriendlyName: string,
     public averageBlocktime = 5
   ) {
-    super(masterWallet, network, safe, displayToken);
+    super(masterWallet, network, safe, displayToken, mainSubWalletFriendlyName);
   }
 
   public async initialize(): Promise<void> {
@@ -62,22 +55,14 @@ export class AANetworkWallet extends NetworkWallet<
 
   protected async prepareStandardSubWallets(): Promise<void> {
     // Create the main token subwallet (ETH, BSC, etc.)
-    this.mainTokenSubWallet = new MainCoinEVMSubWallet(
-      this as any, // Cast to satisfy type requirements
+    this.mainTokenSubWallet = new AccountAbstractionSubWallet(
+      this,
       this.masterWallet.id,
       this.mainSubWalletFriendlyName
     );
 
-    // Create the AA subwallet
-    this.aaSubWallet = new AASubWallet(
-      this as any, // Cast to satisfy type requirements
-      this.masterWallet.id,
-      "Account Abstraction"
-    );
-
     // Add both subwallets
     this.subWallets[this.mainTokenSubWallet.id] = this.mainTokenSubWallet;
-    this.subWallets[this.aaSubWallet.id] = this.aaSubWallet;
 
     return await void 0;
   }
@@ -97,7 +82,21 @@ export class AANetworkWallet extends NetworkWallet<
    * Prepares and saves the AA account address for this network using the AA provider.
    * Returns the address if successful, null otherwise.
    */
-  public async prepareAccountAddress(): Promise<string | null> {
+  public async prepareAccountAddress(): Promise<void> {
+    // Use cached address if available
+    this.aaAddress = await LocalStorage.instance.get(
+      `aa-address-${this.aaProvider.id}-${this.masterWallet.id}`
+    );
+    if (this.aaAddress) {
+      Logger.log(
+        "wallet",
+        "Using cached account abstraction address",
+        this.aaAddress
+      );
+      return;
+    }
+
+    // If no cached address, fetch from the provider / AA contract
     try {
       if (!this.aaProvider) {
         this.aaProvider = AccountAbstractionService.instance.getProviderById(
@@ -150,7 +149,12 @@ export class AANetworkWallet extends NetworkWallet<
         controllerAddress,
         this.network.getMainChainID()
       );
-      return this.aaAddress;
+
+      // Save the address to local storage
+      await LocalStorage.instance.set(
+        `aa-address-${this.aaProvider.id}-${this.masterWallet.id}`,
+        this.aaAddress
+      );
     } catch (error) {
       console.error("Error getting AA address:", error);
       this.aaAddress = null;
@@ -171,38 +175,6 @@ export class AANetworkWallet extends NetworkWallet<
 
   public getMainTokenSubWallet(): AnySubWallet {
     return this.mainTokenSubWallet;
-  }
-
-  public getAASubWallet(): AASubWallet<WalletNetworkOptions> {
-    return this.aaSubWallet;
-  }
-
-  public getDisplayTokenName(): string {
-    return this.displayToken;
-  }
-
-  public getAverageBlocktime(): number {
-    return this.averageBlocktime;
-  }
-
-  protected async fetchExtendedTxInfo(
-    txHash: string
-  ): Promise<ExtendedTransactionInfo> {
-    // Fetch transaction receipt
-    let receipt = await EVMService.instance.getTransactionReceipt(
-      this.network,
-      txHash
-    );
-    if (!receipt) return;
-
-    // Save extended info to cache
-    if (receipt) {
-      await this.saveExtendedTxInfo(txHash, {
-        evm: {
-          transactionReceipt: receipt,
-        },
-      });
-    }
   }
 
   /**

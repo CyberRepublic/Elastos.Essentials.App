@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Logger } from "src/app/logger";
-import { PGAAAccountProvider } from "../../model/networks/elastos/evms/eco/aa-providers/pg-aa-account.provider";
+import { PGAccountAbstractionProvider } from "../../model/networks/elastos/evms/eco/account-abstraction-providers/pg-account-abstraction.provider";
 import { AccountAbstractionProvider } from "../../model/networks/evms/account-abstraction-provider";
 
 /**
@@ -23,7 +23,7 @@ export class AccountAbstractionService {
   }
 
   private registerProviders(): void {
-    this.registerAAProvider(new PGAAAccountProvider());
+    this.registerAAProvider(new PGAccountAbstractionProvider());
   }
 
   public registerAAProvider(provider: AccountAbstractionProvider): void {

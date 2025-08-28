@@ -31,13 +31,6 @@ export type StandardWalletSafe = {
   privateKeyType?: PrivateKeyType;
 };
 
-export type AASafe = {
-  deployedAddresses: { [networkKey: string]: string }; // Network key -> deployed address mapping
-  implementationAddresses: { [networkKey: string]: string }; // Network key -> implementation address mapping
-  deploymentTxHashes: { [networkKey: string]: string }; // Network key -> deployment tx hash mapping
-  deploymentTimestamps: { [networkKey: string]: number }; // Network key -> deployment timestamp mapping
-};
-
 /**
  * Service used to store sensitive wallet information such as seeds.
  * We use a dedicated memory-only object here to avoid storing (even encrypted) seeds and secret wallet keys
@@ -49,7 +42,6 @@ export class SafeService {
   public static instance: SafeService = null;
 
   private standardWalletSafes: { [walletId: string]: StandardWalletSafe } = {};
-  private aaSafes: { [walletId: string]: AASafe } = {};
 
   constructor(private localStorage: LocalStorage) {
     SafeService.instance = this;
@@ -67,82 +59,5 @@ export class SafeService {
     }
 
     return safe;
-  }
-
-  public getAASafe(walletId: string): AASafe {
-    let safe = this.aaSafes[walletId];
-    if (!safe) {
-      safe = {
-        deployedAddresses: {},
-        implementationAddresses: {},
-        deploymentTxHashes: {},
-        deploymentTimestamps: {},
-      };
-      this.aaSafes[walletId] = safe;
-    }
-    return safe;
-  }
-
-  /**
-   * Save AA safe data to persistent storage
-   */
-  public async saveAASafe(walletId: string): Promise<void> {
-    const safe = this.aaSafes[walletId];
-    if (safe) {
-      await this.localStorage.saveAASafe(walletId, safe);
-    }
-  }
-
-  /**
-   * Load AA safe data from persistent storage
-   */
-  public async loadAASafe(walletId: string): Promise<void> {
-    const safe = await this.localStorage.loadAASafe(walletId);
-    if (safe) {
-      this.aaSafes[walletId] = safe;
-    }
-  }
-
-  /**
-   * Update deployed address for a specific network
-   */
-  public async updateAADeployedAddress(
-    walletId: string,
-    networkKey: string,
-    deployedAddress: string,
-    implementationAddress?: string,
-    deploymentTxHash?: string
-  ): Promise<void> {
-    const safe = this.getAASafe(walletId);
-    safe.deployedAddresses[networkKey] = deployedAddress;
-    if (implementationAddress) {
-      safe.implementationAddresses[networkKey] = implementationAddress;
-    }
-    if (deploymentTxHash) {
-      safe.deploymentTxHashes[networkKey] = deploymentTxHash;
-    }
-    safe.deploymentTimestamps[networkKey] = Date.now();
-
-    // Persist to disk
-    await this.saveAASafe(walletId);
-  }
-
-  /**
-   * Get deployed address for a specific network
-   */
-  public getAADeployedAddress(
-    walletId: string,
-    networkKey: string
-  ): string | null {
-    const safe = this.aaSafes[walletId];
-    return safe?.deployedAddresses[networkKey] || null;
-  }
-
-  /**
-   * Check if AA wallet is deployed on a specific network
-   */
-  public isAAWalletDeployed(walletId: string, networkKey: string): boolean {
-    const safe = this.aaSafes[walletId];
-    return !!safe?.deployedAddresses[networkKey];
   }
 }

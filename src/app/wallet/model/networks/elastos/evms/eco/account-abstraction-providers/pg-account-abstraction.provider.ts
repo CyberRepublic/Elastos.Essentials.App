@@ -12,10 +12,11 @@ import { AccountAbstractionProvider } from "../../../../evms/account-abstraction
  * PG AA Account Provider for ECO chain
  * Implements Account Abstraction functionality specific to the PG implementation
  */
-export class PGAAAccountProvider extends AccountAbstractionProvider {
+export class PGAccountAbstractionProvider extends AccountAbstractionProvider {
   constructor() {
-    super("pg", "PG AA Account", [
+    super("pg", "PG ECO Chain Account", [
       {
+        // ECO mainnet
         chainId: 12343,
         entryPointAddress: "0x1Cf34692a73D0edf3d01C5f991441D891469950a",
         bundlerRpcUrl: "https://rpc.eco.evm.testnet.elastos.io",
@@ -26,7 +27,8 @@ export class PGAAAccountProvider extends AccountAbstractionProvider {
   }
 
   /**
-   * Get the AA account address for a given EOA account on a specific chain
+   * Get the AA account address for a given EOA account on a specific chain by asking the contract itself.
+   *
    * @param eoaAddress The EOA address
    * @param chainId The chain ID
    * @returns Promise resolving to the AA account address
