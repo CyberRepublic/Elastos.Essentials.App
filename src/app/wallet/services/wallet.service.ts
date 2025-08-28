@@ -107,13 +107,6 @@ export enum WalletStateOperation {
   BECAME_ACTIVE,
 }
 
-export type AASafe = {
-  deployedAddresses: { [networkKey: string]: string }; // Network key -> deployed address mapping
-  implementationAddresses: { [networkKey: string]: string }; // Network key -> implementation address mapping
-  deploymentTxHashes: { [networkKey: string]: string }; // Network key -> deployment tx hash mapping
-  deploymentTimestamps: { [networkKey: string]: number }; // Network key -> deployment timestamp mapping
-};
-
 @Injectable({
   providedIn: "root",
 })

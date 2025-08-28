@@ -1,3 +1,5 @@
+import { LocalStorage } from "src/app/wallet/services/storage.service";
+
 export type AccountAbstractionProviderChainConfig = {
   chainId: number;
   entryPointAddress: string;
@@ -29,6 +31,30 @@ export abstract class AccountAbstractionProvider {
     eoaAddress: string,
     chainId: number
   ): Promise<string>;
+
+  /**
+   * Saves an account address, normally retrieved from the contract, into local storage,
+   * so we don't need to retrieve it again later.
+   */
+  protected async saveAccountAddress(
+    eoaAddress: string,
+    chainId: number,
+    accountAddress: string
+  ): Promise<void> {
+    await LocalStorage.instance.set(
+      `aa-address-${this.id}-${eoaAddress}-${chainId}`,
+      accountAddress
+    );
+  }
+
+  protected loadAccountAddress(
+    eoaAddress: string,
+    chainId: number
+  ): Promise<string> {
+    return LocalStorage.instance.get(
+      `aa-address-${this.id}-${eoaAddress}-${chainId}`
+    );
+  }
 
   /**
    * Check if this provider supports a specific chain

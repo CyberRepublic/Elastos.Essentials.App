@@ -56,7 +56,7 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
         return new AccountAbstractionNetworkWallet(
           masterWallet as AccountAbstractionMasterWallet,
           this,
-          new AASafe(masterWallet),
+          new AASafe(masterWallet as AccountAbstractionMasterWallet),
           "ELA",
           "Elastos ECO Chain"
         );
