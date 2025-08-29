@@ -1,48 +1,45 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
-import { IonSelect, ModalController } from "@ionic/angular";
-import { TranslateService } from "@ngx-translate/core";
-import {
-  MenuSheetComponent,
-  MenuSheetMenu,
-} from "src/app/components/menu-sheet/menu-sheet.component";
-import { TitleBarComponent } from "src/app/components/titlebar/titlebar.component";
-import { Logger } from "src/app/logger";
-import { GlobalEvents } from "src/app/services/global.events.service";
-import { GlobalPopupService } from "src/app/services/global.popup.service";
-import { GlobalThemeService } from "src/app/services/theming/global.theme.service";
-import { MasterWallet } from "src/app/wallet/model/masterwallets/masterwallet";
-import { WalletType } from "src/app/wallet/model/masterwallets/wallet.types";
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { IonSelect, ModalController } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
+import { MenuSheetComponent, MenuSheetMenu } from 'src/app/components/menu-sheet/menu-sheet.component';
+import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
+import { Logger } from 'src/app/logger';
+import { GlobalEvents } from 'src/app/services/global.events.service';
+import { GlobalPopupService } from 'src/app/services/global.popup.service';
+import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
+import { MasterWallet } from 'src/app/wallet/model/masterwallets/masterwallet';
+import { WalletType } from 'src/app/wallet/model/masterwallets/wallet.types';
 import {
   AccountAbstractionProvider,
-  AccountAbstractionProviderChainConfig,
-} from "src/app/wallet/model/networks/evms/account-abstraction-provider";
-import { AccountAbstractionService } from "src/app/wallet/services/account-abstraction/account-abstraction.service";
-import { AuthService } from "src/app/wallet/services/auth.service";
-import { EVMService } from "src/app/wallet/services/evm/evm.service";
-import { Native } from "src/app/wallet/services/native.service";
-import { WalletNetworkService } from "src/app/wallet/services/network.service";
-import { WalletService } from "src/app/wallet/services/wallet.service";
-import { WalletUIService } from "src/app/wallet/services/wallet.ui.service";
-import { WalletCreationService } from "src/app/wallet/services/walletcreation.service";
+  AccountAbstractionProviderChainConfig
+} from 'src/app/wallet/model/networks/evms/account-abstraction-provider';
+import { AccountAbstractionProvidersService } from 'src/app/wallet/services/account-abstraction/account-abstraction-providers.service';
+import { AuthService } from 'src/app/wallet/services/auth.service';
+import { EVMService } from 'src/app/wallet/services/evm/evm.service';
+import { Native } from 'src/app/wallet/services/native.service';
+import { WalletNetworkService } from 'src/app/wallet/services/network.service';
+import { WalletService } from 'src/app/wallet/services/wallet.service';
+import { WalletUIService } from 'src/app/wallet/services/wallet.ui.service';
+import { WalletCreationService } from 'src/app/wallet/services/walletcreation.service';
 
 @Component({
-  selector: "app-account-abstraction-create",
-  templateUrl: "./account-abstraction-create.page.html",
-  styleUrls: ["./account-abstraction-create.page.scss"],
+  selector: 'app-account-abstraction-create',
+  templateUrl: './account-abstraction-create.page.html',
+  styleUrls: ['./account-abstraction-create.page.scss']
 })
 export class AccountAbstractionCreatePage implements OnInit {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
-  @ViewChild("chainSelect", { static: false }) chainSelect: IonSelect;
-  @ViewChild("providerSelect", { static: false })
+  @ViewChild('chainSelect', { static: false }) chainSelect: IonSelect;
+  @ViewChild('providerSelect', { static: false })
   providerSelect: IonSelect;
 
   public wallet = {
-    name: "", // Will be set from wallet creation service
-    controllerWalletId: "",
+    name: '', // Will be set from wallet creation service
+    controllerWalletId: '',
     chainId: null,
     provider: null as AccountAbstractionProvider | null,
-    providerName: "", // Store the provider name for display
-    aaContractAddress: "",
+    providerName: '', // Store the provider name for display
+    aaContractAddress: ''
   };
 
   public availableChains: AccountAbstractionProviderChainConfig[] = [];
@@ -63,7 +60,7 @@ export class AccountAbstractionCreatePage implements OnInit {
     private native: Native,
     private events: GlobalEvents,
     private globalPopupService: GlobalPopupService,
-    private accountAbstractionService: AccountAbstractionService,
+    private accountAbstractionService: AccountAbstractionProvidersService,
     private evmService: EVMService,
     private walletNetworkService: WalletNetworkService,
     private walletCreationService: WalletCreationService,
@@ -73,7 +70,7 @@ export class AccountAbstractionCreatePage implements OnInit {
   }
 
   ngOnInit() {
-    this.titleBar.setTitle(this.translate.instant("wallet.aa.create.title"));
+    this.titleBar.setTitle(this.translate.instant('wallet.aa.create.title'));
     // Get wallet name from wallet creation service
     this.wallet.name = this.walletCreationService.name;
   }
@@ -81,78 +78,63 @@ export class AccountAbstractionCreatePage implements OnInit {
   private initData() {
     // Get all available providers
     this.availableProviders = this.accountAbstractionService.getProviders();
-    Logger.log("wallet", "All available providers:", this.availableProviders);
+    Logger.log('wallet', 'All available providers:', this.availableProviders);
 
     // Initialize filtered providers (empty initially)
     this.filteredProviders = [];
 
     // Get all unique chains from all providers
     const allChains = new Map<number, AccountAbstractionProviderChainConfig>();
-    this.availableProviders.forEach((provider) => {
-      provider.supportedChains.forEach((chainConfig) => {
+    this.availableProviders.forEach(provider => {
+      provider.supportedChains.forEach(chainConfig => {
         if (!allChains.has(chainConfig.chainId)) {
           allChains.set(chainConfig.chainId, chainConfig);
         }
       });
     });
     this.availableChains = Array.from(allChains.values());
-    Logger.log("wallet", "Available chains:", this.availableChains);
+    Logger.log('wallet', 'Available chains:', this.availableChains);
 
     // Get controller wallets (standard and ledger wallets that can control AA wallets)
     this.controllerWallets = this.walletService
       .getMasterWalletsList()
-      .filter(
-        (wallet) =>
-          wallet.type === WalletType.STANDARD ||
-          wallet.type === WalletType.LEDGER
-      );
-    Logger.log("wallet", "Controller wallets:", this.controllerWallets);
+      .filter(wallet => wallet.type === WalletType.STANDARD || wallet.type === WalletType.LEDGER);
+    Logger.log('wallet', 'Controller wallets:', this.controllerWallets);
   }
 
   public onChainChanged(event: any) {
     const chainId = parseInt(event.detail.value);
-    Logger.log("wallet", "Chain changed to:", chainId);
+    Logger.log('wallet', 'Chain changed to:', chainId);
 
-    this.selectedChain =
-      this.availableChains.find((chain) => chain.chainId === chainId) || null;
+    this.selectedChain = this.availableChains.find(chain => chain.chainId === chainId) || null;
 
     if (this.selectedChain) {
       // Filter providers for this chain
-      this.filteredProviders =
-        this.accountAbstractionService.getProvidersForChain(chainId);
+      this.filteredProviders = this.accountAbstractionService.getProvidersForChain(chainId);
 
-      Logger.log(
-        "wallet",
-        "Available providers for chain:",
-        this.filteredProviders
-      );
+      Logger.log('wallet', 'Available providers for chain:', this.filteredProviders);
 
       // Reset provider selection and contract address
       this.wallet.provider = null;
-      this.wallet.providerName = ""; // Reset provider name
-      this.wallet.aaContractAddress = "";
+      this.wallet.providerName = ''; // Reset provider name
+      this.wallet.aaContractAddress = '';
 
-      Logger.log(
-        "wallet",
-        "Reset provider selection. Provider name:",
-        this.wallet.providerName
-      );
+      Logger.log('wallet', 'Reset provider selection. Provider name:', this.wallet.providerName);
     }
   }
 
   public onProviderChanged(event: any) {
     const providerName = event.detail.value;
-    Logger.log("wallet", "Provider changed to:", providerName);
+    Logger.log('wallet', 'Provider changed to:', providerName);
 
     // Set the provider name first
     this.wallet.providerName = providerName;
 
     // Then get the provider object
-    this.wallet.provider =
-      this.accountAbstractionService.getProviderByName(providerName);
+    this.wallet.provider = this.accountAbstractionService.getProviderByName(providerName);
 
-    Logger.log("wallet", "Provider object:", this.wallet.provider);
-    Logger.log("wallet", "Provider name:", this.wallet.providerName);
+    Logger.log('wallet', 'Provider object:', this.wallet.provider);
+    Logger.log('wallet', 'Provider name:', this.wallet.providerName);
 
     // Now that we have a provider, we can compute the account address
     if (this.wallet.provider && this.wallet.controllerWalletId) {
@@ -165,8 +147,8 @@ export class AccountAbstractionCreatePage implements OnInit {
     this.wallet.controllerWalletId = controllerWalletId;
 
     // Reset contract address when controller wallet changes
-    this.wallet.aaContractAddress = "";
-    this.wallet.providerName = ""; // Reset provider name
+    this.wallet.aaContractAddress = '';
+    this.wallet.providerName = ''; // Reset provider name
     this.wallet.provider = null; // Reset provider object
 
     // If we have a provider selected, compute the new address
@@ -179,11 +161,7 @@ export class AccountAbstractionCreatePage implements OnInit {
    * Compute the account address using the selected provider
    */
   private async computeAccountAddress() {
-    if (
-      !this.wallet.provider ||
-      !this.wallet.controllerWalletId ||
-      !this.wallet.chainId
-    ) {
+    if (!this.wallet.provider || !this.wallet.controllerWalletId || !this.wallet.chainId) {
       return;
     }
 
@@ -191,35 +169,12 @@ export class AccountAbstractionCreatePage implements OnInit {
 
     try {
       // Get the EVM network by chain ID
-      const network = this.walletNetworkService.getNetworkByChainId(
-        this.wallet.chainId
-      );
+      const network = this.walletNetworkService.getNetworkByChainId(this.wallet.chainId);
       if (!network) {
-        throw new Error(
-          `Network not found for chain ID: ${this.wallet.chainId}`
-        );
+        throw new Error(`Network not found for chain ID: ${this.wallet.chainId}`);
       }
 
-      // Get the master wallet
-      const masterWallet = this.walletService.getMasterWallet(
-        this.wallet.controllerWalletId
-      );
-      if (!masterWallet) {
-        throw new Error(
-          `Master wallet not found: ${this.wallet.controllerWalletId}`
-        );
-      }
-
-      // Create a network wallet instance
-      const networkWallet = await network.createNetworkWallet(
-        masterWallet,
-        false
-      );
-      if (!networkWallet) {
-        throw new Error(
-          `Failed to create network wallet for chain ID: ${this.wallet.chainId}`
-        );
-      }
+      const networkWallet = await this.walletService.newNetworkWalletInstance(this.wallet.controllerWalletId, network);
 
       // Get the EOA account address from the network wallet
       const addresses = networkWallet.getAddresses();
@@ -229,17 +184,13 @@ export class AccountAbstractionCreatePage implements OnInit {
 
       // Get the first address (main EOA address)
       const eoaAddress = addresses[0].address;
-      Logger.log("wallet", "Retrieved EOA address:", eoaAddress);
+      Logger.log('wallet', 'Retrieved EOA address:', eoaAddress);
 
       // Use the provider to compute the AA account address
-      this.wallet.aaContractAddress =
-        await this.wallet.provider.getAccountAddress(
-          eoaAddress,
-          this.wallet.chainId
-        );
+      this.wallet.aaContractAddress = await this.wallet.provider.getAccountAddress(eoaAddress, this.wallet.chainId);
     } catch (error) {
-      Logger.error("wallet", "Failed to compute account address:", error);
-      this.wallet.aaContractAddress = "";
+      Logger.error('wallet', 'Failed to compute account address:', error);
+      this.wallet.aaContractAddress = '';
     } finally {
       this.isFetchingAddress = false;
     }
@@ -249,12 +200,12 @@ export class AccountAbstractionCreatePage implements OnInit {
    * Get the display name for a chain
    */
   public getChainDisplayName(chainId: number): string {
-    const chain = this.availableChains.find((c) => c.chainId === chainId);
+    const chain = this.availableChains.find(c => c.chainId === chainId);
     return chain ? chain.chainId.toString() : chainId.toString();
   }
 
   public getControllerWalletName(walletId: string): string {
-    const wallet = this.controllerWallets.find((w) => w.id === walletId);
+    const wallet = this.controllerWallets.find(w => w.id === walletId);
     return wallet ? `${wallet.name} (${wallet.type})` : walletId;
   }
 
@@ -270,9 +221,7 @@ export class AccountAbstractionCreatePage implements OnInit {
 
   public async createWallet() {
     if (!this.allInputsValid()) {
-      this.native.toast(
-        this.translate.instant("wallet.aa.create.validation-error")
-      );
+      this.native.toast(this.translate.instant('wallet.aa.create.validation-error'));
       return;
     }
 
@@ -286,17 +235,13 @@ export class AccountAbstractionCreatePage implements OnInit {
       const walletId = this.walletService.createMasterWalletID();
 
       // Create wallet password
-      const payPassword = await this.authService.createAndSaveWalletPassword(
-        walletId
-      );
+      const payPassword = await this.authService.createAndSaveWalletPassword(walletId);
       if (!payPassword) {
         this.walletIsCreating = false;
         return;
       }
 
-      await this.native.showLoading(
-        this.translate.instant("common.please-wait")
-      );
+      await this.native.showLoading(this.translate.instant('common.please-wait'));
 
       // Create the AA wallet (always assume not deployed for now)
       await this.walletService.newAccountAbstractionWallet(
@@ -311,20 +256,20 @@ export class AccountAbstractionCreatePage implements OnInit {
       await this.native.hideLoading();
 
       // Navigate to wallet home
-      this.native.setRootRouter("/wallet/wallet-home");
+      this.native.setRootRouter('/wallet/wallet-home');
 
       // Notify wallet creation
-      this.events.publish("masterwalletcount:changed", {
-        action: "add",
-        walletId: walletId,
+      this.events.publish('masterwalletcount:changed', {
+        action: 'add',
+        walletId: walletId
       });
     } catch (error) {
-      Logger.error("wallet", "AA wallet creation error:", error);
+      Logger.error('wallet', 'AA wallet creation error:', error);
       await this.native.hideLoading();
 
       await this.globalPopupService.ionicAlert(
-        "common.error",
-        error.message || this.translate.instant("wallet.aa.create.error")
+        'common.error',
+        error.message || this.translate.instant('wallet.aa.create.error')
       );
     } finally {
       this.walletIsCreating = false;
@@ -333,52 +278,48 @@ export class AccountAbstractionCreatePage implements OnInit {
 
   // Custom select methods using MenuSheetComponent
   async showControllerWalletSelect() {
-    const menuItems: MenuSheetMenu[] = this.controllerWallets.map((wallet) => ({
+    const menuItems: MenuSheetMenu[] = this.controllerWallets.map(wallet => ({
       title: `${wallet.name} (${wallet.type})`,
       routeOrAction: () => {
         this.wallet.controllerWalletId = wallet.id;
         this.onControllerWalletChanged({ detail: { value: wallet.id } });
-      },
+      }
     }));
 
     const menu: MenuSheetMenu = {
-      title: this.translate.instant("wallet.aa.create.controller-wallet"),
-      items: menuItems,
+      title: this.translate.instant('wallet.aa.create.controller-wallet'),
+      items: menuItems
     };
 
     const modal = await this.modalCtrl.create({
       component: MenuSheetComponent,
       componentProps: { menu },
       backdropDismiss: true,
-      cssClass: !this.theme.darkMode
-        ? "menu-chooser-component"
-        : "menu-chooser-component-dark",
+      cssClass: !this.theme.darkMode ? 'menu-chooser-component' : 'menu-chooser-component-dark'
     });
 
     await modal.present();
   }
 
   async showChainSelect() {
-    const menuItems: MenuSheetMenu[] = this.availableChains.map((chain) => ({
+    const menuItems: MenuSheetMenu[] = this.availableChains.map(chain => ({
       title: this.getChainDisplayName(chain.chainId),
       routeOrAction: () => {
         this.wallet.chainId = chain.chainId;
         this.onChainChanged({ detail: { value: chain.chainId } });
-      },
+      }
     }));
 
     const menu: MenuSheetMenu = {
-      title: this.translate.instant("wallet.aa.create.chain"),
-      items: menuItems,
+      title: this.translate.instant('wallet.aa.create.chain'),
+      items: menuItems
     };
 
     const modal = await this.modalCtrl.create({
       component: MenuSheetComponent,
       componentProps: { menu },
       backdropDismiss: true,
-      cssClass: !this.theme.darkMode
-        ? "menu-chooser-component"
-        : "menu-chooser-component-dark",
+      cssClass: !this.theme.darkMode ? 'menu-chooser-component' : 'menu-chooser-component-dark'
     });
 
     await modal.present();
@@ -387,28 +328,24 @@ export class AccountAbstractionCreatePage implements OnInit {
   async showProviderSelect() {
     if (!this.wallet.chainId) return;
 
-    const menuItems: MenuSheetMenu[] = this.filteredProviders.map(
-      (provider) => ({
-        title: provider.name,
-        routeOrAction: () => {
-          this.wallet.providerName = provider.name;
-          this.onProviderChanged({ detail: { value: provider.name } });
-        },
-      })
-    );
+    const menuItems: MenuSheetMenu[] = this.filteredProviders.map(provider => ({
+      title: provider.name,
+      routeOrAction: () => {
+        this.wallet.providerName = provider.name;
+        this.onProviderChanged({ detail: { value: provider.name } });
+      }
+    }));
 
     const menu: MenuSheetMenu = {
-      title: this.translate.instant("wallet.aa.create.provider"),
-      items: menuItems,
+      title: this.translate.instant('wallet.aa.create.provider'),
+      items: menuItems
     };
 
     const modal = await this.modalCtrl.create({
       component: MenuSheetComponent,
       componentProps: { menu },
       backdropDismiss: true,
-      cssClass: !this.theme.darkMode
-        ? "menu-chooser-component"
-        : "menu-chooser-component-dark",
+      cssClass: !this.theme.darkMode ? 'menu-chooser-component' : 'menu-chooser-component-dark'
     });
 
     await modal.present();

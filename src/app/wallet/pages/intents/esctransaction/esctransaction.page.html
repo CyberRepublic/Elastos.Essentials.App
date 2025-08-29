@@ -50,24 +50,13 @@
 
     <!-- TX INFO -->
     <!-- Standard EOA Account Component -->
-    <app-standard-account *ngIf="!isAccountAbstractionWallet()" [balance]="balance" [gasPriceGwei]="gasPriceGwei"
-      [gasLimitDisplay]="gasLimitDisplay" [showEditGasPrice]="showEditGasPrice" [uiService]="uiService"
-      [totalTransactionCost]="getTotalTransactionCostInCurrency()" [getCurrencyInUse]="getCurrencyInUse.bind(this)"
-      [getNativeCurrencyInUse]="getNativeCurrencyInUse.bind(this)" (editGasPriceEvent)="editGasPrice()"
-      (updateGaspriceEvent)="updateGasprice($event)" (updateGasLimitEvent)="updateGasLimit($event)">
+    <app-standard-account *ngIf="!isAccountAbstractionWallet()" [balance]="balance" [uiService]="uiService"
+      [parentPage]="this">
     </app-standard-account>
 
     <!-- Account Abstraction Component -->
     <app-account-abstraction *ngIf="isAccountAbstractionWallet()" [balance]="balance" [uiService]="uiService"
-      [totalTransactionCost]="getTotalTransactionCostInCurrency()" [getCurrencyInUse]="getCurrencyInUse.bind(this)">
+      [parentPage]="this">
     </app-account-abstraction>
-
-    <!-- BUTTONS FOOTER -->
-    <ebutton class="btn cancel" [class.expand]="!balanceIsEnough()" [disabled]="!balanceIsEnough()" mode="cancel"
-      (clicked)="cancelOperation()"
-      [title]="(!balanceIsEnough() ? 'wallet.insufficient-balance' : 'common.cancel') | translate">
-    </ebutton>
-    <ebutton class="btn confirm" *ngIf="balanceIsEnough()" [disabled]="signingAndTransacting"
-      (clicked)="goTransaction()" [title]="'common.confirm' | translate"></ebutton>
   </ion-grid>
 </ion-content>

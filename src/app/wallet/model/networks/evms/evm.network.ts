@@ -1,25 +1,23 @@
-import type { ConfigInfo } from "@elastosfoundation/wallet-js-sdk";
-import { Subject } from "rxjs";
-import { Logger } from "src/app/logger";
-import { GlobalNetworksService } from "src/app/services/global.networks.service";
-import { erc20CoinsSerializer } from "src/app/wallet/services/evm/erc20coin.service";
-import { LocalStorage } from "src/app/wallet/services/storage.service";
-import { Coin, CoinID, CoinType, ERC20Coin } from "../../coin";
-import { BridgeProvider } from "../../earn/bridgeprovider";
-import { EarnProvider } from "../../earn/earnprovider";
-import { SwapProvider } from "../../earn/swapprovider";
-import {
-  PrivateKeyType,
-  WalletNetworkOptions,
-} from "../../masterwallets/wallet.types";
-import { NetworkAPIURLType } from "../base/networkapiurltype";
-import { AnyNetwork, Network } from "../network";
-import { DexScreenerCurrencyProvider } from "./dexscreener.currencyprovider";
-import { EVMNetworkWallet } from "./networkwallets/evm.networkwallet";
-import { ERC1155Provider } from "./nfts/erc1155.provider";
-import { ERC721Provider } from "./nfts/erc721.provider";
-import { ERC20SubWallet } from "./subwallets/erc20.subwallet";
-import { UniswapCurrencyProvider } from "./uniswap.currencyprovider";
+import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
+import { Subject } from 'rxjs';
+import { Logger } from 'src/app/logger';
+import { GlobalNetworksService } from 'src/app/services/global.networks.service';
+import { erc20CoinsSerializer } from 'src/app/wallet/services/evm/erc20coin.service';
+import { EVMService } from 'src/app/wallet/services/evm/evm.service';
+import { LocalStorage } from 'src/app/wallet/services/storage.service';
+import { Coin, CoinID, CoinType, ERC20Coin } from '../../coin';
+import { BridgeProvider } from '../../earn/bridgeprovider';
+import { EarnProvider } from '../../earn/earnprovider';
+import { SwapProvider } from '../../earn/swapprovider';
+import { PrivateKeyType, WalletNetworkOptions } from '../../masterwallets/wallet.types';
+import { NetworkAPIURLType } from '../base/networkapiurltype';
+import { AnyNetwork, Network } from '../network';
+import { DexScreenerCurrencyProvider } from './dexscreener.currencyprovider';
+import { EVMNetworkWallet } from './networkwallets/evm.networkwallet';
+import { ERC1155Provider } from './nfts/erc1155.provider';
+import { ERC721Provider } from './nfts/erc721.provider';
+import { ERC20SubWallet } from './subwallets/erc20.subwallet';
+import { UniswapCurrencyProvider } from './uniswap.currencyprovider';
 
 export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   private availableCoins: Coin[] = null;
@@ -31,7 +29,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   protected averageBlocktime = 5; // Unit Second
   protected mainRpcUrl: string = null;
   private lastAccessTimestamp = 0;
-  private localStorageKey = "";
+  private localStorageKey = '';
 
   constructor(
     public key: string, // unique identifier
@@ -54,7 +52,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
       name,
       shortName,
       logo,
-      "ETH" + key.toUpperCase(),
+      'ETH' + key.toUpperCase(),
       networkTemplate,
       earnProviders,
       swapProviders,
@@ -67,16 +65,15 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   public async init(): Promise<void> {
     await super.init();
 
-    const activeNetworkTemplate =
-      GlobalNetworksService.instance.activeNetworkTemplate.value;
-    this.localStorageKey = this.key + "-" + activeNetworkTemplate;
+    const activeNetworkTemplate = GlobalNetworksService.instance.activeNetworkTemplate.value;
+    this.localStorageKey = this.key + '-' + activeNetworkTemplate;
 
     await this.initCoins();
   }
 
   public getDefaultWalletNetworkOptions(): WalletNetworkOptions {
     return {
-      network: this.key,
+      network: this.key
     };
   }
 
@@ -84,12 +81,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
    * Live update of this network instance info. Used for example when a custom network info is modified
    * by the user.
    */
-  public updateInfo(
-    name: string,
-    chainId: number,
-    rpcUrl: string,
-    mainCurrencySymbol: string
-  ) {
+  public updateInfo(name: string, chainId: number, rpcUrl: string, mainCurrencySymbol: string) {
     this.name = name;
     this.chainID = chainId;
     this.mainRpcUrl = rpcUrl;
@@ -112,16 +104,11 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
     this.availableCoins = this.getBuiltInERC20Coins();
 
     // Add custom ERC20 tokens, manually added by the user or discovered
-    this.availableCoins = [
-      ...this.availableCoins,
-      ...(await this.getCustomERC20Coins()),
-    ];
+    this.availableCoins = [...this.availableCoins, ...(await this.getCustomERC20Coins())];
 
     await this.initDeletedCustomERC20Coins(this);
 
-    this.lastAccessTimestamp = await LocalStorage.instance.get(
-      "custom-erc20-coins-accesstime-" + this.localStorageKey
-    );
+    this.lastAccessTimestamp = await LocalStorage.instance.get('custom-erc20-coins-accesstime-' + this.localStorageKey);
 
     //Logger.log('wallet', "Available coins for network " + this.key + ":", this.availableCoins);
     //Logger.log('wallet', "Deleted coins for network " + this.key + ":", this.deletedERC20Coins);
@@ -135,21 +122,21 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   public getAvailableERC20Coins(): ERC20Coin[] {
     // Return only ERC20 coins that are usable on the active network.
     return (
-      (this.getAvailableCoins().filter((c) => {
+      (this.getAvailableCoins().filter(c => {
         return c.getType() === CoinType.ERC20;
       }) as ERC20Coin[]) || []
     );
   }
 
   public getCoinByID(id: CoinID): Coin {
-    return this.getAvailableCoins().find((c) => {
+    return this.getAvailableCoins().find(c => {
       return c.getID() === id;
     });
   }
 
   public getERC20CoinByContractAddress(address: string): ERC20Coin | null {
     return (
-      this.getAvailableERC20Coins().find((c) => {
+      this.getAvailableERC20Coins().find(c => {
         return c.getContractAddress().toLowerCase() === address.toLowerCase();
       }) || null
     );
@@ -161,8 +148,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
 
   public isCoinDeleted(address: string) {
     for (let coin of this.deletedERC20Coins) {
-      if (coin.getContractAddress().toLowerCase() === address.toLowerCase())
-        return true;
+      if (coin.getContractAddress().toLowerCase() === address.toLowerCase()) return true;
     }
     return false;
   }
@@ -174,11 +160,11 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
    * Returns true if the coin was added, false otherwise (already existing or error).
    */
   public async addCustomERC20Coin(erc20Coin: ERC20Coin): Promise<boolean> {
-    Logger.log("wallet", "Adding coin to custom ERC20 coins list", erc20Coin);
+    Logger.log('wallet', 'Adding coin to custom ERC20 coins list', erc20Coin);
 
     const existingCoins = await this.getCustomERC20Coins();
     if (this.coinAlreadyExists(erc20Coin.getContractAddress())) {
-      Logger.log("wallet", "Not adding coin, it already exists", erc20Coin);
+      Logger.log('wallet', 'Not adding coin, it already exists', erc20Coin);
       return false;
     }
 
@@ -189,17 +175,15 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
 
     // Save to permanent storage
     await LocalStorage.instance.set(
-      "custom-erc20-coins-" + this.localStorageKey,
+      'custom-erc20-coins-' + this.localStorageKey,
       erc20CoinsSerializer.serializeObjectArray(existingCoins)
     );
 
     this.deletedERC20Coins = this.deletedERC20Coins.filter(
-      (coin) =>
-        coin.getContractAddress().toLowerCase() !==
-        erc20Coin.getContractAddress().toLowerCase()
+      coin => coin.getContractAddress().toLowerCase() !== erc20Coin.getContractAddress().toLowerCase()
     );
     await LocalStorage.instance.set(
-      "custom-erc20-coins-deleted-" + this.localStorageKey,
+      'custom-erc20-coins-deleted-' + this.localStorageKey,
       erc20CoinsSerializer.serializeObjectArray(this.deletedERC20Coins)
     );
 
@@ -209,24 +193,20 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   }
 
   public async deleteERC20Coin(erc20Coin: ERC20Coin) {
-    this.availableCoins = this.availableCoins.filter(
-      (coin) => coin.getID() !== erc20Coin.getID()
-    );
+    this.availableCoins = this.availableCoins.filter(coin => coin.getID() !== erc20Coin.getID());
     let allCustomERC20Coins = await this.getCustomERC20Coins();
     allCustomERC20Coins = allCustomERC20Coins.filter(
-      (coin) =>
-        coin.getContractAddress().toLowerCase() !==
-        erc20Coin.getContractAddress().toLowerCase()
+      coin => coin.getContractAddress().toLowerCase() !== erc20Coin.getContractAddress().toLowerCase()
     );
     await LocalStorage.instance.set(
-      "custom-erc20-coins-" + this.localStorageKey,
+      'custom-erc20-coins-' + this.localStorageKey,
       erc20CoinsSerializer.serializeObjectArray(allCustomERC20Coins)
     );
-    Logger.log("wallet", "availableCoins after deleting", this.availableCoins);
+    Logger.log('wallet', 'availableCoins after deleting', this.availableCoins);
 
     this.deletedERC20Coins.push(erc20Coin);
     await LocalStorage.instance.set(
-      "custom-erc20-coins-deleted-" + this.localStorageKey,
+      'custom-erc20-coins-deleted-' + this.localStorageKey,
       erc20CoinsSerializer.serializeObjectArray(this.deletedERC20Coins)
     );
 
@@ -234,9 +214,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   }
 
   public async getCustomERC20Coins(): Promise<ERC20Coin[]> {
-    const rawCoinList = await LocalStorage.instance.get(
-      "custom-erc20-coins-" + this.localStorageKey
-    );
+    const rawCoinList = await LocalStorage.instance.get('custom-erc20-coins-' + this.localStorageKey);
     if (!rawCoinList) {
       return [];
     }
@@ -245,7 +223,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
     let someCoinsWereRemoved = false;
     for (let rawCoin of rawCoinList) {
       // Use the contract address as id.
-      if ((rawCoin.id as string).startsWith("0x")) {
+      if ((rawCoin.id as string).startsWith('0x')) {
         let coin = ERC20Coin.fromJson(rawCoin, this);
 
         // Legacy support: we didn't save coins decimals earlier. So we delete custom coins from disk if we don't have the info.
@@ -261,7 +239,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
     if (someCoinsWereRemoved) {
       // Some coins were "repaired", so we save our list.
       await LocalStorage.instance.set(
-        "custom-erc20-coins-" + this.localStorageKey,
+        'custom-erc20-coins-' + this.localStorageKey,
         erc20CoinsSerializer.serializeObjectArray(customCoins)
       );
     }
@@ -269,12 +247,8 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
     return customCoins;
   }
 
-  private async initDeletedCustomERC20Coins(
-    network: AnyNetwork
-  ): Promise<ERC20Coin[]> {
-    const rawCoinList = await LocalStorage.instance.get(
-      "custom-erc20-coins-deleted-" + this.localStorageKey
-    );
+  private async initDeletedCustomERC20Coins(network: AnyNetwork): Promise<ERC20Coin[]> {
+    const rawCoinList = await LocalStorage.instance.get('custom-erc20-coins-deleted-' + this.localStorageKey);
     if (!rawCoinList) {
       return [];
     }
@@ -289,10 +263,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
 
   public updateAccessTime(timestamp: number) {
     this.lastAccessTimestamp = timestamp;
-    void LocalStorage.instance.set(
-      "custom-erc20-coins-accesstime-" + this.localStorageKey,
-      this.lastAccessTimestamp
-    );
+    void LocalStorage.instance.set('custom-erc20-coins-accesstime-' + this.localStorageKey, this.lastAccessTimestamp);
   }
 
   // The last time that the user viewed the coin list screen.
@@ -306,10 +277,8 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
    */
   public getERC1155Provider(contractAddress: string): ERC1155Provider {
     let lowerCaseContract = contractAddress.toLowerCase();
-    let provider = this.erc1155Providers.find((p) =>
-      p.supportedContractAddresses
-        .map((c) => c.toLowerCase())
-        .find((p) => p.indexOf(lowerCaseContract) >= 0)
+    let provider = this.erc1155Providers.find(p =>
+      p.supportedContractAddresses.map(c => c.toLowerCase()).find(p => p.indexOf(lowerCaseContract) >= 0)
     );
     return provider;
   }
@@ -319,10 +288,8 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
    */
   public getERC721Provider(contractAddress: string): ERC721Provider {
     let lowerCaseContract = contractAddress.toLowerCase();
-    let provider = this.erc721Providers.find((p) =>
-      p.supportedContractAddresses
-        .map((c) => c.toLowerCase())
-        .find((p) => p.indexOf(lowerCaseContract) >= 0)
+    let provider = this.erc721Providers.find(p =>
+      p.supportedContractAddresses.map(c => c.toLowerCase()).find(p => p.indexOf(lowerCaseContract) >= 0)
     );
     return provider;
   }
@@ -377,7 +344,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
       networkWallet,
       coinID,
       networkWallet.network.getAPIUrlOfType(NetworkAPIURLType.RPC),
-      ""
+      ''
     );
     await subWallet.initialize();
 
@@ -399,10 +366,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
         throw Error(
           `EVMNetwork: getAPIUrlOfType() default implementation called for RPC type, but mainRpcUrl is undefined`
         );
-    } else
-      throw new Error(
-        `EVMNetwork: getAPIUrlOfType() has no entry for url type ${type.toString()}`
-      );
+    } else throw new Error(`EVMNetwork: getAPIUrlOfType() has no entry for url type ${type.toString()}`);
   }
 
   public getMainTokenSymbol(): string {
@@ -417,13 +381,10 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
     return this.chainID;
   }
 
-  public updateSPVNetworkConfig(
-    onGoingConfig: ConfigInfo,
-    networkTemplate: string
-  ) {
+  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo, networkTemplate: string) {
     onGoingConfig[this.getEVMSPVConfigName()] = {
       chainID: this.getMainChainID(networkTemplate).toString(),
-      NetworkID: this.getMainChainID(networkTemplate).toString(),
+      NetworkID: this.getMainChainID(networkTemplate).toString()
     };
   }
 
@@ -447,5 +408,12 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   // The unit is gwei.
   public getMinGasprice(): number {
     return -1;
+  }
+
+  /**
+   * Returns a (read only) ethersjs rpc provider for this network.
+   */
+  public getJsonRpcProvider() {
+    return EVMService.instance.getJsonRPCProvider(this);
   }
 }

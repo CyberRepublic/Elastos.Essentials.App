@@ -1,9 +1,9 @@
-import { AccountAbstractionService } from "../../services/account-abstraction/account-abstraction.service";
-import { WalletJSSDKHelper } from "../networks/elastos/wallet.jssdk.helper";
-import { EVMNetwork } from "../networks/evms/evm.network";
-import { AnyNetwork } from "../networks/network";
-import { MasterWallet } from "./masterwallet";
-import { SerializedAccountAbstractionMasterWallet } from "./wallet.types";
+import { AccountAbstractionProvidersService } from '../../services/account-abstraction/account-abstraction-providers.service';
+import { WalletJSSDKHelper } from '../networks/elastos/wallet.jssdk.helper';
+import { EVMNetwork } from '../networks/evms/evm.network';
+import { AnyNetwork } from '../networks/network';
+import { MasterWallet } from './masterwallet';
+import { SerializedAccountAbstractionMasterWallet } from './wallet.types';
 
 /**
  * One AA master wallet can work only on ONE chain (network wallet).
@@ -40,8 +40,7 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
   }
 
   public serialize(): SerializedAccountAbstractionMasterWallet {
-    let serialized: SerializedAccountAbstractionMasterWallet =
-      {} as SerializedAccountAbstractionMasterWallet;
+    let serialized: SerializedAccountAbstractionMasterWallet = {} as SerializedAccountAbstractionMasterWallet;
 
     super._serialize(serialized as SerializedAccountAbstractionMasterWallet);
 
@@ -65,9 +64,7 @@ export class AccountAbstractionMasterWallet extends MasterWallet {
     const chainId = evmNetwork.getMainChainID();
 
     // Check if the AA provider used by this wallet supports the given chain
-    const provider = AccountAbstractionService.instance.getProviderById(
-      this.aaProviderId
-    );
+    const provider = AccountAbstractionProvidersService.instance.getProviderById(this.aaProviderId);
     if (!provider) {
       return false;
     }

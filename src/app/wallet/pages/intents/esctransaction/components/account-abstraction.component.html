@@ -1,8 +1,8 @@
 <!-- Account Abstraction Transaction Component -->
 <div class="msg-container">
   <p>{{ 'wallet.esctransaction-you-are-using' | translate }}</p>
-  <h1><span>{{ uiService.getFixedBalance(totalTransactionCost.totalAsBigNumber) }}</span> {{
-    getCurrencyInUse() }}</h1>
+  <h1><span>{{ uiService.getFixedBalance(totalTransactionCost.totalAsBigNumber) }} {{
+      getCurrencyInUse() }}</span></h1>
 
   <!-- Account Abstraction specific transaction details -->
   <div class="item-row ripple ion-activatable">
@@ -20,21 +20,21 @@
     </div>
   </div>
 
-  <!-- Gas fees for AA (may be covered by paymaster) -->
-  <div class="item-row ripple ion-activatable">
-    <div class="item-label">{{ 'wallet.esctransaction-fees' | translate }}</div>
-    <div class="item-value">
-      <div class="fee-primary">
-        <span>{{ 'wallet.esctransaction-covered-by-paymaster' | translate }}</span>
-      </div>
-    </div>
-  </div>
-
   <!-- Balance remaining -->
   <div class="item-row ripple ion-activatable">
     <div class="item-label">{{ 'wallet.balance-remaining' | translate }}</div>
     <div class="item-value">
-      <span>{{ uiService.getFixedBalance(balance) } {{ getCurrencyInUse() }}}</span>
+      <span>{{ uiService.getFixedBalance(balance) }} {{ getCurrencyInUse() }}</span>
     </div>
   </div>
+</div>
+
+<!-- BUTTONS FOOTER -->
+<div class="footer-buttons">
+  <ebutton class="btn cancel" [class.expand]="!balanceIsEnough()" [disabled]="!balanceIsEnough()" mode="cancel"
+    (clicked)="cancelOperation()"
+    [title]="(!balanceIsEnough() ? 'wallet.insufficient-balance' : 'common.cancel') | translate">
+  </ebutton>
+  <ebutton class="btn confirm" *ngIf="balanceIsEnough()" [disabled]="signingAndTransacting" (clicked)="goTransaction()"
+    [title]="'common.confirm' | translate"></ebutton>
 </div>

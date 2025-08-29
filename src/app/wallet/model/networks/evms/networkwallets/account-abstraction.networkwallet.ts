@@ -1,16 +1,18 @@
-import { AccountAbstractionService } from "../../../../services/account-abstraction/account-abstraction.service";
-import { AccountAbstractionMasterWallet } from "../../../masterwallets/account.abstraction.masterwallet";
-import { WalletNetworkOptions } from "../../../masterwallets/wallet.types";
-import { AddressUsage } from "../../../safes/addressusage";
-import { Safe } from "../../../safes/safe";
-import { WalletAddressInfo } from "../../base/networkwallets/networkwallet";
-import { AnySubWallet } from "../../base/subwallets/subwallet";
-import { AccountAbstractionProvider } from "../account-abstraction-provider";
-import type { EVMNetwork } from "../evm.network";
-import { AASafe } from "../safes/aa.safe";
-import { AccountAbstractionSubWallet } from "../subwallets/account-abstraction.subwallet";
-import { MainCoinEVMSubWallet } from "../subwallets/evm.subwallet";
-import { EVMNetworkWallet } from "./evm.networkwallet";
+import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
+import { WalletService } from 'src/app/wallet/services/wallet.service';
+import { AccountAbstractionProvidersService } from '../../../../services/account-abstraction/account-abstraction-providers.service';
+import { AccountAbstractionMasterWallet } from '../../../masterwallets/account.abstraction.masterwallet';
+import { WalletNetworkOptions } from '../../../masterwallets/wallet.types';
+import { AddressUsage } from '../../../safes/addressusage';
+import { Safe } from '../../../safes/safe';
+import { AnyNetworkWallet, WalletAddressInfo } from '../../base/networkwallets/networkwallet';
+import { AnySubWallet } from '../../base/subwallets/subwallet';
+import { AccountAbstractionProvider } from '../account-abstraction-provider';
+import type { EVMNetwork } from '../evm.network';
+import { AASafe } from '../safes/aa.safe';
+import { AccountAbstractionSubWallet } from '../subwallets/account-abstraction.subwallet';
+import { MainCoinEVMSubWallet } from '../subwallets/evm.subwallet';
+import { EVMNetworkWallet } from './evm.networkwallet';
 
 /**
  * Network wallet type for Account Abstraction wallets on EVM networks
@@ -37,9 +39,7 @@ export class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
     await super.initialize();
 
     // Initialize the AA provider and save as variable
-    this.aaProvider = AccountAbstractionService.instance.getProviderById(
-      this.masterWallet.getAAProviderId()
-    );
+    this.aaProvider = AccountAbstractionProvidersService.instance.getProviderById(this.masterWallet.getAAProviderId());
   }
 
   protected createTransactionDiscoveryProvider(): any {
@@ -65,19 +65,16 @@ export class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
     const safe = this.safe as AASafe;
     const addresses: WalletAddressInfo[] = [
       {
-        title: "EVM",
-        address: safe.getAddresses(0, 1, false, AddressUsage.DEFAULT)[0],
-      },
+        title: 'EVM',
+        address: safe.getAddresses(0, 1, false, AddressUsage.DEFAULT)[0]
+      }
     ];
 
     return addresses;
   }
 
-  public async convertAddressForUsage(
-    address: string,
-    usage: AddressUsage
-  ): Promise<string> {
-    return (await address.startsWith("0x")) ? address : "0x" + address;
+  public async convertAddressForUsage(address: string, usage: AddressUsage): Promise<string> {
+    return (await address.startsWith('0x')) ? address : '0x' + address;
   }
 
   public getMainEvmSubWallet(): MainCoinEVMSubWallet<WalletNetworkOptions> {
@@ -93,5 +90,29 @@ export class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
    */
   public getControllerWalletId(): string {
     return this.masterWallet.getControllerWalletId();
+  }
+
+  public getControllerNetworkWallet(): Promise<AnyNetworkWallet> {
+    const controllerWalletId = this.masterWallet.getControllerWalletId();
+    return WalletService.instance.newNetworkWalletInstance(controllerWalletId, this.network);
+  }
+
+  public getAccountAbstractionProvider(): AccountAbstractionProvider {
+    return AccountAbstractionProvidersService.instance.getProviderById(this.masterWallet.getAAProviderId());
+  }
+
+  public getAccountAbstractionAddress(): string {
+    return this.safe.getAddresses(0, 1, false, AddressUsage.DEFAULT)[0];
+  }
+
+  /**
+   * Bundles a raw transaction, possibly coming from a eth_sendTransaction
+   * request, into a UserOp and sends it to the bundler.
+   */
+  public async signAndSendRawTx(tx: AccountAbstractionTransaction): Promise<string> {
+    // Ask the account abstraction provider specific to this account to bundle the transaction.
+    await this.getAccountAbstractionProvider().bundleTransaction(this, tx);
+
+    return 'todo';
   }
 }

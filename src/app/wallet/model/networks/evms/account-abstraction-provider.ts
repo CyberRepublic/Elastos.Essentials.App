@@ -1,4 +1,6 @@
-import { LocalStorage } from "src/app/wallet/services/storage.service";
+import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
+import { LocalStorage } from 'src/app/wallet/services/storage.service';
+import { AccountAbstractionNetworkWallet } from './networkwallets/account-abstraction.networkwallet';
 
 export type AccountAbstractionProviderChainConfig = {
   chainId: number;
@@ -8,16 +10,14 @@ export type AccountAbstractionProviderChainConfig = {
   factoryAddress: string;
 };
 
-export abstract class AccountAbstractionProvider {
+export abstract class AccountAbstractionProvider<
+  ChainConfigType extends AccountAbstractionProviderChainConfig = AccountAbstractionProviderChainConfig
+> {
   readonly id: string;
   readonly name: string;
-  readonly supportedChains: AccountAbstractionProviderChainConfig[];
+  readonly supportedChains: ChainConfigType[];
 
-  constructor(
-    id: string,
-    name: string,
-    supportedChains: AccountAbstractionProviderChainConfig[]
-  ) {
+  constructor(id: string, name: string, supportedChains: ChainConfigType[]) {
     this.id = id;
     this.name = name;
     this.supportedChains = supportedChains;
@@ -27,33 +27,18 @@ export abstract class AccountAbstractionProvider {
    * Returns the expected AA account address for a given EOA owner on a specific chain.
    * This works only for AA providers that support EOA ownership.
    */
-  abstract getAccountAddress(
-    eoaAddress: string,
-    chainId: number
-  ): Promise<string>;
+  abstract getAccountAddress(eoaAddress: string, chainId: number): Promise<string>;
 
   /**
    * Saves an account address, normally retrieved from the contract, into local storage,
    * so we don't need to retrieve it again later.
    */
-  protected async saveAccountAddress(
-    eoaAddress: string,
-    chainId: number,
-    accountAddress: string
-  ): Promise<void> {
-    await LocalStorage.instance.set(
-      `aa-address-${this.id}-${eoaAddress}-${chainId}`,
-      accountAddress
-    );
+  protected async saveAccountAddress(eoaAddress: string, chainId: number, accountAddress: string): Promise<void> {
+    await LocalStorage.instance.set(`aa-address-${this.id}-${eoaAddress}-${chainId}`, accountAddress);
   }
 
-  protected loadAccountAddress(
-    eoaAddress: string,
-    chainId: number
-  ): Promise<string> {
-    return LocalStorage.instance.get(
-      `aa-address-${this.id}-${eoaAddress}-${chainId}`
-    );
+  protected loadAccountAddress(eoaAddress: string, chainId: number): Promise<string> {
+    return LocalStorage.instance.get(`aa-address-${this.id}-${eoaAddress}-${chainId}`);
   }
 
   /**
@@ -62,8 +47,15 @@ export abstract class AccountAbstractionProvider {
    * @returns True if supported
    */
   supportsChain(chainId: number): boolean {
-    return this.supportedChains.some(
-      (chainConfig) => chainConfig.chainId === chainId
-    );
+    return this.supportedChains.some(chainConfig => chainConfig.chainId === chainId);
   }
+
+  getSupportedChain(chainId: number): ChainConfigType {
+    return this.supportedChains.find(chainConfig => chainConfig.chainId === chainId);
+  }
+
+  public abstract bundleTransaction(
+    networkWallet: AccountAbstractionNetworkWallet,
+    transaction: AccountAbstractionTransaction
+  ): Promise<void>;
 }

@@ -56,3 +56,13 @@
     </div>
   </div>
 </div>
+
+<!-- BUTTONS FOOTER -->
+<div class="footer-buttons">
+  <ebutton class="btn cancel" [class.expand]="!balanceIsEnough()" [disabled]="!balanceIsEnough()" mode="cancel"
+    (clicked)="cancelOperation()"
+    [title]="(!balanceIsEnough() ? 'wallet.insufficient-balance' : 'common.cancel') | translate">
+  </ebutton>
+  <ebutton class="btn confirm" *ngIf="balanceIsEnough()" [disabled]="signingAndTransacting" (clicked)="goTransaction()"
+    [title]="'common.confirm' | translate"></ebutton>
+</div>

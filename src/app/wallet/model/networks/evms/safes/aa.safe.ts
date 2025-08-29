@@ -1,15 +1,15 @@
-import { AccountAbstractionService } from "src/app/wallet/services/account-abstraction/account-abstraction.service";
-import { WalletService } from "src/app/wallet/services/wallet.service";
-import { Transfer } from "../../../../services/cointransfer.service";
-import { SafeService } from "../../../../services/safe.service";
-import { AccountAbstractionMasterWallet } from "../../../masterwallets/account.abstraction.masterwallet";
-import { Safe } from "../../../safes/safe";
-import { SignTransactionResult } from "../../../safes/safe.types";
-import { AnyNetworkWallet } from "../../base/networkwallets/networkwallet";
-import { AnySubWallet } from "../../base/subwallets/subwallet";
-import { AccountAbstractionProvider } from "../account-abstraction-provider";
-import { EVMNetwork } from "../evm.network";
-import { EVMSafe } from "./evm.safe";
+import { AccountAbstractionProvidersService } from 'src/app/wallet/services/account-abstraction/account-abstraction-providers.service';
+import { WalletService } from 'src/app/wallet/services/wallet.service';
+import { Transfer } from '../../../../services/cointransfer.service';
+import { SafeService } from '../../../../services/safe.service';
+import { AccountAbstractionMasterWallet } from '../../../masterwallets/account.abstraction.masterwallet';
+import { Safe } from '../../../safes/safe';
+import { SignTransactionResult } from '../../../safes/safe.types';
+import { AnyNetworkWallet } from '../../base/networkwallets/networkwallet';
+import { AnySubWallet } from '../../base/subwallets/subwallet';
+import { AccountAbstractionProvider } from '../account-abstraction-provider';
+import { EVMNetwork } from '../evm.network';
+import { EVMSafe } from './evm.safe';
 
 /**
  * Safe specialized for Account Abstraction wallets
@@ -26,9 +26,7 @@ export class AASafe extends Safe implements EVMSafe {
   public async initialize(networkWallet: AnyNetworkWallet): Promise<void> {
     await super.initialize(networkWallet);
 
-    this.aaProvider = AccountAbstractionService.instance.getProviderById(
-      this.masterWallet.getAAProviderId()
-    );
+    this.aaProvider = AccountAbstractionProvidersService.instance.getProviderById(this.masterWallet.getAAProviderId());
 
     if (!this.aaProvider) {
       throw new Error(
@@ -38,9 +36,7 @@ export class AASafe extends Safe implements EVMSafe {
 
     const network = networkWallet.network as EVMNetwork;
 
-    const controllerWallet = WalletService.instance.getMasterWallet(
-      this.masterWallet.getControllerWalletId()
-    );
+    const controllerWallet = WalletService.instance.getMasterWallet(this.masterWallet.getControllerWalletId());
 
     if (!controllerWallet) {
       throw new Error(
@@ -48,31 +44,18 @@ export class AASafe extends Safe implements EVMSafe {
       );
     }
 
-    const controllerNetworkWallet = await network.createNetworkWallet(
-      controllerWallet,
-      false
-    );
+    const controllerNetworkWallet = await network.createNetworkWallet(controllerWallet, false);
 
     const controllerAccount = controllerNetworkWallet.getAddresses()[0].address;
 
-    this.aaAddress = await this.aaProvider.getAccountAddress(
-      controllerAccount,
-      network.getMainChainID()
-    );
+    this.aaAddress = await this.aaProvider.getAccountAddress(controllerAccount, network.getMainChainID());
 
     if (!this.aaAddress) {
-      throw new Error(
-        `Cannot create safe, account abstraction address was not found.`
-      );
+      throw new Error(`Cannot create safe, account abstraction address was not found.`);
     }
   }
 
-  public getAddresses(
-    startIndex: number,
-    count: number,
-    internalAddresses: boolean,
-    usage: any
-  ): string[] {
+  public getAddresses(startIndex: number, count: number, internalAddresses: boolean, usage: any): string[] {
     if (startIndex === 0) {
       return [this.aaAddress];
     } else {
@@ -87,7 +70,7 @@ export class AASafe extends Safe implements EVMSafe {
     gasLimit: string,
     nonce: number
   ): Promise<any> {
-    throw new Error("createTransferTransaction not implemented by AA Safe");
+    throw new Error('createTransferTransaction not implemented by AA Safe');
   }
 
   public createContractTransaction(
@@ -98,7 +81,7 @@ export class AASafe extends Safe implements EVMSafe {
     nonce: number,
     data: any
   ): Promise<any> {
-    throw new Error("createContractTransaction not implemented by AA Safe");
+    throw new Error('createContractTransaction not implemented by AA Safe');
   }
 
   public signTransaction(
@@ -110,8 +93,6 @@ export class AASafe extends Safe implements EVMSafe {
   ): Promise<SignTransactionResult> {
     // AA wallets don't sign transactions directly
     // They use the controller wallet for signing
-    throw new Error(
-      "AA wallets don't sign transactions directly. Use the controller wallet."
-    );
+    throw new Error("AA wallets don't sign transactions directly. Use the controller wallet.");
   }
 }
