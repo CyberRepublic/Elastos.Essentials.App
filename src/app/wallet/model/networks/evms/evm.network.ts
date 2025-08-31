@@ -264,6 +264,14 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   }
 
   /**
+   * To be overriden by each network. By default, no provider is returned, meaning that ERC20 tokens
+   * won't be able to get a USD pricing.
+   */
+  public getCustomCurrencyProvider() {
+    return null;
+  }
+
+  /**
    * To be overriden by each network. By default, no provider is returned.
    */
   public getDexScreenerCurrencyProvider(): DexScreenerCurrencyProvider {

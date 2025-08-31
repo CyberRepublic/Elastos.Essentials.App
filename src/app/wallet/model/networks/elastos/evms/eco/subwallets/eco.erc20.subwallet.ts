@@ -15,6 +15,14 @@ export class EcoERC20SubWallet extends ERC20SubWallet {
   }
 
   public getMainIcon(): string {
+    //TODO: improve it
+    if (this.coin.getContractAddress().toLowerCase() === '0x45ec25a63e010bfb84629242f40dda187f83833e') {
+      return "assets/wallet/coins/btcd.png"
+    } else if (this.coin.getContractAddress().toLowerCase() === '0x67d8183f13043be52f64fb434f1aa5e5d1c58775') {
+      return "assets/wallet/coins/fist.png"
+    // } else if (this.coin.getContractAddress().toLowerCase() === '') {
+    //   return "assets/wallet/coins/pg.png"
+    }
     return "assets/wallet/networks/elastos-eco.svg";
   }
 

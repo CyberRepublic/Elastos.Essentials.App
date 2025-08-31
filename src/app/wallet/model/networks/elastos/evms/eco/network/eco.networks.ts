@@ -11,6 +11,8 @@ import type { AnyNetworkWallet } from "../../../../base/networkwallets/networkwa
 import { ElastosEVMNetwork } from "../../../network/elastos.evm.network";
 import { ERC20SubWallet } from "../../../../evms/subwallets/erc20.subwallet";
 import { EcoERC20SubWallet } from "../subwallets/eco.erc20.subwallet";
+import { ElastosECOCustomPriceProvider } from "../currency/eco.costum.price.provider";
+import { UniswapCurrencyProvider } from "../../../../evms/uniswap.currencyprovider";
 
 export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetworkOptions> {
   public static NETWORK_KEY = "elastoseco";
@@ -72,6 +74,9 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
  * Elastos ECO Chain
  */
 export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
+  // private uniswapCurrencyProvider: ElastosECOPGProvider = null;
+  private customPriceProvider: ElastosECOCustomPriceProvider = null;
+
   constructor() {
     super(
       ElastosECONetworkBase.NETWORK_KEY,
@@ -81,6 +86,15 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
       MAINNET_TEMPLATE,
       12343
     );
+
+    this.builtInCoins = [
+      new ERC20Coin(this, "USDT", "USDT Coin on ECO", "0x1C4E7cd89ea67339d4A5ed2780703180a19757d7", 18, false, true),
+      new ERC20Coin(this, "BTCD", "BTCD Coin on ECO", "0x45ec25a63e010BFb84629242f40DDa187f83833E", 18, false, true),
+      new ERC20Coin(this, "FIST", "FIST Coin on ECO", "0x67d8183f13043Be52F64FB434F1AA5e5d1C58775", 18, false, true)
+    ];
+
+    // this.uniswapCurrencyProvider = new ElastosECOPGProvider(this);
+    this.customPriceProvider = new ElastosECOCustomPriceProvider(this);
   }
 
   public getAPIUrlOfType(type: NetworkAPIURLType): string {
@@ -94,8 +108,17 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
       return null;
   }
 
+  public getUniswapCurrencyProvider(): UniswapCurrencyProvider {
+    return null;
+    // return this.uniswapCurrencyProvider;
+  }
+
+  public getCustomCurrencyProvider() {
+    return this.customPriceProvider;
+  }
+
   public getBuiltInERC20Coins(): ERC20Coin[] {
-    return [];
+    return this.builtInCoins;
   }
 
   public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
