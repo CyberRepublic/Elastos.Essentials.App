@@ -88,9 +88,9 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
     );
 
     this.builtInCoins = [
-      new ERC20Coin(this, "USDT", "USDT Coin on ECO", "0x1C4E7cd89ea67339d4A5ed2780703180a19757d7", 18, false, true),
-      new ERC20Coin(this, "BTCD", "BTCD Coin on ECO", "0x45ec25a63e010BFb84629242f40DDa187f83833E", 18, false, true),
-      new ERC20Coin(this, "FIST", "FIST Coin on ECO", "0x67d8183f13043Be52F64FB434F1AA5e5d1C58775", 18, false, true)
+      // new ERC20Coin(this, "USDT", "USDT on ECO", "0x1C4E7cd89ea67339d4A5ed2780703180a19757d7", 18, false, true),
+      new ERC20Coin(this, "BTCD", "BTC Dollar", "0x45ec25a63e010BFb84629242f40DDa187f83833E", 18, false, true),
+      new ERC20Coin(this, "FIST", "FIST on ECO", "0x67d8183f13043Be52F64FB434F1AA5e5d1C58775", 18, false, true)
     ];
 
     // this.uniswapCurrencyProvider = new ElastosECOPGProvider(this);
