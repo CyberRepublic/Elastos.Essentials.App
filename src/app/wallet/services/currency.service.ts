@@ -426,12 +426,23 @@ export class CurrencyService {
     }
   }
 
-  public fetchERC20TokenValue(coin: ERC20Coin, network?: EVMNetwork): Promise<void> {
+  public async fetchERC20TokenValue(coin: ERC20Coin, network?: EVMNetwork): Promise<void> {
     let cacheKey = network.key + coin.getContractAddress();
     if ((<EVMNetwork>network).getUniswapCurrencyProvider()) {
         this.queueUniswapTokenFetch(cacheKey, network, coin);
     } else if ((<EVMNetwork>network).getDexScreenerCurrencyProvider()) {
         void this.dexScreenerTokenFetch(cacheKey, network, coin);
+    } else {
+      let provider = (<EVMNetwork>network).getCustomCurrencyProvider();
+      if (provider) {
+        let value = await provider.getTokenPrice(coin);
+        if (value) {
+          let currentTime = Date.now() / 1000;
+          this.pricesCache.set(cacheKey, {
+            usdValue: value
+          }, currentTime);
+        }
+      }
     }
     return;
   }
