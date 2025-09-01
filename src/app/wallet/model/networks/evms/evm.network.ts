@@ -12,6 +12,7 @@ import { SwapProvider } from '../../earn/swapprovider';
 import { PrivateKeyType, WalletNetworkOptions } from '../../masterwallets/wallet.types';
 import { NetworkAPIURLType } from '../base/networkapiurltype';
 import { AnyNetwork, Network } from '../network';
+import { CustomCurrencyProvider } from './custom.currencyprovider';
 import { DexScreenerCurrencyProvider } from './dexscreener.currencyprovider';
 import { EVMNetworkWallet } from './networkwallets/evm.networkwallet';
 import { ERC1155Provider } from './nfts/erc1155.provider';
@@ -22,6 +23,7 @@ import { UniswapCurrencyProvider } from './uniswap.currencyprovider';
 export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   private availableCoins: Coin[] = null;
   private deletedERC20Coins: ERC20Coin[] = [];
+  protected customCurrencyProviders: CustomCurrencyProvider[] = []; // To be filled by implementation networks.
 
   public onCoinAdded: Subject<string> = new Subject(); // Event - when a coin is added - provides the coin ID
   public onCoinDeleted: Subject<string> = new Subject(); // Event - when a coin is added - provides the coin ID
@@ -303,11 +305,11 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   }
 
   /**
-   * To be overriden by each network. By default, no provider is returned, meaning that ERC20 tokens
-   * won't be able to get a USD pricing.
+   * Returns the list of custom currency providers available, for example to get prices
+   * for tokens that can't be retrieved from a uniswap dex, or dex screener, etc.
    */
-  public getCustomCurrencyProvider() {
-    return null;
+  public getCustomCurrencyProviders(): CustomCurrencyProvider[] {
+    return this.customCurrencyProviders;
   }
 
   /**

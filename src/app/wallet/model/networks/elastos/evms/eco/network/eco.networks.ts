@@ -1,73 +1,47 @@
-import type { ConfigInfo } from "@elastosfoundation/wallet-js-sdk";
-import { Logger } from "src/app/logger";
-import { GlobalElastosAPIService } from "src/app/services/global.elastosapi.service";
-import {
-  MAINNET_TEMPLATE,
-  TESTNET_TEMPLATE,
-} from "src/app/services/global.networks.service";
-import { CoinID, ERC20Coin, StandardCoinName } from "src/app/wallet/model/coin";
-import { AccountAbstractionMasterWallet } from "src/app/wallet/model/masterwallets/account.abstraction.masterwallet";
-import type { LedgerMasterWallet } from "src/app/wallet/model/masterwallets/ledger.masterwallet";
-import type {
-  MasterWallet,
-  StandardMasterWallet,
-} from "src/app/wallet/model/masterwallets/masterwallet";
-import {
-  PrivateKeyType,
-  WalletNetworkOptions,
-  WalletType,
-} from "src/app/wallet/model/masterwallets/wallet.types";
-import { NetworkAPIURLType } from "../../../../base/networkapiurltype";
-import type { AnyNetworkWallet } from "../../../../base/networkwallets/networkwallet";
-import { AASafe } from "../../../../evms/safes/aa.safe";
-import { ERC20SubWallet } from "../../../../evms/subwallets/erc20.subwallet";
-import { ElastosEVMNetwork } from "../../../network/elastos.evm.network";
-import { EcoERC20SubWallet } from "../subwallets/eco.erc20.subwallet";
-import { ElastosECOCustomPriceProvider } from "../currency/eco.costum.price.provider";
-import { UniswapCurrencyProvider } from "../../../../evms/uniswap.currencyprovider";
+import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
+import { Logger } from 'src/app/logger';
+import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
+import { MAINNET_TEMPLATE, TESTNET_TEMPLATE } from 'src/app/services/global.networks.service';
+import { CoinID, ERC20Coin, StandardCoinName } from 'src/app/wallet/model/coin';
+import { AccountAbstractionMasterWallet } from 'src/app/wallet/model/masterwallets/account.abstraction.masterwallet';
+import type { LedgerMasterWallet } from 'src/app/wallet/model/masterwallets/ledger.masterwallet';
+import type { MasterWallet, StandardMasterWallet } from 'src/app/wallet/model/masterwallets/masterwallet';
+import { PrivateKeyType, WalletNetworkOptions, WalletType } from 'src/app/wallet/model/masterwallets/wallet.types';
+import { NetworkAPIURLType } from '../../../../base/networkapiurltype';
+import type { AnyNetworkWallet } from '../../../../base/networkwallets/networkwallet';
+import { AASafe } from '../../../../evms/safes/aa.safe';
+import { ERC20SubWallet } from '../../../../evms/subwallets/erc20.subwallet';
+import { UniswapCurrencyProvider } from '../../../../evms/uniswap.currencyprovider';
+import { ElastosEVMNetwork } from '../../../network/elastos.evm.network';
+import { ElastosECOOracleCustomCurrencyProvider } from '../currency/eco.oracle.custom.currency.provider';
+import { EcoERC20SubWallet } from '../subwallets/eco.erc20.subwallet';
 
 export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetworkOptions> {
-  public static NETWORK_KEY = "elastoseco";
+  public static NETWORK_KEY = 'elastoseco';
 
-  public async newNetworkWallet(
-    masterWallet: MasterWallet
-  ): Promise<AnyNetworkWallet> {
+  public async newNetworkWallet(masterWallet: MasterWallet): Promise<AnyNetworkWallet> {
     switch (masterWallet.type) {
       case WalletType.STANDARD:
-        const ElastosECOChainStandardNetworkWallet = (
-          await import("../networkwallets/standard/eco.networkwallet")
-        ).ElastosECOChainStandardNetworkWallet;
-        return new ElastosECOChainStandardNetworkWallet(
-          masterWallet as StandardMasterWallet,
-          this
-        );
+        const ElastosECOChainStandardNetworkWallet = (await import('../networkwallets/standard/eco.networkwallet'))
+          .ElastosECOChainStandardNetworkWallet;
+        return new ElastosECOChainStandardNetworkWallet(masterWallet as StandardMasterWallet, this);
       case WalletType.LEDGER:
-        const ElastosECOLedgerNetworkWallet = (
-          await import("../networkwallets/ledger/eco.networkwallet")
-        ).ElastosECOLedgerNetworkWallet;
-        return new ElastosECOLedgerNetworkWallet(
-          masterWallet as LedgerMasterWallet,
-          this
-        );
+        const ElastosECOLedgerNetworkWallet = (await import('../networkwallets/ledger/eco.networkwallet'))
+          .ElastosECOLedgerNetworkWallet;
+        return new ElastosECOLedgerNetworkWallet(masterWallet as LedgerMasterWallet, this);
       case WalletType.ACCOUNT_ABSTRACTION:
         const AccountAbstractionNetworkWallet = (
-          await import(
-            "../../../../evms/networkwallets/account-abstraction.networkwallet"
-          )
+          await import('../../../../evms/networkwallets/account-abstraction.networkwallet')
         ).AccountAbstractionNetworkWallet;
         return new AccountAbstractionNetworkWallet(
           masterWallet as AccountAbstractionMasterWallet,
           this,
           new AASafe(masterWallet as AccountAbstractionMasterWallet),
-          "ELA",
-          "Elastos ECO Chain"
+          'ELA',
+          'Elastos ECO Chain'
         );
       default:
-        Logger.warn(
-          "wallet",
-          "Elastos ECO does not support ",
-          masterWallet.type
-        );
+        Logger.warn('wallet', 'Elastos ECO does not support ', masterWallet.type);
         return null;
     }
   }
@@ -97,7 +71,7 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
 
   public getDefaultWalletNetworkOptions(): WalletNetworkOptions {
     return {
-      network: this.key,
+      network: this.key
     };
   }
 
@@ -108,7 +82,7 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
   }
 
   public getMainColor(): string {
-    return "535353";
+    return '535353';
   }
 }
 
@@ -116,49 +90,40 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
  * Elastos ECO Chain
  */
 export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
-  // private uniswapCurrencyProvider: ElastosECOPGProvider = null;
-  private customPriceProvider: ElastosECOCustomPriceProvider = null;
-
   constructor() {
     super(
       ElastosECONetworkBase.NETWORK_KEY,
-      "Elastos ECO Chain",
-      "ECO",
-      "assets/wallet/networks/elastos-eco.svg",
+      'Elastos ECO Chain',
+      'ECO',
+      'assets/wallet/networks/elastos-eco.svg',
       MAINNET_TEMPLATE,
       12343
     );
 
     this.builtInCoins = [
       // new ERC20Coin(this, "USDT", "USDT on ECO", "0x1C4E7cd89ea67339d4A5ed2780703180a19757d7", 18, false, true),
-      new ERC20Coin(this, "BTCD", "BTC Dollar", "0x45ec25a63e010BFb84629242f40DDa187f83833E", 18, false, true),
-      new ERC20Coin(this, "FIST", "FIST on ECO", "0x67d8183f13043Be52F64FB434F1AA5e5d1C58775", 18, false, true)
+      new ERC20Coin(this, 'BTCD', 'BTC Dollar', '0x45ec25a63e010BFb84629242f40DDa187f83833E', 18, false, true),
+      new ERC20Coin(this, 'FIST', 'FIST on ECO', '0x67d8183f13043Be52F64FB434F1AA5e5d1C58775', 18, false, true)
     ];
 
     // this.uniswapCurrencyProvider = new ElastosECOPGProvider(this);
-    this.customPriceProvider = new ElastosECOCustomPriceProvider(this);
+    this.customCurrencyProviders.push(new ElastosECOOracleCustomCurrencyProvider(this));
   }
 
   public getAPIUrlOfType(type: NetworkAPIURLType): string {
     if (type === NetworkAPIURLType.RPC)
       return GlobalElastosAPIService.instance.getApiUrl(
-        GlobalElastosAPIService.instance.getApiUrlTypeForRpc(
-          StandardCoinName.ETHECO
-        ),
+        GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECO),
         MAINNET_TEMPLATE
       );
     else if (type === NetworkAPIURLType.ETHERSCAN) {
       return GlobalElastosAPIService.instance.getApiUrl(
-        GlobalElastosAPIService.instance.getApiUrlTypeForBrowser(
-          StandardCoinName.ETHECO
-        ),
+        GlobalElastosAPIService.instance.getApiUrlTypeForBrowser(StandardCoinName.ETHECO),
         MAINNET_TEMPLATE
       );
     } else if (type === NetworkAPIURLType.BLOCK_EXPLORER) {
       return GlobalElastosAPIService.instance.getApiUrl(
-        GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(
-          StandardCoinName.ETHECO
-        ),
+        GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(StandardCoinName.ETHECO),
         MAINNET_TEMPLATE
       );
     } else return null;
@@ -169,16 +134,12 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
     // return this.uniswapCurrencyProvider;
   }
 
-  public getCustomCurrencyProvider() {
-    return this.customPriceProvider;
-  }
-
   public getBuiltInERC20Coins(): ERC20Coin[] {
     return this.builtInCoins;
   }
 
   public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig["ETHECO"] = { chainID: "12343", NetworkID: "12343" };
+    onGoingConfig['ETHECO'] = { chainID: '12343', NetworkID: '12343' };
   }
 
   // When the user manually sets the gas price, it cannot be less than this value.
@@ -193,9 +154,9 @@ export class ElastosECOTestNetNetwork extends ElastosECONetworkBase {
   constructor() {
     super(
       ElastosECONetworkBase.NETWORK_KEY,
-      "ECO Testnet",
-      "ECO Testnet",
-      "assets/wallet/networks/elastos-eco.svg",
+      'ECO Testnet',
+      'ECO Testnet',
+      'assets/wallet/networks/elastos-eco.svg',
       TESTNET_TEMPLATE,
       800007
     );
@@ -204,23 +165,17 @@ export class ElastosECOTestNetNetwork extends ElastosECONetworkBase {
   public getAPIUrlOfType(type: NetworkAPIURLType): string {
     if (type === NetworkAPIURLType.RPC)
       return GlobalElastosAPIService.instance.getApiUrl(
-        GlobalElastosAPIService.instance.getApiUrlTypeForRpc(
-          StandardCoinName.ETHECO
-        ),
+        GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECO),
         TESTNET_TEMPLATE
       );
     else if (type === NetworkAPIURLType.ETHERSCAN) {
       return GlobalElastosAPIService.instance.getApiUrl(
-        GlobalElastosAPIService.instance.getApiUrlTypeForBrowser(
-          StandardCoinName.ETHECO
-        ),
+        GlobalElastosAPIService.instance.getApiUrlTypeForBrowser(StandardCoinName.ETHECO),
         TESTNET_TEMPLATE
       );
     } else if (type === NetworkAPIURLType.BLOCK_EXPLORER) {
       return GlobalElastosAPIService.instance.getApiUrl(
-        GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(
-          StandardCoinName.ETHECO
-        ),
+        GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(StandardCoinName.ETHECO),
         TESTNET_TEMPLATE
       );
     } else return null;
@@ -231,7 +186,7 @@ export class ElastosECOTestNetNetwork extends ElastosECONetworkBase {
   }
 
   public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig["ETHECO"] = { chainID: "800007", NetworkID: "800007" };
+    onGoingConfig['ETHECO'] = { chainID: '800007', NetworkID: '800007' };
   }
 
   // When the user manually sets the gas price, it cannot be less than this value.
