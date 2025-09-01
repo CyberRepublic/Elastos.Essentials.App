@@ -174,6 +174,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
       partialUserOp,
       chainConfig.entryPointAddress
     );
+    Logger.log('wallet', 'First gas estimates:', estimates);
 
     partialUserOp = { ...partialUserOp, ...estimates };
 
@@ -192,6 +193,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
 
     let requiredToken = 4; // TMP VALUE TO AVOID DYNAMIC CALCULATION OF ERC20 AMOUNT FOR GAS
     const allowance = await erc20Contract.allowance(aaAddress, chainConfig.paymasterAddress);
+    Logger.log('wallet', 'ERC20 spending allowance:', allowance.toString());
     // const allowanceHex = await provider.call({ to: erc20Address, data: allowanceData });
     // const allowance = BigNumber.from(ethers.utils.defaultAbiCoder.decode(['uint256'], allowanceHex)[0]);
 
@@ -218,6 +220,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
         partialUserOp,
         chainConfig.entryPointAddress
       );
+      Logger.log('wallet', 'Second gas estimates:', estimates);
 
       partialUserOp = { ...partialUserOp, ...estimates };
 
@@ -256,6 +259,8 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
       },
       chainConfig.entryPointAddress
     );
+
+    Logger.log('wallet', 'User op hash:', userOpHash);
 
     // Confirmation screen here: display details to user
 

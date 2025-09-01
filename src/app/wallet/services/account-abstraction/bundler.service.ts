@@ -1,14 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Logger } from 'src/app/logger';
+import { JsonRpcResponse } from '../../model/json-rpc';
 import { UserOperation } from './model/user-operation';
 
-type EstimateUserOpGasResponse = {
-  result: {
-    preVerificationGas: string;
-    verificationGasLimit: string;
-    callGasLimit: string;
-  };
-};
+type EstimateUserOpGasResponse = JsonRpcResponse<{
+  preVerificationGas: string;
+  verificationGasLimit: string;
+  callGasLimit: string;
+}>;
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +35,11 @@ export class BundlerService {
         headers: { 'content-type': 'application/json' }
       })
       .toPromise();
+
+    if (!response.result) {
+      Logger.error('wallet', response?.error);
+      throw new Error('No valid result returned by estimateUserOpGas response');
+    }
 
     const result = response.result;
     return {

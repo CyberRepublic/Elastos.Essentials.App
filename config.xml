@@ -7,7 +7,7 @@
     <author email="secretariat@elastos.com" href="https://www.elastos.com">
         Elastos DAO LLC
     </author>
-    <content original-src="index.html" src="https://localhost:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
