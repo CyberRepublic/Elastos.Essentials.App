@@ -24,7 +24,9 @@
     "bundle-size-verifier-source-map": "ng build && source-map-explorer www/*",
     "lint": "npm run eslint && npm run prettier -- --check",
     "prettier": "prettier \"**/*.ts\"",
-    "eslint": "eslint src/app --ext .ts"
+    "eslint": "eslint src/app --ext .ts",
+    "manual-native-android": "native-run android --app platforms/android/app/build/outputs/apk/debug/app-debug.apk --device --forward 8100:8100",
+    "manual-ng-run-android": "ng run app:ionic-cordova-serve --host=localhost --port=8100 --ssl --platform=android"
   },
   "private": true,
   "dependencies": {

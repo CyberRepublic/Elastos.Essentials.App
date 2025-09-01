@@ -1,26 +1,29 @@
-import type { ConfigInfo } from "@elastosfoundation/wallet-js-sdk";
-import { Subject } from "rxjs";
-import { Logger } from "src/app/logger";
-import { GlobalNetworksService } from "src/app/services/global.networks.service";
-import { erc20CoinsSerializer } from "src/app/wallet/services/evm/erc20coin.service";
-import { LocalStorage } from "src/app/wallet/services/storage.service";
-import { Coin, CoinID, CoinType, ERC20Coin } from "../../coin";
-import { BridgeProvider } from "../../earn/bridgeprovider";
-import { EarnProvider } from "../../earn/earnprovider";
-import { SwapProvider } from "../../earn/swapprovider";
-import { PrivateKeyType, WalletNetworkOptions } from "../../masterwallets/wallet.types";
-import { NetworkAPIURLType } from "../base/networkapiurltype";
-import { AnyNetwork, Network } from "../network";
-import { DexScreenerCurrencyProvider } from "./dexscreener.currencyprovider";
-import { EVMNetworkWallet } from "./networkwallets/evm.networkwallet";
-import { ERC1155Provider } from "./nfts/erc1155.provider";
-import { ERC721Provider } from "./nfts/erc721.provider";
-import { ERC20SubWallet } from "./subwallets/erc20.subwallet";
-import { UniswapCurrencyProvider } from "./uniswap.currencyprovider";
+import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
+import { Subject } from 'rxjs';
+import { Logger } from 'src/app/logger';
+import { GlobalNetworksService } from 'src/app/services/global.networks.service';
+import { erc20CoinsSerializer } from 'src/app/wallet/services/evm/erc20coin.service';
+import { EVMService } from 'src/app/wallet/services/evm/evm.service';
+import { LocalStorage } from 'src/app/wallet/services/storage.service';
+import { Coin, CoinID, CoinType, ERC20Coin } from '../../coin';
+import { BridgeProvider } from '../../earn/bridgeprovider';
+import { EarnProvider } from '../../earn/earnprovider';
+import { SwapProvider } from '../../earn/swapprovider';
+import { PrivateKeyType, WalletNetworkOptions } from '../../masterwallets/wallet.types';
+import { NetworkAPIURLType } from '../base/networkapiurltype';
+import { AnyNetwork, Network } from '../network';
+import { CustomCurrencyProvider } from './custom.currencyprovider';
+import { DexScreenerCurrencyProvider } from './dexscreener.currencyprovider';
+import { EVMNetworkWallet } from './networkwallets/evm.networkwallet';
+import { ERC1155Provider } from './nfts/erc1155.provider';
+import { ERC721Provider } from './nfts/erc721.provider';
+import { ERC20SubWallet } from './subwallets/erc20.subwallet';
+import { UniswapCurrencyProvider } from './uniswap.currencyprovider';
 
 export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   private availableCoins: Coin[] = null;
   private deletedERC20Coins: ERC20Coin[] = [];
+  protected customCurrencyProviders: CustomCurrencyProvider[] = []; // To be filled by implementation networks.
 
   public onCoinAdded: Subject<string> = new Subject(); // Event - when a coin is added - provides the coin ID
   public onCoinDeleted: Subject<string> = new Subject(); // Event - when a coin is added - provides the coin ID
@@ -264,11 +267,11 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
   }
 
   /**
-   * To be overriden by each network. By default, no provider is returned, meaning that ERC20 tokens
-   * won't be able to get a USD pricing.
+   * Returns the list of custom currency providers available, for example to get prices
+   * for tokens that can't be retrieved from a uniswap dex, or dex screener, etc.
    */
-  public getCustomCurrencyProvider() {
-    return null;
+  public getCustomCurrencyProviders(): CustomCurrencyProvider[] {
+    return this.customCurrencyProviders;
   }
 
   /**
