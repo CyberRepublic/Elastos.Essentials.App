@@ -271,31 +271,49 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
       const chainConfig = this.getSupportedChain(network.getMainChainID());
       const provider = network.getJsonRpcProvider();
 
-      // Get gas price and fee data
-      const gasPrice = await provider.getGasPrice();
-      const feeData = await provider.getFeeData();
+      Logger.log('wallet', 'Partial user op for estimation:', partialUserOp);
+
+      // Create custom paymaster contract interface for ethPerTokenRate
+      const paymasterAbi = ['function ethPerTokenRate() view returns (uint256)'];
+      const paymasterContract = new ethers.Contract(chainConfig.paymasterAddress, paymasterAbi, provider);
+
+      // Run ALL independent async operations in parallel for maximum performance
+      const [gasPrice, feeData, callGasLimit, verificationGasLimit, ethPerTokenRate] = await Promise.all([
+        // Gas price
+        provider.getGasPrice(),
+        // Fee data
+        provider.getFeeData(),
+        // Gas for "execute" operation
+        (async () => {
+          try {
+            Logger.log('wallet', 'Estimating gas for "execute"');
+            const gasLimit = await provider.estimateGas({
+              from: config.entryPointAddress,
+              to: partialUserOp.sender,
+              data: partialUserOp.callData
+            });
+            Logger.log('wallet', 'Estimated execute gas:', gasLimit.toString());
+            return gasLimit;
+          } catch (error) {
+            throw new Error(`Failed to estimate execute gas: ${error}`);
+          }
+        })(),
+        // verificationGasLimit
+        (async () => {
+          const gasLimit = await this.estimateVerificationGasLimit(network, partialUserOp);
+          Logger.log('wallet', 'Estimated verificationGasLimit:', gasLimit.toString());
+          return gasLimit;
+        })(),
+        // ethPerTokenRate
+        (async () => {
+          const rate = await paymasterContract.ethPerTokenRate();
+          Logger.log('wallet', '📊 Paymaster ethPerTokenRate:', rate.toString());
+          return rate;
+        })()
+      ]);
 
       Logger.log('wallet', 'Current network Gas price:', gasPrice.toString());
       Logger.log('wallet', 'Fee data:', feeData);
-
-      Logger.log('wallet', 'Partial user op for estimation:', partialUserOp);
-
-      // Estimate gas for the execute call
-      let callGasLimit: BigNumber;
-      try {
-        Logger.log('wallet', 'Estimating gas for "execute"');
-        callGasLimit = await provider.estimateGas({
-          from: config.entryPointAddress,
-          to: partialUserOp.sender,
-          data: partialUserOp.callData
-        });
-        Logger.log('wallet', 'Estimated execute gas:', callGasLimit.toString());
-      } catch (error) {
-        throw new Error(`Failed to estimate execute gas: ${error}`);
-      }
-
-      const verificationGasLimit = await this.estimateVerificationGasLimit(network, partialUserOp);
-      Logger.log('wallet', 'Estimated verificationGasLimit:', verificationGasLimit.toString());
 
       const estimates = {
         preVerificationGas: BigNumber.from(60000).toHexString(), // Pre-verification gas is a constant in the AA SDK
@@ -304,12 +322,6 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
       };
 
       Logger.log('wallet', 'Real gas estimates from SimpleAccount:', estimates);
-
-      // Create custom paymaster contract interface for ethPerTokenRate
-      const paymasterAbi = ['function ethPerTokenRate() view returns (uint256)'];
-      const paymasterContract = new ethers.Contract(chainConfig.paymasterAddress, paymasterAbi, provider);
-      const ethPerTokenRate = await paymasterContract.ethPerTokenRate();
-      Logger.log('wallet', '📊 Paymaster ethPerTokenRate:', ethPerTokenRate.toString());
 
       // Calculate total gas
       const totalGas = BigNumber.from(estimates.preVerificationGas)
