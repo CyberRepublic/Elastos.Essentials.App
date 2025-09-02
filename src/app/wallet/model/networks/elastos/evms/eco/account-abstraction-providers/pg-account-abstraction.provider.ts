@@ -1,4 +1,6 @@
+import { getUserOpHash } from '@account-abstraction/utils';
 import { BigNumber, ethers } from 'ethers';
+import { parseUnits } from 'ethers/lib/utils';
 import { Logger } from 'src/app/logger';
 import { AccountAbstractionService } from 'src/app/wallet/services/account-abstraction/account-abstraction.service';
 import { BundlerService } from 'src/app/wallet/services/account-abstraction/bundler.service';
@@ -33,7 +35,7 @@ const PG_AA_CHAIN_CONFIGS: PGAAChainConfig[] = [
   {
     chainId: 12343,
     entryPointAddress: '0x8308DF3bb308A669942220614032098BbE62E11A',
-    bundlerRpcUrl: 'https://bundler-test.eadd.co/rpc',
+    bundlerRpcUrl: 'https://bundler.eadd.co/rpc',
     paymasterAddress: '0x0348E7c415cE40188f3e2AFf5d2f936d28D791cb',
     factoryAddress: '0x3fDA83ab9564eC18Cb413f4bdf83e2789DD7D173',
     gasErc20TokenAddress: '0x0348E7c415cE40188f3e2AFf5d2f936d28D791cb', // Test PGA - same as paymaster...
@@ -136,15 +138,13 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     Logger.log('wallet', 'AA address:', aaAddress);
     Logger.log('wallet', 'EOA controller address:', eoaControllerAddress);
 
-    let calls: AccountAbstractionTransaction[] = [transaction];
+    const callData = aaService.encodeExecute(transaction.to, transaction.value, transaction.data);
+    Logger.log('wallet', 'Execute-encoded call data:', callData);
 
-    Logger.log('wallet', 'Batch encoding calls:', calls);
-    const callData = aaService.encodeExecuteBatch(calls);
-    Logger.log('wallet', 'Batch encoded calls:', callData);
-
-    const paymasterAndData =
-      chainConfig.paymasterAddress +
-      ethers.utils.defaultAbiCoder.encode(['address'], [chainConfig.gasErc20TokenAddress]).slice(2);
+    // const paymasterAndData =
+    //   chainConfig.paymasterAddress +
+    //   ethers.utils.defaultAbiCoder.encode(['address'], [chainConfig.gasErc20TokenAddress]).slice(2);
+    const paymasterAndData = chainConfig.paymasterAddress; // Just the address for noz (zehua)
 
     const initCode = await aaService.getInitCode(network, aaAddress, eoaControllerAddress, chainConfig.factoryAddress);
     Logger.log('wallet', 'Init code:', initCode);
@@ -162,13 +162,18 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
       callData,
       callGasLimit: '0x1',
       verificationGasLimit: '0x1',
-      preVerificationGas: '0x1',
-      maxFeePerGas: ethers.utils.hexValue(gasPrice),
-      maxPriorityFeePerGas: '0x1',
+      preVerificationGas: ethers.BigNumber.from(1).toHexString(), // uint256 as hex string
+      // maxFeePerGas: ethers.utils.hexValue(gasPrice.mul(4)), // TMP TEST HIGHER GAS
+      // maxPriorityFeePerGas: '0x1',
+      maxFeePerGas: parseUnits('50', 'gwei').toHexString(),
+      maxPriorityFeePerGas: parseUnits('50', 'gwei').toHexString(),
       paymasterAndData
     };
 
+    Logger.log('wallet', 'Partial user op:', partialUserOp);
+
     // First estimate assuming no approve
+    Logger.log('wallet', 'Estimating user op gas');
     let estimates = await bundlerService.estimateUserOpGas(
       chainConfig.bundlerRpcUrl,
       partialUserOp,
@@ -197,76 +202,95 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     // const allowanceHex = await provider.call({ to: erc20Address, data: allowanceData });
     // const allowance = BigNumber.from(ethers.utils.defaultAbiCoder.decode(['uint256'], allowanceHex)[0]);
 
-    if (allowance.lt(requiredToken)) {
-      const approveMethod = await erc20Contract.approve(chainConfig.paymasterAddress, requiredToken.toString());
+    // if (allowance.lt(requiredToken)) {
+    //   // Get the approve method call data without calling the method
+    //   const approveCallData = erc20Contract.interface.encodeFunctionData('approve', [
+    //     chainConfig.paymasterAddress,
+    //     requiredToken.toString()
+    //   ]);
 
-      // const { gasLimit, nonce } = await EVMService.instance.methodGasAndNonce(approveMethod, network, sender, "0");
+    //   // Add approve call
+    //   calls = [
+    //     {
+    //       to: chainConfig.gasErc20TokenAddress,
+    //       value: '0',
+    //       data: approveCallData
+    //     },
+    //     ...calls
+    //   ];
 
-      // Add approve call
-      calls = [
-        {
-          to: chainConfig.gasErc20TokenAddress,
-          value: '0',
-          data: approveMethod.data
-        },
-        ...calls
-      ];
+    //   partialUserOp.callData = aaService.encodeExecuteBatch(calls);
 
-      partialUserOp.callData = aaService.encodeExecuteBatch(calls);
+    //   // Re-estimate
+    //   estimates = await bundlerService.estimateUserOpGas(
+    //     chainConfig.bundlerRpcUrl,
+    //     partialUserOp,
+    //     chainConfig.entryPointAddress
+    //   );
+    //   Logger.log('wallet', 'Second gas estimates:', estimates);
 
-      // Re-estimate
-      estimates = await bundlerService.estimateUserOpGas(
-        chainConfig.bundlerRpcUrl,
-        partialUserOp,
-        chainConfig.entryPointAddress
-      );
-      Logger.log('wallet', 'Second gas estimates:', estimates);
+    //   partialUserOp = { ...partialUserOp, ...estimates };
 
-      partialUserOp = { ...partialUserOp, ...estimates };
+    //   totalGasLimit = BigNumber.from(estimates.preVerificationGas)
+    //     .add(estimates.verificationGasLimit)
+    //     .add(estimates.callGasLimit);
+    //   totalCostWei = totalGasLimit.mul(BigNumber.from(partialUserOp.maxFeePerGas));
 
-      totalGasLimit = BigNumber.from(estimates.preVerificationGas)
-        .add(estimates.verificationGasLimit)
-        .add(estimates.callGasLimit);
-      totalCostWei = totalGasLimit.mul(BigNumber.from(partialUserOp.maxFeePerGas));
+    //   // requiredToken = await calculateRequiredTokenAmount(
+    //   //   provider,
+    //   //   totalCostWei,
+    //   //   oracleAddress,
+    //   //   tokenDecimals,
+    //   //   oracleDecimals
+    //   // );
+    //   requiredToken = 5; // TMP VALUE TO AVOID DYNAMIC CALCULATION OF ERC20 AMOUNT FOR GAS
 
-      // requiredToken = await calculateRequiredTokenAmount(
-      //   provider,
-      //   totalCostWei,
-      //   oracleAddress,
-      //   tokenDecimals,
-      //   oracleDecimals
-      // );
-      requiredToken = 5; // TMP VALUE TO AVOID DYNAMIC CALCULATION OF ERC20 AMOUNT FOR GAS
+    //   // Update approve data with new amount for the final user op.
+    //   calls[0].data = erc20Contract.interface.encodeFunctionData('approve', [
+    //     chainConfig.paymasterAddress,
+    //     requiredToken
+    //   ]);
+    //   partialUserOp.callData = aaService.encodeExecuteBatch(calls);
+    // }
 
-      // Update approve data with new amount for the final user op.
-      calls[0].data = erc20Contract.interface.encodeFunctionData('approve', [
-        chainConfig.paymasterAddress,
-        requiredToken
-      ]);
-      partialUserOp.callData = aaService.encodeExecuteBatch(calls);
-    }
+    const userOpForHash = {
+      ...partialUserOp,
+      accountGasLimits: ethers.utils.hexZeroPad('0x1', 32), // bytes32
+      gasFees: ethers.utils.hexZeroPad(ethers.utils.hexValue(gasPrice), 32), // bytes32
+      signature: '0x', // Dummy value when getting hash
+      paymasterAndData: '0x' // Dummy value when getting hash
+    };
 
-    const userOpHash = await aaService.getUserOpHash(
-      network,
-      {
-        sender: aaAddress,
-        nonce,
-        initCode,
-        callData,
-        accountGasLimits: '0x1',
-        preVerificationGas: '0x1',
-        gasFees: ethers.utils.hexValue(gasPrice)
-      },
-      chainConfig.entryPointAddress
-    );
+    Logger.log('wallet', 'Getting user op hash for op:', userOpForHash);
+
+    const userOpHash = getUserOpHash(userOpForHash, chainConfig.entryPointAddress, network.getMainChainID());
+    ///const userOpHash = await aaService.getUserOpHash(network, userOpForHash, chainConfig.entryPointAddress);
 
     Logger.log('wallet', 'User op hash:', userOpHash);
 
     // Confirmation screen here: display details to user
 
-    const signature = 'TODO REAL SIGNATURE'; // await aaService.signUserOp(userOpHash, privateKey, provider);
+    //let password = await AuthService.instance.getWalletPassword(networkWallet.masterWallet.id, true, false); // Don't force password
+
+    let signature = await eoaControllerNetworkWallet.signDigest(eoaControllerAddress, userOpHash.substring(2), null);
+    console.log('wallet', 'TEMP Signature:', signature);
+
+    if (!signature) {
+      throw new Error('Failed to sign user op hash');
+    }
 
     const fullUserOp: UserOperation = { ...partialUserOp, signature };
+    Logger.log('wallet', 'Sending full user op:', fullUserOp);
+
+    const requiredPrefund = this.getRequiredPrefund({
+      verificationGasLimit: fullUserOp.verificationGasLimit,
+      callGasLimit: fullUserOp.callGasLimit,
+      paymasterVerificationGasLimit: '0', // Not provided by bundler estimates
+      paymasterPostOpGasLimit: '0', // Not provided by bundler estimates
+      preVerificationGas: fullUserOp.preVerificationGas,
+      maxFeePerGas: fullUserOp.maxFeePerGas
+    });
+    Logger.log('wallet', 'Required prefund:', requiredPrefund.toString());
 
     const txid = await bundlerService.sendUserOpToBundler(
       fullUserOp,
@@ -275,4 +299,56 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     );
     console.log('woot, aa txid', txid);
   }
+
+  /**
+   * Simulates the Solidity _getRequiredPrefund function
+   * Calculates the required prefund amount based on gas limits and max fee per gas
+   *
+   * @param userOp The user operation containing gas limits and fee information
+   * @returns The required prefund amount as a BigNumber
+   */
+  public getRequiredPrefund(userOp: {
+    verificationGasLimit: string | number;
+    callGasLimit: string | number;
+    paymasterVerificationGasLimit: string | number;
+    paymasterPostOpGasLimit: string | number;
+    preVerificationGas: string | number;
+    maxFeePerGas: string | number;
+  }): BigNumber {
+    // Convert all values to BigNumber for safe arithmetic operations
+    const verificationGasLimit = BigNumber.from(userOp.verificationGasLimit);
+    const callGasLimit = BigNumber.from(userOp.callGasLimit);
+    const paymasterVerificationGasLimit = BigNumber.from(userOp.paymasterVerificationGasLimit);
+    const paymasterPostOpGasLimit = BigNumber.from(userOp.paymasterPostOpGasLimit);
+    const preVerificationGas = BigNumber.from(userOp.preVerificationGas);
+    const maxFeePerGas = BigNumber.from(userOp.maxFeePerGas);
+
+    console.log('verificationGasLimit', verificationGasLimit.toString());
+    console.log('callGasLimit', callGasLimit.toString());
+    console.log('paymasterVerificationGasLimit', paymasterVerificationGasLimit.toString());
+    console.log('paymasterPostOpGasLimit', paymasterPostOpGasLimit.toString());
+    console.log('preVerificationGas', preVerificationGas.toString());
+    console.log('maxFeePerGas', maxFeePerGas.toString());
+
+    // Calculate total required gas (equivalent to Solidity's unchecked arithmetic)
+    const requiredGas = verificationGasLimit
+      .add(callGasLimit)
+      .add(paymasterVerificationGasLimit)
+      .add(paymasterPostOpGasLimit)
+      .add(preVerificationGas);
+
+    console.log('requiredGas', requiredGas.toString());
+    console.log('maxFeePerGas', maxFeePerGas.toString());
+
+    // Calculate required prefund = requiredGas * maxFeePerGas
+    const requiredPrefund = requiredGas.mul(maxFeePerGas);
+
+    return requiredPrefund;
+  }
 }
+
+// async signUserOpHash (userOpHash: string): Promise<string> {
+//   const privateKey = (this.owner as any).privateKey
+//   const sig = ecsign(Buffer.from(arrayify(userOpHash)), Buffer.from(arrayify(privateKey)))
+//   return toRpcSig(sig.v, sig.r, sig.s)
+// }

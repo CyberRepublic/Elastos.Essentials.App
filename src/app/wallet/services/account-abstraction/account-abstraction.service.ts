@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ethers } from 'ethers';
 import { EVMNetwork } from '../../model/networks/evms/evm.network';
-import { AccountAbstractionTransaction } from './model/account-abstraction-transaction';
 import { BaseAccount__factory, EntryPoint__factory, SimpleAccountFactory__factory } from './typechain';
-import { PackedUserOperationStruct } from './typechain/contracts/accounts/SimpleAccount';
 
 @Injectable({
   providedIn: 'root'
@@ -25,12 +22,10 @@ export class AccountAbstractionService {
   }
 
   /**
-   * Asks the account contract to encode a batch of transactions.
+   * Asks the account contract to encode a transaction transactions.
    */
-  public encodeExecuteBatch(calls: AccountAbstractionTransaction[]): string {
-    return this.baseAccountInterface.encodeFunctionData('executeBatch', [
-      calls.map(c => ({ target: c.to, value: c.value, data: c.data }))
-    ]);
+  public encodeExecute(target: string, value: string, data: string): string {
+    return this.baseAccountInterface.encodeFunctionData('execute', [target, value, data]);
   }
 
   public async getInitCode(
@@ -49,30 +44,5 @@ export class AccountAbstractionService {
       initCode = factoryAddress + createData.slice(2);
     }
     return initCode;
-  }
-
-  /**
-   *
-   * @param network
-   * @param userOp
-   * @param entryPoint
-   * @returns
-   */
-  public getUserOpHash(
-    network: EVMNetwork,
-    userOp: Omit<PackedUserOperationStruct, 'signature' | 'paymasterAndData'>,
-    entryPoint: string
-  ): Promise<string> {
-    const entryPointContract = EntryPoint__factory.connect(entryPoint, network.getJsonRpcProvider());
-    return entryPointContract.getUserOpHash({ ...userOp, signature: '0x', paymasterAndData: '0x' });
-  }
-
-  async signUserOp(
-    userOpHash: string,
-    privateKey: string,
-    provider: ethers.providers.JsonRpcProvider
-  ): Promise<string> {
-    const signer = new ethers.Wallet(privateKey, provider);
-    return await signer.signMessage(ethers.utils.arrayify(userOpHash));
   }
 }

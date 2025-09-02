@@ -26,13 +26,14 @@
     "lint": "npm run eslint && npm run prettier -- --check",
     "prettier": "prettier \"**/*.ts\"",
     "eslint": "eslint src/app --ext .ts",
-    "manual-native-android": "native-run android --app platforms/android/app/build/outputs/apk/debug/app-debug.apk --device --forward 8100:8100",
+    "manual-native-android": "native-run android --app platforms/android/app/build/outputs/apk/debug/app-debug.apk --device --forward 8100:8100 --forward 1313:1313",
     "manual-ng-run-android": "ng run app:ionic-cordova-serve --host=localhost --port=8100 --ssl --platform=android"
   },
   "private": true,
   "dependencies": {
     "@account-abstraction/contracts": "^0.8.0",
     "@account-abstraction/sdk": "^0.6.0",
+    "@account-abstraction/utils": "^0.6.0",
     "@angular/animations": "13.1.1",
     "@angular/cdk": "13.1.1",
     "@angular/common": "13.1.1",
