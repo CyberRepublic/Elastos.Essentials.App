@@ -109,8 +109,6 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     return senderAddress;
   }
 
-  private getAccountInitCode;
-
   public async bundleTransaction(
     networkWallet: AccountAbstractionNetworkWallet,
     transaction: AccountAbstractionTransaction
@@ -137,15 +135,22 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
 
     const provider = network.getJsonRpcProvider();
 
-    const [initCode, nonce, gasPrice, feeData] = await Promise.all([
+    Logger.log('Wallet', 'Fetching remote information...');
+    const [aaCode, _initCode, nonce, gasPrice, feeData] = await Promise.all([
+      provider.getCode(aaAddress),
       aaService.getAccountInitCode(network, eoaControllerAddress, chainConfig.factoryAddress),
       aaService.getNonce(network, chainConfig.entryPointAddress, aaAddress),
       provider.getGasPrice(),
       provider.getFeeData()
     ]);
 
-    Logger.log('wallet', 'Init code:', initCode);
+    const aaAccountIsDeployed = aaCode !== '0x';
+    Logger.log('Wallet', 'Deployed?', aaAccountIsDeployed);
+    Logger.log('wallet', 'Init code:', _initCode);
     Logger.log('wallet', 'Nonce:', nonce);
+
+    // Only use init code when account is not deployed. WHen deployed, we should always use 0x.
+    const initCode = aaAccountIsDeployed ? '0x' : _initCode;
 
     let partialUserOp: Omit<UserOperation, 'signature'> = {
       sender: aaAddress,
@@ -187,7 +192,6 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     Logger.log('wallet', 'Getting user op hash for op:', userOpForHash);
 
     const userOpHash = getUserOpHash(userOpForHash, chainConfig.entryPointAddress, network.getMainChainID());
-    ///const userOpHash = await aaService.getUserOpHash(network, userOpForHash, chainConfig.entryPointAddress);
 
     Logger.log('wallet', 'User op hash:', userOpHash);
 
@@ -232,7 +236,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     ethPerTokenRate: BigNumber;
   }> {
     try {
-      Logger.log('wallet', '🔍 Starting UserOperation Gas estimation...');
+      Logger.log('wallet', 'Starting UserOperation Gas estimation...');
 
       // Get services
       const chainConfig = this.getSupportedChain(network.getMainChainID());
@@ -264,41 +268,11 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
         throw new Error(`Failed to estimate execute gas: ${error}`);
       }
 
-      // Pre-verification gas is a constant in the AA SDK
-      const preVerificationGas = BigNumber.from(60000);
-
-      // For verification gas, we need to estimate validateUserOp gas
-      // This is more complex as it requires a full UserOperation
-      let verificationGasLimit: BigNumber;
-      try {
-        // Create a dummy user operation for gas estimation
-        const dummyUserOp = {
-          sender: partialUserOp.sender,
-          nonce: partialUserOp.nonce,
-          initCode: '0x',
-          callData: partialUserOp.callData,
-          accountGasLimits: ethers.utils.hexZeroPad('0x1', 32),
-          preVerificationGas: preVerificationGas.toHexString(),
-          gasFees: ethers.utils.hexZeroPad(gasPrice.toHexString(), 32),
-          paymasterAndData: '0x',
-          signature: '0x'
-        };
-
-        // Estimate validateUserOp gas
-        verificationGasLimit = await SimpleAccount.estimateGas.validateUserOp(
-          dummyUserOp,
-          ethers.utils.hexZeroPad('0x1', 32), // dummy userOpHash
-          BigNumber.from(0) // missingAccountFunds
-        );
-        Logger.log('wallet', 'Estimated validateUserOp gas:', verificationGasLimit.toString());
-      } catch (error) {
-        Logger.warn('wallet', 'Failed to estimate validateUserOp gas, using fallback:', error);
-        verificationGasLimit = BigNumber.from(100000); // Reasonable fallback for SimpleAccount
-        callGasLimit = BigNumber.from(50000); // Reasonable fallback for call gas
-      }
+      const verificationGasLimit = await this.estimateVerificationGasLimit(network, partialUserOp);
+      Logger.log('wallet', 'Estimated verificationGasLimit:', verificationGasLimit.toString());
 
       const estimates = {
-        preVerificationGas: preVerificationGas.toHexString(),
+        preVerificationGas: BigNumber.from(60000).toHexString(), // Pre-verification gas is a constant in the AA SDK
         verificationGasLimit: verificationGasLimit.toHexString(),
         callGasLimit: callGasLimit.toHexString()
       };
@@ -345,6 +319,33 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     } catch (error) {
       Logger.error('wallet', 'Gas estimation failed:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Depending on whether the AA is deployed or not, the verification gas is different.
+   * Deployment consumes more gas.
+   */
+  private async estimateVerificationGasLimit(
+    network: EVMNetwork,
+    partialUserOp: Omit<UserOperation, 'signature'>
+  ): Promise<BigNumber> {
+    const baseVerificationGasLimit = BigNumber.from(100000);
+
+    const aaIsDeployed = partialUserOp.initCode === '0x';
+    if (aaIsDeployed) {
+      return baseVerificationGasLimit;
+    } else {
+      // Not deployed yet, get creation cost.
+      const provider = network.getJsonRpcProvider();
+
+      Logger.log('wallet', 'Estimating creation gas');
+      const deployerAddress = partialUserOp.initCode.substring(0, 42);
+      const deployerCallData = '0x' + partialUserOp.initCode.substring(42);
+      const creationGas = await provider.estimateGas({ to: deployerAddress, data: deployerCallData });
+      Logger.log('wallet', `Creation gas cost: ${creationGas.toString()}`);
+
+      return baseVerificationGasLimit.add(creationGas);
     }
   }
 }
