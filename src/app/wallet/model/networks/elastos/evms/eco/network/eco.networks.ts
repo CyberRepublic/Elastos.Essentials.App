@@ -9,7 +9,6 @@ import type { MasterWallet, StandardMasterWallet } from 'src/app/wallet/model/ma
 import { PrivateKeyType, WalletNetworkOptions, WalletType } from 'src/app/wallet/model/masterwallets/wallet.types';
 import { NetworkAPIURLType } from '../../../../base/networkapiurltype';
 import type { AnyNetworkWallet } from '../../../../base/networkwallets/networkwallet';
-import { AASafe } from '../../../../evms/safes/aa.safe';
 import { ERC20SubWallet } from '../../../../evms/subwallets/erc20.subwallet';
 import { UniswapCurrencyProvider } from '../../../../evms/uniswap.currencyprovider';
 import { ElastosEVMNetwork } from '../../../network/elastos.evm.network';
@@ -30,16 +29,10 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
           .ElastosECOLedgerNetworkWallet;
         return new ElastosECOLedgerNetworkWallet(masterWallet as LedgerMasterWallet, this);
       case WalletType.ACCOUNT_ABSTRACTION:
-        const AccountAbstractionNetworkWallet = (
-          await import('../../../../evms/networkwallets/account-abstraction.networkwallet')
-        ).AccountAbstractionNetworkWallet;
-        return new AccountAbstractionNetworkWallet(
-          masterWallet as AccountAbstractionMasterWallet,
-          this,
-          new AASafe(masterWallet as AccountAbstractionMasterWallet),
-          'ELA',
-          'Elastos ECO Chain'
-        );
+        const ElastosAccountAbstractionEVMNetworkWallet = (
+          await import('../../networkwallets/account-abstraction/account-abstraction.evm.networkwallet')
+        ).ElastosAccountAbstractionEVMNetworkWallet;
+        return new ElastosAccountAbstractionEVMNetworkWallet(masterWallet as AccountAbstractionMasterWallet, this);
       default:
         Logger.warn('wallet', 'Elastos ECO does not support ', masterWallet.type);
         return null;

@@ -10,14 +10,13 @@ import { AnySubWallet } from '../../base/subwallets/subwallet';
 import { AccountAbstractionProvider } from '../account-abstraction-provider';
 import type { EVMNetwork } from '../evm.network';
 import { AASafe } from '../safes/aa.safe';
-import { AccountAbstractionSubWallet } from '../subwallets/account-abstraction.subwallet';
 import { MainCoinEVMSubWallet } from '../subwallets/evm.subwallet';
 import { EVMNetworkWallet } from './evm.networkwallet';
 
 /**
  * Network wallet type for Account Abstraction wallets on EVM networks
  */
-export class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
+export abstract class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
   AccountAbstractionMasterWallet,
   WalletNetworkOptions
 > {
@@ -42,18 +41,9 @@ export class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
     this.aaProvider = AccountAbstractionProvidersService.instance.getProviderById(this.masterWallet.getAAProviderId());
   }
 
-  protected createTransactionDiscoveryProvider(): any {
-    // TODO: Implement AA-specific transaction discovery
-    return null;
-  }
-
   protected async prepareStandardSubWallets(): Promise<void> {
     // Create the main token subwallet (ETH, BSC, etc.)
-    this.mainTokenSubWallet = new AccountAbstractionSubWallet(
-      this,
-      this.masterWallet.id,
-      this.mainSubWalletFriendlyName
-    );
+    this.mainTokenSubWallet = new MainCoinEVMSubWallet(this, this.masterWallet.id, this.mainSubWalletFriendlyName);
 
     // Add both subwallets
     this.subWallets[this.mainTokenSubWallet.id] = this.mainTokenSubWallet;
