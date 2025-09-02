@@ -110,9 +110,10 @@ export class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
    * request, into a UserOp and sends it to the bundler.
    */
   public async signAndSendRawTx(tx: AccountAbstractionTransaction): Promise<string> {
-    // Ask the account abstraction provider specific to this account to bundle the transaction.
-    await this.getAccountAbstractionProvider().bundleTransaction(this, tx);
+    // Ask the account abstraction provider specific to this account to bundle the transaction
+    // and return the actual transaction hash.
+    const transactionHash = await this.getAccountAbstractionProvider().bundleTransaction(this, tx);
 
-    return 'todo';
+    return transactionHash;
   }
 }

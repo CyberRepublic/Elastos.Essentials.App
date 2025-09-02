@@ -79,20 +79,24 @@ export class AccountAbstractionComponent implements OnInit {
 
     try {
       const networkWallet = this.parentPage.getNetworkWallet() as AccountAbstractionNetworkWallet;
-      await networkWallet.signAndSendRawTx({
+      const publishedTxId = await networkWallet.signAndSendRawTx({
         to: this.parentPage.getCoinTransferService().payloadParam.to,
         value: this.parentPage.getCoinTransferService().payloadParam.value || '0',
         data: this.parentPage.getCoinTransferService().payloadParam.data
       });
 
-      // Simulate success for now
-      await this.parentPage.sendIntentResponse(
-        {
-          txid: 'aa_transaction_' + Date.now(),
-          status: 'published'
-        },
-        intentTransfer.intentId
-      );
+      if (publishedTxId) {
+        // Simulate success for now
+        await this.parentPage.sendIntentResponse(
+          {
+            txid: publishedTxId,
+            status: 'published'
+          },
+          intentTransfer.intentId
+        );
+      } else {
+        await this.parentPage.sendIntentResponse({ txid: null, status: 'error' }, intentTransfer.intentId);
+      }
     } catch (err) {
       Logger.error('wallet', 'AccountAbstractionComponent sendAccountAbstractionTransaction error:', err);
       if (intentTransfer.intentId) {

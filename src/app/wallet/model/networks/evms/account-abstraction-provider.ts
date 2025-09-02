@@ -57,5 +57,5 @@ export abstract class AccountAbstractionProvider<
   public abstract bundleTransaction(
     networkWallet: AccountAbstractionNetworkWallet,
     transaction: AccountAbstractionTransaction
-  ): Promise<void>;
+  ): Promise<string>;
 }

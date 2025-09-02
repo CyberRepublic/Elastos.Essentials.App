@@ -6,7 +6,7 @@ import { AccountAbstractionService } from 'src/app/wallet/services/account-abstr
 import { BundlerService } from 'src/app/wallet/services/account-abstraction/bundler.service';
 import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
 import { UserOperation } from 'src/app/wallet/services/account-abstraction/model/user-operation';
-import { EntryPoint__factory, SimpleAccount__factory } from 'src/app/wallet/services/account-abstraction/typechain';
+import { EntryPoint__factory } from 'src/app/wallet/services/account-abstraction/typechain';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import {
   AccountAbstractionProvider,
@@ -41,7 +41,12 @@ const PG_AA_CHAIN_CONFIGS: PGAAChainConfig[] = [
 
 /**
  * PG AA Account Provider for ECO chain
- * Implements Account Abstraction functionality specific to the PG implementation
+ * Implements Account Abstraction functionality specific to the PG implementation.
+ *
+ * The specificity of this provider is to have the PGA (that can be used to pay the paymaster for gas)
+ * token mixed with the paymaster contract. This way, users with this kind of contract can avoid having native
+ * ELA, but instead, they need to send PGA tokens to their AA account. PGA on thri account will be automatically
+ * transfered to the paymaster when executing a transaction.
  */
 export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGAAChainConfig> {
   constructor() {
@@ -109,7 +114,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
   public async bundleTransaction(
     networkWallet: AccountAbstractionNetworkWallet,
     transaction: AccountAbstractionTransaction
-  ): Promise<void> {
+  ): Promise<string> {
     // Services
     const aaService = AccountAbstractionService.instance;
     const bundlerService = BundlerService.instance;
@@ -187,14 +192,14 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
 
     Logger.log('wallet', 'Getting user op hash for op:', userOpForHash);
 
-    const userOpHash = getUserOpHash(userOpForHash, chainConfig.entryPointAddress, network.getMainChainID());
+    const calculatedUserOpHash = getUserOpHash(userOpForHash, chainConfig.entryPointAddress, network.getMainChainID());
 
-    Logger.log('wallet', 'User op hash:', userOpHash);
+    Logger.log('wallet', 'User op hash:', calculatedUserOpHash);
 
     // For ERC-4337, we need to sign the Ethereum signed message hash
     // This matches the behavior expected by SimpleAccount._validateSignature
     // which does: bytes32 hash = userOpHash.toEthSignedMessageHash()
-    const userOpHashBytes = Buffer.from(userOpHash.substring(2), 'hex');
+    const userOpHashBytes = Buffer.from(calculatedUserOpHash.substring(2), 'hex');
     const ethSignedMessageHash = hashPersonalMessage(userOpHashBytes);
 
     let signature = await eoaControllerNetworkWallet.signDigest(
@@ -211,12 +216,29 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     const fullUserOp: UserOperation = { ...partialUserOp, signature };
     Logger.log('wallet', 'Sending full user op:', fullUserOp);
 
-    const txid = await bundlerService.sendUserOpToBundler(
+    // Send UserOp to bundler and get UserOpHash
+    const submittedUserOpHash = await bundlerService.sendUserOpToBundler(
       fullUserOp,
       chainConfig.entryPointAddress,
       chainConfig.bundlerRpcUrl
     );
-    console.log('woot, aa txid', txid);
+    Logger.log('wallet', 'UserOp sent successfully, user op hash:', submittedUserOpHash);
+
+    // Wait for the UserOp to be mined and get the actual transaction hash
+    Logger.log('wallet', 'Waiting for UserOp to be mined...');
+    const userOpReceipt = await bundlerService.getUserOperationReceipt(submittedUserOpHash, chainConfig.bundlerRpcUrl);
+
+    // Check if the user operation was successful
+    if (!userOpReceipt.success) {
+      const reason = userOpReceipt.reason || 'Unknown failure reason';
+      Logger.error('wallet', `UserOp execution failed: ${reason}`);
+      throw new Error(`User operation failed: ${reason}`);
+    }
+
+    const transactionHash = userOpReceipt.receipt.transactionHash;
+    Logger.log('wallet', 'UserOp executed successfully! Receipt:', userOpReceipt);
+
+    return transactionHash;
   }
 
   /**
@@ -257,9 +279,6 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
       Logger.log('wallet', 'Fee data:', feeData);
 
       Logger.log('wallet', 'Partial user op for estimation:', partialUserOp);
-
-      // Create SimpleAccount instance to get real gas estimates
-      const simpleAccount = SimpleAccount__factory.connect(partialUserOp.sender, provider);
 
       // Estimate gas for the execute call
       let callGasLimit: BigNumber;
