@@ -1,15 +1,12 @@
 import { getUserOpHash } from '@account-abstraction/utils';
+import { hashPersonalMessage } from 'ethereumjs-util';
 import { BigNumber, ethers } from 'ethers';
 import { Logger } from 'src/app/logger';
 import { AccountAbstractionService } from 'src/app/wallet/services/account-abstraction/account-abstraction.service';
 import { BundlerService } from 'src/app/wallet/services/account-abstraction/bundler.service';
 import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
 import { UserOperation } from 'src/app/wallet/services/account-abstraction/model/user-operation';
-import {
-  BaseAccount__factory,
-  EntryPoint__factory,
-  SimpleAccount__factory
-} from 'src/app/wallet/services/account-abstraction/typechain';
+import { EntryPoint__factory, SimpleAccount__factory } from 'src/app/wallet/services/account-abstraction/typechain';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import {
   AccountAbstractionProvider,
@@ -168,7 +165,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     Logger.log('wallet', 'Partial user op:', partialUserOp);
 
     // Estimate gas using our own method
-    const gasEstimation = await this.estimateUserOpGas(network, partialUserOp);
+    const gasEstimation = await this.estimateUserOpGas(network, chainConfig, partialUserOp);
     Logger.log('wallet', 'Gas estimation results:', gasEstimation);
 
     // Update partial user op with our gas estimates
@@ -185,8 +182,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
       ...partialUserOp,
       accountGasLimits: ethers.utils.hexZeroPad('0x1', 32), // bytes32
       gasFees: ethers.utils.hexZeroPad('0x1', 32), // bytes32 - dummy value
-      signature: '0x', // Dummy value when getting hash
-      paymasterAndData: '0x' // Dummy value when getting hash
+      signature: '0x' // Dummy value when getting hash
     };
 
     Logger.log('wallet', 'Getting user op hash for op:', userOpForHash);
@@ -195,7 +191,17 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
 
     Logger.log('wallet', 'User op hash:', userOpHash);
 
-    let signature = await eoaControllerNetworkWallet.signDigest(eoaControllerAddress, userOpHash.substring(2), null);
+    // For ERC-4337, we need to sign the Ethereum signed message hash
+    // This matches the behavior expected by SimpleAccount._validateSignature
+    // which does: bytes32 hash = userOpHash.toEthSignedMessageHash()
+    const userOpHashBytes = Buffer.from(userOpHash.substring(2), 'hex');
+    const ethSignedMessageHash = hashPersonalMessage(userOpHashBytes);
+
+    let signature = await eoaControllerNetworkWallet.signDigest(
+      eoaControllerAddress,
+      ethSignedMessageHash.toString('hex'),
+      null
+    );
     console.log('wallet', 'TEMP Signature:', signature);
 
     if (!signature) {
@@ -222,6 +228,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
    */
   public async estimateUserOpGas(
     network: EVMNetwork,
+    config: PGAAChainConfig,
     partialUserOp: Omit<UserOperation, 'signature'>
   ): Promise<{
     totalGas: BigNumber;
@@ -252,17 +259,17 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
       Logger.log('wallet', 'Partial user op for estimation:', partialUserOp);
 
       // Create SimpleAccount instance to get real gas estimates
-      const SimpleAccount = SimpleAccount__factory.connect(partialUserOp.sender, provider);
+      const simpleAccount = SimpleAccount__factory.connect(partialUserOp.sender, provider);
 
       // Estimate gas for the execute call
       let callGasLimit: BigNumber;
       try {
-        // Use the BaseAccount interface to decode the callData
-        const baseAccountInterface = BaseAccount__factory.createInterface();
-        const decodedCall = baseAccountInterface.decodeFunctionData('execute', partialUserOp.callData);
-        const [target, value, data] = decodedCall;
-
-        callGasLimit = await SimpleAccount.estimateGas.execute(target, value, data);
+        Logger.log('wallet', 'Estimating gas for "execute"');
+        callGasLimit = await provider.estimateGas({
+          from: config.entryPointAddress,
+          to: partialUserOp.sender,
+          data: partialUserOp.callData
+        });
         Logger.log('wallet', 'Estimated execute gas:', callGasLimit.toString());
       } catch (error) {
         throw new Error(`Failed to estimate execute gas: ${error}`);
