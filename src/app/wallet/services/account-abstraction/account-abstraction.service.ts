@@ -28,21 +28,14 @@ export class AccountAbstractionService {
     return this.baseAccountInterface.encodeFunctionData('execute', [target, value, data]);
   }
 
-  public async getInitCode(
-    network: EVMNetwork,
-    aaAddress: string,
-    eoaControllerAddress: string,
-    factoryAddress: string
-  ): Promise<string> {
+  /**
+   * Returns the init code for a AA account that is already deployed.
+   */
+  public getAccountInitCode(network: EVMNetwork, eoaControllerAddress: string, factoryAddress: string): string {
     const provider = network.getJsonRpcProvider();
-    const code = await provider.getCode(aaAddress);
-    let initCode = '0x';
-    if (code === '0x') {
-      const salt = 0;
-      const factory = SimpleAccountFactory__factory.connect(factoryAddress, provider);
-      const createData = factory.interface.encodeFunctionData('createAccount', [eoaControllerAddress, salt]);
-      initCode = factoryAddress + createData.slice(2);
-    }
-    return initCode;
+    const salt = 0;
+    const factory = SimpleAccountFactory__factory.connect(factoryAddress, provider);
+    const createData = factory.interface.encodeFunctionData('createAccount', [eoaControllerAddress, salt]);
+    return factoryAddress + createData.slice(2);
   }
 }
