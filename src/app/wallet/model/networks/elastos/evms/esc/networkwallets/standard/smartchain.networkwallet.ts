@@ -1,14 +1,12 @@
 import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { Logger } from 'src/app/logger';
 import { GlobalNetworksService } from 'src/app/services/global.networks.service';
-import { AnySubWallet } from 'src/app/wallet/model/networks/base/subwallets/subwallet';
 import { EVMNetwork } from 'src/app/wallet/model/networks/evms/evm.network';
 import { StandardCoinName } from '../../../../../../coin';
 import { StandardMasterWallet } from '../../../../../../masterwallets/masterwallet';
 import { TransactionProvider } from '../../../../../../tx-providers/transaction.provider';
 import { WalletAddressInfo } from '../../../../../base/networkwallets/networkwallet';
 import { ElastosStandardEVMNetworkWallet } from '../../../networkwallets/standard/standard.evm.networkwallet';
-import { ElastosEVMSubWallet } from '../../../subwallets/standard/elastos.evm.subwallet';
 import { ElastosEVMChainTransactionProvider } from '../../../tx-providers/elastos.evm.tx.provider';
 import { ElastosEscMainSubWallet } from '../../subwallets/elastos.esc.main.subwallet';
 
@@ -51,17 +49,5 @@ export class ElastosSmartChainStandardNetworkWallet extends ElastosStandardEVMNe
     }
 
     return addresses;
-  }
-
-  public getMainEvmSubWallet(): ElastosEVMSubWallet {
-    return this.mainTokenSubWallet as ElastosEVMSubWallet;
-  }
-
-  public getMainTokenSubWallet(): AnySubWallet {
-    return this.mainTokenSubWallet;
-  }
-
-  public getAverageBlocktime(): number {
-    return 5;
   }
 }

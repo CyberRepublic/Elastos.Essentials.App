@@ -16,11 +16,19 @@ import type { WalletNetworkOptions } from '../../../masterwallets/wallet.types';
 import { AddressUsage } from '../../../safes/addressusage';
 import { SignTransactionErrorType } from '../../../safes/safe.types';
 import { TimeBasedPersistentCache } from '../../../timebasedpersistentcache';
-import type { AnyOfflineTransaction, GenericTransaction, RawTransactionPublishResult, TransactionInfo } from '../../../tx-providers/transaction.types';
+import type {
+  AnyOfflineTransaction,
+  GenericTransaction,
+  RawTransactionPublishResult,
+  TransactionInfo
+} from '../../../tx-providers/transaction.types';
 import { TransactionListType } from '../../evms/evm.types';
 import type { NetworkWallet } from '../networkwallets/networkwallet';
 
-export abstract class SubWallet<TransactionType extends GenericTransaction, WalletNetworkOptionsType extends WalletNetworkOptions> {
+export abstract class SubWallet<
+  TransactionType extends GenericTransaction,
+  WalletNetworkOptionsType extends WalletNetworkOptions
+> {
   public masterWallet: MasterWallet;
   public id: CoinID = null;
   public tokenDecimals: number;
@@ -102,7 +110,7 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
   }
 
   public async saveBalanceToCache(): Promise<void> {
-    const timestamp = (new Date()).valueOf();
+    const timestamp = new Date().valueOf();
     this.balanceCache.set('balance', this.balance, timestamp);
     await this.balanceCache.save();
   }
@@ -116,16 +124,14 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
     return this.balance;
   }
 
-  public updateBalanceSpendable() {
-  }
+  public updateBalanceSpendable() {}
 
   /**
    * Returns the subwallet balance. The raw "balance" value is divided by the multiple to get a readable value.
    * Ex: returns 5 ELA, 3 MDX, etc
    */
   public getBalance(): BigNumber {
-    if (this.balance.isNaN())
-      return this.balance;
+    if (this.balance.isNaN()) return this.balance;
 
     return this.balance.dividedBy(this.tokenAmountMulipleTimes);
   }
@@ -155,7 +161,7 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
    * From a given transaction return a UI displayable transaction icon that illustrates the transaction operation.
    */
   protected async getTransactionIconPath(transaction: TransactionType): Promise<string> {
-    return await "";
+    return await '';
   }
 
   public abstract getTransactionInfo(transaction: TransactionType): Promise<TransactionInfo>;
@@ -171,8 +177,7 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
    * Inheritable method to do some cleanup when a subwallet is removed/destroyed from a master wallet
    */
   public async destroy(): Promise<void> {
-    if (this.balanceCache)
-      await this.balanceCache.delete();
+    if (this.balanceCache) await this.balanceCache.delete();
     return Promise.resolve();
   }
 
@@ -189,7 +194,7 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
     // Default implementation (for single address wallets): always return the first address.
     // Multi address wallets override this to return the real "current" receiving address.
     let addresses = this.networkWallet.safe.getAddresses(0, 1, false, usage);
-    return (addresses && addresses[0]) ? addresses[0] : null;
+    return addresses && addresses[0] ? addresses[0] : null;
   }
 
   public abstract isAddressValid(address: string): Promise<boolean>;
@@ -274,7 +279,7 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
    */
   public isAmountValid(amount: BigNumber) {
     let amountString = amount.toFixed();
-    if (amountString.indexOf('.') > -1 && amountString.split(".")[1].length > this.tokenDecimals) {
+    if (amountString.indexOf('.') > -1 && amountString.split('.')[1].length > this.tokenDecimals) {
       return false;
     } else {
       return true;
@@ -284,15 +289,17 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
   /**
    * Get the list of transactions currently in local memory cache.
    */
-  public getTransactions(transactionListType = TransactionListType.NORMAL): Promise<TransactionType[]> {
-    return this.networkWallet.getTransactionDiscoveryProvider().getTransactions(this, transactionListType);
+  public async getTransactions(transactionListType = TransactionListType.NORMAL): Promise<TransactionType[]> {
+    return (
+      (await this.networkWallet.getTransactionDiscoveryProvider()?.getTransactions(this, transactionListType)) || []
+    );
   }
 
   /**
    * Get the list of offline transactions, not published on chain (eg: multisig temporarily unsigned).
    */
-  public getOfflineTransactions(): Promise<AnyOfflineTransaction[]> {
-    return this.networkWallet.getTransactionDiscoveryProvider().getOfflineTransactions(this);
+  public async getOfflineTransactions(): Promise<AnyOfflineTransaction[]> {
+    return (await this.networkWallet.getTransactionDiscoveryProvider()?.getOfflineTransactions(this)) || [];
   }
 
   /**
@@ -314,11 +321,11 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
    * Request a network call to fetch the latest transactions for this subwallet.
    */
   public fetchNewestTransactions(transactionListType = TransactionListType.NORMAL) {
-    return this.networkWallet.getTransactionDiscoveryProvider().fetchNewestTransactions(this, transactionListType);
+    return this.networkWallet.getTransactionDiscoveryProvider()?.fetchNewestTransactions(this, transactionListType);
   }
 
   public canFetchMoreTransactions(): boolean {
-    return this.networkWallet.getTransactionDiscoveryProvider().canFetchMoreTransactions(this);
+    return this.networkWallet.getTransactionDiscoveryProvider()?.canFetchMoreTransactions(this);
   }
 
   /**
@@ -331,9 +338,23 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
 
   public getTransactionsCacheKey(transactionListType = TransactionListType.NORMAL): string {
     if (transactionListType === TransactionListType.NORMAL) {
-      return this.masterWallet.id + "-" + this.networkWallet.network.key + "-" + this.getUniqueIdentifierOnNetwork() + "-transactions";
+      return (
+        this.masterWallet.id +
+        '-' +
+        this.networkWallet.network.key +
+        '-' +
+        this.getUniqueIdentifierOnNetwork() +
+        '-transactions'
+      );
     } else {
-      return this.masterWallet.id + "-" + this.networkWallet.network.key + "-" + this.getUniqueIdentifierOnNetwork() + "-internaltransactions";
+      return (
+        this.masterWallet.id +
+        '-' +
+        this.networkWallet.network.key +
+        '-' +
+        this.getUniqueIdentifierOnNetwork() +
+        '-internaltransactions'
+      );
     }
   }
 
@@ -360,17 +381,28 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
   }
 
   public transactionsListChanged(): Subject<void> {
-    return this.networkWallet.getTransactionDiscoveryProvider().transactionsListChanged(this.getUniqueIdentifierOnNetwork());
+    return this.networkWallet
+      .getTransactionDiscoveryProvider()
+      .transactionsListChanged(this.getUniqueIdentifierOnNetwork());
   }
 
   public transactionsFetchStatusChanged(): Subject<boolean> {
-    return this.networkWallet.getTransactionDiscoveryProvider().transactionsFetchStatusChanged(this.getUniqueIdentifierOnNetwork());
+    return this.networkWallet
+      .getTransactionDiscoveryProvider()
+      .transactionsFetchStatusChanged(this.getUniqueIdentifierOnNetwork());
   }
 
   // public abstract getTransactionDetails(txid: string): Promise<TransactionDetail>;
 
   // TODO: same as createPaymentTransaction
-  public abstract createWithdrawTransaction(toAddress: string, amount: number, memo: string, gasPrice: string, gasLimit: string, nonce: number): Promise<string>;
+  public abstract createWithdrawTransaction(
+    toAddress: string,
+    amount: number,
+    memo: string,
+    gasPrice: string,
+    gasLimit: string,
+    nonce: number
+  ): Promise<string>;
 
   /**
    * Executes a SIGNED transaction publication process, including UI flows such as blocking popups.
@@ -396,10 +428,8 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
    * dialog.
    */
   protected markGenericOutgoingTransactionEnd(txid: string, message: string = '') {
-    if (txid)
-      TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.PUBLISHED);
-    else
-      TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.ERRORED, message);
+    if (txid) TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.PUBLISHED);
+    else TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.ERRORED, message);
   }
 
   /**
@@ -414,43 +444,67 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
    * Optionally navigates home after completion. TODO: MOVE THIS NAVIGATION IN SCREENS
    */
   // TODO: make this "transfer" object disappear...
-  public async signAndSendRawTransaction(rawTransaction: any, transfer: Transfer, navigateHomeAfterCompletion = true, forcePasswordPrompt = true, visualFeedback = true): Promise<RawTransactionPublishResult> {
+  public async signAndSendRawTransaction(
+    rawTransaction: any,
+    transfer: Transfer,
+    navigateHomeAfterCompletion = true,
+    forcePasswordPrompt = true,
+    visualFeedback = true
+  ): Promise<RawTransactionPublishResult> {
     // Ask the safe to sign the transaction. This includes potential password prompt or other UI operations
     // depending on the safe requirements.
-    let signedTxResult = await this.networkWallet.safe.signTransaction(this, rawTransaction, transfer, forcePasswordPrompt, visualFeedback);
+    let signedTxResult = await this.networkWallet.safe.signTransaction(
+      this,
+      rawTransaction,
+      transfer,
+      forcePasswordPrompt,
+      visualFeedback
+    );
     if (!signedTxResult.signedTransaction) {
       if (signedTxResult.errorType === SignTransactionErrorType.DELEGATED) {
-        Logger.log("wallet", "Transaction signature has been delegated to another flow.");
+        Logger.log('wallet', 'Transaction signature has been delegated to another flow.');
         return {
           published: false,
           txid: null,
           status: 'delegated'
-        }
-      }
-      else {
+        };
+      } else {
         return {
           published: false,
           txid: null,
-          status: (signedTxResult.errorType === SignTransactionErrorType.CANCELLED) ? 'cancelled' : 'error'
-        }
+          status: signedTxResult.errorType === SignTransactionErrorType.CANCELLED ? 'cancelled' : 'error'
+        };
       }
     }
 
-    return this.sendSignedTransaction(signedTxResult.signedTransaction, transfer, navigateHomeAfterCompletion, visualFeedback);
+    return this.sendSignedTransaction(
+      signedTxResult.signedTransaction,
+      transfer,
+      navigateHomeAfterCompletion,
+      visualFeedback
+    );
   }
 
-  public async sendSignedTransaction(signedTransaction: string, transfer: Transfer, navigateHomeAfterCompletion = true, visualFeedback = true): Promise<RawTransactionPublishResult> {
+  public async sendSignedTransaction(
+    signedTransaction: string,
+    transfer: Transfer,
+    navigateHomeAfterCompletion = true,
+    visualFeedback = true
+  ): Promise<RawTransactionPublishResult> {
     try {
-      Logger.log("wallet", "Publishing transaction.", signedTransaction);
+      Logger.log('wallet', 'Publishing transaction.', signedTransaction);
 
       await this.markGenericOutgoingTransactionStart();
 
-      let transactionToPublish = await this.networkWallet.safe.convertSignedTransactionToPublishableTransaction(this, signedTransaction);
+      let transactionToPublish = await this.networkWallet.safe.convertSignedTransactionToPublishableTransaction(
+        this,
+        signedTransaction
+      );
       let txid = await this.publishTransaction(transactionToPublish, visualFeedback);
 
       await this.markGenericOutgoingTransactionEnd(txid);
 
-      Logger.log("wallet", "publishTransaction txid:", txid);
+      Logger.log('wallet', 'publishTransaction txid:', txid);
 
       if (navigateHomeAfterCompletion) {
         await Native.instance.setRootRouter('/wallet/wallet-home');
@@ -468,34 +522,36 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
         status,
         txid
       };
-    }
-    catch (err) {
-      Logger.error("wallet", "Publish error:", err);
+    } catch (err) {
+      Logger.error('wallet', 'Publish error:', err);
 
       // ETHTransactionManager handle this error if the subwallet is StandardEVMSubWallet.
       // Maybe need to speed up.
       //if (!(this instanceof MainCoinEVMSubWallet)) { // BPI: Removed because of circular dependency - should move to safe, maybe. To be checked
-      let message = ''
+      let message = '';
       if (err.message) {
-        if (err.message.includes('slot TxInputsReferKeys verify tx error')) { // For ELA main chain.
-            message = GlobalTranslationService.instance.translateInstant('wallet.transaction-pending');
+        if (err.message.includes('slot TxInputsReferKeys verify tx error')) {
+          // For ELA main chain.
+          message = GlobalTranslationService.instance.translateInstant('wallet.transaction-pending');
         } else if (err.message.startsWith('transaction validate error')) {
-            let errorInfo = err.message.substring(26)
-            message = GlobalTranslationService.instance.translateInstant('wallet.transaction-invalid') + errorInfo;
+          let errorInfo = err.message.substring(26);
+          message = GlobalTranslationService.instance.translateInstant('wallet.transaction-invalid') + errorInfo;
         } else {
-            message = err.message;
+          message = err.message;
         }
-      } else if (err.error) { // BTC: nownode api
-          try {
-            let erroObj = JSON.parse(err.error);
-            message = erroObj.error.message;
-            if (err.message.includes('txn-mempool-conflict')) { // For BTC chain.
-              message = GlobalTranslationService.instance.translateInstant('wallet.transaction-pending');
-            }
-          } catch (e) {
-            // not json
-            Logger.error("wallet", "JSON.parse error:", err.error, e);
+      } else if (err.error) {
+        // BTC: nownode api
+        try {
+          let erroObj = JSON.parse(err.error);
+          message = erroObj.error.message;
+          if (err.message.includes('txn-mempool-conflict')) {
+            // For BTC chain.
+            message = GlobalTranslationService.instance.translateInstant('wallet.transaction-pending');
           }
+        } catch (e) {
+          // not json
+          Logger.error('wallet', 'JSON.parse error:', err.error, e);
+        }
       }
 
       await this.markGenericOutgoingTransactionEnd(null, message);
@@ -505,7 +561,7 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
         txid: null,
         status: 'error',
         code: err.code,
-        message: message,
+        message: message
       };
     }
   }
@@ -527,7 +583,7 @@ export abstract class SubWallet<TransactionType extends GenericTransaction, Wall
    * to directly target a coin to swap.
    */
   public getSwapInputCurrency(): string {
-    return "";
+    return '';
   }
 }
 

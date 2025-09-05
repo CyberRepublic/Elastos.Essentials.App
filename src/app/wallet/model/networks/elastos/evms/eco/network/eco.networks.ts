@@ -29,10 +29,10 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
           .ElastosECOLedgerNetworkWallet;
         return new ElastosECOLedgerNetworkWallet(masterWallet as LedgerMasterWallet, this);
       case WalletType.ACCOUNT_ABSTRACTION:
-        const ElastosAccountAbstractionEVMNetworkWallet = (
-          await import('../../networkwallets/account-abstraction/account-abstraction.evm.networkwallet')
-        ).ElastosAccountAbstractionEVMNetworkWallet;
-        return new ElastosAccountAbstractionEVMNetworkWallet(masterWallet as AccountAbstractionMasterWallet, this);
+        const ElastosECOChainAccountAbstractionNetworkWallet = (
+          await import('../networkwallets/account-abstraction/eco.networkwallet')
+        ).ElastosECOAccountAbstractionNetworkWallet;
+        return new ElastosECOChainAccountAbstractionNetworkWallet(masterWallet as AccountAbstractionMasterWallet, this);
       default:
         Logger.warn('wallet', 'Elastos ECO does not support ', masterWallet.type);
         return null;
