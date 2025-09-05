@@ -170,23 +170,32 @@ export class EscTransactionPage implements OnInit {
       this.targetNetwork = WalletNetworkService.instance.activeNetwork.value;
     }
 
+    // Early return if target network is not available
+    if (!this.targetNetwork) {
+      Logger.warn('wallet', 'ESC Transaction: target network not found');
+      return;
+    }
+
     this.currentNetworkName = this.targetNetwork.name;
 
     this.intentTransfer = this.coinTransferService.intentTransfer;
 
     let activeNetworkWallet = this.walletManager.getActiveNetworkWallet();
+    if (!activeNetworkWallet) {
+      Logger.warn('wallet', 'ESC Transaction: network wallet not found');
+      return;
+    }
+
     if (this.coinTransferService.masterWalletId != activeNetworkWallet.masterWallet.id) {
       let masterWallet = this.walletManager.getMasterWallet(this.coinTransferService.masterWalletId);
       this.networkWallet = await this.targetNetwork.createNetworkWallet(masterWallet, false);
     } else {
       this.networkWallet = activeNetworkWallet;
     }
-    if (!this.networkWallet) {
-      return;
-    }
 
     this.evmSubWallet = this.networkWallet.getMainEvmSubWallet(); // Use the active network main EVM subwallet. This is ETHSC for elastos.
     if (!this.evmSubWallet) {
+      Logger.warn('wallet', 'ESC Transaction: EVM subwallet not found');
       return;
     }
 

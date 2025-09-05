@@ -1,4 +1,5 @@
 import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
+import { OutgoingTransactionState, TransactionService } from 'src/app/wallet/services/transaction.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
 import { AccountAbstractionProvidersService } from '../../../../services/account-abstraction/account-abstraction-providers.service';
 import { AccountAbstractionMasterWallet } from '../../../masterwallets/account.abstraction.masterwallet';
@@ -100,9 +101,20 @@ export abstract class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
    * request, into a UserOp and sends it to the bundler.
    */
   public async signAndSendRawTx(tx: AccountAbstractionTransaction): Promise<string> {
+    await TransactionService.instance.displayGenericPublicationLoader();
+
+    TransactionService.instance.resetTransactionPublicationStatus();
+    TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.PUBLISHING);
+
     // Ask the account abstraction provider specific to this account to bundle the transaction
     // and return the actual transaction hash.
     const transactionHash = await this.getAccountAbstractionProvider().bundleTransaction(this, tx);
+
+    if (transactionHash) {
+      TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.PUBLISHED);
+    } else {
+      TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.ERRORED);
+    }
 
     return transactionHash;
   }
