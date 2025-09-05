@@ -50,7 +50,7 @@ const PG_AA_CHAIN_CONFIGS: PGAAChainConfig[] = [
  */
 export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGAAChainConfig> {
   constructor() {
-    super('pg', 'PG ECO Chain Account', PG_AA_CHAIN_CONFIGS);
+    super('pg', 'PG Protocol', PG_AA_CHAIN_CONFIGS);
   }
 
   /**
