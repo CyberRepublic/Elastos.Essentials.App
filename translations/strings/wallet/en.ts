@@ -96,10 +96,10 @@ export const en = {
     'settings-add-wallet-standard-wallet': 'Standard Wallet',
     'settings-add-wallet-multi-sig-wallet': 'Multi Signature Wallet',
     'settings-add-wallet-hardware-wallet': 'Connect Hardware Wallet',
-    'settings-add-wallet-aa-wallet': 'On Chain Wallet',
+    'settings-add-wallet-aa-wallet': 'Account Abstraction Wallet',
     'settings-add-wallet-new-wallet': 'New Wallet',
     'settings-add-wallet-mnemonic': 'Mnemonic / Paper key',
-    'settings-add-wallet-create-aa-wallet': 'Create or Restore On Chain Wallet',
+    'settings-add-wallet-create-aa-wallet': 'Create or Restore Account Abstraction Wallet',
 
     /***********************
      * Select-Currency Page *
@@ -1035,32 +1035,32 @@ export const en = {
     'did-oversize': 'DID Over Size',
     'transaction-same-account': 'Cannot transfer TRX to the same account',
 
-    /********************************************** On Chain Wallet ***********************************************/
+    /********************************************** Account Abstraction Wallet ***********************************************/
     aa: {
       create: {
-        title: 'Create On Chain Wallet',
-        subtitle: 'Create a new on chain wallet',
+        title: 'Create Account Abstraction Wallet',
+        subtitle: 'Create a new account abstraction wallet',
         description:
-          'On chain wallets are smart contract wallets that provide enhanced security and user experience features. They are controlled by your existing wallet.',
+          'Account abstraction wallets are smart contract wallets that provide enhanced security and user experience features. They are controlled by your existing wallet.',
         'wallet-name': 'Wallet Name',
-        'wallet-name-placeholder': 'Enter a name for your on chain wallet',
+        'wallet-name-placeholder': 'Enter a name for your account abstraction wallet',
         'controller-wallet': 'Controller Wallet',
-        'controller-wallet-placeholder': 'Select the wallet that will control this on chain wallet',
+        'controller-wallet-placeholder': 'Select the wallet that will control this account abstraction wallet',
         chain: 'Chain',
         'chain-placeholder': 'Select the blockchain network',
         provider: 'Provider',
-        'provider-placeholder': 'Select the on chain wallet provider',
-        'account-address': 'On Chain Account Address',
-        'account-address-placeholder': 'On chain account address is automatically detected',
+        'provider-placeholder': 'Select the account abstraction wallet provider',
+        'account-address': 'Account Abstraction Account Address',
+        'account-address-placeholder': 'Account abstraction account address is automatically detected',
         'account-address-help': 'Account address is automatically detected for the selected chain',
         'selected-options': 'Selected Options',
         'factory-address': 'Factory Address',
         'entry-point': 'Entry Point Address',
-        'create-button': 'Create On Chain Wallet',
+        'create-button': 'Create Account Abstraction Wallet',
         'validation-error': 'Please fill in all required fields',
-        error: 'Failed to create on chain wallet',
+        error: 'Failed to create account abstraction wallet',
         'help-text':
-          'On chain wallets provide features like social recovery, spending limits, and gasless transactions.',
+          'Account abstraction wallets provide features like social recovery, spending limits, and gasless transactions.',
         'help-text-2':
           'Make sure you have the correct contract address and that your controller wallet has sufficient funds for deployment if needed.',
         'summary-text':

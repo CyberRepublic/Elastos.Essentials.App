@@ -96,10 +96,10 @@ export const it = {
     'settings-add-wallet-standard-wallet': 'Standard Wallet',
     'settings-add-wallet-multi-sig-wallet': 'Multi Signature Wallet',
     'settings-add-wallet-hardware-wallet': 'Hardware Wallet',
-    'settings-add-wallet-aa-wallet': 'Portafoglio On Chain',
+    'settings-add-wallet-aa-wallet': 'Portafoglio di Astrazione Account',
     'settings-add-wallet-new-wallet': 'New Wallet',
     'settings-add-wallet-mnemonic': 'Mnemonic / Paper key',
-    'settings-add-wallet-create-aa-wallet': 'Crea o Ripristina Portafoglio On Chain',
+    'settings-add-wallet-create-aa-wallet': 'Crea o Ripristina Portafoglio di Astrazione Account',
 
     /***********************
      * Select-Currency Page *
@@ -1039,32 +1039,33 @@ export const it = {
     'did-oversize': 'DID Over Size',
     'transaction-same-account': 'Cannot transfer TRX to the same account',
 
-    /********************************************** Portafoglio On Chain ***********************************************/
+    /********************************************** Portafoglio di Astrazione Account ***********************************************/
     aa: {
       create: {
-        title: 'Crea Portafoglio On Chain',
-        subtitle: 'Crea un nuovo portafoglio on chain',
+        title: 'Crea Portafoglio di Astrazione Account',
+        subtitle: 'Crea un nuovo portafoglio di astrazione account',
         description:
-          'I portafogli on chain sono portafogli di contratti intelligenti che offrono sicurezza e funzionalità di esperienza utente migliorate. Sono controllati dal tuo portafoglio esistente.',
+          'I portafogli di astrazione account sono portafogli di contratti intelligenti che offrono sicurezza e funzionalità di esperienza utente migliorate. Sono controllati dal tuo portafoglio esistente.',
         'wallet-name': 'Nome Portafoglio',
-        'wallet-name-placeholder': 'Inserisci un nome per il tuo portafoglio on chain',
+        'wallet-name-placeholder': 'Inserisci un nome per il tuo portafoglio di astrazione account',
         'controller-wallet': 'Portafoglio Controllore',
-        'controller-wallet-placeholder': 'Seleziona il portafoglio che controllerà questo portafoglio on chain',
+        'controller-wallet-placeholder':
+          'Seleziona il portafoglio che controllerà questo portafoglio di astrazione account',
         chain: 'Catena',
         'chain-placeholder': 'Seleziona la rete blockchain',
         provider: 'Fornitore',
-        'provider-placeholder': 'Seleziona il fornitore di portafoglio on chain',
-        'account-address': 'Indirizzo Account On Chain',
-        'account-address-placeholder': "L'indirizzo account on chain viene rilevato automaticamente",
+        'provider-placeholder': 'Seleziona il fornitore di portafoglio di astrazione account',
+        'account-address': 'Indirizzo Account di Astrazione Account',
+        'account-address-placeholder': "L'indirizzo account di astrazione account viene rilevato automaticamente",
         'account-address-help': "L'indirizzo account viene rilevato automaticamente per la catena selezionata",
         'selected-options': 'Opzioni Selezionate',
         'factory-address': 'Indirizzo Factory',
         'entry-point': 'Indirizzo Entry Point',
-        'create-button': 'Crea Portafoglio On Chain',
+        'create-button': 'Crea Portafoglio di Astrazione Account',
         'validation-error': 'Si prega di compilare tutti i campi richiesti',
-        error: 'Impossibile creare il portafoglio on chain',
+        error: 'Impossibile creare il portafoglio di astrazione account',
         'help-text':
-          'I portafogli on chain offrono funzionalità come il recupero sociale, i limiti di spesa e le transazioni senza gas.',
+          'I portafogli di astrazione account offrono funzionalità come il recupero sociale, i limiti di spesa e le transazioni senza gas.',
         'help-text-2':
           "Assicurati di avere l'indirizzo del contratto corretto e che il tuo portafoglio controllore abbia fondi sufficienti per la distribuzione se necessario.",
         'summary-text':

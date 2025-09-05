@@ -98,10 +98,10 @@ export const fr = {
     'settings-add-wallet-standard-wallet': 'Portefeuille Standard',
     'settings-add-wallet-multi-sig-wallet': 'Portefeuille Multi Signatures',
     'settings-add-wallet-hardware-wallet': 'Portefeuille physique',
-    'settings-add-wallet-aa-wallet': 'Portefeuille On Chain',
+    'settings-add-wallet-aa-wallet': "Portefeuille d'Abstraction de Compte",
     'settings-add-wallet-new-wallet': 'Nouveau portefeuille',
     'settings-add-wallet-mnemonic': 'Mnémonique / clé papier',
-    'settings-add-wallet-create-aa-wallet': 'Créer ou Restaurer un Portefeuille On Chain',
+    'settings-add-wallet-create-aa-wallet': "Créer ou Restaurer un Portefeuille d'Abstraction de Compte",
 
     /***********************
      * Select-Currency Page *
@@ -1012,32 +1012,33 @@ export const fr = {
     'did-oversize': 'DID Over Size',
     'transaction-same-account': 'Cannot transfer TRX to the same account',
 
-    /********************************************** Portefeuille On Chain ***********************************************/
+    /********************************************** Portefeuille d'Abstraction de Compte ***********************************************/
     aa: {
       create: {
-        title: 'Créer un Portefeuille On Chain',
-        subtitle: 'Créer un nouveau portefeuille on chain',
+        title: "Créer un Portefeuille d'Abstraction de Compte",
+        subtitle: "Créer un nouveau portefeuille d'abstraction de compte",
         description:
-          'Les portefeuilles on chain sont des portefeuilles de contrats intelligents qui offrent une sécurité et une expérience utilisateur améliorées. Ils sont contrôlés par votre portefeuille existant.',
+          "Les portefeuilles d'abstraction de compte sont des portefeuilles de contrats intelligents qui offrent une sécurité et une expérience utilisateur améliorées. Ils sont contrôlés par votre portefeuille existant.",
         'wallet-name': 'Nom du Portefeuille',
-        'wallet-name-placeholder': 'Entrez un nom pour votre portefeuille on chain',
+        'wallet-name-placeholder': "Entrez un nom pour votre portefeuille d'abstraction de compte",
         'controller-wallet': 'Portefeuille Contrôleur',
-        'controller-wallet-placeholder': 'Sélectionnez le portefeuille qui contrôlera ce portefeuille on chain',
+        'controller-wallet-placeholder':
+          "Sélectionnez le portefeuille qui contrôlera ce portefeuille d'abstraction de compte",
         chain: 'Chaîne',
         'chain-placeholder': 'Sélectionnez le réseau blockchain',
         provider: 'Fournisseur',
-        'provider-placeholder': 'Sélectionnez le fournisseur de portefeuille on chain',
-        'account-address': 'Adresse de Compte On Chain',
-        'account-address-placeholder': "L'adresse de compte on chain est automatiquement détectée",
+        'provider-placeholder': "Sélectionnez le fournisseur de portefeuille d'abstraction de compte",
+        'account-address': "Adresse de Compte d'Abstraction de Compte",
+        'account-address-placeholder': "L'adresse de compte d'abstraction de compte est automatiquement détectée",
         'account-address-help': "L'adresse de compte est automatiquement détectée pour la chaîne sélectionnée",
         'selected-options': 'Options Sélectionnées',
         'factory-address': 'Adresse Factory',
         'entry-point': 'Adresse Entry Point',
-        'create-button': 'Créer un Portefeuille On Chain',
+        'create-button': "Créer un Portefeuille d'Abstraction de Compte",
         'validation-error': 'Veuillez remplir tous les champs requis',
-        error: 'Échec de la création du portefeuille on chain',
+        error: "Échec de la création du portefeuille d'abstraction de compte",
         'help-text':
-          'Les portefeuilles on chain offrent des fonctionnalités comme la récupération sociale, les limites de dépenses et les transactions sans gaz.',
+          "Les portefeuilles d'abstraction de compte offrent des fonctionnalités comme la récupération sociale, les limites de dépenses et les transactions sans gaz.",
         'help-text-2':
           "Assurez-vous d'avoir l'adresse de contrat correcte et que votre portefeuille contrôleur dispose de fonds suffisants pour le déploiement si nécessaire.",
         'summary-text':

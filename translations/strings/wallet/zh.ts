@@ -95,10 +95,10 @@ export const zh = {
     'settings-add-wallet-standard-wallet': '标准钱包',
     'settings-add-wallet-multi-sig-wallet': '多签钱包',
     'settings-add-wallet-hardware-wallet': '硬件钱包',
-    'settings-add-wallet-aa-wallet': '链上钱包',
+    'settings-add-wallet-aa-wallet': '账户抽象钱包',
     'settings-add-wallet-new-wallet': '新钱包',
     'settings-add-wallet-mnemonic': '助记词',
-    'settings-add-wallet-create-aa-wallet': '创建或恢复链上钱包',
+    'settings-add-wallet-create-aa-wallet': '创建或恢复账户抽象钱包',
 
     /***********************
      * Select-Currency Page *
@@ -1007,30 +1007,30 @@ export const zh = {
     'did-oversize': 'DID数据过大',
     'transaction-same-account': '无法将TRX转入同一帐户',
 
-    /********************************************** 链上钱包 ***********************************************/
+    /********************************************** 账户抽象钱包 ***********************************************/
     aa: {
       create: {
-        title: '创建链上钱包',
-        subtitle: '创建一个新的链上钱包',
-        description: '链上钱包是智能合约钱包，提供增强的安全性和用户体验功能。由您现有的钱包控制。',
+        title: '创建账户抽象钱包',
+        subtitle: '创建一个新的账户抽象钱包',
+        description: '账户抽象钱包是智能合约钱包，提供增强的安全性和用户体验功能。由您现有的钱包控制。',
         'wallet-name': '钱包名称',
-        'wallet-name-placeholder': '为您的链上钱包输入名称',
+        'wallet-name-placeholder': '为您的账户抽象钱包输入名称',
         'controller-wallet': '控制钱包',
-        'controller-wallet-placeholder': '选择将控制此链上钱包的钱包',
+        'controller-wallet-placeholder': '选择将控制此账户抽象钱包的钱包',
         chain: '链',
         'chain-placeholder': '选择区块链网络',
         provider: '提供商',
-        'provider-placeholder': '选择链上钱包提供商',
-        'account-address': '链上账户地址',
-        'account-address-placeholder': '链上账户地址自动检测',
+        'provider-placeholder': '选择账户抽象钱包提供商',
+        'account-address': '账户抽象账户地址',
+        'account-address-placeholder': '账户抽象账户地址自动检测',
         'account-address-help': '为所选链自动检测账户地址',
         'selected-options': '选定选项',
         'factory-address': '工厂地址',
         'entry-point': '入口点地址',
-        'create-button': '创建链上钱包',
+        'create-button': '创建账户抽象钱包',
         'validation-error': '请填写所有必填字段',
-        error: '创建链上钱包失败',
-        'help-text': '链上钱包提供社交恢复、支出限制和无气体交易等功能。',
+        error: '创建账户抽象钱包失败',
+        'help-text': '账户抽象钱包提供社交恢复、支出限制和无气体交易等功能。',
         'help-text-2': '确保您有正确的合约地址，并且您的控制钱包有足够的资金用于部署（如需要）。',
         'summary-text': '新的钱包 {{walletName}} 将在 {{networkName}} 网络上创建。上面的地址将是您未来操作的账户地址。'
       }
