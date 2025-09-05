@@ -38,9 +38,9 @@
           <ion-icon name="git-network-outline" class="card-icon"></ion-icon>
           <h3 class="card-title">{{ 'wallet.aa.create.chain' | translate }}</h3>
         </div>
-        <div class="custom-select-button" (click)="showChainSelect()">
+        <div class="custom-select-button" (click)="showNetworkSelect()">
           <span class="select-text" *ngIf="wallet.chainId; else chainPlaceholder">
-            {{ getChainDisplayName(wallet.chainId) }}
+            {{ getNetworkDisplayName(wallet.chainId) }}
           </span>
           <ng-template #chainPlaceholder>
             <span class="select-placeholder">{{ 'wallet.aa.create.chain-placeholder' | translate }}</span>
@@ -80,6 +80,19 @@
           <div class="spinner-container" *ngIf="isFetchingAddress">
             <ion-spinner name="crescent"></ion-spinner>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="summary-section" *ngIf="wallet.aaContractAddress && selectedNetwork">
+      <div class="summary-card">
+        <div class="summary-content">
+          <img [src]="selectedNetwork.logo" class="summary-network-logo" />
+          <p class="summary-text">
+            {{ 'wallet.aa.create.summary-text' | translate:{walletName: wallet.name, networkName: selectedNetwork.name}
+            }}
+          </p>
         </div>
       </div>
     </div>

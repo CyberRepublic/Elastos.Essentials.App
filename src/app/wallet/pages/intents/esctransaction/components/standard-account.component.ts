@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import { Subscription } from 'rxjs';
 import { Logger } from 'src/app/logger';
 import { Util } from 'src/app/model/util';

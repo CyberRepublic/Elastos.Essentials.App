@@ -1062,7 +1062,9 @@ export const en = {
         'help-text':
           'On chain wallets provide features like social recovery, spending limits, and gasless transactions.',
         'help-text-2':
-          'Make sure you have the correct contract address and that your controller wallet has sufficient funds for deployment if needed.'
+          'Make sure you have the correct contract address and that your controller wallet has sufficient funds for deployment if needed.',
+        'summary-text':
+          'New wallet {{walletName}} will be created on the {{networkName}} network. The above address will be your account address for future operations.'
       }
     }
   }

@@ -9,10 +9,8 @@ import { GlobalPopupService } from 'src/app/services/global.popup.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 import { MasterWallet } from 'src/app/wallet/model/masterwallets/masterwallet';
 import { WalletType } from 'src/app/wallet/model/masterwallets/wallet.types';
-import {
-  AccountAbstractionProvider,
-  AccountAbstractionProviderChainConfig
-} from 'src/app/wallet/model/networks/evms/account-abstraction-provider';
+import { AccountAbstractionProvider } from 'src/app/wallet/model/networks/evms/account-abstraction-provider';
+import { EVMNetwork } from 'src/app/wallet/model/networks/evms/evm.network';
 import { AccountAbstractionProvidersService } from 'src/app/wallet/services/account-abstraction/account-abstraction-providers.service';
 import { AuthService } from 'src/app/wallet/services/auth.service';
 import { EVMService } from 'src/app/wallet/services/evm/evm.service';
@@ -42,11 +40,11 @@ export class AccountAbstractionCreatePage implements OnInit {
     aaContractAddress: ''
   };
 
-  public availableChains: AccountAbstractionProviderChainConfig[] = [];
+  public availableNetworks: EVMNetwork[] = [];
   public availableProviders: AccountAbstractionProvider[] = [];
-  public filteredProviders: AccountAbstractionProvider[] = []; // Providers filtered by chain
+  public filteredProviders: AccountAbstractionProvider[] = []; // Providers filtered by network
   public controllerWallets: MasterWallet[] = [];
-  public selectedChain: AccountAbstractionProviderChainConfig | null = null;
+  public selectedNetwork: EVMNetwork | null = null;
   public isFetchingAddress = false;
 
   public walletIsCreating = false;
@@ -83,17 +81,20 @@ export class AccountAbstractionCreatePage implements OnInit {
     // Initialize filtered providers (empty initially)
     this.filteredProviders = [];
 
-    // Get all unique chains from all providers
-    const allChains = new Map<number, AccountAbstractionProviderChainConfig>();
+    // Get all unique EVM networks from all providers' supported chains
+    const allNetworks = new Map<number, EVMNetwork>();
     this.availableProviders.forEach(provider => {
       provider.supportedChains.forEach(chainConfig => {
-        if (!allChains.has(chainConfig.chainId)) {
-          allChains.set(chainConfig.chainId, chainConfig);
+        if (!allNetworks.has(chainConfig.chainId)) {
+          const network = this.walletNetworkService.getNetworkByChainId(chainConfig.chainId);
+          if (network) {
+            allNetworks.set(chainConfig.chainId, network);
+          }
         }
       });
     });
-    this.availableChains = Array.from(allChains.values());
-    Logger.log('wallet', 'Available chains:', this.availableChains);
+    this.availableNetworks = Array.from(allNetworks.values());
+    Logger.log('wallet', 'Available networks:', this.availableNetworks);
 
     // Get controller wallets (standard and ledger wallets that can control AA wallets)
     this.controllerWallets = this.walletService
@@ -104,12 +105,12 @@ export class AccountAbstractionCreatePage implements OnInit {
 
   public onChainChanged(event: any) {
     const chainId = parseInt(event.detail.value);
-    Logger.log('wallet', 'Chain changed to:', chainId);
+    Logger.log('wallet', 'Network changed to:', chainId);
 
-    this.selectedChain = this.availableChains.find(chain => chain.chainId === chainId) || null;
+    this.selectedNetwork = this.availableNetworks.find(network => network.getMainChainID() === chainId) || null;
 
-    if (this.selectedChain) {
-      // Filter providers for this chain
+    if (this.selectedNetwork) {
+      // Filter providers for this network
       this.filteredProviders = this.accountAbstractionService.getProvidersForChain(chainId);
 
       Logger.log('wallet', 'Available providers for chain:', this.filteredProviders);
@@ -197,11 +198,11 @@ export class AccountAbstractionCreatePage implements OnInit {
   }
 
   /**
-   * Get the display name for a chain
+   * Get the display name for a network
    */
-  public getChainDisplayName(chainId: number): string {
-    const chain = this.availableChains.find(c => c.chainId === chainId);
-    return chain ? chain.chainId.toString() : chainId.toString();
+  public getNetworkDisplayName(chainId: number): string {
+    const network = this.availableNetworks.find(n => n.getMainChainID() === chainId);
+    return network ? network.name : chainId.toString();
   }
 
   public getControllerWalletName(walletId: string): string {
@@ -301,12 +302,13 @@ export class AccountAbstractionCreatePage implements OnInit {
     await modal.present();
   }
 
-  async showChainSelect() {
-    const menuItems: MenuSheetMenu[] = this.availableChains.map(chain => ({
-      title: this.getChainDisplayName(chain.chainId),
+  async showNetworkSelect() {
+    const menuItems: MenuSheetMenu[] = this.availableNetworks.map(network => ({
+      icon: network.logo,
+      title: network.name,
       routeOrAction: () => {
-        this.wallet.chainId = chain.chainId;
-        this.onChainChanged({ detail: { value: chain.chainId } });
+        this.wallet.chainId = network.getMainChainID();
+        this.onChainChanged({ detail: { value: network.getMainChainID() } });
       }
     }));
 
@@ -336,8 +338,13 @@ export class AccountAbstractionCreatePage implements OnInit {
       }
     }));
 
+    const selectedNetwork = this.availableNetworks.find(network => network.getMainChainID() === this.wallet.chainId);
+    const selectedNetworkName = selectedNetwork
+      ? selectedNetwork.name
+      : this.getNetworkDisplayName(this.wallet.chainId);
     const menu: MenuSheetMenu = {
-      title: this.translate.instant('wallet.aa.create.provider'),
+      title: this.translate.instant('wallet.aa.create.provider') + ' (' + selectedNetworkName + ')',
+      titleIcon: selectedNetwork ? selectedNetwork.logo : undefined,
       items: menuItems
     };
 
