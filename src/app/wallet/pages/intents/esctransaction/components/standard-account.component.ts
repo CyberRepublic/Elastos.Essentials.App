@@ -36,7 +36,7 @@ export class StandardAccountComponent implements OnInit, OnDestroy {
   constructor() {}
 
   ngOnInit() {
-    this.initializeGasParameters();
+    void this.initializeGasParameters();
     this.calculateTransactionCost();
     this.subscribeToGasSpeedup();
   }
