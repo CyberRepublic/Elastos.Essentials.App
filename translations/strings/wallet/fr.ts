@@ -1039,7 +1039,9 @@ export const fr = {
         'help-text':
           'Les portefeuilles on chain offrent des fonctionnalités comme la récupération sociale, les limites de dépenses et les transactions sans gaz.',
         'help-text-2':
-          "Assurez-vous d'avoir l'adresse de contrat correcte et que votre portefeuille contrôleur dispose de fonds suffisants pour le déploiement si nécessaire."
+          "Assurez-vous d'avoir l'adresse de contrat correcte et que votre portefeuille contrôleur dispose de fonds suffisants pour le déploiement si nécessaire.",
+        'summary-text':
+          "Le nouveau portefeuille {{walletName}} sera créé sur le réseau {{networkName}}. L'adresse ci-dessus sera votre adresse de compte pour les opérations futures."
       }
     }
   }

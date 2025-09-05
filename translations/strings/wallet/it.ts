@@ -1066,7 +1066,9 @@ export const it = {
         'help-text':
           'I portafogli on chain offrono funzionalità come il recupero sociale, i limiti di spesa e le transazioni senza gas.',
         'help-text-2':
-          "Assicurati di avere l'indirizzo del contratto corretto e che il tuo portafoglio controllore abbia fondi sufficienti per la distribuzione se necessario."
+          "Assicurati di avere l'indirizzo del contratto corretto e che il tuo portafoglio controllore abbia fondi sufficienti per la distribuzione se necessario.",
+        'summary-text':
+          "Il nuovo portafoglio {{walletName}} verrà creato sulla rete {{networkName}}. L'indirizzo sopra sarà il tuo indirizzo account per le future operazioni."
       }
     }
   }
