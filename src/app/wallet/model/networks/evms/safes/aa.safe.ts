@@ -1,4 +1,5 @@
 import { AccountAbstractionProvidersService } from 'src/app/wallet/services/account-abstraction/account-abstraction-providers.service';
+import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
 import { Transfer } from '../../../../services/cointransfer.service';
 import { SafeService } from '../../../../services/safe.service';
@@ -69,8 +70,16 @@ export class AASafe extends Safe implements EVMSafe {
     gasPrice: string,
     gasLimit: string,
     nonce: number
-  ): Promise<any> {
-    throw new Error('createTransferTransaction not implemented by AA Safe');
+  ): Promise<AccountAbstractionTransaction> {
+    // For AA, we create an AccountAbstractionTransaction object for native token transfers
+    // Native transfers have no contract data, so data is '0x'
+    const aaTransaction: AccountAbstractionTransaction = {
+      to: toAddress,
+      value: amount,
+      data: '0x'
+    };
+
+    return Promise.resolve(aaTransaction);
   }
 
   public createContractTransaction(
@@ -80,8 +89,16 @@ export class AASafe extends Safe implements EVMSafe {
     gasLimit: string,
     nonce: number,
     data: any
-  ): Promise<any> {
-    throw new Error('createContractTransaction not implemented by AA Safe');
+  ): Promise<AccountAbstractionTransaction> {
+    // For AA, we create an AccountAbstractionTransaction object
+    // This will be passed to signAndSendRawTransaction which will handle the AA bundling
+    const aaTransaction = {
+      to: contractAddress,
+      value: amount,
+      data: data || '0x'
+    };
+
+    return Promise.resolve(aaTransaction);
   }
 
   public signTransaction(

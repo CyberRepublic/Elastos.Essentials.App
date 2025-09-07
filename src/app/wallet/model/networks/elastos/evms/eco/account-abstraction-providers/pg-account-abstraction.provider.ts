@@ -129,6 +129,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     Logger.log('wallet', 'PG provider is starting to bundle transaction.');
     Logger.log('wallet', 'AA address:', aaAddress);
     Logger.log('wallet', 'EOA controller address:', eoaControllerAddress);
+    Logger.log('wallet', 'Transaction', transaction);
 
     const callData = aaService.encodeExecute(transaction.to, transaction.value, transaction.data);
     Logger.log('wallet', 'Execute-encoded call data:', callData);

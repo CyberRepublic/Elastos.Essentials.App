@@ -4,7 +4,7 @@ import { StandardCoinName } from '../../../../../../coin';
 import { TransactionProvider } from '../../../../../../tx-providers/transaction.provider';
 import { ElastosEVMNetwork } from '../../../../network/elastos.evm.network';
 import { ElastosAccountAbstractionEVMNetworkWallet } from '../../../networkwallets/account-abstraction/account-abstraction.evm.networkwallet';
-import { EcoSubWallet } from '../../subwallets/eco.evm.subwallet';
+import { EcoAccountAbstractionSubWallet } from '../../../subwallets/account-abstraction/eco.aa.subwallet';
 import { ElastosECOChainTransactionProvider } from '../../tx-providers/elastos.eco.tx.provider';
 
 export class ElastosECOAccountAbstractionNetworkWallet extends ElastosAccountAbstractionEVMNetworkWallet {
@@ -18,10 +18,10 @@ export class ElastosECOAccountAbstractionNetworkWallet extends ElastosAccountAbs
 
   protected prepareStandardSubWallets(): Promise<void> {
     try {
-      this.mainTokenSubWallet = new EcoSubWallet(this);
+      this.mainTokenSubWallet = new EcoAccountAbstractionSubWallet(this);
       this.subWallets[StandardCoinName.ETHECO] = this.mainTokenSubWallet;
     } catch (err) {
-      Logger.error('wallet', 'Can not Create Elastos ECO subwallets ', err);
+      Logger.error('wallet', 'Can not Create Elastos ECO AA subwallets ', err);
     }
 
     return;
