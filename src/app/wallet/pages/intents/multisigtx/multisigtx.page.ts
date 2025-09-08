@@ -140,7 +140,7 @@ export class MultiSigTxPage implements OnInit {
   }
 
   public async pickMultiSigWallet() {
-    let pickedWallet = await this.walletUIService.pickWallet(walletEntry => {
+    let pickedMasterWallet = await this.walletUIService.pickWallet(walletEntry => {
       const { masterWallet } = walletEntry;
 
       // Choose only among multisig wallets
@@ -148,8 +148,9 @@ export class MultiSigTxPage implements OnInit {
 
       return true;
     });
-    if (pickedWallet) {
-      this.multiSigWallet = <StandardMultiSigMasterWallet>pickedWallet.masterWallet;
+
+    if (pickedMasterWallet) {
+      this.multiSigWallet = <StandardMultiSigMasterWallet>pickedMasterWallet;
       this.networkWallet = this.walletManager.getNetworkWalletFromMasterWalletId(this.multiSigWallet.id);
     }
   }

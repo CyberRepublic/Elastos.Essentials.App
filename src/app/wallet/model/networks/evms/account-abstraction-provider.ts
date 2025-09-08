@@ -1,3 +1,4 @@
+import Queue from 'promise-queue';
 import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
 import { UserOperation } from 'src/app/wallet/services/account-abstraction/model/user-operation';
 import { LocalStorage } from 'src/app/wallet/services/storage.service';
@@ -17,6 +18,7 @@ export abstract class AccountAbstractionProvider<
   readonly id: string;
   readonly name: string;
   readonly supportedChains: ChainConfigType[];
+  private queue = new Queue(1);
 
   constructor(id: string, name: string, supportedChains: ChainConfigType[]) {
     this.id = id;
@@ -27,8 +29,29 @@ export abstract class AccountAbstractionProvider<
   /**
    * Returns the expected AA account address for a given EOA owner on a specific chain.
    * This works only for AA providers that support EOA ownership.
+   *
+   * This can either return a cached address, or compute/fetch it then save it.
    */
-  abstract getAccountAddress(eoaAddress: string, chainId: number): Promise<string>;
+  protected abstract fetchAccountAddress(eoaAddress: string, chainId: number): Promise<string>;
+
+  public getAccountAddress(eoaAddress: string, chainId: number): Promise<string> {
+    return this.queue.add(async () => {
+      // Try to load a cached address.
+      const cachedAddress = await this.loadAccountAddress(eoaAddress, chainId);
+      if (cachedAddress) {
+        return cachedAddress;
+      }
+
+      // If no cached address, fetch it.
+      const fetchedAddress = await this.fetchAccountAddress(eoaAddress, chainId);
+      if (!fetchedAddress) {
+        throw new Error(`Failed to fetch account address for EOA ${eoaAddress} on chain ${chainId}`);
+      }
+
+      await this.saveAccountAddress(eoaAddress, chainId, fetchedAddress);
+      return fetchedAddress;
+    });
+  }
 
   /**
    * Saves an account address, normally retrieved from the contract, into local storage,

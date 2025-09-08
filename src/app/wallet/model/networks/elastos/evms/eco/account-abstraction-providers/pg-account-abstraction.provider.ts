@@ -53,7 +53,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
    * @param chainId The chain ID
    * @returns Promise resolving to the AA account address
    */
-  async getAccountAddress(eoaAddress: string, chainId: number): Promise<string> {
+  async fetchAccountAddress(eoaAddress: string, chainId: number): Promise<string> {
     Logger.log('wallet', `PGAAAccountProvider: Getting AA account address for EOA ${eoaAddress} on chain ${chainId}`);
 
     // Check if chain is supported

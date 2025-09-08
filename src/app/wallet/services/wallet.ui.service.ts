@@ -31,7 +31,6 @@ import {
   WalletChooserFilter
 } from '../components/wallet-chooser/wallet-chooser.component';
 import { MasterWallet } from '../model/masterwallets/masterwallet';
-import { AnyNetworkWallet } from '../model/networks/base/networkwallets/networkwallet';
 import { Safe } from '../model/safes/safe';
 import { WalletService } from './wallet.service';
 
@@ -99,7 +98,7 @@ export class WalletUIService {
     showCurrentWallet = false,
     masterWalletMode = false,
     showBalances?: boolean
-  ): Promise<AnyNetworkWallet> {
+  ): Promise<MasterWallet> {
     let options: WalletChooserComponentOptions = {
       currentNetworkWallet: showCurrentWallet ? this.walletService.activeNetworkWallet.value : null,
       filter,
@@ -118,16 +117,10 @@ export class WalletUIService {
       modal.onWillDismiss().then(async params => {
         Logger.log('wallet', 'Wallet selected:', params);
         if (params.data && params.data.selectedMasterWalletId) {
-          if (masterWalletMode) {
-            // In master wallet mode, we still return a network wallet if available
-            // This maintains backward compatibility while allowing master wallet selection
-            let wallet = this.walletService.getNetworkWalletFromMasterWalletId(params.data.selectedMasterWalletId);
-            resolve(wallet);
-          } else {
-            let wallet = this.walletService.getNetworkWalletFromMasterWalletId(params.data.selectedMasterWalletId);
-            resolve(wallet);
-          }
-        } else resolve(null);
+          return this.walletService.getMasterWallet(params.data.selectedMasterWalletId);
+        } else {
+          resolve(null);
+        }
       });
       void modal.present();
     });

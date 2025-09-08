@@ -164,21 +164,25 @@ export class StandardMultiSigCreatePage implements OnInit {
   }
 
   public async pickSigningWallet() {
-    let pickedWallet = await this.walletUIService.pickWallet(walletEntry => {
+    let pickedMasterWallet = await this.walletUIService.pickWallet(walletEntry => {
       const { masterWallet, networkWallet } = walletEntry;
 
       // Allow only wallets that can sign multisig wallets to show in the list
-      if (!(masterWallet instanceof StandardMasterWallet)) return false;
+      if (!(masterWallet instanceof StandardMasterWallet)) {
+        return false;
+      }
 
-      if (!masterWallet.hasMnemonicSupport()) return false;
+      if (!masterWallet.hasMnemonicSupport()) {
+        return false;
+      }
 
       // TODO: probably need to filter more
 
       return true;
     });
 
-    if (pickedWallet) {
-      await this.useSigningWallet(pickedWallet.masterWallet);
+    if (pickedMasterWallet) {
+      await this.useSigningWallet(pickedMasterWallet);
     }
   }
 

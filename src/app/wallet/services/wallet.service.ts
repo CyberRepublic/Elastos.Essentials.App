@@ -390,6 +390,10 @@ export class WalletService {
     });
   }
 
+  /**
+   * Gets the currently loaded network wallet from the master wallet id.
+   * This network wallet reflects the current globally active network in the app.
+   */
   public getNetworkWalletFromMasterWalletId(masterId: string): AnyNetworkWallet {
     return Object.values(this.networkWallets).find(w => w.id === masterId);
   }

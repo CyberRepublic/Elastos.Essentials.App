@@ -31,6 +31,7 @@ import { GlobalStorageService } from 'src/app/services/global.storage.service';
 import { DIDSessionsStore } from 'src/app/services/stores/didsessions.store';
 import { NetworkTemplateStore } from 'src/app/services/stores/networktemplate.store';
 import type { MasterWallet } from '../model/masterwallets/masterwallet';
+import { BTCNetworkBase } from '../model/networks/btc/network/btc.base.network';
 import type { EVMNetwork } from '../model/networks/evms/evm.network';
 import type { AnyNetwork } from '../model/networks/network';
 import { Native } from './native.service';
@@ -236,6 +237,10 @@ export class WalletNetworkService {
     return this.networks.findIndex(n => {
       return n.key === this.activeNetwork.value.key;
     });
+  }
+
+  public getBitcoinNetwork(): BTCNetworkBase {
+    return this.networks.find(n => n instanceof BTCNetworkBase) as BTCNetworkBase;
   }
 
   /**

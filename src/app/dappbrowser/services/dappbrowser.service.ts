@@ -27,12 +27,14 @@ import { StandardCoinName } from 'src/app/wallet/model/coin';
 import { MasterWallet } from 'src/app/wallet/model/masterwallets/masterwallet';
 import type { AnyNetworkWallet } from 'src/app/wallet/model/networks/base/networkwallets/networkwallet';
 import { BTCMainNetNetwork } from 'src/app/wallet/model/networks/btc/network/btc.mainnet.network';
+import { AnyBTCNetworkWallet } from 'src/app/wallet/model/networks/btc/networkwallets/btc.networkwallet';
 import {
   ElastosMainChainMainNetNetwork,
   ElastosMainChainNetworkBase
 } from 'src/app/wallet/model/networks/elastos/mainchain/network/elastos.networks';
 import { MainChainSubWallet } from 'src/app/wallet/model/networks/elastos/mainchain/subwallets/mainchain.subwallet';
 import { EVMNetwork } from 'src/app/wallet/model/networks/evms/evm.network';
+import { AnyEVMNetworkWallet } from 'src/app/wallet/model/networks/evms/networkwallets/evm.networkwallet';
 import { AnyNetwork } from 'src/app/wallet/model/networks/network';
 import type { EthSignIntentResult } from 'src/app/wallet/pages/intents/ethsign/intentresult';
 import type { PersonalSignIntentResult } from 'src/app/wallet/pages/intents/personalsign/intentresult';
@@ -140,8 +142,9 @@ export class DappBrowserService implements GlobalService {
   public activeBrowsedAppInfo = new BehaviorSubject<BrowsedAppInfo>(null); // Extracted info about a fetched dapp, after it's successfully loaded.
   public recentApps = new BehaviorSubject<string[]>([]);
 
-  private networkSubscription: Subscription = null;
-  private walletSubscription: Subscription = null;
+  private activeDAppEVMWalletSub: Subscription = null;
+  private activeDAppBitcoinWalletSub: Subscription = null;
+  private activeDAppEVMNetworkSub: Subscription = null;
   public confirming = false;
   private web3ProviderCode: string = null;
   private elastosConnectorCode: string = null;
@@ -173,10 +176,15 @@ export class DappBrowserService implements GlobalService {
 
   async onUserSignIn(signedInIdentity: IdentityEntry): Promise<void> {
     await this.loadRecentApps();
+
+    this.setupDappWalletSubscriptions();
+
     return;
   }
 
   onUserSignOut(): Promise<void> {
+    this.removeDappWalletSubscriptions();
+
     return;
   }
 
@@ -319,42 +327,19 @@ export class DappBrowserService implements GlobalService {
       target = '_webview';
     }
 
-    const activeNetwork = WalletNetworkService.instance.activeNetwork.value;
-    const masterWallet = WalletService.instance.getActiveMasterWallet();
-
-    // The main chain ID is -1 if there is no EVM subwallet. eg. BTC.
+    const activeNetwork = this.browserWalletConnectionsService.activeDappEVMNetwork.value;
     if (activeNetwork instanceof EVMNetwork) {
-      // Get the active network chain ID
       this.activeChainID = activeNetwork.getMainChainID();
-
-      // Get the active network RPC URL
       this.activeEVMNetworkRpcUrl = activeNetwork.getRPCUrl();
-
-      this.userEVMAddress = null;
-      // Get the active wallet address
-      if (WalletService.instance.activeNetworkWallet.value) {
-        // EVM configuration
-        let evmSubwallet = WalletService.instance.activeNetworkWallet.value.getMainEvmSubWallet();
-        if (evmSubwallet) this.userEVMAddress = await evmSubwallet.getCurrentReceiverAddress();
-
-        // Bitcoin configuration
-        const bitcoinNetwork = this.getBitcoinNetwork();
-        this.btcRpcUrl = bitcoinNetwork.getRPCUrl();
-        this.userBTCAddress = await this.getWalletBitcoinAddress(masterWallet);
-
-        // Ela main chain configuration
-        const elamainNetwork = this.getELAMainChainNetwork();
-        this.elamainRpcUrl = elamainNetwork.getRPCUrl();
-        this.userELAMainChainAddress = (await this.getWalletELAMainChainAddressesByType(masterWallet, 1))?.[0];
-      }
     } else {
       this.userEVMAddress = null;
       this.activeChainID = -1;
-      this.userBTCAddress = null;
-      this.btcRpcUrl = null;
-      this.userELAMainChainAddress = null;
-      this.elamainRpcUrl = null;
     }
+
+    // Set the active dApp and update wallet connections/subscriptions
+    await this.browserWalletConnectionsService.setActiveDapp(url);
+    this.setupDappWalletSubscriptions();
+    //await this.updateWalletAddressesForCurrentDapp();
 
     var options: any = {
       titlebarheight: 50,
@@ -389,7 +374,7 @@ export class DappBrowserService implements GlobalService {
       title: '',
       description: '',
       iconUrl: '',
-      network: WalletNetworkService.instance.activeNetwork.value.key,
+      network: activeNetwork?.key,
       lastBrowsed: moment().unix(),
       useExternalBrowser: false
     };
@@ -407,9 +392,15 @@ export class DappBrowserService implements GlobalService {
       return this.getDefaultInjectedJs();
     }
 
-    const evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(currentUrl, 0); // EVM
-    const btcWallet = await this.browserWalletConnectionsService.getConnectedWallet(currentUrl, 1); // BTC
-    const selectedNetwork = await this.browserWalletConnectionsService.getSelectedNetwork(currentUrl);
+    const evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(
+      currentUrl,
+      BrowserConnectionType.EVM
+    );
+    const btcWallet = await this.browserWalletConnectionsService.getConnectedWallet(
+      currentUrl,
+      BrowserConnectionType.BITCOIN
+    );
+    const selectedNetwork = await this.browserWalletConnectionsService.getSelectedEVMNetwork(currentUrl);
 
     // Get addresses from connected wallets
     let evmAddress = '';
@@ -503,6 +494,10 @@ export class DappBrowserService implements GlobalService {
    */
   public close(mode?: 'goToLauncher' | 'reload'): Promise<void> {
     Logger.log('dappbrowser', 'Closing current webview, if any');
+
+    // Clear the active dApp when closing
+    this.browserWalletConnectionsService.clearActiveDapp();
+
     return dappBrowser.close(mode);
   }
 
@@ -673,19 +668,13 @@ export class DappBrowserService implements GlobalService {
   }
 
   private handleLoadStopEvent(event: DABLoadStop): Promise<void> {
-    if (!this.networkSubscription) {
-      console.log('CREATING NETWORK SUBSCRIPTION');
-      this.networkSubscription = WalletNetworkService.instance.activeNetwork.subscribe(activeNetwork => {
-        console.log('NETWORK SUBSCRIPTION HANDLER', activeNetwork);
-        void this.sendActiveNetworkToDApp(activeNetwork);
-      });
-    }
+    // if (!this.networkSubscription) {
+    //   this.networkSubscription = this.browserWalletConnectionsService.activeDappEVMNetwork.subscribe(activeNetwork => {
+    //     void this.sendActiveNetworkToDApp(activeNetwork);
+    //   });
+    // }
 
-    if (!this.walletSubscription) {
-      this.walletSubscription = WalletService.instance.activeNetworkWallet.subscribe(netWallet => {
-        void this.sendActiveWalletToDApp(netWallet);
-      });
-    }
+    // Wallet subscriptions are now handled by setupDappWalletSubscriptions()
 
     return;
   }
@@ -940,7 +929,10 @@ export class DappBrowserService implements GlobalService {
     }
 
     // Check if we already have a connected wallet for this dapp
-    let evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(currentUrl, 0); // EVM
+    let evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(
+      currentUrl,
+      BrowserConnectionType.EVM
+    );
 
     if (!evmWallet) {
       Logger.log('dappbrowser', 'No connected EVM wallet found, triggering wallet selection');
@@ -949,8 +941,15 @@ export class DappBrowserService implements GlobalService {
       dappBrowser.hide();
 
       try {
-        // Try to connect a wallet
-        evmWallet = await this.browserWalletConnectionsService.connectWallet(currentUrl, BrowserConnectionType.EVM);
+        // Ask user to pick a EVM wallet.
+        const connectedMasterWallet = await this.browserWalletConnectionsService.connectWallet(
+          currentUrl,
+          BrowserConnectionType.EVM
+        );
+
+        // Get the network wallet from the master wallet.
+        const connectedNetwork = this.browserWalletConnectionsService.activeDappEVMNetwork.value;
+        evmWallet = (await connectedNetwork.createNetworkWallet(connectedMasterWallet, false)) as AnyEVMNetworkWallet;
 
         if (evmWallet) {
           // Update the injected provider with the new wallet
@@ -1369,8 +1368,17 @@ export class DappBrowserService implements GlobalService {
 
   private async handleBitcoinGetPublicKey(message: DABMessage): Promise<void> {
     try {
-      const masterWallet = WalletService.instance.getActiveMasterWallet();
-      let publickey = await this.getWalletBitcoinPublicKey(masterWallet);
+      // Use dApp-specific Bitcoin wallet connection
+      const bitcoinWallet = await this.browserWalletConnectionsService.getConnectedWallet(
+        this.url,
+        BrowserConnectionType.BITCOIN
+      );
+
+      if (!bitcoinWallet) {
+        throw new Error('No Bitcoin wallet connected for this dApp');
+      }
+
+      let publickey = await this.getWalletBitcoinPublicKey(bitcoinWallet.masterWallet);
       this.sendInjectedResponse('unisat', message.data.id, publickey);
     } catch (e) {
       this.sendInjectedError('unisat', message.data.id, e);
@@ -1407,8 +1415,16 @@ export class DappBrowserService implements GlobalService {
       dappBrowser.hide();
 
       try {
-        // Try to connect a wallet
-        btcWallet = await this.browserWalletConnectionsService.connectWallet(currentUrl, BrowserConnectionType.BITCOIN);
+        // Ask user to pick a BTC wallet.
+        const connectedMasterWallet = await this.browserWalletConnectionsService.connectWallet(
+          currentUrl,
+          BrowserConnectionType.BITCOIN
+        );
+
+        // Get the network wallet from the master wallet.
+        const bitcoinNetwork = this.walletNetworkService.getBitcoinNetwork();
+        btcWallet = (await bitcoinNetwork.createNetworkWallet(connectedMasterWallet, false)) as AnyBTCNetworkWallet;
+
         Logger.log('dappbrowser', 'BTC wallet selection result:', { hasWallet: !!btcWallet, walletId: btcWallet?.id });
 
         if (btcWallet) {
@@ -1486,6 +1502,8 @@ export class DappBrowserService implements GlobalService {
 
     switch (message.data.name) {
       case 'elamain_getMultiAddresses':
+        // For ELA main chain, we still use the global active master wallet
+        // since ELA main chain connections are not dApp-specific in this implementation
         const masterWallet = WalletService.instance.getActiveMasterWallet();
         const addresses = await this.getWalletELAMainChainAddressesByType(
           masterWallet,
@@ -1627,7 +1645,9 @@ export class DappBrowserService implements GlobalService {
    */
   public async saveBrowsedAppInfo(appInfo: BrowsedAppInfo): Promise<BrowsedAppInfo> {
     // Make sure to save only app info with clean data
-    if (!this.browsedAppInfoDataFilled(appInfo)) return appInfo;
+    if (!this.browsedAppInfoDataFilled(appInfo)) {
+      return appInfo;
+    }
 
     let key = 'appinfo-' + appInfo.url; // Use the url as access key
     await this.globalStorageService.setSetting(
@@ -1851,4 +1871,173 @@ export class DappBrowserService implements GlobalService {
     }
     return addressArray;
   }
+
+  /**
+   * Sets up subscriptions to dApp-specific wallet changes
+   */
+  private setupDappWalletSubscriptions(): void {
+    // Subscribe to EVM wallet changes for the current dApp
+    this.activeDAppEVMWalletSub = this.browserWalletConnectionsService.activeDappEVMWallet.subscribe(evmWallet => {
+      if (evmWallet) {
+        console.log('DappBrowser: EVM wallet changed for active dApp:', evmWallet.masterWallet.name);
+        // Handle async operations without blocking the subscribe callback
+        void this.updateEVMWalletAddress(evmWallet)
+          .then(() => {
+            void this.sendActiveWalletToDApp(evmWallet);
+          })
+          .catch(error => {
+            console.error('DappBrowser: Error updating EVM wallet address:', error);
+          });
+      } else {
+        console.log('DappBrowser: EVM wallet disconnected for active dApp');
+        this.userEVMAddress = null;
+      }
+    });
+
+    // Subscribe to Bitcoin wallet changes for the current dApp
+    this.activeDAppBitcoinWalletSub = this.browserWalletConnectionsService.activeDappBitcoinWallet.subscribe(
+      bitcoinWallet => {
+        if (bitcoinWallet) {
+          console.log('DappBrowser: Bitcoin wallet changed for active dApp:', bitcoinWallet.masterWallet.name);
+          // Handle async operations without blocking the subscribe callback
+          void this.updateBitcoinWalletAddress(bitcoinWallet.masterWallet).catch(error => {
+            console.error('DappBrowser: Error updating Bitcoin wallet address:', error);
+          });
+        } else {
+          console.log('DappBrowser: Bitcoin wallet disconnected for active dApp');
+          this.userBTCAddress = null;
+        }
+      }
+    );
+
+    // Subscribe to EVM network changes for the current dApp
+    this.activeDAppEVMNetworkSub = this.browserWalletConnectionsService.activeDappEVMNetwork.subscribe(network => {
+      if (network) {
+        console.log('DappBrowser: EVM network changed for active dApp:', network.name);
+        void this.sendActiveNetworkToDApp(network);
+        // Handle async operations without blocking the subscribe callback
+        // this.updateNetworkForCurrentDapp(network);
+      }
+    });
+  }
+
+  private removeDappWalletSubscriptions(): void {
+    if (this.activeDAppEVMWalletSub) {
+      this.activeDAppEVMWalletSub.unsubscribe();
+      this.activeDAppEVMWalletSub = null;
+    }
+    if (this.activeDAppBitcoinWalletSub) {
+      this.activeDAppBitcoinWalletSub.unsubscribe();
+      this.activeDAppBitcoinWalletSub = null;
+    }
+    if (this.activeDAppEVMNetworkSub) {
+      this.activeDAppEVMNetworkSub.unsubscribe();
+      this.activeDAppEVMNetworkSub = null;
+    }
+  }
+
+  /**
+   * Updates wallet addresses for the currently active dApp
+   */
+  // private async updateWalletAddressesForCurrentDapp(): Promise<void> {
+  //   const currentUrl = this.browserWalletConnectionsService.getActiveDappUrl();
+  //   if (!currentUrl) {
+  //     console.log('DappBrowser: No active dApp URL');
+  //     return;
+  //   }
+
+  //   try {
+  //     // Get EVM wallet address
+  //     const evmWallet = this.browserWalletConnectionsService.activeDappEVMWallet.value;
+  //     if (evmWallet) {
+  //       await this.updateEVMWalletAddress(evmWallet);
+  //     } else {
+  //       this.userEVMAddress = null;
+  //     }
+
+  //     // Get Bitcoin wallet address
+  //     const bitcoinWallet = this.browserWalletConnectionsService.activeDappBitcoinWallet.value;
+  //     if (bitcoinWallet) {
+  //       await this.updateBitcoinWalletAddress(bitcoinWallet.masterWallet);
+  //     } else {
+  //       this.userBTCAddress = null;
+  //     }
+
+  //     // Get EVM network information
+  //     const evmNetwork = this.browserWalletConnectionsService.activeDappEVMNetwork.value;
+  //     if (evmNetwork) {
+  //       await this.updateNetworkForCurrentDapp(evmNetwork);
+  //     }
+
+  //     console.log('DappBrowser: Updated wallet addresses for dApp:', {
+  //       url: currentUrl,
+  //       evmAddress: this.userEVMAddress,
+  //       btcAddress: this.userBTCAddress,
+  //       evmNetwork: evmNetwork?.name
+  //     });
+  //   } catch (error) {
+  //     console.error('DappBrowser: Error updating wallet addresses:', error);
+  //   }
+  // }
+
+  /**
+   * Updates the EVM wallet address for the current dApp
+   */
+  private async updateEVMWalletAddress(evmWallet: AnyNetworkWallet): Promise<void> {
+    try {
+      const evmSubwallet = evmWallet.getMainEvmSubWallet();
+      if (evmSubwallet) {
+        this.userEVMAddress = await evmSubwallet.getCurrentReceiverAddress();
+        console.log('DappBrowser: Updated EVM address:', this.userEVMAddress);
+      }
+    } catch (error) {
+      console.error('DappBrowser: Error updating EVM wallet address:', error);
+      this.userEVMAddress = null;
+    }
+  }
+
+  /**
+   * Updates the Bitcoin wallet address for the current dApp
+   */
+  private async updateBitcoinWalletAddress(masterWallet: MasterWallet): Promise<void> {
+    try {
+      this.userBTCAddress = await this.getWalletBitcoinAddress(masterWallet);
+      console.log('DappBrowser: Updated Bitcoin address:', this.userBTCAddress);
+    } catch (error) {
+      console.error('DappBrowser: Error updating Bitcoin wallet address:', error);
+      this.userBTCAddress = null;
+    }
+  }
+
+  /**
+   * Updates the network configuration for the current dApp
+   */
+  // private updateNetworkForCurrentDapp(network: AnyNetwork): void {
+  //   try {
+  //     // Check if the network is an EVM network
+  //     if (
+  //       network instanceof EVMNetwork &&
+  //       typeof network.getMainChainID === 'function' &&
+  //       typeof network.getRPCUrl === 'function'
+  //     ) {
+  //       this.activeChainID = network.getMainChainID();
+  //       this.activeEVMNetworkRpcUrl = network.getRPCUrl();
+  //     }
+
+  //     // Update Bitcoin network if it's an EVM network (for now we use the same network)
+  //     const bitcoinNetwork = this.getBitcoinNetwork();
+  //     this.btcRpcUrl = bitcoinNetwork.getRPCUrl();
+
+  //     // Update ELA main chain network
+  //     const elamainNetwork = this.getELAMainChainNetwork();
+  //     this.elamainRpcUrl = elamainNetwork.getRPCUrl();
+
+  //     console.log('DappBrowser: Updated network for dApp:', {
+  //       chainId: this.activeChainID,
+  //       rpcUrl: this.activeEVMNetworkRpcUrl
+  //     });
+  //   } catch (error) {
+  //     console.error('DappBrowser: Error updating network:', error);
+  //   }
+  // }
 }

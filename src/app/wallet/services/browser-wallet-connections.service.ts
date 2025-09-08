@@ -10,12 +10,14 @@
  */
 
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { Logger } from 'src/app/logger';
 import { WalletChooserEntry, WalletChooserFilter } from '../components/wallet-chooser/wallet-chooser.component';
-import { AnyNetworkWallet } from '../model/networks/base/networkwallets/networkwallet';
+import { MasterWallet } from '../model/masterwallets/masterwallet';
 import { BTCNetworkBase } from '../model/networks/btc/network/btc.base.network';
+import { AnyBTCNetworkWallet } from '../model/networks/btc/networkwallets/btc.networkwallet';
 import { EVMNetwork } from '../model/networks/evms/evm.network';
-import { AnyNetwork } from '../model/networks/network';
+import { AnyEVMNetworkWallet } from '../model/networks/evms/networkwallets/evm.networkwallet';
 import { WalletNetworkService } from './network.service';
 import { WalletNetworkUIService } from './network.ui.service';
 import { LocalStorage } from './storage.service';
@@ -43,7 +45,7 @@ interface DappWalletConnection {
 /**
  * Network selection for a specific dapp
  */
-interface DappNetworkSelection {
+interface DappEVMNetworkSelection {
   networkKey: string; // Selected network key
   selectedAt: number; // Timestamp when network was selected
 }
@@ -54,9 +56,12 @@ interface DappNetworkSelection {
  */
 interface DappConnectionsStorage {
   [dappDomain: string]: {
+    // evm
+    evmNetwork?: DappEVMNetworkSelection;
     evm?: DappWalletConnection;
+
+    // bitcoin
     btc?: DappWalletConnection;
-    network?: DappNetworkSelection;
   };
 }
 
@@ -66,6 +71,12 @@ interface DappConnectionsStorage {
 export class BrowserWalletConnectionsService {
   public static instance: BrowserWalletConnectionsService = null;
   private readonly STORAGE_KEY = 'browser-wallet-connections';
+
+  // Reactive subjects for dApp-specific wallet connections
+  public activeDappUrl = new BehaviorSubject<string>(null);
+  public activeDappEVMWallet = new BehaviorSubject<AnyEVMNetworkWallet>(null);
+  public activeDappBitcoinWallet = new BehaviorSubject<AnyBTCNetworkWallet>(null);
+  public activeDappEVMNetwork = new BehaviorSubject<EVMNetwork>(null);
 
   constructor(
     private storage: LocalStorage,
@@ -116,8 +127,16 @@ export class BrowserWalletConnectionsService {
    */
   public async getConnectedWallet(
     dappUrl: string,
+    connectionType: BrowserConnectionType.EVM
+  ): Promise<AnyEVMNetworkWallet | null>;
+  public async getConnectedWallet(
+    dappUrl: string,
+    connectionType: BrowserConnectionType.BITCOIN
+  ): Promise<AnyBTCNetworkWallet | null>;
+  public async getConnectedWallet(
+    dappUrl: string,
     connectionType: BrowserConnectionType
-  ): Promise<AnyNetworkWallet | null> {
+  ): Promise<AnyEVMNetworkWallet | AnyBTCNetworkWallet | null> {
     const domain = this.extractDomain(dappUrl);
     const connections = await this.loadConnections();
 
@@ -143,13 +162,14 @@ export class BrowserWalletConnectionsService {
     // Determine which network to use for this dapp
     let targetNetwork = this.networkService.activeNetwork.value; // Default to app's active network
 
-    // Check if this dapp has a specific network selected
-    if (dappConnections.network) {
-      const selectedNetwork = this.networkService.getNetworkByKey(dappConnections.network.networkKey);
+    // For EVM connections, check if this dapp has a specific EVM network selected
+    if (connectionType === BrowserConnectionType.EVM && dappConnections.evmNetwork) {
+      const selectedNetwork = this.networkService.getNetworkByKey(dappConnections.evmNetwork.networkKey);
       if (selectedNetwork) {
         targetNetwork = selectedNetwork;
       }
     }
+    // For Bitcoin connections, use the default network (Bitcoin doesn't have separate network selection)
 
     // Create network wallet for the target network
     try {
@@ -165,7 +185,7 @@ export class BrowserWalletConnectionsService {
         return null;
       }
 
-      return networkWallet;
+      return networkWallet as AnyEVMNetworkWallet | AnyBTCNetworkWallet;
     } catch (error) {
       Logger.error('wallet', 'Error creating network wallet for dapp:', domain, 'error:', error);
       return null;
@@ -173,24 +193,8 @@ export class BrowserWalletConnectionsService {
   }
 
   /**
-   * Gets the selected network for a specific dapp
-   * @param dappUrl The URL of the dapp
-   * @returns The selected network or null if not set
-   */
-  public async getSelectedNetwork(dappUrl: string): Promise<AnyNetwork | null> {
-    const domain = this.extractDomain(dappUrl);
-    const connections = await this.loadConnections();
-
-    const dappConnections = connections[domain];
-    if (!dappConnections?.network) {
-      return null;
-    }
-
-    return this.networkService.getNetworkByKey(dappConnections.network.networkKey);
-  }
-
-  /**
    * Connects a wallet for a specific dapp and connection type
+   *
    * @param dappUrl The URL of the dapp
    * @param connectionType The type of connection (EVM or BTC)
    * @param masterWalletId Optional specific wallet ID to connect (if not provided, user will be prompted to select)
@@ -200,15 +204,15 @@ export class BrowserWalletConnectionsService {
     dappUrl: string,
     connectionType: BrowserConnectionType,
     masterWalletId?: string
-  ): Promise<AnyNetworkWallet | null> {
+  ): Promise<MasterWallet | null> {
     const domain = this.extractDomain(dappUrl);
     Logger.log('wallet', `Connecting ${connectionType} wallet for dapp:`, domain);
 
-    let selectedWallet: AnyNetworkWallet;
+    let selectedWallet: MasterWallet;
 
     if (masterWalletId) {
       // Use provided wallet ID
-      selectedWallet = this.walletService.getNetworkWalletFromMasterWalletId(masterWalletId);
+      selectedWallet = this.walletService.getMasterWallet(masterWalletId);
       if (!selectedWallet) {
         Logger.warn('wallet', 'Provided masterWalletId not found:', masterWalletId);
         return null;
@@ -252,7 +256,7 @@ export class BrowserWalletConnectionsService {
 
     const connectionKey = connectionType === BrowserConnectionType.EVM ? 'evm' : 'btc';
     connections[domain][connectionKey] = {
-      masterWalletId: selectedWallet.masterWallet.id,
+      masterWalletId: selectedWallet.id,
       connectedAt: Date.now()
     };
 
@@ -262,8 +266,14 @@ export class BrowserWalletConnectionsService {
       'wallet',
       `Connected ${connectionType === BrowserConnectionType.EVM ? 'EVM' : 'BTC'} wallet for dapp:`,
       domain,
-      selectedWallet.masterWallet.name
+      selectedWallet.name
     );
+
+    // Update reactive subjects if this affects the active dApp
+    if (this.activeDappUrl.value === dappUrl) {
+      await this.updateActiveDappConnections();
+    }
+
     return selectedWallet;
   }
 
@@ -302,59 +312,65 @@ export class BrowserWalletConnectionsService {
   }
 
   /**
-   * Selects a network for a specific dapp
+   * Selects an EVM network for a specific dapp
    * @param dappUrl The URL of the dapp
    * @param networkKey Optional specific network key (if not provided, user will be prompted to select)
-   * @returns The selected network or null if cancelled
+   * @returns The selected EVM network or null if cancelled
    */
-  public async selectNetwork(dappUrl: string, networkKey?: string): Promise<AnyNetwork | null> {
+  public async selectEVMNetwork(dappUrl: string, networkKey?: string): Promise<EVMNetwork | null> {
     const domain = this.extractDomain(dappUrl);
-    Logger.log('wallet', 'Selecting network for dapp:', domain);
+    Logger.log('wallet', 'Selecting EVM network for dapp:', domain);
 
-    let selectedNetwork: AnyNetwork;
+    let selectedNetwork: EVMNetwork;
 
     if (networkKey) {
       // Use provided network key
-      selectedNetwork = this.networkService.getNetworkByKey(networkKey);
+      selectedNetwork = this.networkService.getNetworkByKey(networkKey) as EVMNetwork;
       if (!selectedNetwork) {
         Logger.warn('wallet', 'Provided networkKey not found:', networkKey);
         return null;
       }
     } else {
       // Let user pick a network
-      selectedNetwork = await this.walletNetworkUIService.pickNetwork();
+      selectedNetwork = (await this.walletNetworkUIService.pickNetwork()) as EVMNetwork;
       if (!selectedNetwork) {
-        Logger.log('wallet', 'Network selection cancelled for dapp:', domain);
+        Logger.log('wallet', 'EVM network selection cancelled for dapp:', domain);
         return null;
       }
     }
 
-    // Save the network selection
+    // Save the EVM network selection
     const connections = await this.loadConnections();
     if (!connections[domain]) {
       connections[domain] = {};
     }
 
-    connections[domain].network = {
+    connections[domain].evmNetwork = {
       networkKey: selectedNetwork.key,
       selectedAt: Date.now()
     };
 
     await this.saveConnections(connections);
 
-    Logger.log('wallet', 'Selected network for dapp:', domain, selectedNetwork.name);
+    Logger.log('wallet', 'Selected EVM network for dapp:', domain, selectedNetwork.name);
+
+    // Update reactive subjects if this affects the active dApp
+    if (this.activeDappUrl.value === dappUrl) {
+      await this.updateActiveDappConnections();
+    }
+
     return selectedNetwork;
   }
 
   /**
    * Gets all connections for a specific dapp
    * @param dappUrl The URL of the dapp
-   * @returns Object containing EVM, BTC, and network connections
+   * @returns Object containing EVM, BTC, and EVM network connections
    */
   public async getDappConnections(dappUrl: string): Promise<{
     evm: DappWalletConnection | null;
     btc: DappWalletConnection | null;
-    network: DappNetworkSelection | null;
+    evmNetwork: DappEVMNetworkSelection | null;
   }> {
     const domain = this.extractDomain(dappUrl);
     const connections = await this.loadConnections();
@@ -364,74 +380,102 @@ export class BrowserWalletConnectionsService {
     return {
       evm: dappConnections.evm || null,
       btc: dappConnections.btc || null,
-      network: dappConnections.network || null
+      evmNetwork: dappConnections.evmNetwork || null
     };
   }
 
   /**
-   * Gets all dapp domains that have connections
-   * @returns Array of domain strings
+   * Sets the currently active dApp and updates reactive subjects
+   * @param dappUrl The URL of the active dApp
    */
-  public async getConnectedDapps(): Promise<string[]> {
-    const connections = await this.loadConnections();
-    return Object.keys(connections);
+  public async setActiveDapp(dappUrl: string): Promise<void> {
+    if (this.activeDappUrl.value === dappUrl) {
+      console.log('BrowserWalletConnections: URL already active, skipping:', dappUrl);
+      return; // Already active
+    }
+
+    console.log('BrowserWalletConnections: Setting active dApp:', dappUrl);
+    this.activeDappUrl.next(dappUrl);
+
+    // Update reactive subjects with the current connections for this dApp
+    await this.updateActiveDappConnections();
   }
 
   /**
-   * Checks if a dapp has any connections
-   * @param dappUrl The URL of the dapp
-   * @returns True if the dapp has connections
+   * Updates the reactive subjects with current connections for the active dApp
    */
-  public async hasConnections(dappUrl: string): Promise<boolean> {
-    const connections = await this.getDappConnections(dappUrl);
-    return !!(connections.evm || connections.btc || connections.network);
+  private async updateActiveDappConnections(): Promise<void> {
+    console.log('BrowserWalletConnectionsService: Updating active dApp connections');
+    const currentUrl = this.activeDappUrl.value;
+    if (!currentUrl) {
+      this.activeDappEVMWallet.next(null);
+      this.activeDappBitcoinWallet.next(null);
+      this.activeDappEVMNetwork.next(null);
+      return;
+    }
+
+    try {
+      // Load EVM wallet connection
+      const evmWallet = await this.getConnectedWallet(currentUrl, BrowserConnectionType.EVM);
+      this.activeDappEVMWallet.next(evmWallet);
+
+      // Load Bitcoin wallet connection
+      const bitcoinWallet = await this.getConnectedWallet(currentUrl, BrowserConnectionType.BITCOIN);
+      this.activeDappBitcoinWallet.next(bitcoinWallet);
+
+      // Load EVM network selection
+      const selectedEVMNetwork = await this.getSelectedEVMNetwork(currentUrl);
+      this.activeDappEVMNetwork.next(selectedEVMNetwork);
+
+      console.log('BrowserWalletConnections: Updated active dApp connections:', {
+        url: currentUrl,
+        evmWallet: evmWallet?.masterWallet.name || null,
+        bitcoinWallet: bitcoinWallet?.masterWallet.name || null,
+        evmNetwork: selectedEVMNetwork?.name || null
+      });
+    } catch (error) {
+      console.error('BrowserWalletConnections: Error updating active dApp connections:', error);
+      this.activeDappEVMWallet.next(null);
+      this.activeDappBitcoinWallet.next(null);
+      this.activeDappEVMNetwork.next(null);
+    }
   }
 
   /**
-   * Clears all connections for a specific dapp
-   * @param dappUrl The URL of the dapp
+   * Gets the currently active dApp URL
    */
-  public async clearDappConnections(dappUrl: string): Promise<void> {
+  public getActiveDappUrl(): string {
+    return this.activeDappUrl.value;
+  }
+
+  /**
+   * Clears the active dApp
+   */
+  public clearActiveDapp(): void {
+    console.log('BrowserWalletConnections: Clearing active dApp');
+    this.activeDappUrl.next(null);
+    this.activeDappEVMWallet.next(null);
+    this.activeDappBitcoinWallet.next(null);
+    this.activeDappEVMNetwork.next(null);
+  }
+
+  /**
+   * Gets the selected EVM network for a specific dapp
+   * @param dappUrl The URL of the dapp
+   * @returns The selected EVM network or null if not set
+   */
+  public async getSelectedEVMNetwork(dappUrl: string): Promise<EVMNetwork | null> {
     const domain = this.extractDomain(dappUrl);
-    Logger.log('wallet', 'Clearing all connections for dapp:', domain);
-
     const connections = await this.loadConnections();
-    delete connections[domain];
-    await this.saveConnections(connections);
 
-    Logger.log('wallet', 'Cleared all connections for dapp:', domain);
-  }
+    console.log('BrowserWalletConnectionsService: Getting selected EVM network for dapp:', domain);
+    console.log('BrowserWalletConnectionsService: Connections:', connections);
 
-  /**
-   * Legacy method for backward compatibility
-   * @deprecated Use getConnectedWallet instead
-   */
-  public connect(dapp: string, account: string) {
-    Logger.warn('wallet', 'BrowserWalletConnectionsService.connect() is deprecated. Use connectWallet() instead.');
-    // This method doesn't match the new API, so we'll just log a warning
-  }
+    const dappConnections = connections[domain];
+    if (!dappConnections?.evmNetwork) {
+      return null;
+    }
 
-  /**
-   * Legacy method for backward compatibility
-   * @deprecated Use disconnectWallet instead
-   */
-  public disconnect(dapp: string, account: string) {
-    Logger.warn(
-      'wallet',
-      'BrowserWalletConnectionsService.disconnect() is deprecated. Use disconnectWallet() instead.'
-    );
-    // This method doesn't match the new API, so we'll just log a warning
-  }
-
-  /**
-   * Legacy method for backward compatibility
-   * @deprecated Use getDappConnections instead
-   */
-  public getConnections() {
-    Logger.warn(
-      'wallet',
-      'BrowserWalletConnectionsService.getConnections() is deprecated. Use getDappConnections() instead.'
-    );
-    return {};
+    return this.networkService.getNetworkByKey(dappConnections.evmNetwork.networkKey) as EVMNetwork;
   }
 }

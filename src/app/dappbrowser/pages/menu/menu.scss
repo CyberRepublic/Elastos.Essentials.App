@@ -63,11 +63,22 @@
     font-size: 12px;
   }
 
+  .network {
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 2px;
+
+    &.no-connection {
+      opacity: 0.5;
+      font-style: italic;
+    }
+  }
+
   .switches-container {
     .logo-container {
       display: flex;
       align-items: center;
-    //   background: var(--ion-background-color);
+      //   background: var(--ion-background-color);
       border-radius: 10px;
       justify-content: center;
     }

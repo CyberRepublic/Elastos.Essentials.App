@@ -16,8 +16,9 @@ import { GlobalIntentService } from 'src/app/services/global.intent.service';
 import { GlobalNativeService } from 'src/app/services/global.native.service';
 import { GlobalNavService } from 'src/app/services/global.nav.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
-import { NetworkChooserFilter } from 'src/app/wallet/components/network-chooser/network-chooser.component';
-import { AnyNetwork } from 'src/app/wallet/model/networks/network';
+import { BTCNetworkWallet } from 'src/app/wallet/model/networks/btc/networkwallets/btc.networkwallet';
+import { EVMNetwork } from 'src/app/wallet/model/networks/evms/evm.network';
+import { EVMNetworkWallet } from 'src/app/wallet/model/networks/evms/networkwallets/evm.networkwallet';
 import {
   BrowserConnectionType,
   BrowserWalletConnectionsService
@@ -40,8 +41,13 @@ export class MenuPage {
   @ViewChild(TitleBarComponent, { static: false }) titleBar: TitleBarComponent;
 
   public browsedAppInfo: BrowsedAppInfo = null;
+  public connectedEVMWallet: EVMNetworkWallet<any, any> = null;
+  public connectedBitcoinWallet: BTCNetworkWallet<any, any> = null;
+  public connectedEVMNetwork: EVMNetwork = null;
   private titleBarIconClickedListener: (icon: TitleBarIcon | TitleBarMenuItem) => void;
-  private browsedAppInfoSub: Subscription = null;
+
+  // Subscriptions
+  private subscriptions: Subscription[] = [];
 
   constructor(
     public translate: TranslateService,
@@ -76,31 +82,71 @@ export class MenuPage {
       })
     );
 
-    this.browsedAppInfoSub = this.dappBrowserService.activeBrowsedAppInfo.subscribe(browsedApp => {
-      this.zone.run(() => {
-        this.browsedAppInfo = browsedApp;
-      });
-    });
+    this.subscriptions.push(
+      this.dappBrowserService.activeBrowsedAppInfo.subscribe(browsedAppInfo => {
+        this.zone.run(() => {
+          this.browsedAppInfo = browsedAppInfo;
+        });
+      })
+    );
+
+    this.subscriptions.push(
+      this.browserWalletConnectionsService.activeDappEVMNetwork.subscribe(network => {
+        this.zone.run(() => {
+          console.log('Menu: EVM network changed:', network);
+          this.connectedEVMNetwork = network;
+        });
+      })
+    );
+
+    this.subscriptions.push(
+      this.browserWalletConnectionsService.activeDappEVMWallet.subscribe(evmWallet => {
+        this.zone.run(() => {
+          console.log('Menu: EVM wallet changed:', evmWallet);
+          this.connectedEVMWallet = evmWallet;
+        });
+      })
+    );
+
+    this.subscriptions.push(
+      this.browserWalletConnectionsService.activeDappBitcoinWallet.subscribe(bitcoinWallet => {
+        this.zone.run(() => {
+          console.log('Menu: Bitcoin wallet changed:', bitcoinWallet);
+          this.connectedBitcoinWallet = bitcoinWallet;
+        });
+      })
+    );
 
     Logger.log('dappbrowser', 'Showing menu for browsed app', this.browsedAppInfo);
   }
 
   ionViewWillLeave() {
-    if (this.browsedAppInfoSub) {
-      this.browsedAppInfoSub.unsubscribe();
-      this.browsedAppInfoSub = null;
-    }
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscriptions = [];
+
     this.titleBar.removeOnItemClickedListener(this.titleBarIconClickedListener);
   }
 
-  ionViewDidEnter() {}
+  ionViewDidEnter() {
+    // Load connected wallets when the view becomes active
+    // console.log('Menu: View entered, loading wallets');
+    // Check if the subscription has already handled this URL to avoid duplicate calls
+    // const currentActiveUrl = this.browserWalletConnectionsService.getActiveDappUrl();
+    // if (currentActiveUrl !== this.browsedAppInfo?.url) {
+    //   void this.loadConnectedWallets();
+    // } else {
+    //   console.log('Menu: Subscription already handled this URL, skipping loadConnectedWallets');
+    // }
+  }
 
   async goback() {
     await this.nav.navigateBack();
   }
 
   public isInFavorites(): boolean {
-    if (!this.browsedAppInfo) return false;
+    if (!this.browsedAppInfo) {
+      return false;
+    }
 
     return !!this.favoritesService.findFavoriteByUrl(this.browsedAppInfo.url);
   }
@@ -116,39 +162,19 @@ export class MenuPage {
     this.native.genericToast('dappbrowser.removed-from-favorites');
   }
 
-  public async pickNetwork() {
-    if (await this.walletNetworkUIService.chooseActiveNetwork(await this.createNetworkFilter())) void this.goback(); // Exit menu after switching the network (most frequent case is user wants to exit)
+  public async pickEVMNetwork() {
+    if (!this.browsedAppInfo?.url) {
+      return;
+    }
+
+    const selectedNetwork = await this.browserWalletConnectionsService.selectEVMNetwork(this.browsedAppInfo.url);
+    if (selectedNetwork) {
+      void this.goback(); // Exit menu after selecting network
+    }
   }
 
   public async pickWallet() {
     if (await this.walletUIService.chooseActiveWallet()) void this.goback(); // Exit menu after switching the wallet (most frequent case is user wants to exit)
-  }
-
-  /**
-   * Creates a network filter that only shows networks supported by the currently connected EVM wallet.
-   * If no EVM wallet is connected, shows all networks.
-   */
-  private async createNetworkFilter(): Promise<NetworkChooserFilter | undefined> {
-    if (!this.browsedAppInfo?.url) {
-      return undefined; // Show all networks if no URL available
-    }
-
-    // Check if there's a connected EVM wallet for this dapp
-    const connectedWallet = await this.browserWalletConnectionsService.getConnectedWallet(
-      this.browsedAppInfo.url,
-      BrowserConnectionType.EVM
-    );
-
-    if (!connectedWallet) {
-      return undefined; // Show all networks if no wallet connected
-    }
-
-    // Create filter that only shows networks supported by the connected wallet
-    const filter: NetworkChooserFilter = (network: AnyNetwork): boolean => {
-      return connectedWallet.masterWallet.supportsNetwork(network);
-    };
-
-    return filter;
   }
 
   public openExternal() {
@@ -181,15 +207,193 @@ export class MenuPage {
     return this.browsedAppInfo && this.browsedAppInfo.title !== '';
   }
 
-  public getActiveNetworkLogo(): string {
-    if (this.walletNetworkService.activeNetwork.value) return this.walletNetworkService.activeNetwork.value.logo;
-    else return transparentPixelIconDataUrl();
+  public getConnectedEVMNetworkLogo(): string {
+    if (!this.browsedAppInfo?.url || !this.connectedEVMNetwork) {
+      return transparentPixelIconDataUrl();
+    }
+
+    try {
+      return this.connectedEVMNetwork.logo || transparentPixelIconDataUrl();
+    } catch (error) {
+      console.error('Menu: Error getting EVM network logo:', error);
+      return transparentPixelIconDataUrl();
+    }
   }
 
-  public getActiveNetworkName(): string {
-    if (this.walletNetworkService.activeNetwork.value) return this.walletNetworkService.activeNetwork.value.name;
-    else return '';
+  public getConnectedEVMNetworkName(): string {
+    if (!this.browsedAppInfo?.url || !this.connectedEVMNetwork) {
+      return '';
+    }
+
+    try {
+      return this.connectedEVMNetwork.name || '';
+    } catch (error) {
+      console.error('Menu: Error getting EVM network name:', error);
+      return '';
+    }
   }
+
+  public getConnectedBitcoinNetworkName(): string {
+    if (this.connectedBitcoinWallet) {
+      return this.connectedBitcoinWallet.masterWallet.name;
+    } else {
+      return 'Select Network';
+    }
+  }
+
+  public getConnectedBitcoinNetworkLogo(): string {
+    if (this.walletNetworkService.getBitcoinNetwork()) {
+      return this.walletNetworkService.getBitcoinNetwork().logo;
+    } else {
+      return transparentPixelIconDataUrl();
+    }
+  }
+
+  /**
+   * Loads the connected wallets for the current dapp using reactive subjects
+   */
+  // private async loadConnectedWallets() {
+  //   if (!this.browsedAppInfo?.url) {
+  //     console.log('Menu: No browsedAppInfo URL, clearing wallets');
+  //     this.connectedEVMWallet = null;
+  //     this.connectedBitcoinWallet = null;
+  //     return;
+  //   }
+
+  //   console.log('Menu: Loading connected wallets for URL:', this.browsedAppInfo.url);
+
+  //   // The reactive subjects will update our properties automatically
+  //   this.connectedEVMWallet = this.browserWalletConnectionsService.activeDappEVMWallet.value;
+  //   this.connectedBitcoinWallet = this.browserWalletConnectionsService.activeDappBitcoinWallet.value;
+
+  //   console.log(
+  //     'Menu: EVM wallet loaded:',
+  //     this.connectedEVMWallet ? this.connectedEVMWallet.masterWallet.name : 'null'
+  //   );
+  //   console.log(
+  //     'Menu: Bitcoin wallet loaded:',
+  //     this.connectedBitcoinWallet ? this.connectedBitcoinWallet.masterWallet.name : 'null'
+  //   );
+  // }
+
+  /**
+   * Handles Bitcoin wallet selection for the current dapp
+   */
+  public async pickBitcoinWallet() {
+    if (!this.browsedAppInfo?.url) {
+      console.log('Menu: No URL available for Bitcoin wallet selection');
+      return;
+    }
+
+    console.log('Menu: Starting Bitcoin wallet selection for URL:', this.browsedAppInfo.url);
+
+    try {
+      const connectedWallet = await this.browserWalletConnectionsService.connectWallet(
+        this.browsedAppInfo.url,
+        BrowserConnectionType.BITCOIN
+      );
+
+      console.log('Menu: Bitcoin wallet selection result:', connectedWallet ? connectedWallet.name : 'cancelled');
+
+      // if (connectedWallet) {
+      //   // Force UI update by running in zone
+      //   await this.zone.run(async () => {
+      //     await this.loadConnectedWallets();
+
+      //     // Update the Unisat provider with the new wallet
+      //     await this.updateUnisatProvider(connectedWallet);
+
+      //     console.log('Menu: Bitcoin wallet UI updated');
+      //   });
+
+      //   // Wallet was successfully connected, exit menu
+      //   void this.goback();
+      // }
+    } catch (error) {
+      console.error('Menu: Error selecting Bitcoin wallet:', error);
+    }
+  }
+
+  /**
+   * Handles EVM wallet selection for the current dapp
+   */
+  public async pickEVMWallet() {
+    if (!this.browsedAppInfo?.url) {
+      console.log('Menu: No URL available for EVM wallet selection');
+      return;
+    }
+
+    console.log('Menu: Starting EVM wallet selection for URL:', this.browsedAppInfo.url);
+
+    try {
+      const connectedWallet = await this.browserWalletConnectionsService.connectWallet(
+        this.browsedAppInfo.url,
+        BrowserConnectionType.EVM
+      );
+
+      console.log('Menu: EVM wallet selection result:', connectedWallet ? connectedWallet.name : 'cancelled');
+
+      // if (connectedWallet) {
+      //   // Force UI update by running in zone
+      //   await this.zone.run(async () => {
+      //     await this.loadConnectedWallets();
+      //     console.log('Menu: EVM wallet UI updated');
+      //   });
+
+      //   // Wallet was successfully connected, exit menu
+      //   void this.goback();
+      // }
+    } catch (error) {
+      console.error('Menu: Error selecting EVM wallet:', error);
+    }
+  }
+
+  /**
+   * Updates the Unisat provider with the selected Bitcoin wallet
+   */
+  // private async updateUnisatProvider(wallet: any) {
+  //   try {
+  //     // Get the Bitcoin address from the wallet
+  //     const address = await this.getWalletBitcoinAddress(wallet.masterWallet);
+
+  //     if (address) {
+  //       // Update the Unisat provider with the new address
+  //       const updateScript = `
+  //         if (window.unisat && window.unisat.setAddress) {
+  //           window.unisat.setAddress('${address}');
+  //         }
+  //         if (window.okxwallet && window.okxwallet.bitcoin && window.okxwallet.bitcoin.setAddress) {
+  //           window.okxwallet.bitcoin.setAddress('${address}');
+  //         }
+  //       `;
+
+  //       // Execute the script in the dApp context
+  //       await dappBrowser.executeScript({
+  //         code: updateScript
+  //       });
+
+  //       Logger.log('dappbrowser', 'Updated Unisat provider with address:', address);
+  //     }
+  //   } catch (error) {
+  //     Logger.error('dappbrowser', 'Error updating Unisat provider:', error);
+  //   }
+  // }
+
+  /**
+   * Gets the Bitcoin address from a master wallet
+   */
+  // private async getWalletBitcoinAddress(masterWallet: any): Promise<string> {
+  //   try {
+  //     // Get the Bitcoin subwallet from the master wallet
+  //     const bitcoinSubwallet = masterWallet.getSubWallet('BTC');
+  //     if (bitcoinSubwallet) {
+  //       return await bitcoinSubwallet.getCurrentReceiverAddress();
+  //     }
+  //   } catch (error) {
+  //     Logger.error('dappbrowser', 'Error getting Bitcoin address:', error);
+  //   }
+  //   return '';
+  // }
 
   /**
    * Asks the browser plugin to clear cached data for the current url:
