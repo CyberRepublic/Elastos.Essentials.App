@@ -423,7 +423,7 @@ export class DappBrowserService implements GlobalService {
     }
 
     if (btcWallet) {
-      btcAddress = await this.getWalletBitcoinAddress(btcWallet.masterWallet);
+      btcAddress = (await this.getWalletBitcoinAddress(btcWallet.masterWallet)) || '';
     }
 
     // Prepare our web3 provider bridge and elastos connectors for injection
@@ -1382,6 +1382,8 @@ export class DappBrowserService implements GlobalService {
    */
   private async handleBitcoinRequestAccounts(message: DABMessage): Promise<void> {
     const currentUrl = this.url;
+    Logger.log('dappbrowser', 'handleBitcoinRequestAccounts called', { currentUrl, messageId: message.data.id });
+
     if (!currentUrl) {
       Logger.warn('dappbrowser', 'No current URL available for bitcoin request accounts');
       this.sendInjectedError('unisat', message.data.id, {
@@ -1392,7 +1394,11 @@ export class DappBrowserService implements GlobalService {
     }
 
     // Check if we already have a connected wallet for this dapp
-    let btcWallet = await this.browserWalletConnectionsService.getConnectedWallet(currentUrl, 1); // BTC
+    let btcWallet = await this.browserWalletConnectionsService.getConnectedWallet(
+      currentUrl,
+      BrowserConnectionType.BITCOIN
+    );
+    Logger.log('dappbrowser', 'BTC wallet check result:', { hasWallet: !!btcWallet, walletId: btcWallet?.id });
 
     if (!btcWallet) {
       Logger.log('dappbrowser', 'No connected BTC wallet found, triggering wallet selection');
@@ -1402,7 +1408,8 @@ export class DappBrowserService implements GlobalService {
 
       try {
         // Try to connect a wallet
-        btcWallet = await this.browserWalletConnectionsService.connectWallet(currentUrl, 1); // BTC
+        btcWallet = await this.browserWalletConnectionsService.connectWallet(currentUrl, BrowserConnectionType.BITCOIN);
+        Logger.log('dappbrowser', 'BTC wallet selection result:', { hasWallet: !!btcWallet, walletId: btcWallet?.id });
 
         if (btcWallet) {
           // Update the injected provider with the new wallet
@@ -1434,8 +1441,10 @@ export class DappBrowserService implements GlobalService {
     // Return the connected wallet address
     if (btcWallet) {
       const address = await this.getWalletBitcoinAddress(btcWallet.masterWallet);
+      Logger.log('dappbrowser', 'Sending BTC address response:', { address, messageId: message.data.id });
       this.sendInjectedResponse('unisat', message.data.id, [address]);
     } else {
+      Logger.log('dappbrowser', 'No BTC wallet available, sending error');
       this.sendInjectedError('unisat', message.data.id, {
         code: 4001,
         message: 'User rejected the request.'
@@ -1768,7 +1777,7 @@ export class DappBrowserService implements GlobalService {
     const bitcoinNetwork = this.getBitcoinNetwork();
     const bitcoinNetworkWallet = await bitcoinNetwork.createNetworkWallet(masterWallet, false);
     const addresses = bitcoinNetworkWallet?.safe.getAddresses(0, 1, false, null);
-    return addresses?.[0];
+    return addresses?.[0] || '';
   }
 
   private async getWalletBitcoinPublicKey(masterWallet: MasterWallet): Promise<string> {

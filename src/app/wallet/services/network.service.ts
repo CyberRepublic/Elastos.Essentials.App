@@ -148,7 +148,9 @@ export class WalletNetworkService {
    * eg: do not support the BTC network when the wallet is imported by EVM private key.
    */
   public getAvailableNetworks(masterWallet: MasterWallet = null, networkTemplate: string = null): AnyNetwork[] {
-    if (!networkTemplate) networkTemplate = this.globalNetworksService.activeNetworkTemplate.value;
+    if (!networkTemplate) {
+      networkTemplate = this.globalNetworksService.activeNetworkTemplate.value;
+    }
 
     // Keep only networks for the target network template.
     let networks = this.networks.filter(n => n.networkTemplate === networkTemplate);

@@ -108,12 +108,11 @@ export class WalletChooserComponent implements OnInit {
     const walletEntries = this.buildWalletEntries();
 
     // Apply filter if provided
-    const filteredEntries = walletEntries.filter(entry => {
-      return !this.options.filter || this.options.filter(entry);
-    });
+    const filteredEntries = this.options.filter ? walletEntries.filter(this.options.filter) : walletEntries;
 
     // Extract master wallets from filtered entries
     this.masterWalletsToShowInList = filteredEntries.map(entry => entry.masterWallet);
+    Logger.log('wallet', 'wallet chooser - master wallets to show in list:', this.masterWalletsToShowInList);
 
     // Build network wallet mapping for display purposes
     this.networkWalletsToShowInList = {};

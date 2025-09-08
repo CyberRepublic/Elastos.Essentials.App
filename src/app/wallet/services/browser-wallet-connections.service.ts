@@ -28,7 +28,7 @@ import { WalletUIService } from './wallet.ui.service';
  */
 export enum BrowserConnectionType {
   EVM,
-  BTC
+  BITCOIN
 }
 
 /**
@@ -225,9 +225,13 @@ export class BrowserWalletConnectionsService {
         if (connectionType === BrowserConnectionType.EVM) {
           // Allow wallets that support EVM networks or have no network wallet (will be filtered later)
           return !networkWallet || networkWallet.network instanceof EVMNetwork;
-        } else if (connectionType === BrowserConnectionType.BTC) {
-          // Allow wallets that support BTC networks or have no network wallet (will be filtered later)
-          return !networkWallet || networkWallet.network instanceof BTCNetworkBase;
+        } else if (connectionType === BrowserConnectionType.BITCOIN) {
+          // Get bitcoin networks
+          const bitcoinNetworks = this.networkService.networksList.value.filter(
+            network => network instanceof BTCNetworkBase
+          );
+
+          return bitcoinNetworks.some(network => masterWallet.supportsNetwork(network));
         }
 
         return true;
