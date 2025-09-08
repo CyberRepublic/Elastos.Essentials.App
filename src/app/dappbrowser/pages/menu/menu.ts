@@ -4,13 +4,24 @@ import { Clipboard } from '@awesome-cordova-plugins/clipboard/ngx';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
-import { BuiltInIcon, TitleBarIcon, TitleBarIconSlot, TitleBarMenuItem } from 'src/app/components/titlebar/titlebar.types';
+import {
+  BuiltInIcon,
+  TitleBarIcon,
+  TitleBarIconSlot,
+  TitleBarMenuItem
+} from 'src/app/components/titlebar/titlebar.types';
 import { transparentPixelIconDataUrl } from 'src/app/helpers/picture.helpers';
 import { Logger } from 'src/app/logger';
 import { GlobalIntentService } from 'src/app/services/global.intent.service';
 import { GlobalNativeService } from 'src/app/services/global.native.service';
 import { GlobalNavService } from 'src/app/services/global.nav.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
+import { NetworkChooserFilter } from 'src/app/wallet/components/network-chooser/network-chooser.component';
+import { AnyNetwork } from 'src/app/wallet/model/networks/network';
+import {
+  BrowserConnectionType,
+  BrowserWalletConnectionsService
+} from 'src/app/wallet/services/browser-wallet-connections.service';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { WalletNetworkUIService } from 'src/app/wallet/services/network.ui.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
@@ -21,158 +32,177 @@ import { FavoritesService } from '../../services/favorites.service';
 
 declare let dappBrowser: DappBrowserPlugin.DappBrowser;
 @Component({
-    selector: 'page-menu',
-    templateUrl: 'menu.html',
-    styleUrls: ['menu.scss']
+  selector: 'page-menu',
+  templateUrl: 'menu.html',
+  styleUrls: ['menu.scss']
 })
 export class MenuPage {
-    @ViewChild(TitleBarComponent, { static: false }) titleBar: TitleBarComponent;
+  @ViewChild(TitleBarComponent, { static: false }) titleBar: TitleBarComponent;
 
-    public browsedAppInfo: BrowsedAppInfo = null;
-    private titleBarIconClickedListener: (icon: TitleBarIcon | TitleBarMenuItem) => void;
-    private browsedAppInfoSub: Subscription = null;
+  public browsedAppInfo: BrowsedAppInfo = null;
+  private titleBarIconClickedListener: (icon: TitleBarIcon | TitleBarMenuItem) => void;
+  private browsedAppInfoSub: Subscription = null;
 
-    constructor(
-        public translate: TranslateService,
-        private nav: GlobalNavService,
-        public theme: GlobalThemeService,
-        public httpClient: HttpClient,
-        public zone: NgZone,
-        private native: GlobalNativeService,
-        public favoritesService: FavoritesService,
-        public dappBrowserService: DappBrowserService,
-        public walletNetworkService: WalletNetworkService,
-        private walletNetworkUIService: WalletNetworkUIService,
-        public walletService: WalletService,
-        private walletUIService: WalletUIService,
-        private globalIntentService: GlobalIntentService,
-        private clipboard: Clipboard,
-        private globalNative: GlobalNativeService
-    ) {
+  constructor(
+    public translate: TranslateService,
+    private nav: GlobalNavService,
+    public theme: GlobalThemeService,
+    public httpClient: HttpClient,
+    public zone: NgZone,
+    private native: GlobalNativeService,
+    public favoritesService: FavoritesService,
+    public dappBrowserService: DappBrowserService,
+    public walletNetworkService: WalletNetworkService,
+    private walletNetworkUIService: WalletNetworkUIService,
+    public walletService: WalletService,
+    private walletUIService: WalletUIService,
+    private browserWalletConnectionsService: BrowserWalletConnectionsService,
+    private globalIntentService: GlobalIntentService,
+    private clipboard: Clipboard,
+    private globalNative: GlobalNativeService
+  ) {}
+
+  ionViewWillEnter() {
+    this.titleBar.setTitle(this.translate.instant('dappbrowser.menu-title'));
+    this.titleBar.setIcon(TitleBarIconSlot.INNER_LEFT, null);
+    this.titleBar.setIcon(TitleBarIconSlot.OUTER_LEFT, {
+      key: 'close',
+      iconPath: BuiltInIcon.CLOSE
+    });
+
+    this.titleBar.addOnItemClickedListener(
+      (this.titleBarIconClickedListener = () => {
+        void this.goback();
+      })
+    );
+
+    this.browsedAppInfoSub = this.dappBrowserService.activeBrowsedAppInfo.subscribe(browsedApp => {
+      this.zone.run(() => {
+        this.browsedAppInfo = browsedApp;
+      });
+    });
+
+    Logger.log('dappbrowser', 'Showing menu for browsed app', this.browsedAppInfo);
+  }
+
+  ionViewWillLeave() {
+    if (this.browsedAppInfoSub) {
+      this.browsedAppInfoSub.unsubscribe();
+      this.browsedAppInfoSub = null;
+    }
+    this.titleBar.removeOnItemClickedListener(this.titleBarIconClickedListener);
+  }
+
+  ionViewDidEnter() {}
+
+  async goback() {
+    await this.nav.navigateBack();
+  }
+
+  public isInFavorites(): boolean {
+    if (!this.browsedAppInfo) return false;
+
+    return !!this.favoritesService.findFavoriteByUrl(this.browsedAppInfo.url);
+  }
+
+  public async addToFavorites() {
+    await this.favoritesService.addToFavorites(this.browsedAppInfo);
+    this.native.genericToast('dappbrowser.added-to-favorites');
+  }
+
+  public async removeFromFavorites() {
+    let existingFavorite = this.favoritesService.findFavoriteByUrl(this.browsedAppInfo.url);
+    await this.favoritesService.removeFromFavorites(existingFavorite);
+    this.native.genericToast('dappbrowser.removed-from-favorites');
+  }
+
+  public async pickNetwork() {
+    if (await this.walletNetworkUIService.chooseActiveNetwork(await this.createNetworkFilter())) void this.goback(); // Exit menu after switching the network (most frequent case is user wants to exit)
+  }
+
+  public async pickWallet() {
+    if (await this.walletUIService.chooseActiveWallet()) void this.goback(); // Exit menu after switching the wallet (most frequent case is user wants to exit)
+  }
+
+  /**
+   * Creates a network filter that only shows networks supported by the currently connected EVM wallet.
+   * If no EVM wallet is connected, shows all networks.
+   */
+  private async createNetworkFilter(): Promise<NetworkChooserFilter | undefined> {
+    if (!this.browsedAppInfo?.url) {
+      return undefined; // Show all networks if no URL available
     }
 
+    // Check if there's a connected EVM wallet for this dapp
+    const connectedWallet = await this.browserWalletConnectionsService.getConnectedWallet(
+      this.browsedAppInfo.url,
+      BrowserConnectionType.EVM
+    );
 
-    ionViewWillEnter() {
-        this.titleBar.setTitle(this.translate.instant("dappbrowser.menu-title"));
-        this.titleBar.setIcon(TitleBarIconSlot.INNER_LEFT, null);
-        this.titleBar.setIcon(TitleBarIconSlot.OUTER_LEFT, {
-            key: "close",
-            iconPath: BuiltInIcon.CLOSE
-        });
-
-        this.titleBar.addOnItemClickedListener(this.titleBarIconClickedListener = () => {
-            void this.goback();
-        });
-
-        this.browsedAppInfoSub = this.dappBrowserService.activeBrowsedAppInfo.subscribe(browsedApp => {
-            this.zone.run(() => {
-                this.browsedAppInfo = browsedApp;
-            });
-        });
-
-        Logger.log("dappbrowser", "Showing menu for browsed app", this.browsedAppInfo);
+    if (!connectedWallet) {
+      return undefined; // Show all networks if no wallet connected
     }
 
-    ionViewWillLeave() {
-        if (this.browsedAppInfoSub) {
-            this.browsedAppInfoSub.unsubscribe();
-            this.browsedAppInfoSub = null;
-        }
-        this.titleBar.removeOnItemClickedListener(this.titleBarIconClickedListener);
-    }
+    // Create filter that only shows networks supported by the connected wallet
+    const filter: NetworkChooserFilter = (network: AnyNetwork): boolean => {
+      return connectedWallet.masterWallet.supportsNetwork(network);
+    };
 
-    ionViewDidEnter() {
-    }
+    return filter;
+  }
 
-    async goback() {
-        await this.nav.navigateBack();
-    }
+  public openExternal() {
+    void this.globalIntentService.sendIntent('openurl', { url: this.browsedAppInfo.url });
+  }
 
-    public isInFavorites(): boolean {
-        if (!this.browsedAppInfo)
-            return false;
+  public async reloadPage() {
+    // Reload first then go back - because when reloading, the webview gets opened but hidden.
+    // And the browser screen shows it when it's ready
+    await this.dappBrowserService.reload(); // await is important here!
+    await this.goback();
+  }
 
-        return !!this.favoritesService.findFavoriteByUrl(this.browsedAppInfo.url);
-    }
+  public copyUrl() {
+    void this.clipboard.copy(this.browsedAppInfo.url);
+    this.globalNative.genericToast('common.copied-to-clipboard', 2000);
+  }
 
-    public async addToFavorites() {
-        await this.favoritesService.addToFavorites(this.browsedAppInfo);
-        this.native.genericToast('dappbrowser.added-to-favorites');
-    }
+  public shareUrl() {
+    void this.globalIntentService.sendIntent('share', {
+      title: this.browsedAppInfo.title,
+      url: this.browsedAppInfo.url
+    });
+  }
 
-    public async removeFromFavorites() {
-        let existingFavorite = this.favoritesService.findFavoriteByUrl(this.browsedAppInfo.url);
-        await this.favoritesService.removeFromFavorites(existingFavorite);
-        this.native.genericToast('dappbrowser.removed-from-favorites');
-    }
+  /**
+   * Tells if the HTML header was loaded yet or not.
+   */
+  public appMetaLoaded(): boolean {
+    return this.browsedAppInfo && this.browsedAppInfo.title !== '';
+  }
 
-    public async pickNetwork() {
-        if (await this.walletNetworkUIService.chooseActiveNetwork())
-            void this.goback(); // Exit menu after switching the network (most frequent case is user wants to exit)
-    }
+  public getActiveNetworkLogo(): string {
+    if (this.walletNetworkService.activeNetwork.value) return this.walletNetworkService.activeNetwork.value.logo;
+    else return transparentPixelIconDataUrl();
+  }
 
-    public async pickWallet() {
-        if (await this.walletUIService.chooseActiveWallet())
-            void this.goback(); // Exit menu after switching the wallet (most frequent case is user wants to exit)
-    }
+  public getActiveNetworkName(): string {
+    if (this.walletNetworkService.activeNetwork.value) return this.walletNetworkService.activeNetwork.value.name;
+    else return '';
+  }
 
-    public openExternal() {
-        void this.globalIntentService.sendIntent('openurl', { url: this.browsedAppInfo.url });
-    }
+  /**
+   * Asks the browser plugin to clear cached data for the current url:
+   * - local storage
+   * - databases
+   */
+  public async clearBrowserData() {
+    if (!this.browsedAppInfo || !this.browsedAppInfo.url) return;
 
-    public async reloadPage() {
-        // Reload first then go back - because when reloading, the webview gets opened but hidden.
-        // And the browser screen shows it when it's ready
-        await this.dappBrowserService.reload(); // await is important here!
-        await this.goback();
-    }
+    Logger.log('dappbrowser', 'Clearing browser data for url', this.browsedAppInfo.url);
+    await dappBrowser.clearData(this.browsedAppInfo.url);
+    await this.reloadPage();
 
-    public copyUrl() {
-        void this.clipboard.copy(this.browsedAppInfo.url);
-        this.globalNative.genericToast('common.copied-to-clipboard', 2000);
-    }
-
-    public shareUrl() {
-        void this.globalIntentService.sendIntent("share", {
-            title: this.browsedAppInfo.title,
-            url: this.browsedAppInfo.url
-        });
-    }
-
-    /**
-     * Tells if the HTML header was loaded yet or not.
-     */
-    public appMetaLoaded(): boolean {
-        return this.browsedAppInfo && this.browsedAppInfo.title !== "";
-    }
-
-    public getActiveNetworkLogo(): string {
-        if (this.walletNetworkService.activeNetwork.value)
-            return this.walletNetworkService.activeNetwork.value.logo;
-        else
-            return transparentPixelIconDataUrl();
-    }
-
-    public getActiveNetworkName(): string {
-        if (this.walletNetworkService.activeNetwork.value)
-            return this.walletNetworkService.activeNetwork.value.name;
-        else
-            return "";
-    }
-
-    /**
-     * Asks the browser plugin to clear cached data for the current url:
-     * - local storage
-     * - databases
-     */
-    public async clearBrowserData() {
-        if (!this.browsedAppInfo || !this.browsedAppInfo.url)
-            return;
-
-        Logger.log("dappbrowser", "Clearing browser data for url", this.browsedAppInfo.url);
-        await dappBrowser.clearData(this.browsedAppInfo.url);
-        await this.reloadPage();
-
-        this.globalNative.genericToast('dappbrowser.browser-data-cleared', 2000);
-    }
+    this.globalNative.genericToast('dappbrowser.browser-data-cleared', 2000);
+  }
 }

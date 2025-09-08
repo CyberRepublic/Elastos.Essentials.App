@@ -11,7 +11,10 @@
 
 import { Injectable } from '@angular/core';
 import { Logger } from 'src/app/logger';
+import { WalletChooserEntry, WalletChooserFilter } from '../components/wallet-chooser/wallet-chooser.component';
 import { AnyNetworkWallet } from '../model/networks/base/networkwallets/networkwallet';
+import { BTCNetworkBase } from '../model/networks/btc/network/btc.base.network';
+import { EVMNetwork } from '../model/networks/evms/evm.network';
 import { AnyNetwork } from '../model/networks/network';
 import { WalletNetworkService } from './network.service';
 import { WalletNetworkUIService } from './network.ui.service';
@@ -23,7 +26,7 @@ import { WalletUIService } from './wallet.ui.service';
  * Type of connection to the browser. For now we only have injected providers
  * for EVM and BTC. We could support ELA too but not implemented yet.
  */
-enum ConnectionType {
+export enum BrowserConnectionType {
   EVM,
   BTC
 }
@@ -111,7 +114,10 @@ export class BrowserWalletConnectionsService {
    * @param connectionType The type of connection (EVM or BTC)
    * @returns The connected network wallet or null if not connected
    */
-  public async getConnectedWallet(dappUrl: string, connectionType: ConnectionType): Promise<AnyNetworkWallet | null> {
+  public async getConnectedWallet(
+    dappUrl: string,
+    connectionType: BrowserConnectionType
+  ): Promise<AnyNetworkWallet | null> {
     const domain = this.extractDomain(dappUrl);
     const connections = await this.loadConnections();
 
@@ -120,21 +126,50 @@ export class BrowserWalletConnectionsService {
       return null;
     }
 
-    const connectionKey = connectionType === ConnectionType.EVM ? 'evm' : 'btc';
+    const connectionKey = connectionType === BrowserConnectionType.EVM ? 'evm' : 'btc';
     const connection = dappConnections[connectionKey];
 
     if (!connection) {
       return null;
     }
 
-    // Get the network wallet for this master wallet
-    const networkWallet = this.walletService.getNetworkWalletFromMasterWalletId(connection.masterWalletId);
-    if (!networkWallet) {
-      Logger.warn('wallet', 'Connected wallet not found for masterWalletId:', connection.masterWalletId);
+    // Get the master wallet
+    const masterWallet = this.walletService.getMasterWallet(connection.masterWalletId);
+    if (!masterWallet) {
+      Logger.warn('wallet', 'Master wallet not found for masterWalletId:', connection.masterWalletId);
       return null;
     }
 
-    return networkWallet;
+    // Determine which network to use for this dapp
+    let targetNetwork = this.networkService.activeNetwork.value; // Default to app's active network
+
+    // Check if this dapp has a specific network selected
+    if (dappConnections.network) {
+      const selectedNetwork = this.networkService.getNetworkByKey(dappConnections.network.networkKey);
+      if (selectedNetwork) {
+        targetNetwork = selectedNetwork;
+      }
+    }
+
+    // Create network wallet for the target network
+    try {
+      const networkWallet = await targetNetwork.createNetworkWallet(masterWallet, false);
+      if (!networkWallet) {
+        Logger.warn(
+          'wallet',
+          'Failed to create network wallet for masterWalletId:',
+          connection.masterWalletId,
+          'network:',
+          targetNetwork.key
+        );
+        return null;
+      }
+
+      return networkWallet;
+    } catch (error) {
+      Logger.error('wallet', 'Error creating network wallet for dapp:', domain, 'error:', error);
+      return null;
+    }
   }
 
   /**
@@ -163,15 +198,11 @@ export class BrowserWalletConnectionsService {
    */
   public async connectWallet(
     dappUrl: string,
-    connectionType: ConnectionType,
+    connectionType: BrowserConnectionType,
     masterWalletId?: string
   ): Promise<AnyNetworkWallet | null> {
     const domain = this.extractDomain(dappUrl);
-    Logger.log(
-      'wallet',
-      `Connecting ${connectionType === ConnectionType.EVM ? 'EVM' : 'BTC'} wallet for dapp:`,
-      domain
-    );
+    Logger.log('wallet', `Connecting ${connectionType} wallet for dapp:`, domain);
 
     let selectedWallet: AnyNetworkWallet;
 
@@ -184,12 +215,25 @@ export class BrowserWalletConnectionsService {
       }
     } else {
       // Let user pick a wallet
-      const filter =
-        connectionType === ConnectionType.EVM
-          ? (wallet: AnyNetworkWallet) => wallet.network.key.startsWith('evm') || wallet.network.key.startsWith('eth')
-          : (wallet: AnyNetworkWallet) => wallet.network.key.startsWith('btc');
+      const filter: WalletChooserFilter = (walletEntry: WalletChooserEntry) => {
+        console.log('wallet', 'Filtering wallet entry:', walletEntry);
 
-      selectedWallet = await this.walletUIService.pickWallet(filter);
+        const { masterWallet, networkWallet } = walletEntry;
+
+        // For browser wallet selection, we want to show all master wallets
+        // The actual network compatibility will be checked when creating the connection
+        if (connectionType === BrowserConnectionType.EVM) {
+          // Allow wallets that support EVM networks or have no network wallet (will be filtered later)
+          return !networkWallet || networkWallet.network instanceof EVMNetwork;
+        } else if (connectionType === BrowserConnectionType.BTC) {
+          // Allow wallets that support BTC networks or have no network wallet (will be filtered later)
+          return !networkWallet || networkWallet.network instanceof BTCNetworkBase;
+        }
+
+        return true;
+      };
+
+      selectedWallet = await this.walletUIService.pickWallet(filter, false, true, false);
       if (!selectedWallet) {
         Logger.log('wallet', 'Wallet selection cancelled for dapp:', domain);
         return null;
@@ -202,7 +246,7 @@ export class BrowserWalletConnectionsService {
       connections[domain] = {};
     }
 
-    const connectionKey = connectionType === ConnectionType.EVM ? 'evm' : 'btc';
+    const connectionKey = connectionType === BrowserConnectionType.EVM ? 'evm' : 'btc';
     connections[domain][connectionKey] = {
       masterWalletId: selectedWallet.masterWallet.id,
       connectedAt: Date.now()
@@ -212,7 +256,7 @@ export class BrowserWalletConnectionsService {
 
     Logger.log(
       'wallet',
-      `Connected ${connectionType === ConnectionType.EVM ? 'EVM' : 'BTC'} wallet for dapp:`,
+      `Connected ${connectionType === BrowserConnectionType.EVM ? 'EVM' : 'BTC'} wallet for dapp:`,
       domain,
       selectedWallet.masterWallet.name
     );
@@ -224,18 +268,18 @@ export class BrowserWalletConnectionsService {
    * @param dappUrl The URL of the dapp
    * @param connectionType The type of connection (EVM or BTC)
    */
-  public async disconnectWallet(dappUrl: string, connectionType: ConnectionType): Promise<void> {
+  public async disconnectWallet(dappUrl: string, connectionType: BrowserConnectionType): Promise<void> {
     const domain = this.extractDomain(dappUrl);
     Logger.log(
       'wallet',
-      `Disconnecting ${connectionType === ConnectionType.EVM ? 'EVM' : 'BTC'} wallet for dapp:`,
+      `Disconnecting ${connectionType === BrowserConnectionType.EVM ? 'EVM' : 'BTC'} wallet for dapp:`,
       domain
     );
 
     const connections = await this.loadConnections();
 
     if (connections[domain]) {
-      const connectionKey = connectionType === ConnectionType.EVM ? 'evm' : 'btc';
+      const connectionKey = connectionType === BrowserConnectionType.EVM ? 'evm' : 'btc';
       delete connections[domain][connectionKey];
 
       // Clean up empty domain entries
@@ -248,7 +292,7 @@ export class BrowserWalletConnectionsService {
 
     Logger.log(
       'wallet',
-      `Disconnected ${connectionType === ConnectionType.EVM ? 'EVM' : 'BTC'} wallet for dapp:`,
+      `Disconnected ${connectionType === BrowserConnectionType.EVM ? 'EVM' : 'BTC'} wallet for dapp:`,
       domain
     );
   }

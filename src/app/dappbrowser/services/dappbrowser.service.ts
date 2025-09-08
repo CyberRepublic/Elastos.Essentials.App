@@ -38,6 +38,10 @@ import type { EthSignIntentResult } from 'src/app/wallet/pages/intents/ethsign/i
 import type { PersonalSignIntentResult } from 'src/app/wallet/pages/intents/personalsign/intentresult';
 import type { SignTypedDataIntentResult } from 'src/app/wallet/pages/intents/signtypeddata/intentresult';
 import type { EditCustomNetworkIntentResult } from 'src/app/wallet/pages/settings/edit-custom-network/intentresult';
+import {
+  BrowserConnectionType,
+  BrowserWalletConnectionsService
+} from 'src/app/wallet/services/browser-wallet-connections.service';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
 import type { BrowsedAppInfo } from '../model/browsedappinfo';
@@ -155,7 +159,8 @@ export class DappBrowserService implements GlobalService {
     private globalStorageService: GlobalStorageService,
     private globalIntentService: GlobalIntentService,
     public globalPopupService: GlobalPopupService,
-    private walletNetworkService: WalletNetworkService
+    private walletNetworkService: WalletNetworkService,
+    private browserWalletConnectionsService: BrowserWalletConnectionsService
   ) {
     DappBrowserService.instance = this;
 
@@ -358,7 +363,7 @@ export class DappBrowserService implements GlobalService {
       did: DIDSessionsStore.signedInDIDString.replace(/:/g, '_')
     };
 
-    await dappBrowser.setInjectedJavascript(this.getInjectedJs()); // Inject the web3 provider and connector at document start
+    await dappBrowser.setInjectedJavascript(await this.getInjectedJs()); // Inject the web3 provider and connector at document start
 
     if (title && title != null) {
       this.title = title;
@@ -394,19 +399,81 @@ export class DappBrowserService implements GlobalService {
   /**
    * Javascript code to inject at documents start
    */
-  private getInjectedJs(): string {
+  private async getInjectedJs(): Promise<string> {
+    // Check for existing connections for this dapp
+    const currentUrl = this.url;
+    if (!currentUrl) {
+      Logger.warn('dappbrowser', 'No current URL available for connection check');
+      return this.getDefaultInjectedJs();
+    }
+
+    const evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(currentUrl, 0); // EVM
+    const btcWallet = await this.browserWalletConnectionsService.getConnectedWallet(currentUrl, 1); // BTC
+    const selectedNetwork = await this.browserWalletConnectionsService.getSelectedNetwork(currentUrl);
+
+    // Get addresses from connected wallets
+    let evmAddress = '';
+    let btcAddress = '';
+
+    if (evmWallet) {
+      const evmSubwallet = evmWallet.getMainEvmSubWallet();
+      if (evmSubwallet) {
+        evmAddress = await evmSubwallet.getCurrentReceiverAddress();
+      }
+    }
+
+    if (btcWallet) {
+      btcAddress = await this.getWalletBitcoinAddress(btcWallet.masterWallet);
+    }
+
     // Prepare our web3 provider bridge and elastos connectors for injection
     let web3ProviderCode =
       this.web3ProviderCode +
-      ` 
+      `
         console.log('Essentials Web3 provider is being created');
-        window.ethereum = new DappBrowserWeb3Provider(${this.activeChainID}, '${this.activeEVMNetworkRpcUrl}', '${this.userEVMAddress}');
+        window.ethereum = new DappBrowserWeb3Provider(${this.activeChainID}, '${this.activeEVMNetworkRpcUrl}', '${evmAddress}');
         window.web3 = {
             currentProvider: window.ethereum
         };
         console.log('Essentials Web3 provider is injected', window.ethereum, window.web3);
 
-        const bitcoinProvider = new DappBrowserUnisatProvider('${this.btcRpcUrl}', '${this.userBTCAddress}');
+        const bitcoinProvider = new DappBrowserUnisatProvider('${this.btcRpcUrl}', '${btcAddress}');
+        window.unisat = bitcoinProvider;
+        window.okxwallet = {
+            bitcoin: bitcoinProvider
+        }
+        console.log('Essentials Unisat/OKX providers are injected', bitcoinProvider);
+
+        const elamainProvider = new DappBrowserElaMainProvider('${this.elamainRpcUrl}', '${this.userELAMainChainAddress}');
+        window.elamain = elamainProvider;
+        console.log('Essentials Ela main chain providers are injected', elamainProvider);
+        `;
+
+    let elastosConnectorCode =
+      this.elastosConnectorCode +
+      "\
+        console.log('Essentials dapp browser connector is being created'); \
+        window.elastos = new EssentialsDABConnector();\
+        console.log('Essentials dapp browser connector is injected', window.elastos);";
+
+    return web3ProviderCode + elastosConnectorCode;
+  }
+
+  /**
+   * Fallback method for when no URL is available
+   */
+  private getDefaultInjectedJs(): string {
+    let web3ProviderCode =
+      this.web3ProviderCode +
+      `
+        console.log('Essentials Web3 provider is being created (default)');
+        window.ethereum = new DappBrowserWeb3Provider(${this.activeChainID}, '${this.activeEVMNetworkRpcUrl}', '');
+        window.web3 = {
+            currentProvider: window.ethereum
+        };
+        console.log('Essentials Web3 provider is injected', window.ethereum, window.web3);
+
+        const bitcoinProvider = new DappBrowserUnisatProvider('${this.btcRpcUrl}', '');
         window.unisat = bitcoinProvider;
         window.okxwallet = {
             bitcoin: bitcoinProvider
@@ -542,7 +609,7 @@ export class DappBrowserService implements GlobalService {
       this.activeEVMNetworkRpcUrl
     );
 
-    await dappBrowser.setInjectedJavascript(this.getInjectedJs()); // Inject the web3 provider and connector at document start
+    await dappBrowser.setInjectedJavascript(await this.getInjectedJs()); // Inject the web3 provider and connector at document start
     void dappBrowser.executeScript({
       code: `
                 window.ethereum.setRPCApiEndpoint(${this.activeChainID}, '${this.activeEVMNetworkRpcUrl}');
@@ -577,7 +644,7 @@ export class DappBrowserService implements GlobalService {
         this.userELAMainChainAddress
       );
 
-      await dappBrowser.setInjectedJavascript(this.getInjectedJs()); // Inject the web3 provider and connector at document start
+      await dappBrowser.setInjectedJavascript(await this.getInjectedJs()); // Inject the web3 provider and connector at document start
       void dappBrowser.executeScript({
         code: `
                     window.ethereum.setAddress('${this.userEVMAddress}');
@@ -721,6 +788,8 @@ export class DappBrowserService implements GlobalService {
       return;
     }
 
+    Logger.log('dappbrowser', 'Received dApp message:', message.data);
+
     // UNISAT
     if (message.data.name.startsWith('unisat_')) {
       await this.handleUnisatMessage(message);
@@ -850,10 +919,137 @@ export class DappBrowserService implements GlobalService {
 
   /**
    * Returns the active user address to the calling dApp.
+   * If no wallet is connected, triggers wallet selection.
+   *
+   * According to EIP1102 and 1193:
+   * - If the user has not previously granted account access to the site:
+   * The provider MUST prompt the user (e.g., via a popup or modal) to approve or deny account access. This may involve selecting one or more accounts to expose to the dApp.
+   * - If the user has previously granted access:
+   * The provider MAY return the list of previously connected accounts immediately, without prompting the user again.
+   * However, some providers may still choose to prompt the user for confirmation, depending on their security model or user settings.
    */
-  private handleRequestAccounts(message: DABMessage): Promise<void> {
-    this.sendInjectedResponse('ethereum', message.data.id, [this.userEVMAddress]);
-    return;
+  private async handleRequestAccounts(message: DABMessage): Promise<void> {
+    const currentUrl = this.url;
+    if (!currentUrl) {
+      Logger.warn('dappbrowser', 'No current URL available for request accounts');
+      this.sendInjectedError('ethereum', message.data.id, {
+        code: 4001,
+        message: 'User rejected the request.'
+      });
+      return;
+    }
+
+    // Check if we already have a connected wallet for this dapp
+    let evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(currentUrl, 0); // EVM
+
+    if (!evmWallet) {
+      Logger.log('dappbrowser', 'No connected EVM wallet found, triggering wallet selection');
+
+      // Hide the browser and prompt for wallet selection
+      dappBrowser.hide();
+
+      try {
+        // Try to connect a wallet
+        evmWallet = await this.browserWalletConnectionsService.connectWallet(currentUrl, BrowserConnectionType.EVM);
+
+        if (evmWallet) {
+          // Update the injected provider with the new wallet
+          await this.updateInjectedProviderWithWallet(currentUrl, 'ethereum', evmWallet);
+          Logger.log('dappbrowser', 'Successfully connected EVM wallet for dapp:', currentUrl);
+        } else {
+          Logger.log('dappbrowser', 'Wallet selection cancelled');
+          this.sendInjectedError('ethereum', message.data.id, {
+            code: 4001,
+            message: 'User rejected the request.'
+          });
+          this.showWebView();
+          return;
+        }
+      } catch (error) {
+        Logger.error('dappbrowser', 'Error during wallet selection:', error);
+        this.sendInjectedError('ethereum', message.data.id, {
+          code: -32603,
+          message: 'Internal error'
+        });
+        this.showWebView();
+        return;
+      }
+
+      // Show the browser again
+      this.showWebView();
+    }
+
+    // Return the connected wallet address
+    if (evmWallet) {
+      const evmSubwallet = evmWallet.getMainEvmSubWallet();
+      if (evmSubwallet) {
+        const address = await evmSubwallet.getCurrentReceiverAddress();
+        this.sendInjectedResponse('ethereum', message.data.id, [address]);
+      } else {
+        this.sendInjectedError('ethereum', message.data.id, {
+          code: -32603,
+          message: 'Unable to get EVM address'
+        });
+      }
+    } else {
+      this.sendInjectedError('ethereum', message.data.id, {
+        code: 4001,
+        message: 'User rejected the request.'
+      });
+    }
+  }
+
+  /**
+   * Updates the injected provider with a newly connected wallet
+   */
+  private async updateInjectedProviderWithWallet(
+    dappUrl: string,
+    providerType: 'ethereum' | 'unisat',
+    wallet: AnyNetworkWallet
+  ): Promise<void> {
+    if (!wallet) return;
+
+    try {
+      let address = '';
+
+      if (providerType === 'ethereum') {
+        const evmSubwallet = wallet.getMainEvmSubWallet();
+        if (evmSubwallet) {
+          address = await evmSubwallet.getCurrentReceiverAddress();
+        }
+      } else if (providerType === 'unisat') {
+        address = await this.getWalletBitcoinAddress(wallet.masterWallet);
+      }
+
+      if (address) {
+        let updateScript = '';
+        if (providerType === 'ethereum') {
+          updateScript = `
+            if (window.ethereum && window.ethereum.setAddress) {
+              window.ethereum.setAddress('${address}');
+            }
+          `;
+        } else if (providerType === 'unisat') {
+          updateScript = `
+            if (window.unisat && window.unisat.setAddress) {
+              window.unisat.setAddress('${address}');
+            }
+            if (window.okxwallet && window.okxwallet.bitcoin && window.okxwallet.bitcoin.setAddress) {
+              window.okxwallet.bitcoin.setAddress('${address}');
+            }
+          `;
+        }
+
+        if (updateScript) {
+          await dappBrowser.executeScript({
+            code: updateScript
+          });
+          Logger.log('dappbrowser', `Updated ${providerType} provider with address:`, address);
+        }
+      }
+    } catch (error) {
+      Logger.error('dappbrowser', `Error updating ${providerType} provider:`, error);
+    }
   }
 
   /**
@@ -1043,6 +1239,12 @@ export class DappBrowserService implements GlobalService {
     console.log('Unisat command received');
 
     switch (message.data.name) {
+      case 'unisat_requestAccounts':
+        await this.handleBitcoinRequestAccounts(message);
+        break;
+      case 'unisat_getAccounts':
+        await this.handleBitcoinGetAccounts(message);
+        break;
       case 'unisat_getPublicKey':
         await this.handleBitcoinGetPublicKey(message);
         break;
@@ -1172,6 +1374,98 @@ export class DappBrowserService implements GlobalService {
       this.sendInjectedResponse('unisat', message.data.id, publickey);
     } catch (e) {
       this.sendInjectedError('unisat', message.data.id, e);
+    }
+  }
+
+  /**
+   * Handle unisat requestAccounts - triggers wallet selection if no BTC wallet connected
+   */
+  private async handleBitcoinRequestAccounts(message: DABMessage): Promise<void> {
+    const currentUrl = this.url;
+    if (!currentUrl) {
+      Logger.warn('dappbrowser', 'No current URL available for bitcoin request accounts');
+      this.sendInjectedError('unisat', message.data.id, {
+        code: 4001,
+        message: 'User rejected the request.'
+      });
+      return;
+    }
+
+    // Check if we already have a connected wallet for this dapp
+    let btcWallet = await this.browserWalletConnectionsService.getConnectedWallet(currentUrl, 1); // BTC
+
+    if (!btcWallet) {
+      Logger.log('dappbrowser', 'No connected BTC wallet found, triggering wallet selection');
+
+      // Hide the browser and prompt for wallet selection
+      dappBrowser.hide();
+
+      try {
+        // Try to connect a wallet
+        btcWallet = await this.browserWalletConnectionsService.connectWallet(currentUrl, 1); // BTC
+
+        if (btcWallet) {
+          // Update the injected provider with the new wallet
+          await this.updateInjectedProviderWithWallet(currentUrl, 'unisat', btcWallet);
+          Logger.log('dappbrowser', 'Successfully connected BTC wallet for dapp:', currentUrl);
+        } else {
+          Logger.log('dappbrowser', 'BTC wallet selection cancelled');
+          this.sendInjectedError('unisat', message.data.id, {
+            code: 4001,
+            message: 'User rejected the request.'
+          });
+          this.showWebView();
+          return;
+        }
+      } catch (error) {
+        Logger.error('dappbrowser', 'Error during BTC wallet selection:', error);
+        this.sendInjectedError('unisat', message.data.id, {
+          code: -32603,
+          message: 'Internal error'
+        });
+        this.showWebView();
+        return;
+      }
+
+      // Show the browser again
+      this.showWebView();
+    }
+
+    // Return the connected wallet address
+    if (btcWallet) {
+      const address = await this.getWalletBitcoinAddress(btcWallet.masterWallet);
+      this.sendInjectedResponse('unisat', message.data.id, [address]);
+    } else {
+      this.sendInjectedError('unisat', message.data.id, {
+        code: 4001,
+        message: 'User rejected the request.'
+      });
+    }
+  }
+
+  /**
+   * Handle unisat getAccounts - returns connected BTC wallet address
+   */
+  private async handleBitcoinGetAccounts(message: DABMessage): Promise<void> {
+    const currentUrl = this.url;
+    if (!currentUrl) {
+      Logger.warn('dappbrowser', 'No current URL available for bitcoin get accounts');
+      this.sendInjectedError('unisat', message.data.id, {
+        code: -32603,
+        message: 'No current URL available'
+      });
+      return;
+    }
+
+    // Check if we have a connected wallet for this dapp
+    const btcWallet = await this.browserWalletConnectionsService.getConnectedWallet(currentUrl, 1); // BTC
+
+    if (btcWallet) {
+      const address = await this.getWalletBitcoinAddress(btcWallet.masterWallet);
+      this.sendInjectedResponse('unisat', message.data.id, [address]);
+    } else {
+      // Return empty array if no wallet connected
+      this.sendInjectedResponse('unisat', message.data.id, []);
     }
   }
 
