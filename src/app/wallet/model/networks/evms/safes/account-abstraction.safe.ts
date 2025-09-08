@@ -10,12 +10,13 @@ import { AnyNetworkWallet } from '../../base/networkwallets/networkwallet';
 import { AnySubWallet } from '../../base/subwallets/subwallet';
 import { AccountAbstractionProvider } from '../account-abstraction-provider';
 import { EVMNetwork } from '../evm.network';
+import { AccountAbstractionNetworkWallet } from '../networkwallets/account-abstraction.networkwallet';
 import { EVMSafe } from './evm.safe';
 
 /**
  * Safe specialized for Account Abstraction wallets
  */
-export class AASafe extends Safe implements EVMSafe {
+export class AccountAbstractionSafe extends Safe implements EVMSafe {
   private safeService = SafeService.instance;
   private aaProvider: AccountAbstractionProvider;
   private aaAddress: string;
@@ -101,15 +102,47 @@ export class AASafe extends Safe implements EVMSafe {
     return Promise.resolve(aaTransaction);
   }
 
-  public signTransaction(
+  public async signTransaction(
     subWallet: AnySubWallet,
-    rawTx: any,
+    rawTx: AccountAbstractionTransaction,
     transfer: Transfer,
     forcePasswordPrompt?: boolean,
     visualFeedback?: boolean
   ): Promise<SignTransactionResult> {
-    // AA wallets don't sign transactions directly
-    // They use the controller wallet for signing
-    throw new Error("AA wallets don't sign transactions directly. Use the controller wallet.");
+    const networkWallet = subWallet.networkWallet as AccountAbstractionNetworkWallet;
+    const aaProvider = networkWallet.getAccountAbstractionProvider();
+
+    console.log('wallet', 'AA safe Signing transaction:', rawTx, transfer);
+
+    // Ask the account abstraction provider specific to this account to bundle the transaction
+    // and return the actual transaction hash.
+    const transactionHash = await aaProvider.bundleAndSignTransaction(networkWallet, rawTx);
+
+    return {
+      signedTransaction: transactionHash
+    };
   }
+
+  /**
+   * Bundles a raw transaction, possibly coming from a eth_sendTransaction
+   * request, into a UserOp and sends it to the bundler.
+   */
+  // public async signAndSendRawTx(tx: AccountAbstractionTransaction): Promise<string> {
+  //   await TransactionService.instance.displayGenericPublicationLoader();
+
+  //   TransactionService.instance.resetTransactionPublicationStatus();
+  //   TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.PUBLISHING);
+
+  //   // Ask the account abstraction provider specific to this account to bundle the transaction
+  //   // and return the actual transaction hash.
+  //   const transactionHash = await this.getAccountAbstractionProvider().bundleAndSignTransaction(this, tx);
+
+  //   if (transactionHash) {
+  //     TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.PUBLISHED);
+  //   } else {
+  //     TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.ERRORED);
+  //   }
+
+  //   return transactionHash;
+  // }
 }

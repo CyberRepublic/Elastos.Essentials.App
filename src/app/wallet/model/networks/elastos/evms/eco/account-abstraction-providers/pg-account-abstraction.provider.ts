@@ -15,13 +15,6 @@ import {
 import { EVMNetwork } from '../../../../evms/evm.network';
 import { AccountAbstractionNetworkWallet } from '../../../../evms/networkwallets/account-abstraction.networkwallet';
 
-/**
- * TODO:
- * yes need to provide the fee infromation to user and check erc20 token balance,
- * but fee is calucluated by entrypoint, and bundler account will pay and
- *  paymster will send ela to bundler.
- */
-
 type PGAAChainConfig = AccountAbstractionProviderChainConfig & {
   gasErc20TokenAddress: string;
   gasErc20TokenDecimals: number;
@@ -111,13 +104,12 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     return senderAddress;
   }
 
-  public async bundleTransaction(
+  public async bundleAndSignTransaction(
     networkWallet: AccountAbstractionNetworkWallet,
     transaction: AccountAbstractionTransaction
-  ): Promise<string> {
+  ): Promise<UserOperation> {
     // Services
     const aaService = AccountAbstractionService.instance;
-    const bundlerService = BundlerService.instance;
 
     // Inits
     const network = networkWallet.network;
@@ -215,31 +207,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
     }
 
     const fullUserOp: UserOperation = { ...partialUserOp, signature };
-    Logger.log('wallet', 'Sending full user op:', fullUserOp);
-
-    // Send UserOp to bundler and get UserOpHash
-    const submittedUserOpHash = await bundlerService.sendUserOpToBundler(
-      fullUserOp,
-      chainConfig.entryPointAddress,
-      chainConfig.bundlerRpcUrl
-    );
-    Logger.log('wallet', 'UserOp sent successfully, user op hash:', submittedUserOpHash);
-
-    // Wait for the UserOp to be mined and get the actual transaction hash
-    Logger.log('wallet', 'Waiting for UserOp to be mined...');
-    const userOpReceipt = await bundlerService.getUserOperationReceipt(submittedUserOpHash, chainConfig.bundlerRpcUrl);
-
-    // Check if the user operation was successful
-    if (!userOpReceipt.success) {
-      const reason = userOpReceipt.reason || 'Unknown failure reason';
-      Logger.error('wallet', `UserOp execution failed: ${reason}`);
-      throw new Error(`User operation failed: ${reason}`);
-    }
-
-    const transactionHash = userOpReceipt.receipt.transactionHash;
-    Logger.log('wallet', 'UserOp executed successfully! Receipt:', userOpReceipt);
-
-    return transactionHash;
+    return fullUserOp;
   }
 
   /**
@@ -386,5 +354,40 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
 
       return baseVerificationGasLimit.add(creationGas);
     }
+  }
+
+  public async publishTransaction(
+    networkWallet: AccountAbstractionNetworkWallet,
+    fullUserOp: UserOperation
+  ): Promise<string> {
+    const bundlerService = BundlerService.instance;
+    const network = networkWallet.network;
+    const chainConfig = this.getSupportedChain(network.getMainChainID());
+
+    Logger.log('wallet', 'Sending full user op:', fullUserOp);
+
+    // Send UserOp to bundler and get UserOpHash
+    const submittedUserOpHash = await bundlerService.sendUserOpToBundler(
+      fullUserOp,
+      chainConfig.entryPointAddress,
+      chainConfig.bundlerRpcUrl
+    );
+    Logger.log('wallet', 'UserOp sent successfully, user op hash:', submittedUserOpHash);
+
+    // Wait for the UserOp to be mined and get the actual transaction hash
+    Logger.log('wallet', 'Waiting for UserOp to be mined...');
+    const userOpReceipt = await bundlerService.getUserOperationReceipt(submittedUserOpHash, chainConfig.bundlerRpcUrl);
+
+    // Check if the user operation was successful
+    if (!userOpReceipt.success) {
+      const reason = userOpReceipt.reason || 'Unknown failure reason';
+      Logger.error('wallet', `UserOp execution failed: ${reason}`);
+      throw new Error(`User operation failed: ${reason}`);
+    }
+
+    const transactionHash = userOpReceipt.receipt.transactionHash;
+    Logger.log('wallet', 'UserOp executed successfully! Receipt:', userOpReceipt);
+
+    return transactionHash;
   }
 }

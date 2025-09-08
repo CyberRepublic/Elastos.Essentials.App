@@ -1,16 +1,13 @@
-import { EVMService } from "src/app/wallet/services/evm/evm.service";
-import { ExtendedTransactionInfo } from "../../../extendedtxinfo";
-import { MasterWallet } from "../../../masterwallets/masterwallet";
-import { WalletNetworkOptions } from "../../../masterwallets/wallet.types";
-import { AddressUsage } from "../../../safes/addressusage";
-import { Safe } from "../../../safes/safe";
-import {
-  NetworkWallet,
-  WalletAddressInfo,
-} from "../../base/networkwallets/networkwallet";
-import { AnySubWallet } from "../../base/subwallets/subwallet";
-import type { EVMNetwork } from "../evm.network";
-import { MainCoinEVMSubWallet } from "../subwallets/evm.subwallet";
+import { EVMService } from 'src/app/wallet/services/evm/evm.service';
+import { ExtendedTransactionInfo } from '../../../extendedtxinfo';
+import { MasterWallet } from '../../../masterwallets/masterwallet';
+import { WalletNetworkOptions } from '../../../masterwallets/wallet.types';
+import { AddressUsage } from '../../../safes/addressusage';
+import { Safe } from '../../../safes/safe';
+import { NetworkWallet, WalletAddressInfo } from '../../base/networkwallets/networkwallet';
+import { AnySubWallet } from '../../base/subwallets/subwallet';
+import type { EVMNetwork } from '../evm.network';
+import { MainCoinEVMSubWallet } from '../subwallets/evm.subwallet';
 
 /**
  * Network wallet type for standard EVM networks
@@ -19,8 +16,7 @@ export abstract class EVMNetworkWallet<
   MasterWalletType extends MasterWallet,
   WalletNetworkOptionsType extends WalletNetworkOptions
 > extends NetworkWallet<MasterWalletType, WalletNetworkOptionsType> {
-  protected mainTokenSubWallet: MainCoinEVMSubWallet<WalletNetworkOptionsType> =
-    null;
+  protected mainTokenSubWallet: MainCoinEVMSubWallet<WalletNetworkOptionsType> = null;
 
   constructor(
     masterWallet: MasterWalletType,
@@ -40,10 +36,14 @@ export abstract class EVMNetworkWallet<
   public getAddresses(): WalletAddressInfo[] {
     return [
       {
-        title: "EVM",
-        address: this.mainTokenSubWallet.getAccountAddress(),
-      },
+        title: 'EVM',
+        address: this.mainTokenSubWallet.getAccountAddress()
+      }
     ];
+  }
+
+  public publishTransaction(subWallet: AnySubWallet, signedTransaction: any, visualFeedback: boolean): Promise<string> {
+    return EVMService.instance.publishTransaction(subWallet as any, signedTransaction, null, visualFeedback);
   }
 
   /**
@@ -53,11 +53,8 @@ export abstract class EVMNetworkWallet<
    * for example when sending coins, users use ioXX formats, but internal implementations require EVM native
    * address formats with 0x.
    */
-  public async convertAddressForUsage(
-    address: string,
-    usage: AddressUsage
-  ): Promise<string> {
-    return await (address.startsWith("0x") ? address : "0x" + address);
+  public async convertAddressForUsage(address: string, usage: AddressUsage): Promise<string> {
+    return await (address.startsWith('0x') ? address : '0x' + address);
   }
 
   public getMainEvmSubWallet(): MainCoinEVMSubWallet<WalletNetworkOptionsType> {
@@ -76,22 +73,17 @@ export abstract class EVMNetworkWallet<
     return this.averageBlocktime;
   }
 
-  protected async fetchExtendedTxInfo(
-    txHash: string
-  ): Promise<ExtendedTransactionInfo> {
+  protected async fetchExtendedTxInfo(txHash: string): Promise<ExtendedTransactionInfo> {
     // Fetch transaction receipt
-    let receipt = await EVMService.instance.getTransactionReceipt(
-      this.network,
-      txHash
-    );
+    let receipt = await EVMService.instance.getTransactionReceipt(this.network, txHash);
     if (!receipt) return;
 
     // Save extended info to cache
     if (receipt) {
       await this.saveExtendedTxInfo(txHash, {
         evm: {
-          transactionReceipt: receipt,
-        },
+          transactionReceipt: receipt
+        }
       });
     }
   }

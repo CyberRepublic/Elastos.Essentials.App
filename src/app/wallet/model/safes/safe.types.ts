@@ -8,6 +8,6 @@ export enum SignTransactionErrorType {
  * Result of a transaction signing request to a safe
  */
 export type SignTransactionResult = {
-  signedTransaction?: string;
+  signedTransaction?: any; // often a string, but potentially an object (AA user op with signature inside)
   errorType?: SignTransactionErrorType;
-}
+};

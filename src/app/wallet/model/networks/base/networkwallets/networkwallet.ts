@@ -1,38 +1,35 @@
-import { BigNumber } from "bignumber.js";
-import Queue from "promise-queue";
-import { BehaviorSubject, Observable, Subject } from "rxjs";
-import { Logger } from "src/app/logger";
-import { GlobalNetworksService } from "src/app/services/global.networks.service";
-import { GlobalStorageService } from "src/app/services/global.storage.service";
-import { NetworkTemplateStore } from "src/app/services/stores/networktemplate.store";
-import { EVMService } from "src/app/wallet/services/evm/evm.service";
-import { CurrencyService } from "../../../../services/currency.service";
-import { StakingData } from "../../../../services/evm/defi.service";
-import { ERC1155Service } from "../../../../services/evm/erc1155.service";
-import { ERC721Service } from "../../../../services/evm/erc721.service";
-import { LocalStorage } from "../../../../services/storage.service";
-import { Coin, CoinID, CoinType } from "../../../coin";
-import { ExtendedTransactionInfo } from "../../../extendedtxinfo";
-import { MasterWallet } from "../../../masterwallets/masterwallet";
-import {
-  WalletNetworkOptions,
-  WalletType,
-} from "../../../masterwallets/wallet.types";
-import { AddressUsage } from "../../../safes/addressusage";
-import { Safe } from "../../../safes/safe";
-import { TimeBasedPersistentCache } from "../../../timebasedpersistentcache";
-import { TransactionProvider } from "../../../tx-providers/transaction.provider";
-import { WalletSortType } from "../../../walletaccount";
-import { EVMNetwork } from "../../evms/evm.network";
-import { ERCTokenInfo } from "../../evms/evm.types";
-import { NFT, NFTType, SerializedNFT } from "../../evms/nfts/nft";
-import { NFTAsset } from "../../evms/nfts/nftasset";
-import { MainCoinEVMSubWallet } from "../../evms/subwallets/evm.subwallet";
-import { AnyNetwork } from "../../network";
-import { TronNetworkBase } from "../../tron/network/tron.base.network";
-import { AnySubWallet, SerializedSubWallet } from "../subwallets/subwallet";
-import { SubWalletBuilder } from "../subwallets/subwalletbuilder";
-import { DIDSessionsStore } from "./../../../../../services/stores/didsessions.store";
+import { BigNumber } from 'bignumber.js';
+import Queue from 'promise-queue';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Logger } from 'src/app/logger';
+import { GlobalNetworksService } from 'src/app/services/global.networks.service';
+import { GlobalStorageService } from 'src/app/services/global.storage.service';
+import { NetworkTemplateStore } from 'src/app/services/stores/networktemplate.store';
+import { EVMService } from 'src/app/wallet/services/evm/evm.service';
+import { CurrencyService } from '../../../../services/currency.service';
+import { StakingData } from '../../../../services/evm/defi.service';
+import { ERC1155Service } from '../../../../services/evm/erc1155.service';
+import { ERC721Service } from '../../../../services/evm/erc721.service';
+import { LocalStorage } from '../../../../services/storage.service';
+import { Coin, CoinID, CoinType } from '../../../coin';
+import { ExtendedTransactionInfo } from '../../../extendedtxinfo';
+import { MasterWallet } from '../../../masterwallets/masterwallet';
+import { WalletNetworkOptions, WalletType } from '../../../masterwallets/wallet.types';
+import { AddressUsage } from '../../../safes/addressusage';
+import { Safe } from '../../../safes/safe';
+import { TimeBasedPersistentCache } from '../../../timebasedpersistentcache';
+import { TransactionProvider } from '../../../tx-providers/transaction.provider';
+import { WalletSortType } from '../../../walletaccount';
+import { EVMNetwork } from '../../evms/evm.network';
+import { ERCTokenInfo } from '../../evms/evm.types';
+import { NFT, NFTType, SerializedNFT } from '../../evms/nfts/nft';
+import { NFTAsset } from '../../evms/nfts/nftasset';
+import { MainCoinEVMSubWallet } from '../../evms/subwallets/evm.subwallet';
+import { AnyNetwork } from '../../network';
+import { TronNetworkBase } from '../../tron/network/tron.base.network';
+import { AnySubWallet, SerializedSubWallet } from '../subwallets/subwallet';
+import { SubWalletBuilder } from '../subwallets/subwalletbuilder';
+import { DIDSessionsStore } from './../../../../../services/stores/didsessions.store';
 
 export class ExtendedNetworkWalletInfo {
   /** List of serialized subwallets added earlier to this network wallet */
@@ -79,12 +76,11 @@ export abstract class NetworkWallet<
   private fetchMainTokenTimer: any = null;
   private fetchStakingAssetTimer: any = null;
 
-  private stakingAssetsID = "";
+  private stakingAssetsID = '';
   private stakingInfo: StakingInfo = null;
 
   private extendedTransactionInfoOpsQueue = new Queue(1);
-  private extendedTransactionInfoCache: TimeBasedPersistentCache<ExtendedTransactionInfo> =
-    null;
+  private extendedTransactionInfoCache: TimeBasedPersistentCache<ExtendedTransactionInfo> = null;
 
   constructor(
     public masterWallet: MasterWalletType,
@@ -94,8 +90,7 @@ export abstract class NetworkWallet<
   ) {
     this.id = masterWallet.id;
 
-    this.transactionDiscoveryProvider =
-      this.createTransactionDiscoveryProvider();
+    this.transactionDiscoveryProvider = this.createTransactionDiscoveryProvider();
   }
 
   public async initialize(): Promise<void> {
@@ -103,12 +98,7 @@ export abstract class NetworkWallet<
     await this.safe.initialize(this);
 
     // Prepare the extended transaction info cache
-    this.extendedTransactionInfoCache =
-      await TimeBasedPersistentCache.loadOrCreate(
-        "exttxinfo-" + this.id,
-        false,
-        500
-      );
+    this.extendedTransactionInfoCache = await TimeBasedPersistentCache.loadOrCreate('exttxinfo-' + this.id, false, 500);
 
     await this.prepareStandardSubWallets();
 
@@ -142,6 +132,24 @@ export abstract class NetworkWallet<
   protected abstract prepareStandardSubWallets(): Promise<void>;
 
   /**
+   * Publish a signed transaction.
+   * Each network wallet can have its own way to publish a transaction, for example an account abstraciton wallet
+   * will publish the transaction using the account abstraction provider.
+   */
+  public publishTransaction(
+    subWallet: AnySubWallet,
+    signedTransaction: any, // Often a string, could be an object (AA user op)
+    visualFeedback: boolean
+  ): Promise<string> {
+    // NOTE: historically, subwallets publish transactions. nevertheless it appeared that not all transactions
+    // can be pusliehd in the same way on the same network. For example, ledget and stndard safe are find sending
+    // signed EVM transactions to base RPC apis, but for AA transactions, bundling into a user op and sending
+    // to a bundler api is required. So for now, not all subwallet call networkwallet's publishTransaction, but
+    // some of them like EVM subwallets have started to do so.
+    throw new Error('publishTransaction not implemented for this network wallet. it should not be called');
+  }
+
+  /**
    * Starts network wallet and subwallets updates in background.
    * All the initializations here are not mandatory during initializations and can deliver
    * asynchronous content at any time.
@@ -163,11 +171,7 @@ export abstract class NetworkWallet<
     if (txDiscoveryProvider) {
       txDiscoveryProvider.start();
     } else {
-      Logger.warn(
-        "wallet",
-        "No transaction discovery provider configured for network wallet " +
-          this.id
-      );
+      Logger.warn('wallet', 'No transaction discovery provider configured for network wallet ' + this.id);
     }
 
     return;
@@ -198,11 +202,7 @@ export abstract class NetworkWallet<
   }
 
   private async fetchMainTokenValue(): Promise<void> {
-    await CurrencyService.instance.fetchMainTokenValue(
-      new BigNumber(1),
-      this.network,
-      "USD"
-    );
+    await CurrencyService.instance.fetchMainTokenValue(new BigNumber(1), this.network, 'USD');
   }
 
   // Do not auto refresh.
@@ -222,14 +222,12 @@ export abstract class NetworkWallet<
    * some default built in ERC20 coins for convenience.
    */
   private async checkFirstTimeUseAddCoins(): Promise<void> {
-    let activeNetworkTemplate =
-      GlobalNetworksService.instance.activeNetworkTemplate.value;
-    let existingExtendedInfo =
-      await LocalStorage.instance.getExtendedNetworWalletInfo(
-        this.id,
-        activeNetworkTemplate,
-        this.network.key
-      );
+    let activeNetworkTemplate = GlobalNetworksService.instance.activeNetworkTemplate.value;
+    let existingExtendedInfo = await LocalStorage.instance.getExtendedNetworWalletInfo(
+      this.id,
+      activeNetworkTemplate,
+      this.network.key
+    );
     if (existingExtendedInfo) return; // Not the first time, don't re-add coins that user may have disabled.
 
     if (this.network instanceof EVMNetwork) {
@@ -282,10 +280,7 @@ export abstract class NetworkWallet<
     }
 
     // Convert USD balance to currency (ex: CNY) balance
-    return CurrencyService.instance.usdToCurrencyAmount(
-      usdBalance,
-      currencySymbol
-    );
+    return CurrencyService.instance.usdToCurrencyAmount(usdBalance, currencySymbol);
   }
 
   /**
@@ -294,15 +289,11 @@ export abstract class NetworkWallet<
    * Then convert back to native currency value
    */
   public getDisplayBalance(): BigNumber {
-    let nativeTokenUSDPrice = CurrencyService.instance.getMainTokenValue(
-      new BigNumber(1),
-      this.network,
-      "USD"
-    );
+    let nativeTokenUSDPrice = CurrencyService.instance.getMainTokenValue(new BigNumber(1), this.network, 'USD');
 
     // Convert USD balance back to native token
     if (nativeTokenUSDPrice) {
-      let usdBalance = this.getDisplayBalanceInCurrency("USD");
+      let usdBalance = this.getDisplayBalanceInCurrency('USD');
       return usdBalance.dividedBy(nativeTokenUSDPrice);
     } else {
       if (this.getMainTokenSubWallet()) {
@@ -317,11 +308,7 @@ export abstract class NetworkWallet<
   // The higher the price, the more decimal places.
   public getDecimalPlaces() {
     let decimalPlaces = 3;
-    let nativeTokenUSDPrice = CurrencyService.instance.getMainTokenValue(
-      new BigNumber(1),
-      this.network,
-      "USD"
-    );
+    let nativeTokenUSDPrice = CurrencyService.instance.getMainTokenValue(new BigNumber(1), this.network, 'USD');
     if (nativeTokenUSDPrice) {
       const digit = nativeTokenUSDPrice.dividedToIntegerBy(1).toFixed().length;
       decimalPlaces = digit < 3 ? 3 : digit + 1;
@@ -333,9 +320,7 @@ export abstract class NetworkWallet<
    * Returns the whole balance balance, for the active currency.
    */
   public getDisplayBalanceInActiveCurrency(): BigNumber {
-    return this.getDisplayBalanceInCurrency(
-      CurrencyService.instance.selectedCurrency.symbol
-    );
+    return this.getDisplayBalanceInCurrency(CurrencyService.instance.selectedCurrency.symbol);
   }
 
   public getDisplayTokenName(): string {
@@ -363,7 +348,7 @@ export abstract class NetworkWallet<
   }
 
   public getSubWalletBalance(coinId: CoinID): BigNumber {
-    Logger.log("wallet", "getSubWalletBalance", coinId, this.subWallets);
+    Logger.log('wallet', 'getSubWalletBalance', coinId, this.subWallets);
     return this.subWallets[coinId].getRawBalance();
   }
 
@@ -374,15 +359,10 @@ export abstract class NetworkWallet<
   /**
    * Returns the list of all subwallets except the excluded one.
    */
-  public subWalletsWithExcludedCoin(
-    excludedCoinName: CoinID,
-    type: CoinType = null
-  ): AnySubWallet[] {
+  public subWalletsWithExcludedCoin(excludedCoinName: CoinID, type: CoinType = null): AnySubWallet[] {
     // Hide the id chain, do not use the id chain any more.
-    return Object.values(this.subWallets).filter((sw) => {
-      return (
-        sw.id !== excludedCoinName && (type !== null ? sw.type === type : true)
-      );
+    return Object.values(this.subWallets).filter(sw => {
+      return sw.id !== excludedCoinName && (type !== null ? sw.type === type : true);
     });
   }
 
@@ -408,11 +388,7 @@ export abstract class NetworkWallet<
    * @param digest : SHA256
    * @param password
    */
-  public async signDigest(
-    address: string,
-    digest: string,
-    passwd: string
-  ): Promise<string> {
+  public async signDigest(address: string, digest: string, passwd: string): Promise<string> {
     return await this.safe.signDigest(address, digest, passwd);
   }
 
@@ -430,10 +406,7 @@ export abstract class NetworkWallet<
    * for example when sending coins, users use ioXX formats, but internal implementations require EVM native
    * address formats with 0x.
    */
-  public async convertAddressForUsage(
-    address: string,
-    usage: AddressUsage
-  ): Promise<string> {
+  public async convertAddressForUsage(address: string, usage: AddressUsage): Promise<string> {
     return await address;
   }
 
@@ -464,20 +437,14 @@ export abstract class NetworkWallet<
   public async createNonStandardSubWallet(coin: Coin): Promise<void> {
     try {
       if (this.subWallets[coin.getID()]) {
-        Logger.warn(
-          "wallet",
-          `Subwallet for coin ${coin.getID()} already exists. Not adding again.`
-        );
+        Logger.warn('wallet', `Subwallet for coin ${coin.getID()} already exists. Not adding again.`);
         return;
       }
 
       let newSubWallet = await SubWalletBuilder.newFromCoin(this, coin);
       this.subWallets[coin.getID()] = newSubWallet;
 
-      Logger.log(
-        "wallet",
-        "Created subwallet with id " + coin.getID() + " for wallet " + this.id
-      );
+      Logger.log('wallet', 'Created subwallet with id ' + coin.getID() + ' for wallet ' + this.id);
 
       await this.save();
 
@@ -491,10 +458,7 @@ export abstract class NetworkWallet<
   }
 
   public async removeNonStandardSubWallet(coin: Coin): Promise<void> {
-    Logger.log(
-      "wallet",
-      "Removing subwallet with id " + coin.getID() + " from wallet " + this.id
-    );
+    Logger.log('wallet', 'Removing subwallet with id ' + coin.getID() + ' from wallet ' + this.id);
 
     let deletedSubWallet = this.subWallets[coin.getID()];
     delete this.subWallets[coin.getID()];
@@ -507,9 +471,7 @@ export abstract class NetworkWallet<
   /**
    * Convenient method to access subwallets as an array alphabetically.
    */
-  public getSubWallets(
-    sortType: WalletSortType = WalletSortType.NAME
-  ): AnySubWallet[] {
+  public getSubWallets(sortType: WalletSortType = WalletSortType.NAME): AnySubWallet[] {
     return Object.values(this.subWallets).sort((a, b) => {
       if (a.type == CoinType.STANDARD && b.type == CoinType.STANDARD) return 0;
       if (a.type == CoinType.STANDARD) return -1;
@@ -535,7 +497,7 @@ export abstract class NetworkWallet<
    * Returns the list of all subwallets by CoinType
    */
   public getSubWalletsByType(type: CoinType): AnySubWallet[] {
-    return Object.values(this.subWallets).filter((sw) => {
+    return Object.values(this.subWallets).filter(sw => {
       return sw.type === type;
     });
   }
@@ -546,10 +508,7 @@ export abstract class NetworkWallet<
    * TODO: MOVE TO EVM NETWORK WALLETS ONLY
    */
   public containsNFT(contractAddress: string): boolean {
-    return (
-      this.nfts.findIndex((nft) => nft.contractAddress === contractAddress) !==
-      -1
-    );
+    return this.nfts.findIndex(nft => nft.contractAddress === contractAddress) !== -1;
   }
 
   /**
@@ -569,25 +528,21 @@ export abstract class NetworkWallet<
     if (nftType === NFTType.ERC721) {
       if (!name) {
         // No name given (not found by the tx provider)? resolve it ourselves
-        let resolvedInfo = await ERC721Service.instance.getCoinInfo(
-          contractAddress
-        );
+        let resolvedInfo = await ERC721Service.instance.getCoinInfo(contractAddress);
         if (resolvedInfo) {
           nft.setResolvedInfo(resolvedInfo);
         } else {
-          nft.name = "Unnamed";
+          nft.name = 'Unnamed';
         }
       }
     } else if (nftType === NFTType.ERC1155) {
       if (!name) {
         // No name given (not found by the tx provider)? resolve it ourselves
-        let resolvedInfo = await ERC1155Service.instance.getCoinInfo(
-          contractAddress
-        );
+        let resolvedInfo = await ERC1155Service.instance.getCoinInfo(contractAddress);
         if (resolvedInfo) {
           nft.setResolvedInfo(resolvedInfo);
         } else {
-          nft.name = "Unnamed";
+          nft.name = 'Unnamed';
         }
       }
     }
@@ -608,13 +563,10 @@ export abstract class NetworkWallet<
     tokenIDs: string[],
     name: string = null
   ): Promise<NFT> {
-    let isAddressValid = await EVMService.instance.isContractAddress(
-      this.network,
-      contractAddress
-    );
+    let isAddressValid = await EVMService.instance.isContractAddress(this.network, contractAddress);
     if (!isAddressValid) return null;
 
-    let nft = this.nfts.find((nft) => nft.contractAddress === contractAddress);
+    let nft = this.nfts.find(nft => nft.contractAddress === contractAddress);
     if (!nft) {
       nft = await this.createNFT(nftType, contractAddress, balance);
     }
@@ -634,25 +586,25 @@ export abstract class NetworkWallet<
    * TODO: MOVE TO EVM NETWORK WALLETS ONLY
    */
   private updateNFT(nft: NFT): Promise<void> {
-    Logger.log("wallet", "Updating wallet NFT", nft);
+    Logger.log('wallet', 'Updating wallet NFT', nft);
     let walletNFT = this.getNFTByAddress(nft.contractAddress);
     if (walletNFT) {
-      walletNFT.assetIDs = nft.assets.map((a) => a.id);
+      walletNFT.assetIDs = nft.assets.map(a => a.id);
       walletNFT.assets = nft.assets;
       walletNFT.balance = nft.balance;
       walletNFT.name = nft.name;
     }
 
-    Logger.log("wallet", "Updating wallet walletNFT", walletNFT);
+    Logger.log('wallet', 'Updating wallet walletNFT', walletNFT);
 
     return this.save();
   }
 
   // Clean up NFTs that have been sent.
   public cleanUpNFT(nftTokes: ERCTokenInfo[]) {
-    this.nfts = this.nfts.filter((nft) => {
+    this.nfts = this.nfts.filter(nft => {
       return (
-        nftTokes.findIndex((n) => {
+        nftTokes.findIndex(n => {
           return n.contractAddress === nft.contractAddress;
         }) >= 0
       );
@@ -690,7 +642,7 @@ export abstract class NetworkWallet<
    * TODO: MOVE TO EVM NETWORK WALLETS ONLY
    */
   public getNFTByAddress(contractAddress: string): NFT {
-    return this.nfts.find((n) => n.contractAddress === contractAddress);
+    return this.nfts.find(n => n.contractAddress === contractAddress);
   }
 
   /**
@@ -702,24 +654,18 @@ export abstract class NetworkWallet<
    * TODO: MOVE TO EVM NETWORK WALLETS ONLY
    */
   public refreshNFTAssets(nft: NFT): Observable<NFTAsset[]> {
-    Logger.log("wallet", "Refreshing NFT assets", nft);
+    Logger.log('wallet', 'Refreshing NFT assets', nft);
 
     let subject = new BehaviorSubject<NFTAsset[]>([]);
     let observable = subject.asObservable();
 
     void (() => {
-      let accountAddress =
-        this.getMainEvmSubWallet().getCurrentReceiverAddress();
+      let accountAddress = this.getMainEvmSubWallet().getCurrentReceiverAddress();
       if (nft.type == NFTType.ERC721) {
         ERC721Service.instance
-          .refreshAllAssets(
-            <EVMNetwork>this.network,
-            accountAddress,
-            nft.contractAddress,
-            nft.assetIDs
-          )
+          .refreshAllAssets(<EVMNetwork>this.network, accountAddress, nft.contractAddress, nft.assetIDs)
           .subscribe({
-            next: (event) => {
+            next: event => {
               nft.assets = event.assets; // can be null (couldn't fetch assets) or empty (0 assets)
               subject.next(nft.assets);
             },
@@ -731,26 +677,24 @@ export abstract class NetworkWallet<
               void this.updateNFT(nft);
 
               subject.complete();
-            },
+            }
           });
       } else if (nft.type == NFTType.ERC1155) {
-        ERC1155Service.instance
-          .refreshAllAssets(accountAddress, nft.contractAddress, nft.assetIDs)
-          .subscribe({
-            next: (event) => {
-              nft.assets = event.assets; // can be null (couldn't fetch assets) or empty (0 assets)
-              subject.next(nft.assets);
-            },
-            complete: () => {
-              // Complete
-              nft.balance = nft.assets ? nft.assets.length : -1; // -1 to remember that we can't know the real number of assets
+        ERC1155Service.instance.refreshAllAssets(accountAddress, nft.contractAddress, nft.assetIDs).subscribe({
+          next: event => {
+            nft.assets = event.assets; // can be null (couldn't fetch assets) or empty (0 assets)
+            subject.next(nft.assets);
+          },
+          complete: () => {
+            // Complete
+            nft.balance = nft.assets ? nft.assets.length : -1; // -1 to remember that we can't know the real number of assets
 
-              // Update wallet's NFT with the new data
-              void this.updateNFT(nft);
+            // Update wallet's NFT with the new data
+            void this.updateNFT(nft);
 
-              subject.complete();
-            },
-          });
+            subject.complete();
+          }
+        });
       }
     })();
 
@@ -774,9 +718,7 @@ export abstract class NetworkWallet<
   public getExtendedWalletInfo(): ExtendedNetworkWalletInfo {
     let extendedInfo = new ExtendedNetworkWalletInfo();
 
-    extendedInfo.subWallets = this.getSubWallets().map((subwallet) =>
-      SerializedSubWallet.fromSubWallet(subwallet)
-    );
+    extendedInfo.subWallets = this.getSubWallets().map(subwallet => SerializedSubWallet.fromSubWallet(subwallet));
 
     for (let nft of this.nfts) {
       extendedInfo.nfts.push(nft.toSerializedNFT());
@@ -790,9 +732,7 @@ export abstract class NetworkWallet<
    * This includes everything the SPV plugin could not save and that we saved in our local
    * storage instead.
    */
-  public async populateWithExtendedInfo(
-    extendedInfo: ExtendedNetworkWalletInfo
-  ): Promise<void> {
+  public async populateWithExtendedInfo(extendedInfo: ExtendedNetworkWalletInfo): Promise<void> {
     //Logger.log("wallet", "Populating network wallet with extended info", this, extendedInfo);
 
     // In case of newly created wallet we don't have extended info from local storage yet,
@@ -804,11 +744,8 @@ export abstract class NetworkWallet<
         // NOTE: for now, we save the standard subwallets but we don't restore them from extended info
         // as they are always rebuilt by default by the network wallet. Later this COULD be a problem
         // if we want to save some information about those standard subwallets, in extended infos.
-        if (serializedSubWallet.type !== "STANDARD") {
-          let subWallet = await SubWalletBuilder.newFromSerializedSubWallet(
-            this,
-            serializedSubWallet
-          );
+        if (serializedSubWallet.type !== 'STANDARD') {
+          let subWallet = await SubWalletBuilder.newFromSerializedSubWallet(this, serializedSubWallet);
           if (subWallet) {
             this.subWallets[serializedSubWallet.id] = subWallet;
           } else {
@@ -850,16 +787,16 @@ export abstract class NetworkWallet<
   public saveContextInfo<T>(key: string, value: T): Promise<void> {
     let fullKey =
       GlobalNetworksService.instance.activeNetworkTemplate.value +
-      "_" +
+      '_' +
       this.network.key +
-      "_" +
+      '_' +
       this.masterWallet.id +
-      "_" +
+      '_' +
       key;
     return GlobalStorageService.instance.setSetting<T>(
       DIDSessionsStore.signedInDIDString,
       NetworkTemplateStore.networkTemplate,
-      "wallet",
+      'wallet',
       fullKey,
       value
     );
@@ -871,16 +808,16 @@ export abstract class NetworkWallet<
   public loadContextInfo<T>(key: string): Promise<T> {
     let fullKey =
       GlobalNetworksService.instance.activeNetworkTemplate.value +
-      "_" +
+      '_' +
       this.network.key +
-      "_" +
+      '_' +
       this.masterWallet.id +
-      "_" +
+      '_' +
       key;
     return GlobalStorageService.instance.getSetting<T>(
       DIDSessionsStore.signedInDIDString,
       NetworkTemplateStore.networkTemplate,
-      "wallet",
+      'wallet',
       fullKey,
       null
     );
@@ -894,14 +831,7 @@ export abstract class NetworkWallet<
   private async getUniqueIdentifierOnStake() {
     let tokenAddress = await this.getMainEvmSubWallet().getAccountAddress();
     let chainId = (<EVMNetwork>this.network).getMainChainID();
-    return (
-      "stakingassets-" +
-      tokenAddress +
-      "-" +
-      chainId +
-      "-" +
-      this.masterWallet.id
-    );
+    return 'stakingassets-' + tokenAddress + '-' + chainId + '-' + this.masterWallet.id;
   }
 
   private async loadStakingAssets() {
@@ -944,17 +874,13 @@ export abstract class NetworkWallet<
   }
 
   public getNetworkOptions(): WalletNetworkOptionsType {
-    return this.masterWallet.networkOptions.find(
-      (no) => no.network === this.network.key
-    ) as WalletNetworkOptionsType;
+    return this.masterWallet.networkOptions.find(no => no.network === this.network.key) as WalletNetworkOptionsType;
   }
 
   /**
    * Gets the extended transaction info from cache, or returns null if we don't have anything.
    */
-  public async getExtendedTxInfo(
-    txHash: string
-  ): Promise<ExtendedTransactionInfo> {
+  public async getExtendedTxInfo(txHash: string): Promise<ExtendedTransactionInfo> {
     let txInfoEntry = await this.extendedTransactionInfoCache.get(txHash);
     if (!txInfoEntry) return null;
 
@@ -964,9 +890,7 @@ export abstract class NetworkWallet<
   /**
    * Gets the extended transaction info from cache, or fetches it if we don't have anything.
    */
-  public getOrFetchExtendedTxInfo(
-    txHash: string
-  ): Promise<ExtendedTransactionInfo> {
+  public getOrFetchExtendedTxInfo(txHash: string): Promise<ExtendedTransactionInfo> {
     // Don't spam the RPC API, fetch info one at a time
     return this.extendedTransactionInfoOpsQueue.add(async () => {
       let txInfoEntry = await this.extendedTransactionInfoCache.get(txHash);
@@ -980,17 +904,10 @@ export abstract class NetworkWallet<
     });
   }
 
-  public async saveExtendedTxInfo(
-    txHash: string,
-    info: ExtendedTransactionInfo
-  ): Promise<void> {
+  public async saveExtendedTxInfo(txHash: string, info: ExtendedTransactionInfo): Promise<void> {
     // In order to reduce the size of the cache, do not save useless data.
-    if (
-      info.evm &&
-      info.evm.transactionReceipt &&
-      info.evm.transactionReceipt.logsBloom
-    ) {
-      info.evm.transactionReceipt.logsBloom = "";
+    if (info.evm && info.evm.transactionReceipt && info.evm.transactionReceipt.logsBloom) {
+      info.evm.transactionReceipt.logsBloom = '';
     }
     this.extendedTransactionInfoCache.set(txHash, info);
     await this.extendedTransactionInfoCache.save();
@@ -998,19 +915,14 @@ export abstract class NetworkWallet<
     // Let listeners know about this tx info change
     this.extendedTransactionInfoUpdated.next({
       txHash,
-      extInfo: info,
+      extInfo: info
     });
   }
 
-  protected fetchExtendedTxInfo(
-    txHash: string
-  ): Promise<ExtendedTransactionInfo> {
+  protected fetchExtendedTxInfo(txHash: string): Promise<ExtendedTransactionInfo> {
     // Empty by default. Overriden by EVM network wallet mostly
     return;
   }
 }
 
-export abstract class AnyNetworkWallet extends NetworkWallet<
-  MasterWallet,
-  any
-> {}
+export abstract class AnyNetworkWallet extends NetworkWallet<MasterWallet, any> {}

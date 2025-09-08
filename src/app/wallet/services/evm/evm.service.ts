@@ -117,7 +117,7 @@ class ETHTransactionManager {
 
       Logger.log('wallet', 'EVM publishTransaction result:', result);
       if (result.published) {
-        const isPublishingOnGoing = await this.CheckPublishing(result);
+        const isPublishingOnGoing = await this.checkPublishing(result);
         if (!isPublishingOnGoing) {
           Logger.warn('wallet', 'publishTransaction error ', result);
 
@@ -200,7 +200,7 @@ class ETHTransactionManager {
     }
   }
 
-  private async CheckPublishing(result: RawTransactionPublishResult) {
+  private async checkPublishing(result: RawTransactionPublishResult) {
     if (result.message) {
       if (result.message.includes('insufficient funds for gas * price + value')) {
         await this.modalCtrl.dismiss();

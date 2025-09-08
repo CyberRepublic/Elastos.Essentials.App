@@ -1,11 +1,11 @@
-import type { TxData } from "@ethereumjs/tx";
-import { Transfer } from "../../services/cointransfer.service";
-import { BTCTxData } from "../btc.types";
-import { MasterWallet } from "../masterwallets/masterwallet";
-import { AnyNetworkWallet } from "../networks/base/networkwallets/networkwallet";
-import { AnySubWallet } from "../networks/base/subwallets/subwallet";
-import { AddressUsage } from "./addressusage";
-import { SignTransactionResult } from "./safe.types";
+import type { TxData } from '@ethereumjs/tx';
+import { Transfer } from '../../services/cointransfer.service';
+import { BTCTxData } from '../btc.types';
+import { MasterWallet } from '../masterwallets/masterwallet';
+import { AnyNetworkWallet } from '../networks/base/networkwallets/networkwallet';
+import { AnySubWallet } from '../networks/base/subwallets/subwallet';
+import { AddressUsage } from './addressusage';
+import { SignTransactionResult } from './safe.types';
 
 /**
  * Hosts and manipulates sensitive wallet information such as mnemonic, seed, private keys.
@@ -64,18 +64,14 @@ export abstract class Safe {
    * @param digest : SHA256
    * @param password
    */
-  public signDigest(
-    address: string,
-    digest: string,
-    password: string
-  ): Promise<string> {
+  public signDigest(address: string, digest: string, password: string): Promise<string> {
     return null;
   }
 
   /**
    * Signs a transaction.
    *
-   * By default, the master password is required, even if elready known, as a security step. But this can be
+   * By default, the master password is required, even if already known, as a security step. But this can be
    * disabled, for example to chain operations (eg: easy bridge feature0, using forcePasswordPrompt = false.
    *
    * The UI feedback (popup) can also be hidden using visualFeedback = false.

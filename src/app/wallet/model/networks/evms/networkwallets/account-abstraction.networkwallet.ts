@@ -1,5 +1,5 @@
-import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
-import { OutgoingTransactionState, TransactionService } from 'src/app/wallet/services/transaction.service';
+import { AccountAbstractionService } from 'src/app/wallet/services/account-abstraction/account-abstraction.service';
+import { UserOperation } from 'src/app/wallet/services/account-abstraction/model/user-operation';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
 import { AccountAbstractionProvidersService } from '../../../../services/account-abstraction/account-abstraction-providers.service';
 import { AccountAbstractionMasterWallet } from '../../../masterwallets/account.abstraction.masterwallet';
@@ -10,7 +10,7 @@ import { AnyNetworkWallet, WalletAddressInfo } from '../../base/networkwallets/n
 import { AnySubWallet } from '../../base/subwallets/subwallet';
 import { AccountAbstractionProvider } from '../account-abstraction-provider';
 import type { EVMNetwork } from '../evm.network';
-import { AASafe } from '../safes/aa.safe';
+import { AccountAbstractionSafe } from '../safes/account-abstraction.safe';
 import { MainCoinEVMSubWallet } from '../subwallets/evm.subwallet';
 import { EVMNetworkWallet } from './evm.networkwallet';
 
@@ -53,7 +53,7 @@ export abstract class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
   }
 
   public getAddresses(): WalletAddressInfo[] {
-    const safe = this.safe as AASafe;
+    const safe = this.safe as AccountAbstractionSafe;
     const addresses: WalletAddressInfo[] = [
       {
         title: 'EVM',
@@ -66,6 +66,23 @@ export abstract class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
 
   public async convertAddressForUsage(address: string, usage: AddressUsage): Promise<string> {
     return (await address.startsWith('0x')) ? address : '0x' + address;
+  }
+
+  public async publishTransaction(
+    subWallet: AnySubWallet,
+    signedUserOp: UserOperation,
+    visualFeedback: boolean
+  ): Promise<string> {
+    // Show publication popup
+    if (visualFeedback) await AccountAbstractionService.instance.displayPublicationLoader();
+
+    // Publish transaction
+    const txid = await this.getAccountAbstractionProvider().publishTransaction(this, signedUserOp);
+
+    // Close publication popup
+    if (visualFeedback) AccountAbstractionService.instance.closePublicationLoader();
+
+    return txid;
   }
 
   public getMainEvmSubWallet(): MainCoinEVMSubWallet<WalletNetworkOptions> {
@@ -94,28 +111,5 @@ export abstract class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
 
   public getAccountAbstractionAddress(): string {
     return this.safe.getAddresses(0, 1, false, AddressUsage.DEFAULT)[0];
-  }
-
-  /**
-   * Bundles a raw transaction, possibly coming from a eth_sendTransaction
-   * request, into a UserOp and sends it to the bundler.
-   */
-  public async signAndSendRawTx(tx: AccountAbstractionTransaction): Promise<string> {
-    await TransactionService.instance.displayGenericPublicationLoader();
-
-    TransactionService.instance.resetTransactionPublicationStatus();
-    TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.PUBLISHING);
-
-    // Ask the account abstraction provider specific to this account to bundle the transaction
-    // and return the actual transaction hash.
-    const transactionHash = await this.getAccountAbstractionProvider().bundleTransaction(this, tx);
-
-    if (transactionHash) {
-      TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.PUBLISHED);
-    } else {
-      TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.ERRORED);
-    }
-
-    return transactionHash;
   }
 }

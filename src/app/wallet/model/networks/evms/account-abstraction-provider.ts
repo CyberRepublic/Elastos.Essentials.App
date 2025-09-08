@@ -1,4 +1,5 @@
 import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
+import { UserOperation } from 'src/app/wallet/services/account-abstraction/model/user-operation';
 import { LocalStorage } from 'src/app/wallet/services/storage.service';
 import { AccountAbstractionNetworkWallet } from './networkwallets/account-abstraction.networkwallet';
 
@@ -54,8 +55,13 @@ export abstract class AccountAbstractionProvider<
     return this.supportedChains.find(chainConfig => chainConfig.chainId === chainId);
   }
 
-  public abstract bundleTransaction(
+  public abstract bundleAndSignTransaction(
     networkWallet: AccountAbstractionNetworkWallet,
     transaction: AccountAbstractionTransaction
+  ): Promise<UserOperation>;
+
+  public abstract publishTransaction(
+    networkWallet: AccountAbstractionNetworkWallet,
+    fullUserOp: UserOperation
   ): Promise<string>;
 }
