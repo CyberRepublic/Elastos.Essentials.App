@@ -48,6 +48,17 @@
       </ion-col>
     </ion-row>
 
+    <!-- Signing Wallet info -->
+    <ion-row class="wallet-info-row">
+      <ion-col size="12" class="left-col">
+        <div class="wallet-info">
+          <div class="wallet-label">{{ 'wallet.signing-wallet' | translate }}</div>
+          <h1 class="wallet-name">{{ getSigningWalletName() }}</h1>
+          <div class="wallet-address">{{ getSigningWalletAddress() }}</div>
+        </div>
+      </ion-col>
+    </ion-row>
+
     <!-- TX INFO -->
     <!-- Standard EOA Account Component -->
     <app-standard-account *ngIf="!isAccountAbstractionWallet()" [balance]="balance" [uiService]="uiService"

@@ -157,6 +157,7 @@ export class EscTransactionPage implements OnInit {
       'wallet',
       'ESC Transaction params',
       this.coinTransferService.payloadParam,
+      this.coinTransferService.masterWalletId,
       this.coinTransferService.sendTransactionChainId
     );
 
@@ -180,16 +181,38 @@ export class EscTransactionPage implements OnInit {
 
     this.intentTransfer = this.coinTransferService.intentTransfer;
 
-    let activeNetworkWallet = this.walletManager.getActiveNetworkWallet();
-    if (!activeNetworkWallet) {
-      Logger.warn('wallet', 'ESC Transaction: network wallet not found');
-      return;
+    // Determine which network and wallet to use based on available parameters
+    let targetNetwork = this.targetNetwork; // Default to target network from chain ID
+    let masterWalletId = this.coinTransferService.masterWalletId;
+
+    // If no specific master wallet ID is provided, use the active wallet's master wallet
+    if (!masterWalletId) {
+      let activeNetworkWallet = this.walletManager.getActiveNetworkWallet();
+      if (activeNetworkWallet) {
+        masterWalletId = activeNetworkWallet.masterWallet.id;
+      }
     }
 
-    if (this.coinTransferService.masterWalletId != activeNetworkWallet.masterWallet.id) {
-      let masterWallet = this.walletManager.getMasterWallet(this.coinTransferService.masterWalletId);
-      this.networkWallet = await this.targetNetwork.createNetworkWallet(masterWallet, false);
+    // If no specific chain ID is provided, use the active network
+    if (!this.coinTransferService.sendTransactionChainId) {
+      targetNetwork = WalletNetworkService.instance.activeNetwork.value;
+    }
+
+    // Create network wallet with the determined network and master wallet
+    if (masterWalletId) {
+      let masterWallet = this.walletManager.getMasterWallet(masterWalletId);
+      if (!masterWallet) {
+        Logger.warn('wallet', 'ESC Transaction: master wallet not found for ID:', masterWalletId);
+        return;
+      }
+      this.networkWallet = await targetNetwork.createNetworkWallet(masterWallet, false);
     } else {
+      // Ultimate fallback to active network wallet
+      let activeNetworkWallet = this.walletManager.getActiveNetworkWallet();
+      if (!activeNetworkWallet) {
+        Logger.warn('wallet', 'ESC Transaction: network wallet not found');
+        return;
+      }
       this.networkWallet = activeNetworkWallet;
     }
 
@@ -331,5 +354,28 @@ export class EscTransactionPage implements OnInit {
    */
   public getNetworkWallet(): AnyNetworkWallet {
     return this.networkWallet;
+  }
+
+  /**
+   * Get the signing wallet name
+   */
+  public getSigningWalletName(): string {
+    if (this.networkWallet && this.networkWallet.masterWallet) {
+      return this.networkWallet.masterWallet.name;
+    }
+    return '';
+  }
+
+  /**
+   * Get the signing wallet address
+   */
+  public getSigningWalletAddress(): string {
+    if (this.networkWallet) {
+      const addresses = this.networkWallet.getAddresses();
+      if (addresses && addresses.length > 0) {
+        return addresses[0].address;
+      }
+    }
+    return '';
   }
 }

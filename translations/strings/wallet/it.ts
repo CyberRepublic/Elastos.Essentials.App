@@ -773,6 +773,7 @@ export const it = {
 
     'multi-sig-wallet-name': 'Wallet name',
     'multi-sig-my-signing-wallet': 'My signing wallet',
+    'signing-wallet': 'Portafoglio di firma',
     'multi-sig-pick-a-wallet': 'Pick a wallet',
     'multi-sig-other-co-signers': 'Other cosigners',
     'multi-sig-input-xpub-key-prompt': 'Input xpub key',

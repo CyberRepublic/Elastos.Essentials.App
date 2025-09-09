@@ -73,8 +73,11 @@ export class BrowserTitleBarComponent extends TitleBarComponent {
       // Non browser mode (home screen): never show the title
       this.showTitleAndUrl = false;
     } else {
-      if (this._title || this._url) this.showTitleAndUrl = true;
-      else this.showTitleAndUrl = false;
+      if (this._title || this._url) {
+        this.showTitleAndUrl = true;
+      } else {
+        this.showTitleAndUrl = false;
+      }
     }
   }
 
@@ -98,7 +101,8 @@ export class BrowserTitleBarComponent extends TitleBarComponent {
   public setBrowserMode(browserMode: boolean) {
     this.browserMode = browserMode;
     if (browserMode) {
-      this.setIcon(TitleBarIconSlot.INNER_RIGHT, { key: 'network', iconPath: BuiltInIcon.NETWORK });
+      //this.setIcon(TitleBarIconSlot.INNER_RIGHT, { key: 'network', iconPath: BuiltInIcon.NETWORK });
+      this.setIcon(TitleBarIconSlot.INNER_RIGHT, null);
       this.setIcon(TitleBarIconSlot.OUTER_RIGHT, { key: 'menu', iconPath: BuiltInIcon.VERTICAL_MENU });
     }
   }

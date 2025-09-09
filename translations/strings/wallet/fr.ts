@@ -775,6 +775,7 @@ export const fr = {
 
     'multi-sig-wallet-name': 'Nom du portefeuille',
     'multi-sig-my-signing-wallet': 'Mon portefeuille signataire',
+    'signing-wallet': 'Portefeuille signataire',
     'multi-sig-pick-a-wallet': 'Choisir un portefeuille',
     'multi-sig-other-co-signers': 'Autres co-signataires',
     'multi-sig-input-xpub-key-prompt': 'Saisir une clé xpub vqlide',

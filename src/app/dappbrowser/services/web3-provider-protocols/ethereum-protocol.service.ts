@@ -19,8 +19,9 @@ import {
   BrowserConnectionType,
   BrowserWalletConnectionsService
 } from 'src/app/wallet/services/browser-wallet-connections.service';
+import { CoinTransferService } from 'src/app/wallet/services/cointransfer.service';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
-import { DABMessage, DappBrowserService } from '../dappbrowser.service';
+import { DABMessage } from '../dappbrowser.service';
 
 declare let dappBrowser: DappBrowserPlugin.DappBrowser;
 
@@ -45,11 +46,15 @@ export class EthereumProtocolService {
   private activeChainID: number;
   private activeEVMNetworkRpcUrl: string = null;
   private web3ProviderCode: string = null;
+  private currentUrl: string = null;
+  private activeEVMWallet: AnyNetworkWallet = null;
+  private activeEVMNetwork: EVMNetwork = null;
   private subscriptions: Subscription[] = [];
 
   constructor(
     private browserWalletConnectionsService: BrowserWalletConnectionsService,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private coinTransferService: CoinTransferService
   ) {}
 
   /**
@@ -157,7 +162,21 @@ export class EthereumProtocolService {
       return this.getProviderInjectionCode('', -1, '');
     }
 
-    // Check for existing EVM wallet connection for this dapp
+    // If this is for the current dApp URL, use the active properties (more efficient)
+    if (url === this.currentUrl && this.activeEVMWallet && this.activeEVMNetwork) {
+      let evmAddress: string | undefined = undefined;
+      const evmSubwallet = this.activeEVMWallet.getMainEvmSubWallet();
+      if (evmSubwallet) {
+        evmAddress = await evmSubwallet.getCurrentReceiverAddress();
+      }
+
+      const chainId = this.activeEVMNetwork.getMainChainID();
+      const rpcUrl = this.activeEVMNetwork.getRPCUrl();
+
+      return this.getProviderInjectionCode(evmAddress, chainId, rpcUrl);
+    }
+
+    // Fallback: Check for existing EVM wallet connection for this dapp
     const evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(url, BrowserConnectionType.EVM);
     const selectedNetwork = await this.browserWalletConnectionsService.getSelectedEVMNetwork(url);
 
@@ -185,8 +204,15 @@ export class EthereumProtocolService {
    * Sets up subscriptions to EVM wallet and network changes for the current dApp
    */
   setupSubscriptions(): void {
+    // Subscribe to dApp URL changes
+    const urlSub = this.browserWalletConnectionsService.activeDappUrl.subscribe(url => {
+      Logger.log('ethereum', 'dApp URL changed:', url);
+      this.currentUrl = url;
+    });
+
     // Subscribe to EVM wallet changes for the current dApp
     const evmWalletSub = this.browserWalletConnectionsService.activeDappEVMWallet.subscribe(evmWallet => {
+      this.activeEVMWallet = evmWallet;
       if (evmWallet) {
         Logger.log('ethereum', 'EVM wallet changed for active dApp:', evmWallet.masterWallet.name);
         // Handle async operations without blocking the subscribe callback
@@ -207,19 +233,20 @@ export class EthereumProtocolService {
 
     // Subscribe to EVM network changes for the current dApp
     const evmNetworkSub = this.browserWalletConnectionsService.activeDappEVMNetwork.subscribe(network => {
+      this.activeEVMNetwork = network;
       if (network) {
         Logger.log('ethereum', 'EVM network changed for active dApp:', network.name);
         void this.sendActiveNetworkToDApp(network);
       }
     });
 
-    this.subscriptions.push(evmWalletSub, evmNetworkSub);
+    this.subscriptions.push(urlSub, evmWalletSub, evmNetworkSub);
   }
 
   /**
    * Updates the injected provider with a newly connected wallet
    */
-  async updateProviderWithWallet(dappUrl: string, walletAddress: string): Promise<void> {
+  async updateProviderWithWallet(walletAddress: string): Promise<void> {
     if (!walletAddress) return;
 
     try {
@@ -324,6 +351,14 @@ export class EthereumProtocolService {
    * Executes a smart contract transaction then returns the result to the calling dApp.
    */
   private async handleSendTransaction(message: DABMessage): Promise<void> {
+    Logger.log(
+      'ethereum',
+      'Sending ESC transaction intent with target master wallet:',
+      this.activeEVMWallet.masterWallet.id,
+      'and EVM chain ID:',
+      this.activeEVMNetwork.getMainChainID()
+    );
+
     const response: {
       action: string;
       result: {
@@ -331,6 +366,8 @@ export class EthereumProtocolService {
         status: 'published' | 'cancelled';
       };
     } = await GlobalIntentService.instance.sendIntent('https://wallet.web3essentials.io/esctransaction', {
+      masterWalletId: this.activeEVMWallet.masterWallet.id,
+      chainId: this.activeEVMNetwork.getMainChainID(),
       payload: {
         params: [message.data.object]
       }
@@ -358,21 +395,8 @@ export class EthereumProtocolService {
    * If no wallet is connected, triggers wallet selection.
    */
   private async handleRequestAccounts(message: DABMessage): Promise<void> {
-    const currentUrl = this.getCurrentUrl();
-    if (!currentUrl) {
-      Logger.warn('ethereum', 'No current URL available for request accounts');
-      this.sendInjectedError('ethereum', message.data.id, {
-        code: 4001,
-        message: 'User rejected the request.'
-      });
-      return;
-    }
-
-    // Check if we already have a connected wallet for this dapp
-    let evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(
-      currentUrl,
-      BrowserConnectionType.EVM
-    );
+    // Use the active EVM wallet that's already connected
+    let evmWallet = this.activeEVMWallet;
 
     if (!evmWallet) {
       Logger.log('ethereum', 'No connected EVM wallet found, triggering wallet selection');
@@ -383,7 +407,7 @@ export class EthereumProtocolService {
       try {
         // Ask user to pick a EVM wallet.
         const connectedMasterWallet = await this.browserWalletConnectionsService.connectWallet(
-          currentUrl,
+          this.currentUrl,
           BrowserConnectionType.EVM
         );
 
@@ -396,9 +420,9 @@ export class EthereumProtocolService {
           const evmSubwallet = evmWallet.getMainEvmSubWallet();
           if (evmSubwallet) {
             const address = await evmSubwallet.getCurrentReceiverAddress();
-            await this.updateProviderWithWallet(currentUrl, address);
+            await this.updateProviderWithWallet(address);
           }
-          Logger.log('ethereum', 'Successfully connected EVM wallet for dapp:', currentUrl);
+          Logger.log('ethereum', 'Successfully connected EVM wallet for dapp:', this.currentUrl);
         } else {
           Logger.log('ethereum', 'Wallet selection cancelled');
           this.sendInjectedError('ethereum', message.data.id, {
@@ -449,7 +473,11 @@ export class EthereumProtocolService {
     const rawData: { payload: string; useV4: boolean } = message.data.object;
     const response: { result: SignTypedDataIntentResult } = await GlobalIntentService.instance.sendIntent(
       'https://wallet.web3essentials.io/signtypeddata',
-      rawData
+      {
+        masterWalletId: this.activeEVMWallet.masterWallet.id,
+        chainId: this.activeEVMNetwork.getMainChainID(),
+        ...rawData
+      }
     );
     this.sendInjectedResponse('ethereum', message.data.id, response.result.signedData);
   }
@@ -461,7 +489,11 @@ export class EthereumProtocolService {
     const rawData: { data: unknown } = message.data.object;
     const response: { result: PersonalSignIntentResult } = await GlobalIntentService.instance.sendIntent(
       'https://wallet.web3essentials.io/personalsign',
-      rawData
+      {
+        masterWalletId: this.activeEVMWallet.masterWallet.id,
+        chainId: this.activeEVMNetwork.getMainChainID(),
+        ...rawData
+      }
     );
     this.sendInjectedResponse('ethereum', message.data.id, response.result.signedData);
   }
@@ -473,7 +505,11 @@ export class EthereumProtocolService {
     const rawData: { data: unknown } = message.data.object;
     const response: { result: EthSignIntentResult } = await GlobalIntentService.instance.sendIntent(
       'https://wallet.web3essentials.io/insecureethsign',
-      rawData
+      {
+        masterWalletId: this.activeEVMWallet.masterWallet.id,
+        chainId: this.activeEVMNetwork.getMainChainID(),
+        ...rawData
+      }
     );
     this.sendInjectedResponse('ethereum', message.data.id, response.result.signedData);
   }
@@ -493,7 +529,7 @@ export class EthereumProtocolService {
       return;
     } else {
       // Do nothing if already on the right network
-      if ((WalletNetworkService.instance.activeNetwork.value as EVMNetwork).getMainChainID() === chainId) {
+      if (this.activeEVMNetwork && this.activeEVMNetwork.getMainChainID() === chainId) {
         Logger.log('ethereum', 'Already on the right network');
         this.sendInjectedResponse('ethereum', message.data.id, {}); // Successfully switched
         return;
@@ -535,7 +571,7 @@ export class EthereumProtocolService {
     }
 
     // Not on this network, ask user to switch
-    if ((WalletNetworkService.instance.activeNetwork.value as EVMNetwork).getMainChainID() !== chainId) {
+    if (this.activeEVMNetwork && this.activeEVMNetwork.getMainChainID() !== chainId) {
       let targetNetwork = existingNetwork;
       if (!targetNetwork) targetNetwork = WalletNetworkService.instance.getNetworkByKey(addedNetworkKey) as EVMNetwork;
 
@@ -563,7 +599,7 @@ export class EthereumProtocolService {
     const walletPermissions: WalletPermission = {
       id: unsafeRandomHex(21),
       parentCapability: 'eth_accounts',
-      invoker: this.getCurrentUrl(),
+      invoker: this.currentUrl,
       caveats: [
         {
           type: 'restrictReturnedAccounts',
@@ -577,13 +613,6 @@ export class EthereumProtocolService {
   }
 
   // Helper methods
-
-  /**
-   * Gets the current URL from the dappbrowser service
-   */
-  private getCurrentUrl(): string {
-    return DappBrowserService.instance.url;
-  }
 
   // Provider injection coordination with main service handled elsewhere
 

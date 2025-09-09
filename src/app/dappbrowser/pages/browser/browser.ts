@@ -15,13 +15,6 @@ import { App } from 'src/app/model/app.enum';
 import { GlobalIntentService } from 'src/app/services/global.intent.service';
 import { GlobalNavService } from 'src/app/services/global.nav.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
-import { NetworkChooserFilter } from 'src/app/wallet/components/network-chooser/network-chooser.component';
-import { AnyNetwork } from 'src/app/wallet/model/networks/network';
-import {
-  BrowserConnectionType,
-  BrowserWalletConnectionsService
-} from 'src/app/wallet/services/browser-wallet-connections.service';
-import { WalletNetworkUIService } from 'src/app/wallet/services/network.ui.service';
 import { BrowserTitleBarComponent } from '../../components/titlebar/titlebar.component';
 import { DappBrowserClient, DappBrowserService } from '../../services/dappbrowser.service';
 
@@ -54,8 +47,6 @@ export class BrowserPage implements DappBrowserClient {
     public keyboard: Keyboard,
     private platform: Platform,
     private dAppBrowserService: DappBrowserService,
-    private walletNetworkUIService: WalletNetworkUIService,
-    private browserWalletConnectionsService: BrowserWalletConnectionsService,
     private globalIntentService: GlobalIntentService
   ) {
     this.dAppBrowserService.activeBrowsedAppInfo.subscribe(appInfo => {
@@ -81,13 +72,13 @@ export class BrowserPage implements DappBrowserClient {
           case BuiltInIcon.BACK:
             void this.onGoBack();
             break;
-          case BuiltInIcon.NETWORK:
-            dappBrowser.hide();
-            void (async () => {
-              await this.walletNetworkUIService.chooseActiveNetwork(await this.createNetworkFilter());
-              this.dAppBrowserService.showWebView();
-            })();
-            break;
+          // case BuiltInIcon.NETWORK:
+          //   dappBrowser.hide();
+          //   void (async () => {
+          //     await this.walletNetworkUIService.chooseActiveNetwork(await this.createNetworkFilter());
+          //     this.dAppBrowserService.showWebView();
+          //   })();
+          //   break;
           case BuiltInIcon.VERTICAL_MENU:
             this.onMenu();
             break;
@@ -96,34 +87,6 @@ export class BrowserPage implements DappBrowserClient {
     );
 
     this.shot = null;
-  }
-
-  /**
-   * Creates a network filter that only shows networks supported by the currently connected EVM wallet.
-   * If no EVM wallet is connected, shows all networks.
-   */
-  private async createNetworkFilter(): Promise<NetworkChooserFilter | undefined> {
-    const currentUrl = this.dAppBrowserService.url;
-    if (!currentUrl) {
-      return undefined; // Show all networks if no URL available
-    }
-
-    // Check if there's a connected EVM wallet for this dapp
-    const connectedWallet = await this.browserWalletConnectionsService.getConnectedWallet(
-      currentUrl,
-      BrowserConnectionType.EVM
-    );
-
-    if (!connectedWallet) {
-      return undefined; // Show all networks if no wallet connected
-    }
-
-    // Create filter that only shows networks supported by the connected wallet
-    const filter: NetworkChooserFilter = (network: AnyNetwork): boolean => {
-      return connectedWallet.masterWallet.supportsNetwork(network);
-    };
-
-    return filter;
   }
 
   ionViewDidEnter() {
@@ -261,8 +224,11 @@ export class BrowserPage implements DappBrowserClient {
         let color = await fac.prepareResult([r, g, b, 1]);
 
         this.zone.run(() => {
-          if (color.isDark) this.titleBar.setForegroundMode(TitleBarForegroundMode.LIGHT);
-          else this.titleBar.setForegroundMode(TitleBarForegroundMode.DARK);
+          if (color.isDark) {
+            this.titleBar.setForegroundMode(TitleBarForegroundMode.LIGHT);
+          } else {
+            this.titleBar.setForegroundMode(TitleBarForegroundMode.DARK);
+          }
 
           // Set the title bar background color to match the dapp theme
           this.titleBar.setBackgroundColor(themeColor);

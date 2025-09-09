@@ -746,6 +746,7 @@ export const zh = {
 
     'multi-sig-wallet-name': '钱包名称',
     'multi-sig-my-signing-wallet': '我的签名钱包',
+    'signing-wallet': '签名钱包',
     'multi-sig-pick-a-wallet': '选择钱包',
     'multi-sig-other-co-signers': '其他联合签名人',
     'multi-sig-input-xpub-key-prompt': '输入扩展公钥',
