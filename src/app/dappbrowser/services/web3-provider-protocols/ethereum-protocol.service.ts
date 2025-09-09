@@ -538,6 +538,10 @@ export class EthereumProtocolService {
       const networkSwitched = await GlobalSwitchNetworkService.instance.promptSwitchToNetwork(targetNetwork);
       if (networkSwitched) {
         Logger.log('ethereum', 'Successfully switched to the new network');
+
+        // Update the EVM network in the browser wallet connections service
+        await this.browserWalletConnectionsService.selectEVMNetwork(this.currentUrl, targetNetwork.key);
+
         this.sendInjectedResponse('ethereum', message.data.id, {}); // Successfully switched
       } else {
         Logger.log('ethereum', 'Network switch cancelled');
@@ -576,8 +580,12 @@ export class EthereumProtocolService {
       if (!targetNetwork) targetNetwork = WalletNetworkService.instance.getNetworkByKey(addedNetworkKey) as EVMNetwork;
 
       if (targetNetwork) {
-        // Ask user to switch but we don't mind the result.
-        await GlobalSwitchNetworkService.instance.promptSwitchToNetwork(targetNetwork);
+        // Ask user to switch and update the browser wallet connections service if successful
+        const networkSwitched = await GlobalSwitchNetworkService.instance.promptSwitchToNetwork(targetNetwork);
+        if (networkSwitched) {
+          // Update the EVM network in the browser wallet connections service
+          await this.browserWalletConnectionsService.selectEVMNetwork(this.currentUrl, targetNetwork.key);
+        }
       }
     }
 
