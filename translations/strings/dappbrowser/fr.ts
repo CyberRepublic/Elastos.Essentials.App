@@ -40,6 +40,7 @@ export const fr = {
     'wallet-disconnected': 'Portefeuille déconnecté',
     'wallet-disconnect-error': 'Erreur lors de la déconnexion du portefeuille',
     'no-wallet-connected': 'Aucun portefeuille connecté',
+    connected: 'Connecté',
 
     // Edit favorite
     'edit-favorite-title': 'Modifier le favori',

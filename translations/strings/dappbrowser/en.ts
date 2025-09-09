@@ -39,7 +39,8 @@ export const en = {
     disconnect: 'Disconnect',
     'wallet-disconnected': 'Wallet disconnected',
     'wallet-disconnect-error': 'Error disconnecting wallet',
-    'no-wallet-connected': 'No wallet connected',
+    'no-wallet-connected': 'Not connected',
+    connected: 'Connected',
 
     // Edit favorite
     'edit-favorite-title': 'Edit Favorite',

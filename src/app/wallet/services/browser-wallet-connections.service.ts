@@ -18,6 +18,7 @@ import { BTCNetworkBase } from '../model/networks/btc/network/btc.base.network';
 import { AnyBTCNetworkWallet } from '../model/networks/btc/networkwallets/btc.networkwallet';
 import { EVMNetwork } from '../model/networks/evms/evm.network';
 import { AnyEVMNetworkWallet } from '../model/networks/evms/networkwallets/evm.networkwallet';
+import { AnyNetwork } from '../model/networks/network';
 import { WalletNetworkService } from './network.service';
 import { WalletNetworkUIService } from './network.ui.service';
 import { LocalStorage } from './storage.service';
@@ -355,8 +356,9 @@ export class BrowserWalletConnectionsService {
         return null;
       }
     } else {
-      // Let user pick a network
-      selectedNetwork = (await this.walletNetworkUIService.pickNetwork()) as EVMNetwork;
+      // Let user pick a network - filter to only show EVM networks
+      const evmNetworkFilter = (network: AnyNetwork): boolean => network.isEVMNetwork();
+      selectedNetwork = (await this.walletNetworkUIService.pickNetwork(evmNetworkFilter)) as EVMNetwork;
       if (!selectedNetwork) {
         Logger.log('wallet', 'EVM network selection cancelled for dapp:', domain);
         return null;

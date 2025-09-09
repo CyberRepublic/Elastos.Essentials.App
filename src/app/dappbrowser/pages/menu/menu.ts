@@ -232,9 +232,9 @@ export class MenuPage {
 
   public getConnectedBitcoinNetworkName(): string {
     if (this.connectedBitcoinWallet) {
-      return this.connectedBitcoinWallet.masterWallet.name;
+      return this.translate.instant('dappbrowser.connected');
     } else {
-      return 'Select Network';
+      return this.translate.instant('dappbrowser.no-wallet-connected');
     }
   }
 
