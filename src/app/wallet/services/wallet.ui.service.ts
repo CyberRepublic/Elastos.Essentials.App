@@ -117,7 +117,7 @@ export class WalletUIService {
       modal.onWillDismiss().then(async params => {
         Logger.log('wallet', 'Wallet selected:', params);
         if (params.data && params.data.selectedMasterWalletId) {
-          return this.walletService.getMasterWallet(params.data.selectedMasterWalletId);
+          resolve(this.walletService.getMasterWallet(params.data.selectedMasterWalletId));
         } else {
           resolve(null);
         }

@@ -168,13 +168,10 @@ export class MenuPage {
     }
 
     const selectedNetwork = await this.browserWalletConnectionsService.selectEVMNetwork(this.browsedAppInfo.url);
+    console.log('Menu: EVM network selected:', selectedNetwork);
     if (selectedNetwork) {
       void this.goback(); // Exit menu after selecting network
     }
-  }
-
-  public async pickWallet() {
-    if (await this.walletUIService.chooseActiveWallet()) void this.goback(); // Exit menu after switching the wallet (most frequent case is user wants to exit)
   }
 
   public openExternal() {
@@ -394,6 +391,51 @@ export class MenuPage {
   //   }
   //   return '';
   // }
+
+  /**
+   * Disconnects the EVM wallet for the current dapp
+   */
+  public async disconnectEVMWallet(event: Event) {
+    event.stopPropagation(); // Prevent the wallet selection dialog from opening
+
+    if (!this.browsedAppInfo?.url) {
+      return;
+    }
+
+    try {
+      await this.browserWalletConnectionsService.disconnectWallet(this.browsedAppInfo.url, BrowserConnectionType.EVM);
+
+      Logger.log('dappbrowser', 'EVM wallet disconnected for url', this.browsedAppInfo.url);
+      this.native.genericToast('dappbrowser.wallet-disconnected');
+    } catch (error) {
+      Logger.error('dappbrowser', 'Error disconnecting EVM wallet:', error);
+      this.native.genericToast('dappbrowser.wallet-disconnect-error');
+    }
+  }
+
+  /**
+   * Disconnects the Bitcoin wallet for the current dapp
+   */
+  public async disconnectBitcoinWallet(event: Event) {
+    event.stopPropagation(); // Prevent the wallet selection dialog from opening
+
+    if (!this.browsedAppInfo?.url) {
+      return;
+    }
+
+    try {
+      await this.browserWalletConnectionsService.disconnectWallet(
+        this.browsedAppInfo.url,
+        BrowserConnectionType.BITCOIN
+      );
+
+      Logger.log('dappbrowser', 'Bitcoin wallet disconnected for url', this.browsedAppInfo.url);
+      this.native.genericToast('dappbrowser.wallet-disconnected');
+    } catch (error) {
+      Logger.error('dappbrowser', 'Error disconnecting Bitcoin wallet:', error);
+      this.native.genericToast('dappbrowser.wallet-disconnect-error');
+    }
+  }
 
   /**
    * Asks the browser plugin to clear cached data for the current url:

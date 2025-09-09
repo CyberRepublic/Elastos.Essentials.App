@@ -48,6 +48,10 @@
                                 <div class="title">EVM {{ 'dappbrowser.wallet' | translate }}</div>
                                 <div class="network" *ngIf="connectedEVMWallet; else noEvmWallet">
                                     {{connectedEVMWallet.masterWallet.name}}
+                                    <div class="disconnect-action" (click)="disconnectEVMWallet($event)">
+                                        <ion-icon name="close-circle-outline"></ion-icon>
+                                        <span>{{ 'dappbrowser.disconnect' | translate }}</span>
+                                    </div>
                                 </div>
                                 <ng-template #noEvmWallet>
                                     <div class="network no-connection">{{ 'dappbrowser.no-wallet-connected' | translate
@@ -86,6 +90,10 @@
                                 <div class="title">Bitcoin {{ 'dappbrowser.wallet' | translate }}</div>
                                 <div class="network" *ngIf="connectedBitcoinWallet; else noBitcoinWallet">
                                     {{connectedBitcoinWallet.masterWallet.name}}
+                                    <div class="disconnect-action" (click)="disconnectBitcoinWallet($event)">
+                                        <ion-icon name="close-circle-outline"></ion-icon>
+                                        <span>{{ 'dappbrowser.disconnect' | translate }}</span>
+                                    </div>
                                 </div>
                                 <ng-template #noBitcoinWallet>
                                     <div class="network no-connection">{{ 'dappbrowser.no-wallet-connected' | translate

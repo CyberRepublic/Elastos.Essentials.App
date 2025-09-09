@@ -1891,6 +1891,14 @@ export class DappBrowserService implements GlobalService {
       } else {
         console.log('DappBrowser: EVM wallet disconnected for active dApp');
         this.userEVMAddress = null;
+        // Notify the web3 provider about the disconnection
+        void dappBrowser.executeScript({
+          code: `
+            if (window.ethereum && window.ethereum.setAddress) {
+              window.ethereum.setAddress('');
+            }
+          `
+        });
       }
     });
 
@@ -1906,6 +1914,14 @@ export class DappBrowserService implements GlobalService {
         } else {
           console.log('DappBrowser: Bitcoin wallet disconnected for active dApp');
           this.userBTCAddress = null;
+          // Notify the Bitcoin provider about the disconnection
+          void dappBrowser.executeScript({
+            code: `
+              if (window.unisat && window.unisat.setAddress) {
+                window.unisat.setAddress('');
+              }
+            `
+          });
         }
       }
     );
@@ -1935,50 +1951,6 @@ export class DappBrowserService implements GlobalService {
       this.activeDAppEVMNetworkSub = null;
     }
   }
-
-  /**
-   * Updates wallet addresses for the currently active dApp
-   */
-  // private async updateWalletAddressesForCurrentDapp(): Promise<void> {
-  //   const currentUrl = this.browserWalletConnectionsService.getActiveDappUrl();
-  //   if (!currentUrl) {
-  //     console.log('DappBrowser: No active dApp URL');
-  //     return;
-  //   }
-
-  //   try {
-  //     // Get EVM wallet address
-  //     const evmWallet = this.browserWalletConnectionsService.activeDappEVMWallet.value;
-  //     if (evmWallet) {
-  //       await this.updateEVMWalletAddress(evmWallet);
-  //     } else {
-  //       this.userEVMAddress = null;
-  //     }
-
-  //     // Get Bitcoin wallet address
-  //     const bitcoinWallet = this.browserWalletConnectionsService.activeDappBitcoinWallet.value;
-  //     if (bitcoinWallet) {
-  //       await this.updateBitcoinWalletAddress(bitcoinWallet.masterWallet);
-  //     } else {
-  //       this.userBTCAddress = null;
-  //     }
-
-  //     // Get EVM network information
-  //     const evmNetwork = this.browserWalletConnectionsService.activeDappEVMNetwork.value;
-  //     if (evmNetwork) {
-  //       await this.updateNetworkForCurrentDapp(evmNetwork);
-  //     }
-
-  //     console.log('DappBrowser: Updated wallet addresses for dApp:', {
-  //       url: currentUrl,
-  //       evmAddress: this.userEVMAddress,
-  //       btcAddress: this.userBTCAddress,
-  //       evmNetwork: evmNetwork?.name
-  //     });
-  //   } catch (error) {
-  //     console.error('DappBrowser: Error updating wallet addresses:', error);
-  //   }
-  // }
 
   /**
    * Updates the EVM wallet address for the current dApp

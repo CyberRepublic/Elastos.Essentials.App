@@ -206,7 +206,7 @@ export class BrowserWalletConnectionsService {
     masterWalletId?: string
   ): Promise<MasterWallet | null> {
     const domain = this.extractDomain(dappUrl);
-    Logger.log('wallet', `Connecting ${connectionType} wallet for dapp:`, domain);
+    Logger.log('wallet', `Connecting wallet of type: ${connectionType.toString()} for dapp:`, domain);
 
     let selectedWallet: MasterWallet;
 
@@ -270,9 +270,12 @@ export class BrowserWalletConnectionsService {
     );
 
     // Update reactive subjects if this affects the active dApp
+    console.log('active dapp url:', this.activeDappUrl.value, 'dapp url:', dappUrl);
     if (this.activeDappUrl.value === dappUrl) {
       await this.updateActiveDappConnections();
     }
+
+    Logger.log('wallet', 'Connected wallet:', selectedWallet, 'for type:', connectionType, 'for dapp:', dappUrl);
 
     return selectedWallet;
   }
@@ -309,6 +312,11 @@ export class BrowserWalletConnectionsService {
       `Disconnected ${connectionType === BrowserConnectionType.EVM ? 'EVM' : 'BTC'} wallet for dapp:`,
       domain
     );
+
+    // Update reactive subjects if this affects the active dApp
+    if (this.activeDappUrl.value === dappUrl) {
+      await this.updateActiveDappConnections();
+    }
   }
 
   /**
