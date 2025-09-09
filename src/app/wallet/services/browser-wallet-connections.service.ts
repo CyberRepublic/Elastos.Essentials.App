@@ -248,6 +248,16 @@ export class BrowserWalletConnectionsService {
       }
     }
 
+    // For EVM connections, handle chain verification and network selection
+    if (connectionType === BrowserConnectionType.EVM) {
+      const selectedNetwork = await this.handleEVMChainVerification(dappUrl, selectedWallet);
+      if (!selectedNetwork) {
+        Logger.warn('wallet', 'No suitable EVM network found for wallet:', selectedWallet.name);
+        return null;
+      }
+      Logger.log('wallet', 'Selected EVM network for connection:', selectedNetwork.name);
+    }
+
     // Save the connection
     const connections = await this.loadConnections();
     if (!connections[domain]) {
@@ -491,5 +501,104 @@ export class BrowserWalletConnectionsService {
     }
 
     return this.networkService.getNetworkByKey(dappConnections.evmNetwork.networkKey) as EVMNetwork;
+  }
+
+  /**
+   * Handles EVM chain verification and network selection when connecting a wallet.
+   * This method ensures the connected wallet supports the appropriate network based on:
+   * - Active chain ID if there's one and the wallet supports it
+   * - Overall active network from wallet service if supported by the wallet
+   * - First supported network by the wallet as fallback
+   *
+   * @param dappUrl The URL of the dapp
+   * @param selectedWallet The wallet being connected
+   * @returns The selected EVMNetwork or null if no suitable network found
+   */
+  public async handleEVMChainVerification(dappUrl: string, selectedWallet: MasterWallet): Promise<EVMNetwork | null> {
+    const domain = this.extractDomain(dappUrl);
+    Logger.log('wallet', 'Handling EVM chain verification for dapp:', domain, 'wallet:', selectedWallet.name);
+
+    // Get supported EVM networks for this wallet
+    const supportedEVMNetworks = this.getSupportedEVMNetworks(selectedWallet);
+
+    if (supportedEVMNetworks.length === 0) {
+      Logger.warn('wallet', 'Selected wallet does not support any EVM networks:', selectedWallet.name);
+      return null;
+    }
+
+    Logger.log(
+      'wallet',
+      'Wallet supports',
+      supportedEVMNetworks.length,
+      'EVM networks:',
+      supportedEVMNetworks.map(n => n.name)
+    );
+
+    // 1. Check if there's an active chain for this dapp and wallet supports it
+    const connections = await this.loadConnections();
+    const dappConnections = connections[domain];
+
+    if (dappConnections?.evmNetwork) {
+      const activeNetwork = this.networkService.getNetworkByKey(dappConnections.evmNetwork.networkKey) as EVMNetwork;
+      if (activeNetwork && supportedEVMNetworks.includes(activeNetwork)) {
+        Logger.log('wallet', 'Keeping existing active network for dapp:', activeNetwork.name);
+        return activeNetwork;
+      } else {
+        Logger.log('wallet', 'Active network not supported by wallet, will select new one');
+      }
+    }
+
+    // 2. If no active chain or not supported, check the overall active network from wallet service
+    const globalActiveNetwork = this.networkService.activeNetwork.value;
+    if (
+      globalActiveNetwork &&
+      globalActiveNetwork.isEVMNetwork() &&
+      supportedEVMNetworks.includes(globalActiveNetwork as EVMNetwork)
+    ) {
+      Logger.log('wallet', 'Using global active network:', globalActiveNetwork.name);
+
+      // Save this network selection for the dapp
+      await this.saveEVMNetworkSelection(dappUrl, globalActiveNetwork as EVMNetwork);
+      return globalActiveNetwork as EVMNetwork;
+    }
+
+    // 3. Use the first supported network as fallback
+    const fallbackNetwork = supportedEVMNetworks[0];
+    Logger.log('wallet', 'Using first supported network as fallback:', fallbackNetwork.name);
+
+    // Save this network selection for the dapp
+    await this.saveEVMNetworkSelection(dappUrl, fallbackNetwork);
+    return fallbackNetwork;
+  }
+
+  /**
+   * Gets all EVM networks supported by a master wallet
+   * @param masterWallet The master wallet to check
+   * @returns Array of supported EVM networks
+   */
+  private getSupportedEVMNetworks(masterWallet: MasterWallet): EVMNetwork[] {
+    return masterWallet.getSupportedNetworks().filter(network => network.isEVMNetwork()) as EVMNetwork[];
+  }
+
+  /**
+   * Saves EVM network selection for a dapp
+   * @param dappUrl The URL of the dapp
+   * @param network The network to save
+   */
+  private async saveEVMNetworkSelection(dappUrl: string, network: EVMNetwork): Promise<void> {
+    const domain = this.extractDomain(dappUrl);
+    const connections = await this.loadConnections();
+
+    if (!connections[domain]) {
+      connections[domain] = {};
+    }
+
+    connections[domain].evmNetwork = {
+      networkKey: network.key,
+      selectedAt: Date.now()
+    };
+
+    await this.saveConnections(connections);
+    Logger.log('wallet', 'Saved EVM network selection for dapp:', domain, network.name);
   }
 }
