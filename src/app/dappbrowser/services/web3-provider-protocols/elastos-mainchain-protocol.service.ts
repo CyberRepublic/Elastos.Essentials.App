@@ -10,9 +10,13 @@ import {
   ElastosMainChainNetworkBase
 } from 'src/app/wallet/model/networks/elastos/mainchain/network/elastos.networks';
 import { MainChainSubWallet } from 'src/app/wallet/model/networks/elastos/mainchain/subwallets/mainchain.subwallet';
+import {
+  BrowserConnectionType,
+  BrowserWalletConnectionsService
+} from 'src/app/wallet/services/browser-wallet-connections.service';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
-import { DABMessage, DappBrowserService } from '../dappbrowser.service';
+import { DABMessage } from '../dappbrowser.service';
 
 declare let dappBrowser: DappBrowserPlugin.DappBrowser;
 
@@ -36,8 +40,8 @@ export class ElastosMainchainProtocolService {
 
   constructor(
     private walletNetworkService: WalletNetworkService,
-    private dappBrowserService: DappBrowserService,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private browserWalletConnectionsService: BrowserWalletConnectionsService
   ) {}
 
   /**
@@ -99,6 +103,38 @@ export class ElastosMainchainProtocolService {
       window.elamain = elamainProvider;
       console.log('Essentials Ela main chain providers are injected', elamainProvider);
     `;
+  }
+
+  /**
+   * Gets the injection code for a specific URL, handling wallet connections and address extraction
+   */
+  async getInjectionCodeForUrl(url: string): Promise<string> {
+    if (!url) {
+      Logger.warn('elastosmainchain', 'No URL provided for injection code generation');
+      return this.getElaMainProviderInjectionCode('', '') + '\n' + this.getElastosConnectorInjectionCode();
+    }
+
+    // For Elastos mainchain, we need to get the ELA address from the connected EVM wallet
+    // since Elastos mainchain addresses are derived from EVM wallets
+    const evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(url, BrowserConnectionType.EVM);
+
+    let elaMainChainAddress = '';
+
+    if (evmWallet) {
+      elaMainChainAddress = await this.getCurrentElaMainChainAddress(evmWallet.masterWallet);
+    }
+
+    // Get ELA main chain network RPC URL
+    const elaMainChainNetwork =
+      this.walletNetworkService.getNetworkByKey('elastos') ||
+      this.walletNetworkService.getNetworkByKey('elastos-mainnet');
+    const elamainRpcUrl = elaMainChainNetwork?.getRPCUrl() || '';
+
+    return (
+      this.getElaMainProviderInjectionCode(elaMainChainAddress, elamainRpcUrl) +
+      '\n' +
+      this.getElastosConnectorInjectionCode()
+    );
   }
 
   /**

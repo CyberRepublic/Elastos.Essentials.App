@@ -24,8 +24,7 @@ export class UnisatProtocolService {
 
   constructor(
     private walletNetworkService: WalletNetworkService,
-    private browserWalletConnectionsService: BrowserWalletConnectionsService,
-    private dappBrowserService: DappBrowserService
+    private browserWalletConnectionsService: BrowserWalletConnectionsService
   ) {}
 
   /**
@@ -120,6 +119,32 @@ export class UnisatProtocolService {
       }
       console.log('Essentials Unisat/OKX providers are injected', bitcoinProvider);
     `;
+  }
+
+  /**
+   * Gets the injection code for a specific URL, handling wallet connections and address extraction
+   */
+  async getInjectionCodeForUrl(url: string): Promise<string> {
+    if (!url) {
+      Logger.warn('unisatprotocol', 'No URL provided for injection code generation');
+      return this.getProviderInjectionCode('', this.btcRpcUrl || '');
+    }
+
+    // Check for existing Bitcoin wallet connection for this dapp
+    const btcWallet = await this.browserWalletConnectionsService.getConnectedWallet(url, BrowserConnectionType.BITCOIN);
+
+    // Get address from connected wallet
+    let btcAddress = '';
+
+    if (btcWallet) {
+      btcAddress = await this.getWalletBitcoinAddress(btcWallet.masterWallet);
+    }
+
+    // Get Bitcoin RPC URL
+    const bitcoinNetwork = this.walletNetworkService.getNetworkByKey('btc');
+    const btcRpcUrl = bitcoinNetwork?.getRPCUrl() || '';
+
+    return this.getProviderInjectionCode(btcAddress, btcRpcUrl);
   }
 
   /**
@@ -452,6 +477,6 @@ export class UnisatProtocolService {
    * Gets the current URL from the dappbrowser service
    */
   private getCurrentUrl(): string {
-    return this.dappBrowserService.url;
+    return DappBrowserService.instance.url;
   }
 }

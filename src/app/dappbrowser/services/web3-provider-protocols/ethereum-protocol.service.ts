@@ -48,9 +48,7 @@ export class EthereumProtocolService {
   private subscriptions: Subscription[] = [];
 
   constructor(
-    private walletNetworkService: WalletNetworkService,
     private browserWalletConnectionsService: BrowserWalletConnectionsService,
-    private dappBrowserService: DappBrowserService,
     private httpClient: HttpClient
   ) {}
 
@@ -151,6 +149,39 @@ export class EthereumProtocolService {
   }
 
   /**
+   * Gets the injection code for a specific URL, handling wallet connections and address extraction
+   */
+  async getInjectionCodeForUrl(url: string): Promise<string> {
+    if (!url) {
+      Logger.warn('ethereum', 'No URL provided for injection code generation');
+      return this.getProviderInjectionCode('', -1, '');
+    }
+
+    // Check for existing EVM wallet connection for this dapp
+    const evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(url, BrowserConnectionType.EVM);
+    const selectedNetwork = await this.browserWalletConnectionsService.getSelectedEVMNetwork(url);
+
+    // Get address from connected wallet
+    let evmAddress: string | undefined = undefined;
+    let chainId: number | undefined = undefined;
+    let rpcUrl = '';
+
+    if (evmWallet) {
+      const evmSubwallet = evmWallet.getMainEvmSubWallet();
+      if (evmSubwallet) {
+        evmAddress = await evmSubwallet.getCurrentReceiverAddress();
+      }
+    }
+
+    if (selectedNetwork && selectedNetwork.getMainChainID && selectedNetwork.getRPCUrl) {
+      chainId = selectedNetwork.getMainChainID();
+      rpcUrl = selectedNetwork.getRPCUrl();
+    }
+
+    return this.getProviderInjectionCode(evmAddress, chainId, rpcUrl);
+  }
+
+  /**
    * Sets up subscriptions to EVM wallet and network changes for the current dApp
    */
   setupSubscriptions(): void {
@@ -170,11 +201,7 @@ export class EthereumProtocolService {
         Logger.log('ethereum', 'EVM wallet disconnected for active dApp');
         this.userEVMAddress = null;
         // Notify the web3 provider about the disconnection
-        void this.executeScript(`
-          if (window.ethereum && window.ethereum.setAddress) {
-            window.ethereum.setAddress('');
-          }
-        `);
+        void this.sendActiveWalletToDApp(undefined);
       }
     });
 
@@ -241,7 +268,7 @@ export class EthereumProtocolService {
   /**
    * Updates the wallet address for the current dApp
    */
-  async sendActiveWalletToDApp(networkWallet: AnyNetworkWallet): Promise<void> {
+  async sendActiveWalletToDApp(networkWallet: AnyNetworkWallet | undefined): Promise<void> {
     // Get the active wallet address
     if (networkWallet) {
       const evmSubwallet = networkWallet.getMainEvmSubWallet();
@@ -256,6 +283,16 @@ export class EthereumProtocolService {
       // Network updates are coordinated through the main service
       void this.executeScript(`
         window.ethereum.setAddress('${this.userEVMAddress}');
+      `);
+    } else {
+      Logger.log('ethereum', 'Sending wallet disconnection to dapp');
+
+      // When disconnecting, both address and chain must become udnefined
+      void this.executeScript(`
+        if (window.ethereum && window.ethereum.setAddress) {
+          window.ethereum.setAddress(undefined);
+          window.ethereum.setChainId(undefined);
+        }
       `);
     }
   }
@@ -545,7 +582,7 @@ export class EthereumProtocolService {
    * Gets the current URL from the dappbrowser service
    */
   private getCurrentUrl(): string {
-    return this.dappBrowserService.url;
+    return DappBrowserService.instance.url;
   }
 
   // Provider injection coordination with main service handled elsewhere

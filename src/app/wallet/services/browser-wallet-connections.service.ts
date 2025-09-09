@@ -299,6 +299,12 @@ export class BrowserWalletConnectionsService {
       const connectionKey = connectionType === BrowserConnectionType.EVM ? 'evm' : 'btc';
       delete connections[domain][connectionKey];
 
+      // When disconnecting EVM wallet, also unset the selected EVM network.
+      // This is how metamask works (which EIP?).
+      if (connectionType === BrowserConnectionType.EVM) {
+        delete connections[domain].evmNetwork;
+      }
+
       // Clean up empty domain entries
       if (Object.keys(connections[domain]).length === 0) {
         delete connections[domain];

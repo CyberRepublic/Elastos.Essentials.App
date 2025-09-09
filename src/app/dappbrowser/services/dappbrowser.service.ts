@@ -21,10 +21,7 @@ import { DIDSessionsStore } from 'src/app/services/stores/didsessions.store';
 import { NetworkTemplateStore } from 'src/app/services/stores/networktemplate.store';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 // EVM, Network, and Intent result imports moved to EthereumProtocolService
-import {
-  BrowserConnectionType,
-  BrowserWalletConnectionsService
-} from 'src/app/wallet/services/browser-wallet-connections.service';
+import { BrowserWalletConnectionsService } from 'src/app/wallet/services/browser-wallet-connections.service';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import type { BrowsedAppInfo } from '../model/browsedappinfo';
 import { ElastosMainchainProtocolService } from './web3-provider-protocols/elastos-mainchain-protocol.service';
@@ -101,8 +98,6 @@ export interface DappBrowserClient {
 })
 export class DappBrowserService implements GlobalService {
   public static instance: DappBrowserService = null;
-
-  private btcRpcUrl: string = null;
 
   private dabClient: DappBrowserClient = null;
   public title: string = null;
@@ -337,93 +332,34 @@ export class DappBrowserService implements GlobalService {
    * Javascript code to inject at documents start
    */
   private async getInjectedJs(): Promise<string> {
-    // Check for existing connections for this dapp
     const currentUrl = this.url;
     if (!currentUrl) {
       Logger.warn('dappbrowser', 'No current URL available for connection check');
-      return this.getDefaultInjectedJs();
+      return await this.getDefaultInjectedJs();
     }
 
-    const evmWallet = await this.browserWalletConnectionsService.getConnectedWallet(
-      currentUrl,
-      BrowserConnectionType.EVM
-    );
-    const btcWallet = await this.browserWalletConnectionsService.getConnectedWallet(
-      currentUrl,
-      BrowserConnectionType.BITCOIN
-    );
-    const selectedNetwork = await this.browserWalletConnectionsService.getSelectedEVMNetwork(currentUrl);
+    // Delegate to protocol services to handle their specific wallet connections and injection code
+    const [ethereumCode, unisatCode, elastosCode] = await Promise.all([
+      this.ethereumProtocolService.getInjectionCodeForUrl(currentUrl),
+      this.unisatProtocolService.getInjectionCodeForUrl(currentUrl),
+      this.elastosMainchainProtocolService.getInjectionCodeForUrl(currentUrl)
+    ]);
 
-    // Get addresses from connected wallets
-    let evmAddress = '';
-    let btcAddress = '';
-    let elaMainChainAddress = '';
-    let chainId = -1;
-    let rpcUrl = '';
-
-    if (evmWallet) {
-      const evmSubwallet = evmWallet.getMainEvmSubWallet();
-      if (evmSubwallet) {
-        evmAddress = await evmSubwallet.getCurrentReceiverAddress();
-      }
-      elaMainChainAddress = await this.elastosMainchainProtocolService.getCurrentElaMainChainAddress(
-        evmWallet.masterWallet
-      );
-    }
-
-    if (selectedNetwork && selectedNetwork.getMainChainID && selectedNetwork.getRPCUrl) {
-      chainId = selectedNetwork.getMainChainID();
-      rpcUrl = selectedNetwork.getRPCUrl();
-    }
-
-    if (btcWallet) {
-      // Get Bitcoin address through the protocol service
-      const bitcoinNetwork = this.walletNetworkService.getNetworkByKey('btc');
-      const bitcoinNetworkWallet = await bitcoinNetwork.createNetworkWallet(btcWallet.masterWallet, false);
-      const addresses = bitcoinNetworkWallet?.safe.getAddresses(0, 1, false, null);
-      btcAddress = addresses?.[0] || '';
-    }
-
-    // Prepare our web3 provider bridge and elastos connectors for injection
-    const web3ProviderCode =
-      this.ethereumProtocolService.getProviderInjectionCode(evmAddress, chainId, rpcUrl) +
-      '\n' +
-      this.unisatProtocolService.getProviderInjectionCode(btcAddress, this.btcRpcUrl) +
-      '\n' +
-      this.getElastosProviderInjectionCode(elaMainChainAddress);
-
-    const elastosConnectorCode = this.elastosMainchainProtocolService.getElastosConnectorInjectionCode();
-
-    return web3ProviderCode + elastosConnectorCode;
-  }
-
-  /**
-   * Gets the Elastos provider injection code
-   */
-  private getElastosProviderInjectionCode(elaMainChainAddress = ''): string {
-    // Get ELA main chain network RPC URL
-    const elaMainChainNetwork =
-      this.walletNetworkService.getNetworkByKey('elastos') ||
-      this.walletNetworkService.getNetworkByKey('elastos-mainnet');
-    const elamainRpcUrl = elaMainChainNetwork?.getRPCUrl() || '';
-
-    return this.elastosMainchainProtocolService.getElaMainProviderInjectionCode(elaMainChainAddress, elamainRpcUrl);
+    return `${ethereumCode}\n${unisatCode}\n${elastosCode}`;
   }
 
   /**
    * Fallback method for when no URL is available
    */
-  private getDefaultInjectedJs(): string {
-    const web3ProviderCode =
-      this.ethereumProtocolService.getProviderInjectionCode('', -1, '') +
-      '\n' +
-      this.unisatProtocolService.getProviderInjectionCode('', this.btcRpcUrl) +
-      '\n' +
-      this.getElastosProviderInjectionCode();
+  private async getDefaultInjectedJs(): Promise<string> {
+    // Delegate to protocol services with empty URL to get default injection code
+    const [ethereumCode, unisatCode, elastosCode] = await Promise.all([
+      this.ethereumProtocolService.getInjectionCodeForUrl(''),
+      this.unisatProtocolService.getInjectionCodeForUrl(''),
+      this.elastosMainchainProtocolService.getInjectionCodeForUrl('')
+    ]);
 
-    const elastosConnectorCode = this.elastosMainchainProtocolService.getElastosConnectorInjectionCode();
-
-    return web3ProviderCode + elastosConnectorCode;
+    return `${ethereumCode}\n${unisatCode}\n${elastosCode}`;
   }
 
   /**
