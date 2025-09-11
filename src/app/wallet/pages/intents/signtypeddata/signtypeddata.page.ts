@@ -23,7 +23,7 @@
 import { Component, NgZone, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { signTypedData, signTypedData_v4 } from 'eth-sig-util';
+import { TypedDataUtils } from 'eth-sig-util';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import {
   BuiltInIcon,
@@ -34,7 +34,6 @@ import {
 import { Logger } from 'src/app/logger';
 import { GlobalIntentService } from 'src/app/services/global.intent.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
-import { StandardMasterWallet } from 'src/app/wallet/model/masterwallets/masterwallet';
 import { WalletType } from 'src/app/wallet/model/masterwallets/wallet.types';
 import { AnyNetworkWallet } from 'src/app/wallet/model/networks/base/networkwallets/networkwallet';
 import { AnyMainCoinEVMSubWallet } from 'src/app/wallet/model/networks/evms/subwallets/evm.subwallet';
@@ -241,30 +240,28 @@ export class SignTypedDataPage implements OnInit {
       return;
     }
 
-    let privateKeyHexNoprefix = await (
-      await (this.networkWallet.masterWallet as StandardMasterWallet).getPrivateKey(payPassword)
-    ).replace('0x', '');
-
-    let privateKey = Buffer.from(privateKeyHexNoprefix, 'hex');
-    let signedData: string = null;
-
     try {
-      if (this.useV4) {
-        signedData = signTypedData_v4(privateKey, {
-          data: this.dataToSign
-        });
-      } else {
-        signedData = signTypedData(privateKey, {
-          data: this.dataToSign
-        });
-      }
+      // Create the digest for typed data
+      const digest = TypedDataUtils.sign(this.dataToSign, this.useV4);
+      const digestHex = digest.toString('hex');
 
-      void this.sendIntentResponse(
-        {
-          signedData
-        },
-        this.receivedIntent.intentId
-      );
+      // Get the wallet address for signing
+      const walletAddress = this.evmSubWallet.getCurrentReceiverAddress();
+
+      // Use networkWallet.signDigest() instead of accessing private key directly
+      const signature = await this.networkWallet.signDigest(walletAddress, digestHex, payPassword);
+
+      if (signature) {
+        void this.sendIntentResponse(
+          {
+            signedData: signature
+          },
+          this.receivedIntent.intentId
+        );
+      } else {
+        Logger.error('wallet', 'Sign typed data - signature is null');
+        await this.sendIntentResponse({ data: null }, this.receivedIntent.intentId);
+      }
     } catch (e) {
       // Sign method can throw exception in case some provided content has an invalid format
       // i.e.: array value, with "address" type. In such case, we fail silently.

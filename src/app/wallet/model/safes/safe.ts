@@ -1,4 +1,5 @@
 import type { TxData } from '@ethereumjs/tx';
+import { Logger } from 'src/app/logger';
 import { Transfer } from '../../services/cointransfer.service';
 import { BTCTxData } from '../btc.types';
 import { MasterWallet } from '../masterwallets/masterwallet';
@@ -65,6 +66,10 @@ export abstract class Safe {
    * @param password
    */
   public signDigest(address: string, digest: string, password: string): Promise<string> {
+    Logger.error(
+      'wallet',
+      'signDigest is not implemented, returning an empty signature. Need to override signDigest in the safe subclass.'
+    );
     return null;
   }
 

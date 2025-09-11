@@ -390,4 +390,52 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
 
     return transactionHash;
   }
+
+  /**
+   * Signs a digest using the underlying EOA controller wallet.
+   * This delegates to the EOA safe's signDigest method.
+   */
+  public async signDigest(
+    networkWallet: AccountAbstractionNetworkWallet,
+    address: string,
+    digest: string,
+    password: string
+  ): Promise<string> {
+    Logger.log('wallet', 'PG AA Provider: Signing digest:', digest, 'for address:', address);
+
+    try {
+      // Get the EOA controller network wallet
+      const eoaControllerNetworkWallet = await networkWallet.getControllerNetworkWallet();
+
+      if (!eoaControllerNetworkWallet) {
+        throw new Error('Cannot sign digest: EOA controller network wallet not found');
+      }
+
+      Logger.log('wallet', 'PG AA Provider: EOA controller network wallet found:', {
+        masterWalletId: eoaControllerNetworkWallet.masterWallet.id,
+        masterWalletType: eoaControllerNetworkWallet.masterWallet.type,
+        networkKey: eoaControllerNetworkWallet.network.key
+      });
+
+      // Delegate to the EOA safe's signDigest method
+      const signature = await eoaControllerNetworkWallet.signDigest(address, digest, null);
+
+      if (!signature) {
+        Logger.warn('wallet', 'PG AA Provider: EOA safe returned null signature');
+        return null;
+      }
+
+      Logger.log('wallet', 'PG AA Provider: Successfully signed digest');
+      return signature;
+    } catch (error) {
+      Logger.error('wallet', 'PG AA Provider: signDigest error:', {
+        errorMessage: error.message,
+        errorStack: error.stack,
+        address,
+        digestLength: digest ? digest.length : 'undefined',
+        hasPassword: !!password
+      });
+      throw error;
+    }
+  }
 }

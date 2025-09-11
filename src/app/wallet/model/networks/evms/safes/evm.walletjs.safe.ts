@@ -63,11 +63,18 @@ export class EVMWalletJSSafe extends Safe implements EVMSafe {
     try {
       let seed = await (this.masterWallet as StandardMasterWallet).getSeed(password);
       if (seed) {
+        Logger.log('wallet', 'EVM Safe: Using seed for wallet initialization');
         let jsWallet = await WalletUtil.getWalletFromSeed(seed);
         this.privateKey = jsWallet.privateKey;
       } else {
         // No mnemonic - check if we have a private key instead
+        Logger.log('wallet', 'EVM Safe: Using private key for wallet initialization');
         this.privateKey = await (this.masterWallet as StandardMasterWallet).getPrivateKey(password);
+      }
+
+      if (!this.privateKey) {
+        Logger.error('wallet', 'EVM Safe: Failed to get private key or seed');
+        throw new Error('Failed to get private key or seed from master wallet');
       }
 
       this.privateKey = this.privateKey.replace('0x', '');
@@ -84,7 +91,14 @@ export class EVMWalletJSSafe extends Safe implements EVMSafe {
         );
       }
     } catch (error) {
-      Logger.error('wallet', 'initJSWallet exception', error);
+      Logger.error('wallet', 'EVM Safe initJSWallet exception:', error);
+      Logger.error('wallet', 'EVM Safe initJSWallet error details:', {
+        masterWalletId: this.masterWallet.id,
+        masterWalletType: this.masterWallet.type,
+        hasPassword: !!password,
+        errorMessage: error.message,
+        errorStack: error.stack
+      });
       throw error;
     }
   }

@@ -87,4 +87,21 @@ export abstract class AccountAbstractionProvider<
     networkWallet: AccountAbstractionNetworkWallet,
     fullUserOp: UserOperation
   ): Promise<string>;
+
+  /**
+   * Signs a digest
+   *
+   * @param networkWallet The account abstraction network wallet
+   * @param address The address to sign with (should be the EOA controller address)
+   * @param digest The digest to sign (hex string)
+   * @param password The password for the EOA wallet
+   *
+   * @returns Promise resolving to the signature
+   */
+  public abstract signDigest(
+    networkWallet: AccountAbstractionNetworkWallet,
+    address: string,
+    digest: string,
+    password: string
+  ): Promise<string>;
 }

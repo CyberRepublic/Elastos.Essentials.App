@@ -1,8 +1,8 @@
+import { Logger } from 'src/app/logger';
 import { AccountAbstractionProvidersService } from 'src/app/wallet/services/account-abstraction/account-abstraction-providers.service';
 import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
 import { Transfer } from '../../../../services/cointransfer.service';
-import { SafeService } from '../../../../services/safe.service';
 import { AccountAbstractionMasterWallet } from '../../../masterwallets/account.abstraction.masterwallet';
 import { Safe } from '../../../safes/safe';
 import { SignTransactionResult } from '../../../safes/safe.types';
@@ -17,7 +17,6 @@ import { EVMSafe } from './evm.safe';
  * Safe specialized for Account Abstraction wallets
  */
 export class AccountAbstractionSafe extends Safe implements EVMSafe {
-  private safeService = SafeService.instance;
   private aaProvider: AccountAbstractionProvider;
   private aaAddress: string;
 
@@ -121,6 +120,23 @@ export class AccountAbstractionSafe extends Safe implements EVMSafe {
     return {
       signedTransaction: transactionHash
     };
+  }
+
+  public async signDigest(address: string, digest: string, password: string): Promise<string> {
+    // Get the network wallet to access the provider
+    const networkWallet = this.networkWallet as AccountAbstractionNetworkWallet;
+
+    if (!networkWallet) {
+      Logger.error('wallet', 'AccountAbstractionSafe: networkWallet is null');
+      return null;
+    }
+
+    // Get the EOA controller address
+    const eoaControllerNetworkWallet = await networkWallet.getControllerNetworkWallet();
+    const eoaControllerAddress = eoaControllerNetworkWallet.getAddresses()[0].address;
+
+    // Delegate to the AA provider's signDigest method
+    return await this.aaProvider.signDigest(networkWallet, eoaControllerAddress, digest, password);
   }
 
   /**
