@@ -246,7 +246,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
       const paymasterAbi = ['function ethPerTokenRate() view returns (uint256)'];
       const paymasterContract = new ethers.Contract(chainConfig.paymasterAddress, paymasterAbi, provider);
 
-      // Run ALL independent async operations in parallel for maximum performance
+      // Run independent async operations in parallel
       const [gasPrice, feeData, callGasLimit, verificationGasLimit, ethPerTokenRate] = await Promise.all([
         // Gas price
         provider.getGasPrice(),
@@ -264,7 +264,8 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
             Logger.log('wallet', 'Estimated execute gas:', gasLimit.toString());
             return gasLimit;
           } catch (error) {
-            throw new Error(`Failed to estimate execute gas: ${error}`);
+            Logger.warn('wallet', 'Failed to estimate execute gas, using default:', error);
+            return BigNumber.from(100000); // Default fallback
           }
         })(),
         // verificationGasLimit
@@ -284,8 +285,27 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
       Logger.log('wallet', 'Current network Gas price:', gasPrice.toString());
       Logger.log('wallet', 'Fee data:', feeData);
 
+      // Create UserOperation with dummy NON-ZERO signature to avoid underestimating calldata gas cost
+      // SDK uses non-zero bytes when signature is missing; we simulate that explicitly here
+      const userOpForCalculation = {
+        ...partialUserOp,
+        signature: '0x' + '1'.repeat(130)
+      };
+
+      // Use AA SDK to get the preVerificationGas
+      const preVerificationGas = BundlerService.instance.calculatePreVerificationGas(userOpForCalculation);
+
+      Logger.log('wallet', 'PreVerificationGas calculation:', {
+        preVerificationGas: preVerificationGas.toString(),
+        userOpCallData: userOpForCalculation.callData.substring(0, 10) + '...' // Show first 10 chars
+      });
+
+      // Use calculated preVerificationGas (with small safety buffer) and estimated callGasLimit.
+      // It's unclear why the AA SDK calculation method returns a too low value. It's possibly
+      // "normal" for some bundlers to require a overhead, as the SDK has "GasOverheads" capabilities...
+      const preVerificationGasWithBuffer = BigNumber.from(preVerificationGas).add(10000);
       const estimates = {
-        preVerificationGas: BigNumber.from(60000).toHexString(), // Pre-verification gas is a constant in the AA SDK
+        preVerificationGas: preVerificationGasWithBuffer.toHexString(),
         verificationGasLimit: verificationGasLimit.toHexString(),
         callGasLimit: callGasLimit.toHexString()
       };

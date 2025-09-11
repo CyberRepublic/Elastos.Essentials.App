@@ -1,3 +1,4 @@
+import { calcPreVerificationGas } from '@account-abstraction/sdk';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Logger } from 'src/app/logger';
@@ -122,6 +123,27 @@ export class BundlerService {
     }
 
     throw new Error(`UserOperation receipt not found after ${maxAttempts} attempts`);
+  }
+
+  /**
+   * Calculates preVerificationGas using the official AA SDK implementation.
+   * This follows the same logic as used by popular bundlers and avoids arbitrary floors.
+   */
+  public calculatePreVerificationGas(userOp: UserOperation): number {
+    const partial = {
+      sender: userOp.sender,
+      nonce: userOp.nonce,
+      initCode: userOp.initCode,
+      callData: userOp.callData,
+      callGasLimit: userOp.callGasLimit,
+      verificationGasLimit: userOp.verificationGasLimit,
+      maxFeePerGas: userOp.maxFeePerGas,
+      maxPriorityFeePerGas: userOp.maxPriorityFeePerGas,
+      paymasterAndData: userOp.paymasterAndData,
+      signature: userOp.signature
+    } as unknown as Parameters<typeof calcPreVerificationGas>[0];
+
+    return calcPreVerificationGas(partial);
   }
 
   /**
