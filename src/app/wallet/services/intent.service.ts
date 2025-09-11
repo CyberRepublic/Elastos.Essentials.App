@@ -164,11 +164,13 @@ export class IntentService {
       case 'dposvotetransaction':
         Logger.log('wallet', 'DPoS Transaction intent content:', intent.params);
         this.nextScreen = '/wallet/intents/dposvote';
+        this.coinTransferService.masterWalletId = this.activeWallet.id;
         this.coinTransferService.publickeys = intent.params.publickeys;
         break;
 
       case 'didtransaction':
         this.nextScreen = '/wallet/intents/didtransaction';
+        this.coinTransferService.masterWalletId = this.activeWallet.id;
         this.coinTransferService.subWalletId = StandardCoinName.ETHDID;
         this.coinTransferService.didrequest = intent.params.didrequest;
         break;
@@ -176,33 +178,34 @@ export class IntentService {
       case 'esctransaction':
         this.nextScreen = '/wallet/intents/esctransaction';
         this.coinTransferService.masterWalletId = intent.params.masterWalletId;
-        this.coinTransferService.sendTransactionChainId = intent.params.chainId;
+        this.coinTransferService.evmChainId = intent.params.chainId;
         this.coinTransferService.payloadParam = intent.params.payload.params[0];
         break;
 
       case 'signtypeddata':
         this.nextScreen = '/wallet/intents/signtypeddata';
         this.coinTransferService.masterWalletId = intent.params.masterWalletId;
-        this.coinTransferService.sendTransactionChainId = intent.params.chainId;
+        this.coinTransferService.evmChainId = intent.params.chainId;
         navigationState = JSON.parse(JSON.stringify(intent));
         break;
 
       case 'personalsign':
         this.nextScreen = '/wallet/intents/personalsign';
         this.coinTransferService.masterWalletId = intent.params.masterWalletId;
-        this.coinTransferService.sendTransactionChainId = intent.params.chainId;
+        this.coinTransferService.evmChainId = intent.params.chainId;
         navigationState = JSON.parse(JSON.stringify(intent));
         break;
 
       case 'insecureethsign':
         this.nextScreen = '/wallet/intents/insecureethsign';
         this.coinTransferService.masterWalletId = intent.params.masterWalletId;
-        this.coinTransferService.sendTransactionChainId = intent.params.chainId;
+        this.coinTransferService.evmChainId = intent.params.chainId;
         navigationState = JSON.parse(JSON.stringify(intent));
         break;
 
       case 'pay':
         this.nextScreen = '/wallet/coin-transfer';
+        this.coinTransferService.masterWalletId = this.activeWallet.id;
         let ret = await this.handlePayIntent(intent);
         if (!ret) return;
         break;
@@ -210,29 +213,36 @@ export class IntentService {
       case 'multisigtx':
         Logger.log('wallet', 'Handling multisig intent:', intent);
         this.nextScreen = '/wallet/intents/multisigtx';
+        this.coinTransferService.masterWalletId = this.activeWallet.id;
         this.coinTransferService.intentTransfer = intent;
         break;
 
       case 'pushbitcointx':
         this.nextScreen = '/wallet/intents/pushbitcointx';
+        this.coinTransferService.masterWalletId = intent.params.masterWalletId;
         navigationState = JSON.parse(JSON.stringify(intent));
         break;
       case 'sendbitcoin':
         this.nextScreen = '/wallet/intents/sendbitcoin';
+        this.coinTransferService.masterWalletId = intent.params.masterWalletId;
+        console.log('intent', 'sendbitcoin', this.coinTransferService.masterWalletId);
         navigationState = JSON.parse(JSON.stringify(intent));
         break;
       case 'signbitcoindata':
         this.nextScreen = '/wallet/intents/signbitcoindata';
+        this.coinTransferService.masterWalletId = intent.params.masterWalletId;
         navigationState = JSON.parse(JSON.stringify(intent));
         break;
       case 'signbitcoinmessage':
         this.nextScreen = '/wallet/intents/signbitcoinmessage';
+        this.coinTransferService.masterWalletId = intent.params.masterWalletId;
         navigationState = JSON.parse(JSON.stringify(intent));
         break;
 
       // Ela main chain
       case 'elamainsignmessage':
         this.nextScreen = '/wallet/intents/elamainsignmessage';
+        this.coinTransferService.masterWalletId = this.activeWallet.id;
         navigationState = JSON.parse(JSON.stringify(intent));
         break;
 
@@ -240,15 +250,7 @@ export class IntentService {
         Logger.log('wallet', 'IntentService unknown intent:', intent);
         return;
     }
-
-    // if (intentRequiresWalletSelection) {
-    this.coinTransferService.masterWalletId = this.activeWallet.id;
-
     this.native.setRootRouter(this.nextScreen, navigationState);
-    // }
-    // else {
-    //     this.native.setRootRouter(this.nextScreen, navigationState);
-    // }
   }
 
   handleAddCoinIntent(intent: EssentialsIntentPlugin.ReceivedIntent) {

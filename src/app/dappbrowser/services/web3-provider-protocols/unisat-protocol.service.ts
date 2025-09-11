@@ -20,6 +20,7 @@ declare let dappBrowser: DappBrowserPlugin.DappBrowser;
 export class UnisatProtocolService {
   private userBTCAddress: string = null;
   private btcRpcUrl: string = null;
+  private activeBTCWallet: AnyBTCNetworkWallet = null;
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -153,6 +154,7 @@ export class UnisatProtocolService {
   setupSubscriptions(): void {
     // Subscribe to Bitcoin wallet changes for the current dApp
     const bitcoinWalletSub = this.browserWalletConnectionsService.activeDappBitcoinWallet.subscribe(bitcoinWallet => {
+      this.activeBTCWallet = bitcoinWallet;
       if (bitcoinWallet) {
         Logger.log('unisatprotocol', 'Bitcoin wallet changed for active dApp:', bitcoinWallet.masterWallet.name);
         // Handle async operations without blocking the subscribe callback
@@ -342,6 +344,14 @@ export class UnisatProtocolService {
 
   private async handleBitcoinPushTx(message: DABMessage): Promise<void> {
     try {
+      if (!this.activeBTCWallet) {
+        this.sendInjectedError('unisat', message.data.id, {
+          code: 4001,
+          message: 'No Bitcoin wallet connected.'
+        });
+        return;
+      }
+
       const response: {
         action: string;
         result: {
@@ -349,6 +359,7 @@ export class UnisatProtocolService {
           status: 'published' | 'cancelled';
         };
       } = await GlobalIntentService.instance.sendIntent('https://wallet.web3essentials.io/pushbitcointx', {
+        masterWalletId: this.activeBTCWallet.masterWallet.id,
         payload: {
           params: [message.data.object]
         }
@@ -368,6 +379,16 @@ export class UnisatProtocolService {
 
   private async handleBitcoinSend(message: DABMessage): Promise<void> {
     try {
+      if (!this.activeBTCWallet) {
+        this.sendInjectedError('unisat', message.data.id, {
+          code: 4001,
+          message: 'No Bitcoin wallet connected.'
+        });
+        return;
+      }
+
+      console.log('unisatprotocol', 'handleBitcoinSend', this.activeBTCWallet.masterWallet);
+
       const response: {
         action: string;
         result: {
@@ -375,6 +396,7 @@ export class UnisatProtocolService {
           status: 'published' | 'cancelled';
         };
       } = await GlobalIntentService.instance.sendIntent('https://wallet.web3essentials.io/sendbitcoin', {
+        masterWalletId: this.activeBTCWallet.masterWallet.id,
         payload: {
           params: [message.data.object]
         }
@@ -394,12 +416,21 @@ export class UnisatProtocolService {
 
   private async handleBitcoinSignMessage(message: DABMessage): Promise<void> {
     try {
+      if (!this.activeBTCWallet) {
+        this.sendInjectedError('unisat', message.data.id, {
+          code: 4001,
+          message: 'No Bitcoin wallet connected.'
+        });
+        return;
+      }
+
       const responseSignMessage: {
         action: string;
         result: {
           signature: string;
         };
       } = await GlobalIntentService.instance.sendIntent('https://wallet.web3essentials.io/signbitcoinmessage', {
+        masterWalletId: this.activeBTCWallet.masterWallet.id,
         payload: {
           params: [message.data.object]
         }
@@ -419,12 +450,21 @@ export class UnisatProtocolService {
 
   private async handleBitcoinSignData(message: DABMessage): Promise<void> {
     try {
+      if (!this.activeBTCWallet) {
+        this.sendInjectedError('unisat', message.data.id, {
+          code: 4001,
+          message: 'No Bitcoin wallet connected.'
+        });
+        return;
+      }
+
       const responseSigndata: {
         action: string;
         result: {
           signature: string;
         };
       } = await GlobalIntentService.instance.sendIntent('https://wallet.web3essentials.io/signbitcoindata', {
+        masterWalletId: this.activeBTCWallet.masterWallet.id,
         payload: {
           params: [message.data.object]
         }

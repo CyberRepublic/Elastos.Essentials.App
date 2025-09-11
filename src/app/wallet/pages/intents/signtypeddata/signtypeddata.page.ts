@@ -157,15 +157,13 @@ export class SignTypedDataPage implements OnInit {
       'wallet',
       'Sign Typed Data params',
       this.coinTransferService.masterWalletId,
-      this.coinTransferService.sendTransactionChainId
+      this.coinTransferService.evmChainId
     );
 
     // If there is a provided chain ID, use that chain id network (eg: wallet connect v2).
     // Otherwise, use the active network
-    if (this.coinTransferService.sendTransactionChainId) {
-      this.targetNetwork = WalletNetworkService.instance.getNetworkByChainId(
-        this.coinTransferService.sendTransactionChainId
-      );
+    if (this.coinTransferService.evmChainId) {
+      this.targetNetwork = WalletNetworkService.instance.getNetworkByChainId(this.coinTransferService.evmChainId);
     } else {
       this.targetNetwork = WalletNetworkService.instance.activeNetwork.value;
     }
@@ -191,7 +189,7 @@ export class SignTypedDataPage implements OnInit {
     }
 
     // If no specific chain ID is provided, use the active network
-    if (!this.coinTransferService.sendTransactionChainId) {
+    if (!this.coinTransferService.evmChainId) {
       targetNetwork = WalletNetworkService.instance.activeNetwork.value;
     }
 
