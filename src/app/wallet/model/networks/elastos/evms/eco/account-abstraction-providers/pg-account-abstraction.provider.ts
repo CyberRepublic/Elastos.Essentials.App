@@ -276,7 +276,7 @@ export class PGAccountAbstractionProvider extends AccountAbstractionProvider<PGA
         // ethPerTokenRate
         (async () => {
           const rate = await paymasterContract.ethPerTokenRate();
-          Logger.log('wallet', '📊 Paymaster ethPerTokenRate:', rate.toString());
+          Logger.log('wallet', 'Paymaster ethPerTokenRate:', rate.toString());
           return rate;
         })()
       ]);
