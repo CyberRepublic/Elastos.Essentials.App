@@ -1,5 +1,6 @@
 import { Logger } from 'src/app/logger';
 import { AccountAbstractionProvidersService } from 'src/app/wallet/services/account-abstraction/account-abstraction-providers.service';
+import { AccountAbstractionService } from 'src/app/wallet/services/account-abstraction/account-abstraction.service';
 import { AccountAbstractionTransaction } from 'src/app/wallet/services/account-abstraction/model/account-abstraction-transaction';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
 import { Transfer } from '../../../../services/cointransfer.service';
@@ -113,9 +114,16 @@ export class AccountAbstractionSafe extends Safe implements EVMSafe {
 
     console.log('wallet', 'AA safe Signing transaction:', rawTx, transfer);
 
+    // For AA safes, signing operation takes time, so we show a publication loader.
+    // This one closes and another loader takes over whenpublishing the transaction.
+    // Can probably be optimized to use a single loader...
+    await AccountAbstractionService.instance.displayPublicationLoader();
+
     // Ask the account abstraction provider specific to this account to bundle the transaction
     // and return the actual transaction hash.
     const transactionHash = await aaProvider.bundleAndSignTransaction(networkWallet, rawTx);
+
+    await AccountAbstractionService.instance.closePublicationLoader();
 
     return {
       signedTransaction: transactionHash
