@@ -33,7 +33,7 @@ export const zh = {
         'stats-overview': 'ELA网络统计',
         'stats-last-validator': '最近验证节点',
         'stats-total-voters': '总投票地址',
-        'stats-total-votes': '总投票',
+        'stats-total-votes': '总投票权',
         'stats-ela-staking': '参与投票的ELA总量',
         'stats-voters-percent': 'ELA投票数 / 总流通量',
         'stats-active-nodes': '激活的超级节点',

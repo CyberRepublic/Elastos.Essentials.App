@@ -33,7 +33,7 @@ export const fr = {
         'stats-overview': 'Informations Réseau',
         'stats-last-validator': 'Dernier Validateur',
         'stats-total-voters': 'Total des votants',
-        'stats-total-votes': 'Total des votes',
+        'stats-total-votes': 'Total des droits de vote',
         'stats-ela-staking': 'Total d\'ELA utilisés',
         'stats-voters-percent': 'ELA votés VS en circulation',
         'stats-active-nodes': 'Supernoeuds actifs',

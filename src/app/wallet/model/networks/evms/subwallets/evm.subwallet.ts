@@ -188,6 +188,7 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
       txid: transaction.hash,
       type: null,
       isCrossChain: isCrossChain,
+      crossChainToAddress: isCrossChain ? await this.getCrossChainToAddress(transaction) : null,
       erc20TokenSymbol: isERC20TokenTransfer ? erc20TokenTransactionInfo.tokenSymbol : null,
       erc20TokenValue: isERC20TokenTransfer ? erc20TokenTransactionInfo.tokenValue : null,
       erc20TokenContractAddress: isERC20TokenTransfer ? erc20TokenTransactionInfo.tokenContractAddress : null,
@@ -349,6 +350,19 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
     } else {
       return TransactionDirection.SENT;
     }
+  }
+
+  protected async getCrossChainToAddress(transaction: EthTransaction): Promise<string> {
+    // Use extended info is there is some
+    let extInfo = await this.networkWallet.getExtendedTxInfo(transaction.hash);
+    if (extInfo && extInfo.evm && extInfo.evm.txInfo && extInfo.evm.txInfo.operation) {
+      // Use the main chain receiving address, if it has been resolved.
+      if (extInfo.evm.txInfo.operation.descriptionTranslationParams?.toAddress) {
+        return extInfo.evm.txInfo.operation.descriptionTranslationParams.toAddress;
+      }
+    }
+
+    return null;
   }
 
   private checkRedPacketTransaction(transaction: EthTransaction) {

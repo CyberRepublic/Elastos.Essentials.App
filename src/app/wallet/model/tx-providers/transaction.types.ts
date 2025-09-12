@@ -105,6 +105,7 @@ export type TransactionInfo = {
   txid: string,
   type: TransactionType,
   isCrossChain: boolean,
+  crossChainToAddress?: string, // for cross chain tx
   erc20TokenSymbol?: string,
   erc20TokenValue?: string,
   erc20TokenContractAddress?: string,

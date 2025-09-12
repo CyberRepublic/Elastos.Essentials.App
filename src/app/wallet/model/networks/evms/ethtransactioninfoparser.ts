@@ -470,6 +470,15 @@ export class ETHTransactionInfoParser {
 
       case '0x67d630fa': // receivePayload(string _addr, uint256 _amount, uint256 _fee), Send ela from side chain to main chain
         txInfo.operation = { description: "wallet.ext-tx-info-type-withdraw-to-mainchain" };
+        try {
+          let params = await this.extractTransactionParamValues(["function receivePayload(string _addr, uint256 _amount, uint256 _fee) public returns (bool success)"], txData);
+          // Get the real receiving address of the main chain
+          let toAddress = this.stringTransactionParamAt(params, 0);
+          txInfo.operation.descriptionTranslationParams = { toAddress: toAddress };
+        }
+        catch (e) {
+          // Do nothing
+        }
         break;
 
       case '0x18fccc76': // harvest(uint256 pid, address to)

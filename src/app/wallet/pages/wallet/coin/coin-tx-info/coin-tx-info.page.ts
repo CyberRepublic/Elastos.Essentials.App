@@ -250,6 +250,10 @@ export class CoinTxInfoPage implements OnInit {
             }
         }
 
+        if (this.transactionInfo.isCrossChain === true && this.transactionInfo.crossChainToAddress) {
+            this.targetAddress = this.transactionInfo.crossChainToAddress;
+        }
+
         // Create array of displayable details for txs
         this.txDetails = [];
 
