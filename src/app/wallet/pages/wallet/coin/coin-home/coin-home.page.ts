@@ -28,14 +28,12 @@ import BigNumber from 'bignumber.js';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
-import { DappBrowserService } from 'src/app/dappbrowser/services/dappbrowser.service';
 import { runDelayed } from 'src/app/helpers/sleep.helper';
 import { Logger } from 'src/app/logger';
 import { App } from 'src/app/model/app.enum';
 import { Util } from 'src/app/model/util';
 import { UIToken } from 'src/app/multiswap/model/uitoken';
 import { MultiSwapHomePageParams } from 'src/app/multiswap/pages/home/home';
-import { ChaingeSwapService } from 'src/app/multiswap/services/chaingeswap.service';
 import { GlobalDIDSessionsService } from 'src/app/services/global.didsessions.service';
 import { GlobalEvents } from 'src/app/services/global.events.service';
 import { GlobalNavService } from 'src/app/services/global.nav.service';
@@ -123,9 +121,6 @@ export class CoinHomePage implements OnInit {
 
     public popover: any = null;
 
-    private isIOS = false;
-    private canBrowseInApp = false;
-
     constructor(
         public router: Router,
         public walletManager: WalletService,
@@ -142,8 +137,6 @@ export class CoinHomePage implements OnInit {
         private globalStorage: GlobalStorageService,
         private globalNav: GlobalNavService,
         private didSessions: GlobalDIDSessionsService,
-        // private chaingeSwapService: ChaingeSwapService,
-        private dAppBrowserService: DappBrowserService,
         private platform: Platform,
         public stakingInitService: StakingInitService,
         private voteService: VoteService
@@ -183,9 +176,6 @@ export class CoinHomePage implements OnInit {
     }
 
     ngAfterViewInit() {
-        // just in case this.networkWallet is null
-        if (!this.fetchMoreTrigger) return;
-
         const options: IntersectionObserverInit = {
             root: this.fetchMoreTrigger.nativeElement.closest('.intersection-container')
         };
@@ -257,12 +247,6 @@ export class CoinHomePage implements OnInit {
         this.sendTransactionSubscription = this.events.subscribe("wallet:transactionpublished", () => {
             void this.updateWalletInfo();
         });
-
-        this.isIOS = this.platform.platforms().indexOf('android') < 0;
-        // Disable swap on iOS as apple complains about swap.
-        // if (this.isIOS) {
-        //     this.canBrowseInApp = await this.dAppBrowserService.canBrowseInApp();
-        // }
     }
 
     ngOnInit() {

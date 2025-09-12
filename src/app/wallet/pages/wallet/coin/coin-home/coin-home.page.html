@@ -7,15 +7,16 @@
             </ion-refresher-content>
         </ion-refresher>
 
-        <ion-grid *ngIf="networkWallet" class="container">
-            <ion-row class="main-title-row">
+        <!-- Can't use ngIf here, otherwise fetchmoretrigger will be invalid -->
+        <ion-grid class="container">
+            <ion-row *ngIf="networkWallet" class="main-title-row">
                 <ion-col size="12">
                     <h1>{{ getSubwalletTitle() }}</h1>
                     <p>{{ 'wallet.coin-new-transactions-today' |
                         translate:{todaysTransactions: todaysTransactions} }}</p>
                 </ion-col>
             </ion-row>
-            <ion-row [class]="getSubwalletClass()">
+            <ion-row *ngIf="networkWallet" [class]="getSubwalletClass()">
                 <img class="blurred-network-logo" [src]="networkWallet.network.logo" />
                 <ion-row class="card-label-row">
                     <h3>{{ 'wallet.coin-balance' | translate }}</h3>
