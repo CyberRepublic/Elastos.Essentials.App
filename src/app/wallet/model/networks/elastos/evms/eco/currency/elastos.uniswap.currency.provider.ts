@@ -3,7 +3,7 @@ import { UniswapCurrencyProvider } from "../../../../evms/uniswap.currencyprovid
 import { AnyNetwork } from "../../../../network";
 
 export class ElastosECOPGProvider extends UniswapCurrencyProvider {
-  // private referenceUSDTCoin = new ERC20Coin(this.network, "USDT", "USDT Coin on ECO", "0x1C4E7cd89ea67339d4A5ed2780703180a19757d7", 18, false, true);
+  private referenceUSDTCoin = new ERC20Coin(this.network, "USDT", "PGA-USDT", "0x1C4E7cd89ea67339d4A5ed2780703180a19757d7", 18, false, true);
   private referenceBTCDCoin = new ERC20Coin(this.network, "BSDT", "BTCD Coin on ECO", "0x45ec25a63e010bfb84629242f40dda187f83833e", 18, false, true);
   private wrappedNativeCoin = new ERC20Coin(this.network, "WELA", "Wrapped ELA", "0x289DbD7DD0F5Fea25dbDEA5a248caE4171428CE5", 18, false, true);
 
