@@ -66,6 +66,7 @@
     "@ethersproject/wordlists": "^5.7.0",
     "@evmos/address-converter": "^0.1.9",
     "@feedsnetwork/feeds-js-sdk": "^1.0.0",
+    "@ionic-native/app-minimize": "^5.36.0",
     "@ionic-native/core": "5.36.0",
     "@ionic-native/qr-scanner": "5.36.0",
     "@ionic/angular": "^6.3.0",
@@ -199,6 +200,7 @@
     "cordova-plugin-add-swift-support": "2.0.2",
     "cordova-plugin-advanced-http": "^3.3.1",
     "cordova-plugin-app-version": "0.1.12",
+    "cordova-plugin-appminimize": "^1.0.1",
     "cordova-plugin-ble-central": "^1.5.2",
     "cordova-plugin-camera": "8.0.0",
     "cordova-plugin-file": "^7.0.0",
@@ -288,11 +290,11 @@
       "cordova-plugin-advanced-http": {
         "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
       },
-      "elastos-essentials-plugin-internal": {}
+      "elastos-essentials-plugin-internal": {},
+      "cordova-plugin-appminimize": {}
     },
     "platforms": [
-      "android",
-      "ios"
+      "android"
     ]
   }
 }

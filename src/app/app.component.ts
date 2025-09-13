@@ -37,7 +37,7 @@ import { GlobalThemeService } from './services/theming/global.theme.service';
 import { GlobalWalletConnectService } from './services/walletconnect/global.walletconnect.service';
 import { VoteService } from './voting/services/vote.service';
 import { GlobalUnisatApiService } from './services/global.unisat.service';
-
+import { AppMinimize } from '@ionic-native/app-minimize/ngx';
 
 @Component({
   selector: 'app-root',
@@ -53,6 +53,7 @@ export class AppComponent {
   constructor(
     private platform: Platform,
     private statusBar: StatusBar,
+    private appMinimize: AppMinimize,
     public storage: GlobalStorageService,
     public theme: GlobalThemeService,
     private globalNav: GlobalNavService,
@@ -162,11 +163,13 @@ export class AppComponent {
    * Otherwise, exit the application.
    */
   setupBackKeyNavigation() {
-    this.platform.backButton.subscribeWithPriority(0, () => {
+    this.platform.backButton.subscribeWithPriority(0, async () => {
       if (this.globalNav.canGoBack()) {
-        void this.globalNav.navigateBack();
+        await this.globalNav.navigateBack();
       } else {
-        navigator["app"].exitApp();
+        void this.appMinimize.minimize().catch((error) => {
+          navigator['app'].exitApp();
+        });
       }
     });
   }
