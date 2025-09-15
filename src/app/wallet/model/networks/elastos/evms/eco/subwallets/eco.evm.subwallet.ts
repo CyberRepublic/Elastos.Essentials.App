@@ -5,7 +5,7 @@ import { ElastosEVMSubWallet } from '../../subwallets/standard/elastos.evm.subwa
 
 export class EcoSubWallet extends ElastosEVMSubWallet {
   constructor(networkWallet: AnyEVMNetworkWallet) {
-    super(networkWallet, StandardCoinName.ETHECO, 'Elastos ECO Chain');
+    super(networkWallet, StandardCoinName.ETHECO, 'Elastos ECO PG Chain');
   }
 
   public async initialize() {
