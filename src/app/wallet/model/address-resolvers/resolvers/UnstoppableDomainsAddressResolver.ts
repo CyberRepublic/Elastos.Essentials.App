@@ -8,7 +8,6 @@ import { ElastosMainChainMainNetNetwork } from '../../networks/elastos/mainchain
 import { MainChainSubWallet } from '../../networks/elastos/mainchain/subwallets/mainchain.subwallet';
 import { EthereumMainNetNetwork } from '../../networks/ethereum/network/ethereum.mainnet.network';
 import { FantomMainNetNetwork } from '../../networks/fantom/network/fantom.mainnet.network';
-import { HECOMainNetNetwork } from '../../networks/heco/network/heco.mainnet.network';
 import { Address } from '../addresses/Address';
 import { UnstoppableDomainsAddress } from '../addresses/UnstoppableDomainsAddress';
 import { Resolver } from './Resolver';
@@ -40,7 +39,6 @@ export class UnstoppableDomainsAddressResolver extends Resolver {
       if (subWallet instanceof ElastosEscMainSubWallet) return 'crypto.ELA.version.ESC.address';
       else return null;
     } else if (subWallet.networkWallet.network instanceof EthereumMainNetNetwork) return 'crypto.ETH.address';
-    else if (subWallet.networkWallet.network instanceof HECOMainNetNetwork) return 'crypto.HT.address';
     else if (subWallet.networkWallet.network instanceof BSCMainNetNetwork) return 'crypto.BNB.address';
     else if (subWallet.networkWallet.network instanceof FantomMainNetNetwork) return 'crypto.FTM.version.OPERA.address';
     // TODO: Tron -> crypto.TRX.address

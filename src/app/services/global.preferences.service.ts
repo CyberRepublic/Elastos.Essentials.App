@@ -7,11 +7,11 @@ import { GlobalStorageService } from './global.storage.service';
 import { NetworkTemplateStore } from './stores/networktemplate.store';
 
 export interface AllPreferences {
-  /** Language locale setting */
+  /** Language locale */
   'locale.language': string;
   /** Developer mode for external developers using essentials to build dapps */
   'developer.mode': boolean;
-  /** Whether to verify digest during developer installs */
+  /** @deprecated Whether to verify digest during developer installs (elastos capsules) */
   'developer.install.verifyDigest': boolean;
   /** Whether to start background services on boot */
   'developer.backgroundservices.startonboot': boolean;
@@ -19,7 +19,7 @@ export interface AllPreferences {
   'developer.screencapture': boolean;
   /** Whether to collect logs */
   'developer.collectLogs': boolean;
-  /** Whether to sign Bitcoin data */
+  /** Whether to allow dangerous Bitcoin sign data operations */
   'developer.bitcoinSignData': boolean;
   /** Whether to use built-in browser (Android uses built-in, iOS uses external) */
   'privacy.browser.usebuiltin': boolean;
@@ -37,19 +37,16 @@ export interface AllPreferences {
   'ui.theme': string;
   /** Light or dark variant. The variant changes the box colors mostly for now */
   'ui.variant': 'light' | 'dark';
-  /** Whether to use lightweight UI mode */
+  /** Whether to use lightweight UI mode (all elastos or advanced features hidden) */
   'ui.lightweight': boolean;
   /** Startup screen setting */
   'ui.startupscreen': string;
-  /** Network template setting */
   'network.template': string;
-  /** Chain network configuration */
   'chain.network.config': string;
-  /** Chain network configuration URL */
   'chain.network.configurl': string;
   /** Elastos API provider */
   'elastosapi.provider': string;
-  /** Whether to show daily tips */
+  /** Whether to show daily tips (notifications) */
   'help.dailytips.show': boolean;
   /** Whether to enable creating red packets (removed on iOS due to Apple policy) */
   'privacy.redpacket.create': boolean;
@@ -110,7 +107,7 @@ export class GlobalPreferencesService implements GlobalService {
       'privacy.browser.usebuiltin': useBuiltInBrowser,
       'developer.core.mode': false,
       'privacy.identity.publication.medium': 'assist',
-      'privacy.credentialtoolbox.stats': true,
+      'privacy.credentialtoolbox.stats': false,
       'privacy.hive.sync': false,
       'ui.darkmode': true,
       'ui.theme': 'white',
@@ -305,5 +302,13 @@ export class GlobalPreferencesService implements GlobalService {
 
   public setEnableCreatingOfRedPacket(did: string, networkTemplate: string, enable: boolean): Promise<void> {
     return this.setPreference(did, networkTemplate, 'privacy.redpacket.create', enable);
+  }
+
+  public setLightweightMode(did: string, networkTemplate: string, lightweight: boolean): Promise<void> {
+    return this.setPreference(did, networkTemplate, 'ui.lightweight', lightweight);
+  }
+
+  public getLightweightMode(did: string, networkTemplate: string): Promise<boolean> {
+    return this.getPreference(did, networkTemplate, 'ui.lightweight');
   }
 }
