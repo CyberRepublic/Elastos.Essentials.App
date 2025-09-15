@@ -1020,6 +1020,7 @@ export const fr = {
         subtitle: "Créer un nouveau portefeuille d'abstraction de compte",
         description:
           "Les portefeuilles d'abstraction de compte sont des portefeuilles de contrats intelligents qui offrent une sécurité et une expérience utilisateur améliorées. Ils sont contrôlés par votre portefeuille existant.",
+        descriptionSencond: "Actuellement, l'adresse du portefeuille abstrait du compte ne prend en charge que la chaîne Elastos PGP ECO et n'est pas compatible avec d'autres réseaux blockchain.",
         'wallet-name': 'Nom du Portefeuille',
         'wallet-name-placeholder': "Entrez un nom pour votre portefeuille d'abstraction de compte",
         'controller-wallet': 'Portefeuille Contrôleur',

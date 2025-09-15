@@ -1042,17 +1042,18 @@ export const en = {
         title: 'Create Account Abstraction Wallet',
         subtitle: 'Create a new account abstraction wallet',
         description:
-          'Account abstraction wallets are smart contract wallets that provide enhanced security and user experience features. They are controlled by your existing wallet.',
+          'The Account Abstraction Wallet is a smart contract wallet. It needs to be generated via the mnemonic phrase or private key of an EOA (Externally Owned Account), and will be associated with the original EOA account after generation.',
+        descriptionSencond: 'Currently, AA (Account Abstraction) account addresses only support Elastos PGP ECO Chain and are temporarily incompatible with other blockchain networks.',
         'wallet-name': 'Wallet Name',
         'wallet-name-placeholder': 'Enter a name for your account abstraction wallet',
-        'controller-wallet': 'Controller Wallet',
+        'controller-wallet': 'EOA Wallet',
         'controller-wallet-placeholder': 'Select the wallet that will control this account abstraction wallet',
         chain: 'Chain',
         'chain-placeholder': 'Select the blockchain network',
         provider: 'Provider',
         'provider-placeholder': 'Select the account abstraction wallet provider',
-        'account-address': 'Account Abstraction Account Address',
-        'account-address-placeholder': 'Account abstraction account address is automatically detected',
+        'account-address': 'Account Abstraction Address',
+        'account-address-placeholder': 'Account abstraction address is automatically detected',
         'account-address-help': 'Account address is automatically detected for the selected chain',
         'selected-options': 'Selected Options',
         'factory-address': 'Factory Address',
@@ -1063,7 +1064,7 @@ export const en = {
         'help-text':
           'Account abstraction wallets provide features like social recovery, spending limits, and gasless transactions.',
         'help-text-2':
-          'Make sure you have the correct contract address and that your controller wallet has sufficient funds for deployment if needed.',
+          'Make sure you have the correct contract address and that your EOA wallet has sufficient funds for deployment if needed.',
         'summary-text':
           'New wallet {{walletName}} will be created on the {{networkName}} network. The above address will be your account address for future operations.'
       }

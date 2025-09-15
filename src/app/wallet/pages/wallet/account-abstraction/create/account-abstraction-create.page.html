@@ -11,6 +11,7 @@
       </div>
       <h1 class="page-title">{{ 'wallet.aa.create.title' | translate }}</h1>
       <p class="page-description">{{ 'wallet.aa.create.description' | translate }}</p>
+      <p class="page-description">{{ 'wallet.aa.create.descriptionSencond' | translate }}</p>
     </div>
 
     <!-- Form Cards Section -->
@@ -80,19 +81,6 @@
           <div class="spinner-container" *ngIf="isFetchingAddress">
             <ion-spinner name="crescent"></ion-spinner>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Summary Section -->
-    <div class="summary-section" *ngIf="wallet.aaContractAddress && selectedNetwork">
-      <div class="summary-card">
-        <div class="summary-content">
-          <img [src]="selectedNetwork.logo" class="summary-network-logo" />
-          <p class="summary-text">
-            {{ 'wallet.aa.create.summary-text' | translate:{walletName: wallet.name, networkName: selectedNetwork.name}
-            }}
-          </p>
         </div>
       </div>
     </div>
