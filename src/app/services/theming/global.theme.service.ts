@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
-import { IdentityEntry } from "../../model/didsessions/identityentry";
+import { IdentityEntry } from '../../model/didsessions/identityentry';
 import { GlobalPreferencesService } from '../global.preferences.service';
 import { GlobalService, GlobalServiceManager } from '../global.service.manager';
 import { DIDSessionsStore } from '../stores/didsessions.store';
@@ -17,8 +17,8 @@ export enum GlobalThemeMode {
 
 export type ActiveTheming = {
   config: ThemeConfig;
-  variant: "light" | "dark";
-}
+  variant: 'light' | 'dark';
+};
 
 declare let passwordManager: PasswordManagerPlugin.PasswordManager;
 
@@ -79,10 +79,18 @@ export class GlobalThemeService extends GlobalService {
   public async fetchThemeFromPreferences() {
     let useDarkMode: boolean;
 
-    let themeKey = await this.prefs.getPreference<string>(DIDSessionsStore.signedInDIDString, NetworkTemplateStore.networkTemplate, "ui.theme");
+    let themeKey = await this.prefs.getPreference(
+      DIDSessionsStore.signedInDIDString,
+      NetworkTemplateStore.networkTemplate,
+      'ui.theme'
+    );
     let themeConfig = availableThemes.find(theme => theme.key === themeKey);
 
-    let themeVariant = await this.prefs.getPreference<"light" | "dark">(DIDSessionsStore.signedInDIDString, NetworkTemplateStore.networkTemplate, "ui.variant");
+    let themeVariant = await this.prefs.getPreference(
+      DIDSessionsStore.signedInDIDString,
+      NetworkTemplateStore.networkTemplate,
+      'ui.variant'
+    );
 
     await this.applyThemeConfig(themeConfig, themeVariant);
 
@@ -95,7 +103,7 @@ export class GlobalThemeService extends GlobalService {
       await this.prefs.setPreference(DIDSessionsStore.signedInDIDString, "ui.darkmode", useDarkMode);
     }
     else {
-      useDarkMode = await this.prefs.getPreference<boolean>(DIDSessionsStore.signedInDIDString, "ui.darkmode");
+      useDarkMode = await this.prefs.getPreference(DIDSessionsStore.signedInDIDString, NetworkTemplateStore.networkTemplate, "ui.darkmode");
     }
 
     void passwordManager.setDarkMode(useDarkMode);
@@ -143,31 +151,36 @@ export class GlobalThemeService extends GlobalService {
     return availableThemes;
   }
 
-  private defaultThemeConfig(): { theme: ThemeConfig, themeVariant: "light" | "dark" } {
-    let blackTheme = availableThemes.find(theme => theme.key === "white");
-    return { theme: blackTheme, themeVariant: "light" };
+  private defaultThemeConfig(): { theme: ThemeConfig; themeVariant: 'light' | 'dark' } {
+    let blackTheme = availableThemes.find(theme => theme.key === 'white');
+    return { theme: blackTheme, themeVariant: 'light' };
   }
 
   /**
    * Applies a theme without persisting
    */
-  async applyThemeConfig(theme: ThemeConfig, themeVariant: "light" | "dark") {
+  async applyThemeConfig(theme: ThemeConfig, themeVariant: 'light' | 'dark') {
     let variant = theme.variants[themeVariant];
 
     // mainTextColor format must be #RRGGBB
     let mainTextColor: string = null;
     if (theme.usesDarkMode) {
-      mainTextColor = variant.textColor || "#FFFFFF";
-    }
-    else {
-      mainTextColor = variant.textColor || "#000000";
+      mainTextColor = variant.textColor || '#FFFFFF';
+    } else {
+      mainTextColor = variant.textColor || '#000000';
     }
 
-    document.body.style.setProperty('--essentials-box-color', variant.boxColor || (themeVariant === "light" ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'));
+    document.body.style.setProperty(
+      '--essentials-box-color',
+      variant.boxColor || (themeVariant === 'light' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)')
+    );
     document.body.style.setProperty('--essentials-border-separator-color', `${mainTextColor}30`); // Semi transparent based on text color
     document.body.style.setProperty('--essentials-pagination-color', `${mainTextColor}B0`); // Semi transparent based on text color
     document.body.style.setProperty('--essentials-pagination-active-color', `${mainTextColor}`);
-    document.body.style.setProperty('--essentials-button-background-color', variant.buttonBackgroundColor || mainTextColor);
+    document.body.style.setProperty(
+      '--essentials-button-background-color',
+      variant.buttonBackgroundColor || mainTextColor
+    );
     document.body.style.setProperty('--essentials-button-text-color', variant.buttonTextColor || variant.color);
 
     // Set ionic background color and variants
@@ -201,24 +214,34 @@ export class GlobalThemeService extends GlobalService {
     let themeVariant = this.activeTheme.value.variant;
 
     // Persist
-    await this.prefs.setPreference(DIDSessionsStore.signedInDIDString, NetworkTemplateStore.networkTemplate, "ui.theme", theme.key);
+    await this.prefs.setPreference(
+      DIDSessionsStore.signedInDIDString,
+      NetworkTemplateStore.networkTemplate,
+      'ui.theme',
+      theme.key
+    );
 
     // Apply
     void this.applyThemeConfig(theme, themeVariant);
   }
 
-  private async setThemeVariant(themeVariant: "light" | "dark") {
+  private async setThemeVariant(themeVariant: 'light' | 'dark') {
     let theme = this.activeTheme.value.config;
 
     // Persist
-    await this.prefs.setPreference(DIDSessionsStore.signedInDIDString, NetworkTemplateStore.networkTemplate, "ui.variant", themeVariant);
+    await this.prefs.setPreference(
+      DIDSessionsStore.signedInDIDString,
+      NetworkTemplateStore.networkTemplate,
+      'ui.variant',
+      themeVariant
+    );
 
     // Apply
     void this.applyThemeConfig(theme, themeVariant);
   }
 
   public async toggleThemeVariant() {
-    await this.setThemeVariant(this.activeTheme.value.variant === "light" ? "dark" : "light");
+    await this.setThemeVariant(this.activeTheme.value.variant === 'light' ? 'dark' : 'light');
   }
 
   public getThemeTitle(theme: ThemeConfig): string {
