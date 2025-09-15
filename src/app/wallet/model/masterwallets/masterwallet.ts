@@ -305,7 +305,7 @@ export class StandardMasterWallet extends MasterWallet {
     if (btcNetworkOptions && btcNetworkOptions.bitcoinAddressType) {
       return btcNetworkOptions.bitcoinAddressType as BitcoinAddressType;
     }
-    return BitcoinAddressType.Legacy; // default
+    return BitcoinAddressType.NativeSegwit; // default
   }
 
   /**
