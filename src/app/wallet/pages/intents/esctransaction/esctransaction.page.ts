@@ -319,11 +319,10 @@ export class EscTransactionPage implements OnInit {
   }
 
   /**
-   * Checks if the active master wallet is an Account Abstraction wallet
+   * Checks if the current master wallet is an Account Abstraction wallet
    */
   public isAccountAbstractionWallet(): boolean {
-    const activeMasterWallet = this.walletManager.getActiveMasterWallet();
-    return activeMasterWallet instanceof AccountAbstractionMasterWallet;
+    return this.networkWallet.masterWallet instanceof AccountAbstractionMasterWallet;
   }
 
   /**
