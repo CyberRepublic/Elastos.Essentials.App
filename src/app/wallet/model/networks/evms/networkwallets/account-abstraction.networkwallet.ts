@@ -14,8 +14,6 @@ import type { EVMNetwork } from '../evm.network';
 import { AccountAbstractionSafe } from '../safes/account-abstraction.safe';
 import { MainCoinEVMSubWallet } from '../subwallets/evm.subwallet';
 import { EVMNetworkWallet } from './evm.networkwallet';
-import { ETHTransactionStatusInfo, EVMService } from 'src/app/wallet/services/evm/evm.service';
-import { ETHTransactionStatus } from '../evm.types';
 
 /**
  * Network wallet type for Account Abstraction wallets on EVM networks
@@ -71,13 +69,6 @@ export abstract class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
     return (await address.startsWith('0x')) ? address : '0x' + address;
   }
 
-  /**
-   * Emit a public publication status event.
-   */
-  public emitEthTransactionStatusChange(status: ETHTransactionStatusInfo) {
-    EVMService.instance.ethTransactionStatus.next(status);
-  }
-
   public async publishTransaction(
     subWallet: AnySubWallet,
     signedUserOp: UserOperation,
@@ -91,26 +82,15 @@ export abstract class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
     // Publish transaction
     try {
       const txid = await this.getAccountAbstractionProvider().publishTransaction(this, signedUserOp);
-      // Emit status, ETHTransactionComponent receives this event and closes the publication popup
-      let status: ETHTransactionStatusInfo = {
-        chainId: this.mainTokenSubWallet.id,
-        gasPrice: null,
-        gasLimit: null,
-        status: ETHTransactionStatus.PACKED,
-        txId: txid,
-        nonce: null
-      };
-      this.emitEthTransactionStatusChange(status);
-
       return txid;
     } catch (error) {
       Logger.error('wallet', 'AccountAbstractionNetworkWallet: publishTransaction error:', error);
       throw error;
     } finally {
       // Close publication popup
-      // if (visualFeedback) {
-      //   await AccountAbstractionService.instance.closePublicationLoader();
-      // }
+      if (visualFeedback) {
+        await AccountAbstractionService.instance.closePublicationLoader();
+      }
     }
   }
 
