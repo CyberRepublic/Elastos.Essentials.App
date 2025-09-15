@@ -35,7 +35,7 @@ export class BTCWalletJSSafe extends Safe implements BTCSafe {
     private btcPublicKey = null;
     private btcNetwork = bitcoin;
 
-    constructor(protected masterWallet: StandardMasterWallet, protected chainId: string, protected bitcoinAddressType = BitcoinAddressType.Legacy) {
+    constructor(protected masterWallet: StandardMasterWallet, protected chainId: string, protected bitcoinAddressType = BitcoinAddressType.NativeSegwit) {
         super(masterWallet);
     }
 

@@ -39,7 +39,7 @@ export abstract class BTCNetworkBase extends Network<BTCWalletNetworkOptions> {
   public getDefaultWalletNetworkOptions(): BTCWalletNetworkOptions {
     return {
       network: this.key,
-      bitcoinAddressType: BitcoinAddressType.Legacy
+      bitcoinAddressType: BitcoinAddressType.NativeSegwit
     }
   }
 
