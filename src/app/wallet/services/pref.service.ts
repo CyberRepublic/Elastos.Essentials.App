@@ -87,7 +87,8 @@ export class WalletPrefsService {
   }
 
   public getMnemonicLang(): string {
-    return this.mnemonicLang;
+    // return this.mnemonicLang;
+    return "ENGLISH"; // TODO: let user choose?
   }
 
   public setMnemonicLang(lang) {
