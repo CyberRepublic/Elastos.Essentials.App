@@ -58,12 +58,12 @@ export class AccountAbstractionService {
       this.modal = null;
     });
 
-    void this.modal.present();
+    return this.modal.present();
   }
 
-  public closePublicationLoader() {
+  public closePublicationLoader(): Promise<boolean> {
     if (this.modal) {
-      void this.modal.dismiss();
+      return this.modal.dismiss();
     }
   }
 }

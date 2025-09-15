@@ -1,3 +1,4 @@
+import { Logger } from 'src/app/logger';
 import { AccountAbstractionService } from 'src/app/wallet/services/account-abstraction/account-abstraction.service';
 import { UserOperation } from 'src/app/wallet/services/account-abstraction/model/user-operation';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
@@ -74,15 +75,23 @@ export abstract class AccountAbstractionNetworkWallet extends EVMNetworkWallet<
     visualFeedback: boolean
   ): Promise<string> {
     // Show publication popup
-    if (visualFeedback) await AccountAbstractionService.instance.displayPublicationLoader();
+    if (visualFeedback) {
+      await AccountAbstractionService.instance.displayPublicationLoader();
+    }
 
     // Publish transaction
-    const txid = await this.getAccountAbstractionProvider().publishTransaction(this, signedUserOp);
-
-    // Close publication popup
-    if (visualFeedback) AccountAbstractionService.instance.closePublicationLoader();
-
-    return txid;
+    try {
+      const txid = await this.getAccountAbstractionProvider().publishTransaction(this, signedUserOp);
+      return txid;
+    } catch (error) {
+      Logger.error('wallet', 'AccountAbstractionNetworkWallet: publishTransaction error:', error);
+      throw error;
+    } finally {
+      // Close publication popup
+      if (visualFeedback) {
+        await AccountAbstractionService.instance.closePublicationLoader();
+      }
+    }
   }
 
   public getMainEvmSubWallet(): MainCoinEVMSubWallet<WalletNetworkOptions> {

@@ -6,7 +6,7 @@ import { WalletService } from 'src/app/wallet/services/wallet.service';
 import { Transfer } from '../../../../services/cointransfer.service';
 import { AccountAbstractionMasterWallet } from '../../../masterwallets/account.abstraction.masterwallet';
 import { Safe } from '../../../safes/safe';
-import { SignTransactionResult } from '../../../safes/safe.types';
+import { SignTransactionErrorType, SignTransactionResult } from '../../../safes/safe.types';
 import { AnyNetworkWallet } from '../../base/networkwallets/networkwallet';
 import { AnySubWallet } from '../../base/subwallets/subwallet';
 import { AccountAbstractionProvider } from '../account-abstraction-provider';
@@ -117,17 +117,30 @@ export class AccountAbstractionSafe extends Safe implements EVMSafe {
     // For AA safes, signing operation takes time, so we show a publication loader.
     // This one closes and another loader takes over whenpublishing the transaction.
     // Can probably be optimized to use a single loader...
-    await AccountAbstractionService.instance.displayPublicationLoader();
+    if (visualFeedback) {
+      await AccountAbstractionService.instance.displayPublicationLoader();
+    }
 
     // Ask the account abstraction provider specific to this account to bundle the transaction
     // and return the actual transaction hash.
-    const transactionHash = await aaProvider.bundleAndSignTransaction(networkWallet, rawTx);
+    try {
+      const transactionHash = await aaProvider.bundleAndSignTransaction(networkWallet, rawTx);
 
-    await AccountAbstractionService.instance.closePublicationLoader();
+      return {
+        signedTransaction: transactionHash
+      };
+    } catch (error) {
+      Logger.error('wallet', 'AccountAbstractionSafe: signTransaction error:', error);
 
-    return {
-      signedTransaction: transactionHash
-    };
+      return {
+        signedTransaction: null,
+        errorType: SignTransactionErrorType.FAILURE
+      };
+    } finally {
+      if (visualFeedback) {
+        await AccountAbstractionService.instance.closePublicationLoader();
+      }
+    }
   }
 
   public async signDigest(address: string, digest: string, password: string): Promise<string> {
