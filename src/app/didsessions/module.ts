@@ -16,6 +16,8 @@ import { EditProfilePage } from './pages/editprofile/editprofile';
 import { ImportDIDPage } from './pages/importdid/importdid';
 import { LanguagePage } from './pages/language/language.page';
 import { PickIdentityPage } from './pages/pickidentity/pickidentity';
+import { AdvancedModeComponent as PrepareDIDAdvancedModeComponent } from './pages/preparedid/components/advanced-mode/advanced-mode.component';
+import { LightweightModeComponent as PrepareDIDLightweightModeComponent } from './pages/preparedid/components/lightweight-mode/lightweight-mode.component';
 import { PrepareDIDPage } from './pages/preparedid/preparedid';
 import { ScanPage } from './pages/scan/scan.page';
 import { SettingsSelectNetPage } from './pages/settings-select-net/settings-select-net.page';
@@ -28,6 +30,8 @@ import { DIDSessionsRoutingModule } from './routing';
     CreateIdentityPage,
     AdvancedModeComponent,
     LightweightModeComponent,
+    PrepareDIDAdvancedModeComponent,
+    PrepareDIDLightweightModeComponent,
     EditProfilePage,
     ImportDIDPage,
     ChooseImportedDIDPage,

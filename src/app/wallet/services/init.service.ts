@@ -173,6 +173,8 @@ export class WalletInitService extends GlobalService {
   private async registerNetworks(): Promise<void> {
     let networkTemplate = this.globalNetworksService.activeNetworkTemplate.value;
 
+    Logger.log('wallet', 'Registering networks for network template:', networkTemplate);
+
     // Register all networks, no matter if they are for the active network template or not,
     // as they are sometimes needed.
     await this.createAndRegisterNetwork(new ElastosMainChainMainNetNetwork());
