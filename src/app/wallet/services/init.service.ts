@@ -24,10 +24,23 @@ import { CeloMainNetNetwork } from '../model/networks/celo/network/celo.mainnet.
 import { CeloTestNetNetwork } from '../model/networks/celo/network/celo.testnet.network';
 import { CronosMainNetNetwork } from '../model/networks/cronos/network/cronos.mainnet.network';
 import { CronosTestNetNetwork } from '../model/networks/cronos/network/cronos.testnet.network';
-import { ElastosIdentityChainMainNetNetwork, ElastosIdentityChainTestNetNetwork } from '../model/networks/elastos/evms/eid/network/eid.networks';
-import { ElastosSmartChainMainNetNetwork, ElastosSmartChainTestNetNetwork } from '../model/networks/elastos/evms/esc/network/esc.networks';
+import {
+  ElastosECOMainNetNetwork,
+  ElastosECOTestNetNetwork
+} from '../model/networks/elastos/evms/eco/network/eco.networks';
+import {
+  ElastosIdentityChainMainNetNetwork,
+  ElastosIdentityChainTestNetNetwork
+} from '../model/networks/elastos/evms/eid/network/eid.networks';
+import {
+  ElastosSmartChainMainNetNetwork,
+  ElastosSmartChainTestNetNetwork
+} from '../model/networks/elastos/evms/esc/network/esc.networks';
 import { ElastosLRWNetwork } from '../model/networks/elastos/lrw/network/elastos.lrw.network';
-import { ElastosMainChainMainNetNetwork, ElastosMainChainTestNetNetwork } from '../model/networks/elastos/mainchain/network/elastos.networks';
+import {
+  ElastosMainChainMainNetNetwork,
+  ElastosMainChainTestNetNetwork
+} from '../model/networks/elastos/mainchain/network/elastos.networks';
 import { EthereumGoerliNetwork } from '../model/networks/ethereum/network/ethereum.goerli.network';
 import { EthereumMainNetNetwork } from '../model/networks/ethereum/network/ethereum.mainnet.network';
 import { EvmosMainNetNetwork } from '../model/networks/evmos/network/evmos.mainnet.network';
@@ -49,6 +62,9 @@ import { TelosMainNetNetwork } from '../model/networks/telos/network/telos.mainn
 import { TelosTestNetNetwork } from '../model/networks/telos/network/telos.testnet.network';
 import { TronMainNetNetwork } from '../model/networks/tron/network/tron.mainnet.network';
 import { TronShastaTestNetNetwork } from '../model/networks/tron/network/tron.shasta.network';
+import { AccountAbstractionProvidersService } from './account-abstraction/account-abstraction-providers.service';
+import { AccountAbstractionService } from './account-abstraction/account-abstraction.service';
+import { BundlerService } from './account-abstraction/bundler.service';
 import { ContactsService } from './contacts.service';
 import { CurrencyService } from './currency.service';
 import { BridgeService } from './evm/bridge.service';
@@ -68,7 +84,6 @@ import { TRC20CoinService } from './tvm/trc20coin.service';
 import { UiService } from './ui.service';
 import { WalletService } from './wallet.service';
 import { WalletUIService } from './wallet.ui.service';
-import { ElastosECOMainNetNetwork, ElastosECOTestNetNetwork } from '../model/networks/elastos/evms/eco/network/eco.networks';
 
 @Injectable({
   providedIn: 'root'
@@ -97,10 +112,13 @@ export class WalletInitService extends GlobalService {
     private swapService: SwapService, // IMPORTANT: unused, but keep it here for initialization
     private bridgeService: BridgeService, // IMPORTANT: unused, but keep it here for initialization
     private defiService: DefiService, // IMPORTANT: unused, but keep it here for initialization
+    private accountAbstractionService: AccountAbstractionService, // IMPORTANT: unused, but keep it here for initialization
+    private accountAbstractionBundlerService: BundlerService, // IMPORTANT: unused, but keep it here for initialization
     private erc20CoinService: ERC20CoinService,
     private tron20CoinSerice: TRC20CoinService,
     private walletUIService: WalletUIService, // IMPORTANT: unused, but keep it here for initialization
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private aaProviderRegistryService: AccountAbstractionProvidersService
   ) {
     super();
   }
@@ -111,7 +129,7 @@ export class WalletInitService extends GlobalService {
   }
 
   public async onUserSignIn(signedInIdentity: IdentityEntry): Promise<void> {
-    Logger.log("Wallet", "Wallet init service is initializing");
+    Logger.log('Wallet', 'Wallet init service is initializing');
 
     await this.prefs.init();
 
@@ -125,6 +143,9 @@ export class WalletInitService extends GlobalService {
     // Register name resolvers
     this.registerNameResolvers();
 
+    // Initialize AA provider registry
+    await this.aaProviderRegistryService.init();
+
     await this.currencyService.init(); // Currency cache must be ready for other services
     // Do not await.
     void this.uniswapCurrencyService.init();
@@ -134,8 +155,8 @@ export class WalletInitService extends GlobalService {
     await this.uiService.init();
 
     // TODO: dirty, rework this
-    this.subscription = this.events.subscribe("walletmanager:initialized", () => {
-      Logger.log("wallet", "walletmanager:initialized event received");
+    this.subscription = this.events.subscribe('walletmanager:initialized', () => {
+      Logger.log('wallet', 'walletmanager:initialized event received');
       this.walletServiceInitialized = true;
     });
 
@@ -204,7 +225,7 @@ export class WalletInitService extends GlobalService {
     // await this.createAndRegisterNetwork(new AtomTestNetNetwork());
     await this.createAndRegisterNetwork(new BttcTestNetNetwork());
 
-    await this.createAndRegisterNetwork(new ElastosLRWNetwork(), networkTemplate === "LRW");
+    await this.createAndRegisterNetwork(new ElastosLRWNetwork(), networkTemplate === 'LRW');
 
     this.networkService.notifyAllNetworksRegistered();
   }
@@ -215,8 +236,7 @@ export class WalletInitService extends GlobalService {
     //Logger.log("wallet", "Register network in", network.key);
 
     // Initialize the network, only if the network belongs to the active network template
-    if (network.networkTemplate === networkTemplate)
-      await network.init();
+    if (network.networkTemplate === networkTemplate) await network.init();
 
     //Logger.log("wallet", "Register network before register", network.key);
 
@@ -238,7 +258,7 @@ export class WalletInitService extends GlobalService {
   }
 
   public async stop(): Promise<void> {
-    Logger.log('wallet', 'init service stopping')
+    Logger.log('wallet', 'init service stopping');
     await this.prefs.stop();
     this.currencyService.stop();
     await this.walletManager.stop();
@@ -252,7 +272,7 @@ export class WalletInitService extends GlobalService {
       this.subscription = null;
     }
     this.walletServiceInitialized = true;
-    Logger.log('wallet', 'init service stopped')
+    Logger.log('wallet', 'init service stopped');
   }
 
   public start() {
@@ -262,14 +282,17 @@ export class WalletInitService extends GlobalService {
       if (!this.waitForServiceInitialized) {
         this.waitForServiceInitialized = true;
         // Wait until the wallet manager is ready before showing the first screen.
-        let subscription = this.events.subscribe("walletmanager:initialized", () => {
-          Logger.log("wallet", "walletmanager:initialized event received, showStartupScreen");
+        let subscription = this.events.subscribe('walletmanager:initialized', () => {
+          Logger.log('wallet', 'walletmanager:initialized event received, showStartupScreen');
           this.navService.showStartupScreen();
           this.waitForServiceInitialized = false;
           subscription.unsubscribe();
         });
       } else {
-        Logger.log("wallet", "Wallet init service is initializing, The Wallet will be displayed when the service is initialized.");
+        Logger.log(
+          'wallet',
+          'Wallet init service is initializing, The Wallet will be displayed when the service is initialized.'
+        );
       }
     }
   }

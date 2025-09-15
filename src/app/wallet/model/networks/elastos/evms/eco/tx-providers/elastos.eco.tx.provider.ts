@@ -1,14 +1,14 @@
-import { StandardCoinName } from "../../../../../coin";
-import { AnySubWalletTransactionProvider } from "../../../../../tx-providers/subwallet.provider";
-import { TransactionProvider } from "../../../../../tx-providers/transaction.provider";
-import { ElastosTransaction } from "../../../../../tx-providers/transaction.types";
-import { AnySubWallet } from "../../../../base/subwallets/subwallet";
-import { AnyMainCoinEVMSubWallet } from "../../../../evms/subwallets/evm.subwallet";
-import { EtherscanEVMSubWalletInternalTransactionProvider } from "../../../../evms/tx-providers/etherscan.evm.subwallet.internaltx.provider";
-import { EcoERC20SubWallet } from "../subwallets/eco.erc20.subwallet";
-import { EcoSubWallet } from "../subwallets/eco.evm.subwallet";
-import { EcoSubWalletProvider } from "./eco.subwallet.provider";
-import { ElastosTokenSubWalletProvider } from "./token.subwallet.provider";
+import { StandardCoinName } from '../../../../../coin';
+import { AnySubWalletTransactionProvider } from '../../../../../tx-providers/subwallet.provider';
+import { TransactionProvider } from '../../../../../tx-providers/transaction.provider';
+import { ElastosTransaction } from '../../../../../tx-providers/transaction.types';
+import { AnySubWallet } from '../../../../base/subwallets/subwallet';
+import { ERC20SubWallet } from '../../../../evms/subwallets/erc20.subwallet';
+import { AnyMainCoinEVMSubWallet } from '../../../../evms/subwallets/evm.subwallet';
+import { EtherscanEVMSubWalletInternalTransactionProvider } from '../../../../evms/tx-providers/etherscan.evm.subwallet.internaltx.provider';
+import { EcoSubWallet } from '../subwallets/eco.evm.subwallet';
+import { EcoSubWalletProvider } from './eco.subwallet.provider';
+import { ElastosTokenSubWalletProvider } from './token.subwallet.provider';
 
 export class ElastosECOChainTransactionProvider extends TransactionProvider<ElastosTransaction> {
   private elaECOSubWallet: EcoSubWallet;
@@ -20,7 +20,7 @@ export class ElastosECOChainTransactionProvider extends TransactionProvider<Elas
   private internalTXProvider: EtherscanEVMSubWalletInternalTransactionProvider<AnyMainCoinEVMSubWallet> = null;
 
   public async start(): Promise<void> {
-    super.start()
+    super.start();
 
     this.elaECOSubWallet = this.networkWallet.getSubWallet(StandardCoinName.ETHECO) as EcoSubWallet;
 
@@ -41,12 +41,10 @@ export class ElastosECOChainTransactionProvider extends TransactionProvider<Elas
   }
 
   protected getSubWalletTransactionProvider(subWallet: AnySubWallet): AnySubWalletTransactionProvider {
-    if (subWallet instanceof EcoSubWallet)
-      return this.elaECOProvider;
-    else if (subWallet instanceof EcoERC20SubWallet)
-      return this.tokenProvider;
+    if (subWallet instanceof EcoSubWallet) return this.elaECOProvider;
+    else if (subWallet instanceof ERC20SubWallet) return this.tokenProvider;
     else
-      throw new Error("Transactions provider: getSubWalletTransactionProvider() is called with an unknown subwallet!");
+      throw new Error('Transactions provider: getSubWalletTransactionProvider() is called with an unknown subwallet!');
   }
 
   protected getSubWalletInternalTransactionProvider(subWallet: EcoSubWallet): AnySubWalletTransactionProvider {

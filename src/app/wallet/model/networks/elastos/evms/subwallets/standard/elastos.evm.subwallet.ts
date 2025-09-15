@@ -1,4 +1,4 @@
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import { Logger } from 'src/app/logger';
 import { Util } from 'src/app/model/util';
 import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
@@ -21,13 +21,13 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
     super(networkWallet, id, friendlyName);
 
     this.tokenDecimals = 18;
-    this.tokenAmountMulipleTimes = new BigNumber(10).pow(this.tokenDecimals)
+    this.tokenAmountMulipleTimes = new BigNumber(10).pow(this.tokenDecimals);
   }
 
   public supportsCrossChainTransfers(): boolean {
     // Only wallets imported with mnemonic have cross chain capability because we then have both mainchain
     // and sidechains addresses.
-    return this.networkWallet.masterWallet.hasMnemonicSupport()
+    return this.networkWallet.masterWallet.hasMnemonicSupport();
   }
 
   public getAverageBlocktime(): number {
@@ -44,7 +44,8 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
   public async getTransactionDetails(txid: string): Promise<EthTransaction> {
     let result = await GlobalEthereumRPCService.instance.eth_getTransactionByHash(
       GlobalElastosAPIService.instance.getApiUrlForChainCode(this.id as StandardCoinName),
-      txid);
+      txid
+    );
     if (!result) {
       // Remove error transaction.
       // TODO await this.removeInvalidTransaction(txid);
@@ -61,17 +62,24 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
 
   private async getWithdrawContract() {
     if (!this.ethscWithdrawContract) {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const contractAbi = require("src/assets/wallet/ethereum/ETHSCWithdrawABI.json");
-        this.ethscWithdrawContract = new ((await this.getWeb3(true)).eth.Contract)(contractAbi, this.withdrawContractAddress);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const contractAbi = require('src/assets/wallet/ethereum/ETHSCWithdrawABI.json');
+      this.ethscWithdrawContract = new (await this.getWeb3(true)).eth.Contract(
+        contractAbi,
+        this.withdrawContractAddress
+      );
     }
     return this.ethscWithdrawContract;
   }
 
   public async estimateWithdrawTransactionGas(toAddress: string) {
-    const ethscWithdrawContract = await this.getWithdrawContract()
+    const ethscWithdrawContract = await this.getWithdrawContract();
 
-    const method = ethscWithdrawContract.methods.receivePayload(toAddress, '1000000000000000000', Config.ETHSC_WITHDRAW_GASPRICE);
+    const method = ethscWithdrawContract.methods.receivePayload(
+      toAddress,
+      '1000000000000000000',
+      Config.ETHSC_WITHDRAW_GASPRICE
+    );
 
     let estimateGas = 30000;
     try {
@@ -79,21 +87,27 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
       let tx = {
         data: method.encodeABI(),
         to: this.withdrawContractAddress,
-        value: '1000000000000000000',
-      }
+        value: '1000000000000000000'
+      };
       let tempGasLimit = await this.estimateGas(tx);
       // Make sure the gaslimit is big enough - add a bit of margin for fluctuating gas price
       estimateGas = Util.ceil(tempGasLimit * 1.5, 100);
-
     } catch (error) {
-        Logger.error('wallet', 'estimateWithdrawTransactionGas error:', error);
+      Logger.error('wallet', 'estimateWithdrawTransactionGas error:', error);
     }
 
     return estimateGas;
   }
 
-  public async createWithdrawTransaction(toAddress: string, toAmount: number, memo: string, gasPriceArg: string, gasLimitArg: string, nonceArg = -1): Promise<string> {
-    const ethscWithdrawContract = await this.getWithdrawContract()
+  public async createWithdrawTransaction(
+    toAddress: string,
+    toAmount: number,
+    memo: string,
+    gasPriceArg: string,
+    gasLimitArg: string,
+    nonceArg = -1
+  ): Promise<string> {
+    const ethscWithdrawContract = await this.getWithdrawContract();
 
     let gasPrice = gasPriceArg;
     if (gasPrice === null) {
@@ -102,13 +116,13 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
 
     let gasLimit = gasLimitArg;
     if (gasLimit === null) {
-    //   gasLimit = '100000';
+      //   gasLimit = '100000';
       let estimateGas = await this.estimateWithdrawTransactionGas(toAddress);
       gasLimit = estimateGas.toString();
     }
 
     // Contract:
-    //   unction receivePayload(string _addr, uint256 _amount, uint256 _fee) public payable {
+    //   function receivePayload(string _addr, uint256 _amount, uint256 _fee) public payable {
     //     require(msg.value == _amount);
     //     require(_fee >= 100000000000000 && _fee % 10000000000 == 0);
     //     require(_amount % 10000000000 == 0 && _amount.sub(_fee) >= _fee);
@@ -119,54 +133,78 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
     if (toAmount === -1) {
       let fee = new BigNumber(gasLimit).multipliedBy(new BigNumber(gasPrice)).dividedBy(this.tokenAmountMulipleTimes);
       toAmount = this.balance.dividedBy(this.tokenAmountMulipleTimes).minus(fee).toNumber();
-      if (toAmount <= 0)
-        return null;
+      if (toAmount <= 0) return null;
     }
 
     // _amount % 10000000000 == 0
     const amountTemp = toAmount.toFixed(9);
-    const fixedAmount = amountTemp.substring(0, amountTemp.lastIndexOf('.') + 9)
+    const fixedAmount = amountTemp.substring(0, amountTemp.lastIndexOf('.') + 9);
     // TODO fixedAmount >= 0.0002 (_amount.sub(_fee) >= _fee)
 
     const toAmountSend = (await this.getWeb3(true)).utils.toWei(fixedAmount);
-    const method = ethscWithdrawContract.methods.receivePayload(toAddress, toAmountSend, Config.ETHSC_WITHDRAW_GASPRICE);
+    const method = ethscWithdrawContract.methods.receivePayload(
+      toAddress,
+      toAmountSend,
+      Config.ETHSC_WITHDRAW_GASPRICE
+    );
 
     let nonce = nonceArg;
     if (nonce === -1) {
       nonce = await this.getNonce();
     }
-    Logger.log('wallet', 'createWithdrawTransaction gasPrice:', gasPrice.toString(), ' toAmountSend:', toAmountSend, ' nonce:', nonce, ' withdrawContractAddress:', this.withdrawContractAddress);
-    return (this.networkWallet.safe as unknown as EVMSafe).createContractTransaction(this.withdrawContractAddress, toAmountSend, gasPrice, gasLimit, nonce, method.encodeABI());
+    Logger.log(
+      'wallet',
+      'createWithdrawTransaction gasPrice:',
+      gasPrice.toString(),
+      ' toAmountSend:',
+      toAmountSend,
+      ' nonce:',
+      nonce,
+      ' withdrawContractAddress:',
+      this.withdrawContractAddress
+    );
+    return (this.networkWallet.safe as unknown as EVMSafe).createContractTransaction(
+      this.withdrawContractAddress,
+      toAmountSend,
+      gasPrice,
+      gasLimit,
+      nonce,
+      method.encodeABI()
+    );
   }
 
   public async canClaim(elaHash: string) {
-    const contractAbi = [{
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "elaHash",
-                "type": "bytes32"
-            }
+    const contractAbi = [
+      {
+        inputs: [
+          {
+            internalType: 'bytes32',
+            name: 'elaHash',
+            type: 'bytes32'
+          }
         ],
-        "name": "canClaim",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "tokenID",
-                "type": "uint256"
-            }
+        name: 'canClaim',
+        outputs: [
+          {
+            internalType: 'uint256',
+            name: 'tokenID',
+            type: 'uint256'
+          }
         ],
-        "stateMutability": "view",
-        "type": "function"
-    }];
+        stateMutability: 'view',
+        type: 'function'
+      }
+    ];
 
-    let canClaimContract = new ((await this.getWeb3(true)).eth.Contract)(contractAbi, Config.ETHSC_CLAIMNFT_CONTRACTADDRESS);
+    let canClaimContract = new (await this.getWeb3(true)).eth.Contract(
+      contractAbi,
+      Config.ETHSC_CLAIMNFT_CONTRACTADDRESS
+    );
     try {
       let hash = '0x' + Util.reverseHexToBE(elaHash);
       return await canClaimContract.methods.canClaim(hash).call();
-    }
-    catch (e) {
-      Logger.warn('wallet', 'canClaim exception', e)
+    } catch (e) {
+      Logger.warn('wallet', 'canClaim exception', e);
       return null;
     }
   }

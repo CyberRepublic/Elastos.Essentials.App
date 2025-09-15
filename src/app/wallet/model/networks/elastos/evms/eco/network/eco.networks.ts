@@ -3,6 +3,7 @@ import { Logger } from 'src/app/logger';
 import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
 import { MAINNET_TEMPLATE, TESTNET_TEMPLATE } from 'src/app/services/global.networks.service';
 import { CoinID, ERC20Coin, StandardCoinName } from 'src/app/wallet/model/coin';
+import { AccountAbstractionMasterWallet } from 'src/app/wallet/model/masterwallets/account.abstraction.masterwallet';
 import type { LedgerMasterWallet } from 'src/app/wallet/model/masterwallets/ledger.masterwallet';
 import type { MasterWallet, StandardMasterWallet } from 'src/app/wallet/model/masterwallets/masterwallet';
 import { PrivateKeyType, WalletNetworkOptions, WalletType } from 'src/app/wallet/model/masterwallets/wallet.types';
@@ -27,17 +28,25 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
         const ElastosECOLedgerNetworkWallet = (await import('../networkwallets/ledger/eco.networkwallet'))
           .ElastosECOLedgerNetworkWallet;
         return new ElastosECOLedgerNetworkWallet(masterWallet as LedgerMasterWallet, this);
+      case WalletType.ACCOUNT_ABSTRACTION:
+        const ElastosECOChainAccountAbstractionNetworkWallet = (
+          await import('../networkwallets/account-abstraction/eco.networkwallet')
+        ).ElastosECOAccountAbstractionNetworkWallet;
+        return new ElastosECOChainAccountAbstractionNetworkWallet(masterWallet as AccountAbstractionMasterWallet, this);
       default:
         Logger.warn('wallet', 'Elastos ECO does not support ', masterWallet.type);
         return null;
     }
   }
 
-  public async createERC20SubWallet(networkWallet: AnyNetworkWallet, coinID: CoinID, startBackgroundUpdates = true): Promise<ERC20SubWallet> {
+  public async createERC20SubWallet(
+    networkWallet: AnyNetworkWallet,
+    coinID: CoinID,
+    startBackgroundUpdates = true
+  ): Promise<ERC20SubWallet> {
     let subWallet = new EcoERC20SubWallet(networkWallet, coinID);
     await subWallet.initialize();
-    if (startBackgroundUpdates)
-      void subWallet.startBackgroundUpdates();
+    if (startBackgroundUpdates) void subWallet.startBackgroundUpdates();
     return subWallet;
   }
 
@@ -62,9 +71,7 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
   public supportedPrivateKeyTypes(): PrivateKeyType[] {
     // None by default. If this method is not overriden by the network,
     // the network can't handle any import by private key
-    return [
-      PrivateKeyType.EVM
-    ];
+    return [PrivateKeyType.EVM];
   }
 
   public getMainColor(): string {

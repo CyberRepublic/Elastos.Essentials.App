@@ -3,18 +3,27 @@ import { Subject } from "rxjs";
 import { Logger } from "src/app/logger";
 import { GlobalNetworksService } from "src/app/services/global.networks.service";
 import { LocalStorage } from "src/app/wallet/services/storage.service";
-import { trc20CoinsSerializer } from "src/app/wallet/services/tvm/trc20coin.service";
+import { JsonSerializer } from "typescript-json-serializer";
 import { Coin, CoinID, CoinType, TRC20Coin } from "../../../coin";
 import { BridgeProvider } from "../../../earn/bridgeprovider";
 import { EarnProvider } from "../../../earn/earnprovider";
 import { SwapProvider } from "../../../earn/swapprovider";
-import type { MasterWallet, StandardMasterWallet } from "../../../masterwallets/masterwallet";
-import { PrivateKeyType, WalletNetworkOptions, WalletType } from "../../../masterwallets/wallet.types";
+import type {
+  MasterWallet,
+  StandardMasterWallet,
+} from "../../../masterwallets/masterwallet";
+import {
+  PrivateKeyType,
+  WalletNetworkOptions,
+  WalletType,
+} from "../../../masterwallets/wallet.types";
 import { TransactionInfoType } from "../../../tx-providers/transaction.types";
 import { NetworkAPIURLType } from "../../base/networkapiurltype";
 import type { AnyNetworkWallet } from "../../base/networkwallets/networkwallet";
 import { AnyNetwork, Network } from "../../network";
 import { TRC20SubWallet } from "../subwallets/trc20.subwallet";
+
+export const trc20CoinsSerializer = new JsonSerializer();
 
 export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
   public static networkKey = "tron";
@@ -28,7 +37,7 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
   protected averageBlocktime = 5; // Unit Second
   protected mainRpcUrl: string = null;
   private lastAccessTimestamp = 0;
-  private localStorageKey = ''
+  private localStorageKey = "";
 
   constructor(
     displayName: string,
@@ -36,7 +45,8 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
     protected builtInCoins?: TRC20Coin[],
     earnProviders?: EarnProvider[],
     swapProviders?: SwapProvider[],
-    bridgeProviders?: BridgeProvider[]) {
+    bridgeProviders?: BridgeProvider[]
+  ) {
     super(
       TronNetworkBase.networkKey,
       displayName,
@@ -46,31 +56,40 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
       networkTemplate,
       earnProviders,
       swapProviders,
-      bridgeProviders);
+      bridgeProviders
+    );
   }
 
   public async init(): Promise<void> {
     await super.init();
 
-    const activeNetworkTemplate = GlobalNetworksService.instance.activeNetworkTemplate.value;
-    this.localStorageKey = this.key + '-' + activeNetworkTemplate;
+    const activeNetworkTemplate =
+      GlobalNetworksService.instance.activeNetworkTemplate.value;
+    this.localStorageKey = this.key + "-" + activeNetworkTemplate;
 
     await this.initCoins();
   }
 
   public getDefaultWalletNetworkOptions(): WalletNetworkOptions {
     return {
-      network: this.key
-    }
+      network: this.key,
+    };
   }
 
-  public async newNetworkWallet(masterWallet: MasterWallet): Promise<AnyNetworkWallet> {
+  public async newNetworkWallet(
+    masterWallet: MasterWallet
+  ): Promise<AnyNetworkWallet> {
     switch (masterWallet.type) {
       case WalletType.STANDARD:
-        const StandardTronNetworkWallet = (await import("../networkwallets/standard/standard.tron.networkwallet")).StandardTronNetworkWallet;
-        return new StandardTronNetworkWallet(masterWallet as StandardMasterWallet, this);
+        const StandardTronNetworkWallet = (
+          await import("../networkwallets/standard/standard.tron.networkwallet")
+        ).StandardTronNetworkWallet;
+        return new StandardTronNetworkWallet(
+          masterWallet as StandardMasterWallet,
+          this
+        );
       default:
-        Logger.warn('wallet', 'TRON does not support ', masterWallet.type);
+        Logger.warn("wallet", "TRON does not support ", masterWallet.type);
         return null;
     }
   }
@@ -90,11 +109,16 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
     this.availableCoins = this.getBuiltInTRC20Coins();
 
     // Add custom TRC20 tokens, manually added by the user or discovered
-    this.availableCoins = [...this.availableCoins, ...await this.getCustomTRC20Coins()];
+    this.availableCoins = [
+      ...this.availableCoins,
+      ...(await this.getCustomTRC20Coins()),
+    ];
 
     await this.initDeletedCustomTRC20Coins(this);
 
-    this.lastAccessTimestamp = await LocalStorage.instance.get("custom-trc20-coins-accesstime-" + this.localStorageKey);
+    this.lastAccessTimestamp = await LocalStorage.instance.get(
+      "custom-trc20-coins-accesstime-" + this.localStorageKey
+    );
 
     // Logger.log('wallet', "Available coins for network " + this.key + ":", this.availableCoins);
     // Logger.log('wallet', "Deleted coins for network " + this.key + ":", this.deletedTRC20Coins);
@@ -107,9 +131,11 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
 
   public getAvailableTRC20Coins(): TRC20Coin[] {
     // Return only TRC20 coins that are usable on the active network.
-    return this.getAvailableCoins().filter(c => {
-      return (c.getType() === CoinType.TRC20);
-    }) as TRC20Coin[] || [];
+    return (
+      (this.getAvailableCoins().filter((c) => {
+        return c.getType() === CoinType.TRC20;
+      }) as TRC20Coin[]) || []
+    );
   }
 
   public getCoinByID(id: CoinID): Coin {
@@ -119,9 +145,11 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
   }
 
   public getTRC20CoinByContractAddress(address: string): TRC20Coin | null {
-    return this.getAvailableTRC20Coins().find((c) => {
-      return c.getContractAddress().toLowerCase() === address.toLowerCase();
-    }) || null;
+    return (
+      this.getAvailableTRC20Coins().find((c) => {
+        return c.getContractAddress().toLowerCase() === address.toLowerCase();
+      }) || null
+    );
   }
 
   public coinAlreadyExists(address: string): boolean {
@@ -130,7 +158,8 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
 
   public isCoinDeleted(address: string) {
     for (let coin of this.deletedTRC20Coins) {
-      if (coin.getContractAddress().toLowerCase() === address.toLowerCase()) return true;
+      if (coin.getContractAddress().toLowerCase() === address.toLowerCase())
+        return true;
     }
     return false;
   }
@@ -142,11 +171,11 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
    * Returns true if the coin was added, false otherwise (already existing or error).
    */
   public async addCustomTRC20Coin(trc20Coin: TRC20Coin): Promise<boolean> {
-    Logger.log('wallet', "Adding coin to custom TRC20 coins list", trc20Coin);
+    Logger.log("wallet", "Adding coin to custom TRC20 coins list", trc20Coin);
 
     const existingCoins = await this.getCustomTRC20Coins();
     if (this.coinAlreadyExists(trc20Coin.getContractAddress())) {
-      Logger.log('wallet', "Not adding coin, it already exists", trc20Coin);
+      Logger.log("wallet", "Not adding coin, it already exists", trc20Coin);
       return false;
     }
 
@@ -156,10 +185,20 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
     this.availableCoins.push(trc20Coin);
 
     // Save to permanent storage
-    await LocalStorage.instance.set("custom-trc20-coins-" + this.localStorageKey, trc20CoinsSerializer.serializeObjectArray(existingCoins));
+    await LocalStorage.instance.set(
+      "custom-trc20-coins-" + this.localStorageKey,
+      trc20CoinsSerializer.serializeObjectArray(existingCoins)
+    );
 
-    this.deletedTRC20Coins = this.deletedTRC20Coins.filter((coin) => coin.getContractAddress().toLowerCase() !== trc20Coin.getContractAddress().toLowerCase());
-    await LocalStorage.instance.set("custom-trc20-coins-deleted-" + this.localStorageKey, trc20CoinsSerializer.serializeObjectArray(this.deletedTRC20Coins));
+    this.deletedTRC20Coins = this.deletedTRC20Coins.filter(
+      (coin) =>
+        coin.getContractAddress().toLowerCase() !==
+        trc20Coin.getContractAddress().toLowerCase()
+    );
+    await LocalStorage.instance.set(
+      "custom-trc20-coins-deleted-" + this.localStorageKey,
+      trc20CoinsSerializer.serializeObjectArray(this.deletedTRC20Coins)
+    );
 
     this.onCoinAdded.next(trc20Coin.getID());
 
@@ -167,20 +206,34 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
   }
 
   public async deleteTRC20Coin(trc20Coin: TRC20Coin) {
-    this.availableCoins = this.availableCoins.filter((coin) => coin.getID() !== trc20Coin.getID());
+    this.availableCoins = this.availableCoins.filter(
+      (coin) => coin.getID() !== trc20Coin.getID()
+    );
     let allCustomtrc20Coins = await this.getCustomTRC20Coins();
-    allCustomtrc20Coins = allCustomtrc20Coins.filter((coin) => coin.getContractAddress().toLowerCase() !== trc20Coin.getContractAddress().toLowerCase());
-    await LocalStorage.instance.set("custom-trc20-coins-" + this.localStorageKey, trc20CoinsSerializer.serializeObjectArray(allCustomtrc20Coins));
-    Logger.log('wallet', 'availableCoins after deleting', this.availableCoins);
+    allCustomtrc20Coins = allCustomtrc20Coins.filter(
+      (coin) =>
+        coin.getContractAddress().toLowerCase() !==
+        trc20Coin.getContractAddress().toLowerCase()
+    );
+    await LocalStorage.instance.set(
+      "custom-trc20-coins-" + this.localStorageKey,
+      trc20CoinsSerializer.serializeObjectArray(allCustomtrc20Coins)
+    );
+    Logger.log("wallet", "availableCoins after deleting", this.availableCoins);
 
     this.deletedTRC20Coins.push(trc20Coin);
-    await LocalStorage.instance.set("custom-trc20-coins-deleted-" + this.localStorageKey, trc20CoinsSerializer.serializeObjectArray(this.deletedTRC20Coins));
+    await LocalStorage.instance.set(
+      "custom-trc20-coins-deleted-" + this.localStorageKey,
+      trc20CoinsSerializer.serializeObjectArray(this.deletedTRC20Coins)
+    );
 
     this.onCoinDeleted.next(trc20Coin.getID());
   }
 
   public async getCustomTRC20Coins(): Promise<TRC20Coin[]> {
-    const rawCoinList = await LocalStorage.instance.get("custom-trc20-coins-" + this.localStorageKey);
+    const rawCoinList = await LocalStorage.instance.get(
+      "custom-trc20-coins-" + this.localStorageKey
+    );
     if (!rawCoinList) {
       return [];
     }
@@ -189,15 +242,14 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
     let someCoinsWereRemoved = false;
     for (let rawCoin of rawCoinList) {
       // Use the contract address as id.
-      if ((rawCoin.id as string).startsWith('T')) {
+      if ((rawCoin.id as string).startsWith("T")) {
         let coin = TRC20Coin.fromJson(rawCoin, this);
 
         // Legacy support: we didn't save coins decimals earlier. So we delete custom coins from disk if we don't have the info.
         // Users have to re-add them manually.
         if (coin.decimals == -1) {
           someCoinsWereRemoved = true;
-        }
-        else {
+        } else {
           customCoins.push(coin);
         }
       }
@@ -205,14 +257,21 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
 
     if (someCoinsWereRemoved) {
       // Some coins were "repaired", so we save our list.
-      await LocalStorage.instance.set("custom-trc20-coins-" + this.localStorageKey, trc20CoinsSerializer.serializeObjectArray(customCoins));
+      await LocalStorage.instance.set(
+        "custom-trc20-coins-" + this.localStorageKey,
+        trc20CoinsSerializer.serializeObjectArray(customCoins)
+      );
     }
 
     return customCoins;
   }
 
-  private async initDeletedCustomTRC20Coins(network: AnyNetwork): Promise<TRC20Coin[]> {
-    const rawCoinList = await LocalStorage.instance.get("custom-trc20-coins-deleted-" + this.localStorageKey);
+  private async initDeletedCustomTRC20Coins(
+    network: AnyNetwork
+  ): Promise<TRC20Coin[]> {
+    const rawCoinList = await LocalStorage.instance.get(
+      "custom-trc20-coins-deleted-" + this.localStorageKey
+    );
     if (!rawCoinList) {
       return [];
     }
@@ -227,7 +286,10 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
 
   public updateAccessTime(timestamp: number) {
     this.lastAccessTimestamp = timestamp;
-    void LocalStorage.instance.set("custom-trc20-coins-accesstime-" + this.localStorageKey, this.lastAccessTimestamp);
+    void LocalStorage.instance.set(
+      "custom-trc20-coins-accesstime-" + this.localStorageKey,
+      this.lastAccessTimestamp
+    );
   }
 
   // The last time that the user viewed the coin list screen.
@@ -236,12 +298,19 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
     return this.lastAccessTimestamp;
   }
 
-  public async createTRC20SubWallet(networkWallet: AnyNetworkWallet, coinID: CoinID, startBackgroundUpdates = true): Promise<TRC20SubWallet> {
-    let subWallet = new TRC20SubWallet(networkWallet, coinID, networkWallet.network.getAPIUrlOfType(NetworkAPIURLType.RPC));
+  public async createTRC20SubWallet(
+    networkWallet: AnyNetworkWallet,
+    coinID: CoinID,
+    startBackgroundUpdates = true
+  ): Promise<TRC20SubWallet> {
+    let subWallet = new TRC20SubWallet(
+      networkWallet,
+      coinID,
+      networkWallet.network.getAPIUrlOfType(NetworkAPIURLType.RPC)
+    );
     await subWallet.initialize();
 
-    if (startBackgroundUpdates)
-      void subWallet.startBackgroundUpdates();
+    if (startBackgroundUpdates) void subWallet.startBackgroundUpdates();
 
     return subWallet;
   }
@@ -252,17 +321,17 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
   public getBrowserUrlByType(type: TransactionInfoType, value: string): string {
     let browserUrl = this.getAPIUrlOfType(NetworkAPIURLType.BLOCK_EXPLORER);
     switch (type) {
-        case TransactionInfoType.ADDRESS:
-            browserUrl += '/#/address/'
+      case TransactionInfoType.ADDRESS:
+        browserUrl += "/#/address/";
         break;
-        case TransactionInfoType.BLOCKID:
-            browserUrl += '/#/block/'
+      case TransactionInfoType.BLOCKID:
+        browserUrl += "/#/block/";
         break;
-        case TransactionInfoType.TXID:
-            browserUrl += '/#/transaction/'
+      case TransactionInfoType.TXID:
+        browserUrl += "/#/transaction/";
         break;
-        default:
-            Logger.warn("wallet", "getBrowserUrlByType: not support ", type);
+      default:
+        Logger.warn("wallet", "getBrowserUrlByType: not support ", type);
         break;
     }
     return browserUrl + value;
@@ -273,15 +342,14 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
   }
 
   public getMainTokenSymbol(): string {
-    return 'TRX';
+    return "TRX";
   }
 
   public getMainChainID(): number {
     return -1;
   }
 
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-  }
+  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {}
 
   public supportedPrivateKeyTypes(): PrivateKeyType[] {
     return [PrivateKeyType.EVM];

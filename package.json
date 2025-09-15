@@ -11,6 +11,7 @@
     "build-env": "ts-node --project environment/tsconfig.json environment/set_env.ts",
     "start": "ng serve",
     "start-dev-android": "ionic cordova run android --external -l --ssl",
+    "launch-android-emulator": "$ANDROID_HOME/emulator/emulator -avd \"Pixel_9_Pro\"",
     "ios-select-device": "./scripts/auto_select_ios_device.ts",
     "start-dev-ios": "ionic cordova run ios --external -l --ssl --target=$(./scripts/auto_select_ios_device.ts )",
     "ios-list-devices": "ionic cordova run ios --list",
@@ -25,11 +26,14 @@
     "lint": "npm run eslint && npm run prettier -- --check",
     "prettier": "prettier \"**/*.ts\"",
     "eslint": "eslint src/app --ext .ts",
-    "manual-native-android": "native-run android --app platforms/android/app/build/outputs/apk/debug/app-debug.apk --device --forward 8100:8100",
+    "manual-native-android": "native-run android --app platforms/android/app/build/outputs/apk/debug/app-debug.apk --device --forward 8100:8100 --forward 1313:1313",
     "manual-ng-run-android": "ng run app:ionic-cordova-serve --host=localhost --port=8100 --ssl --platform=android"
   },
   "private": true,
   "dependencies": {
+    "@account-abstraction/contracts": "^0.8.0",
+    "@account-abstraction/sdk": "^0.6.0",
+    "@account-abstraction/utils": "^0.6.0",
     "@angular/animations": "13.1.1",
     "@angular/cdk": "13.1.1",
     "@angular/common": "13.1.1",
@@ -88,6 +92,7 @@
     "@types/jsonld": "^1.5.6",
     "@types/jsonpath": "^0.2.0",
     "@types/promise-queue": "^2.2.0",
+    "@types/web3": "^1.0.20",
     "@uniswap/sdk": "3.0.3",
     "@uniswap/sdk-core": "^3.1.0",
     "@uniswap/v2-core": "1.0.1",
@@ -163,8 +168,8 @@
     "typescript-json-serializer": "^4.3.0",
     "unorm": "1.6.0",
     "url": "^0.11.0",
-    "web3": "^1.7.5",
-    "web3-core": "^1.8.0",
+    "web3": "^1.10.4",
+    "web3-core": "^1.10.4",
     "web3-core-helpers": "^1.8.0",
     "web3-eth-contract": "^1.8.0",
     "web3-utils": "^1.8.0",
@@ -296,5 +301,6 @@
     "platforms": [
       "android"
     ]
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }
