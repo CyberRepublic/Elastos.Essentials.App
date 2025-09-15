@@ -305,10 +305,10 @@ export class GlobalPreferencesService implements GlobalService {
   }
 
   public setLightweightMode(did: string, networkTemplate: string, lightweight: boolean): Promise<void> {
-    return this.setPreference(did, networkTemplate, 'ui.lightweight', lightweight);
+    return this.setPreference(did, networkTemplate, 'ui.lightweight', lightweight, true);
   }
 
   public getLightweightMode(did: string, networkTemplate: string): Promise<boolean> {
-    return this.getPreference(did, networkTemplate, 'ui.lightweight');
+    return this.getPreference(did, networkTemplate, 'ui.lightweight', true);
   }
 }

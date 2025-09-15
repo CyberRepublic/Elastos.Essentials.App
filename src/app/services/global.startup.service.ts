@@ -71,7 +71,6 @@ export class GlobalStartupService {
 
         // Navigate to DID creation
         await this.globalNav.navigateTo('didsessions', '/didsessions/pickidentity');
-        // await this.globalNav.navigateTo("didsessions", '/didsessions/chooseimporteddid');
       }
     }
   }

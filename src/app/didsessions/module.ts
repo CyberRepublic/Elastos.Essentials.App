@@ -9,6 +9,8 @@ import { InlineSVGModule } from 'ng-inline-svg-2';
 import { SharedComponentsModule } from '../components/sharedcomponents.module';
 import { ComponentsModule } from './components/components.module';
 import { ChooseImportedDIDPage } from './pages/chooseimporteddid/chooseimporteddid.page';
+import { AdvancedModeComponent } from './pages/createidentity/components/advanced-mode/advanced-mode.component';
+import { LightweightModeComponent } from './pages/createidentity/components/lightweight-mode/lightweight-mode.component';
 import { CreateIdentityPage } from './pages/createidentity/createidentity';
 import { EditProfilePage } from './pages/editprofile/editprofile';
 import { ImportDIDPage } from './pages/importdid/importdid';
@@ -24,6 +26,8 @@ import { DIDSessionsRoutingModule } from './routing';
   declarations: [
     LanguagePage,
     CreateIdentityPage,
+    AdvancedModeComponent,
+    LightweightModeComponent,
     EditProfilePage,
     ImportDIDPage,
     ChooseImportedDIDPage,
@@ -43,14 +47,8 @@ import { DIDSessionsRoutingModule } from './routing';
     DIDSessionsRoutingModule,
     InlineSVGModule
   ],
-  entryComponents: [
-  ],
-  providers: [
-    QRScanner,
-    Platform,
-    WebView,
-    LoadingController
-  ],
+  entryComponents: [],
+  providers: [QRScanner, Platform, WebView, LoadingController],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class DIDSessionsModule { }
+export class DIDSessionsModule {}
