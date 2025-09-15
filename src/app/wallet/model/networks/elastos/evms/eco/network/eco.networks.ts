@@ -80,13 +80,13 @@ export abstract class ElastosECONetworkBase extends ElastosEVMNetwork<WalletNetw
 }
 
 /**
- * Elastos ECO PG Chain
+ * Elastos PGP ECO Chain
  */
 export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
   constructor() {
     super(
       ElastosECONetworkBase.NETWORK_KEY,
-      'Elastos ECO PG Chain',
+      'Elastos PGP ECO Chain',
       'ECO',
       'assets/wallet/networks/elastos-eco.svg',
       MAINNET_TEMPLATE,

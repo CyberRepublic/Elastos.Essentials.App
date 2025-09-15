@@ -1013,17 +1013,18 @@ export const zh = {
       create: {
         title: '创建账户抽象钱包',
         subtitle: '创建一个新的账户抽象钱包',
-        description: '账户抽象钱包是智能合约钱包，提供增强的安全性和用户体验功能。由您现有的钱包控制。',
+        description: '账户抽象钱包是智能合约钱包，需通过 EOA 的助记词或私钥生成，生成后与原 EOA 账户关联。',
+        descriptionSencond: '目前账户抽象钱包地址仅支持 Elastos PGP ECO Chain，暂不兼容其他区块链网络。',
         'wallet-name': '钱包名称',
         'wallet-name-placeholder': '为您的账户抽象钱包输入名称',
-        'controller-wallet': '控制钱包',
+        'controller-wallet': 'EOA 钱包',
         'controller-wallet-placeholder': '选择将控制此账户抽象钱包的钱包',
         chain: '链',
         'chain-placeholder': '选择区块链网络',
         provider: '提供商',
         'provider-placeholder': '选择账户抽象钱包提供商',
-        'account-address': '账户抽象账户地址',
-        'account-address-placeholder': '账户抽象账户地址自动检测',
+        'account-address': '账户抽象地址',
+        'account-address-placeholder': '账户抽象地址自动检测',
         'account-address-help': '为所选链自动检测账户地址',
         'selected-options': '选定选项',
         'factory-address': '工厂地址',
@@ -1032,7 +1033,7 @@ export const zh = {
         'validation-error': '请填写所有必填字段',
         error: '创建账户抽象钱包失败',
         'help-text': '账户抽象钱包提供社交恢复、支出限制和无气体交易等功能。',
-        'help-text-2': '确保您有正确的合约地址，并且您的控制钱包有足够的资金用于部署（如需要）。',
+        'help-text-2': '确保您有正确的合约地址，并且您的 EOA 钱包有足够的资金用于部署（如需要）。',
         'summary-text': '新的钱包 {{walletName}} 将在 {{networkName}} 网络上创建。上面的地址将是您未来操作的账户地址。'
       }
     }
