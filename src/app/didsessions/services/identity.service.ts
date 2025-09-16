@@ -303,7 +303,9 @@ export class IdentityService {
           );
 
           // Imported DIDs are automatically marked as backed up, no need to remind users about this.
-          if (isImportOperation) await this.didSessions.markActiveIdentityBackedUp();
+          if (isImportOperation) {
+            await this.didSessions.markActiveIdentityBackedUp();
+          }
 
           void this.didSessions.navigateHome();
         });

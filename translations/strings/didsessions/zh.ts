@@ -37,8 +37,8 @@ export const zh = {
     'got-it': '好的',
 
     // Create screen
+    'lightweight-message-1': '欢迎来到 Essentials 的 Web3 未来。请稍等，我们正在准备一切。',
     'welcome-message1': '欢迎来到 Web3，在这里您可以控制自己的数字身份',
-    'welcome-message-web3': '欢迎来到 Essentials 的 Web3 未来。请稍等，我们正在准备一切。',
     'welcome-message2': '使用一份助记词，管理您的多网络加密钱包、您的 Web3 DID 身份和您自己的存储空间。',
     'welcome-message3': '让我们首先创建一个新身份或导入现有身份。您将在 30 秒内为 Web3 做好准备！',
     'create-message': '您可以创建一个全新的身份，也可以导入一个已有的身份',

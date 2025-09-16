@@ -39,8 +39,8 @@ export const it = {
     'got-it': 'Fatto',
 
     // Create screen
+    'lightweight-message-1': 'Benvenuti nel futuro del Web3 con Essentials. Aspettate, stiamo preparando tutto.',
     'welcome-message1': 'Welcome to Web3, where you take control of your own digital identity',
-    'welcome-message-web3': 'Benvenuti nel futuro del Web3 con Essentials. Aspettate, stiamo preparando tutto.',
     'welcome-message2':
       'With one mnemonic, manage your multi-network crypto wallets, your Web3 DID identity and your own storage space.',
     'welcome-message3':

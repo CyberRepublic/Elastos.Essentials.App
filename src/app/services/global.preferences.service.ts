@@ -110,7 +110,7 @@ export class GlobalPreferencesService implements GlobalService {
       'privacy.credentialtoolbox.stats': false,
       'privacy.hive.sync': false,
       'ui.darkmode': true,
-      'ui.theme': 'white',
+      'ui.theme': 'black',
       'ui.variant': 'light',
       'ui.lightweight': true,
       'ui.startupscreen': 'home',
