@@ -21,6 +21,7 @@ export enum ETHOperationType {
   ERC20_TOKEN_APPROVE = 'erc20_token_approve', // The contract seems to be a request to approve a caller to spend ERC20 tokens on behalf of the user
   ERC721_TOKEN_APPROVE = 'erc721_token_approve', // The contract seems to be a request to approve a caller to spend ERC721 tokens on behalf of the user
   SEND_ERC20 = 'send_erc20',
+  RECEIVE_ERC20 = 'receive_erc20',
   SEND_NFT = 'send_nft',
   SWAP = 'swap',
   ADD_LIQUIDITY = 'add_liquidity',
@@ -202,9 +203,21 @@ export class ETHTransactionInfoParser {
         try {
           let coinInfo = await this.getERC20TokenInfoOrThrow(txTo);
           if (coinInfo) {
-            txInfo.type = ETHOperationType.SEND_ERC20;
+            let params = await this.extractTransactionParamValues(
+              ['function transferFrom(address,address,uint256) public returns (bool success)'],
+              txData
+            );
+            let toAddress = this.stringTransactionParamAt(params, 1);
+            let description = '';
+            if (subWallet.getCurrentReceiverAddress().toLowerCase() == toAddress.toLowerCase()) {
+              txInfo.type = ETHOperationType.RECEIVE_ERC20;
+              description = 'wallet.ext-tx-info-type-receive-erc20';
+            } else {
+              txInfo.type = ETHOperationType.SEND_ERC20;
+              description = 'wallet.ext-tx-info-type-send-erc20';
+            }
             txInfo.operation = {
-              description: 'wallet.ext-tx-info-type-send-erc20',
+              description: description,
               descriptionTranslationParams: { symbol: coinInfo.coinSymbol }
             };
           } else {
@@ -221,9 +234,21 @@ export class ETHTransactionInfoParser {
         try {
           let coinInfo = await this.getERC20TokenInfoOrThrow(txTo);
           if (coinInfo) {
-            txInfo.type = ETHOperationType.SEND_ERC20;
+            let params = await this.extractTransactionParamValues(
+              ['function transfer(address,uint256) public returns (bool success)'],
+              txData
+            );
+            let toAddress = this.stringTransactionParamAt(params, 0);
+            let description = '';
+            if (subWallet.getCurrentReceiverAddress().toLowerCase() == toAddress.toLowerCase()) {
+              txInfo.type = ETHOperationType.RECEIVE_ERC20;
+              description = 'wallet.ext-tx-info-type-receive-erc20';
+            } else {
+              txInfo.type = ETHOperationType.SEND_ERC20;
+              description = 'wallet.ext-tx-info-type-send-erc20';
+            }
             txInfo.operation = {
-              description: 'wallet.ext-tx-info-type-send-erc20',
+              description: description,
               descriptionTranslationParams: { symbol: coinInfo.coinSymbol }
             };
           } else txInfo.operation = { description: 'wallet.ext-tx-info-type-send-tokens' };
