@@ -3,6 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import * as moment from 'moment';
 import { Logger } from 'src/app/logger';
 import { App } from 'src/app/model/app.enum';
+import { GlobalLightweightService } from 'src/app/services/global.lightweight.service';
 import { GlobalNotificationsService } from 'src/app/services/global.notifications.service';
 import { GlobalPreferencesService } from 'src/app/services/global.preferences.service';
 import { GlobalStorageService } from 'src/app/services/global.storage.service';
@@ -77,7 +78,8 @@ export class TipsService {
     private translate: TranslateService,
     private storage: GlobalStorageService,
     private prefs: GlobalPreferencesService,
-    private notifications: GlobalNotificationsService
+    private notifications: GlobalNotificationsService,
+    private lightweightService: GlobalLightweightService
   ) {}
 
   public init() {
@@ -104,6 +106,11 @@ export class TipsService {
 
     if (!(await this.userWantsToSeeTips())) {
       Logger.log('Launcher', "User doesn't want to see tips. Skipping.");
+      return;
+    }
+
+    if (this.lightweightService.getCurrentLightweightMode()) {
+      Logger.log('Launcher', 'App is in lightweight mode. Skipping tip notifications.');
       return;
     }
 
