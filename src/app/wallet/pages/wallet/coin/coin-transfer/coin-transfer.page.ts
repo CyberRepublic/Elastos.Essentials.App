@@ -87,6 +87,7 @@ import { Native } from '../../../../services/native.service';
 import { UiService } from '../../../../services/ui.service';
 import { WalletService } from '../../../../services/wallet.service';
 import { NetworkInfo } from '../coin-select/coin-select.page';
+import { AccountAbstractionMasterWallet } from 'src/app/wallet/model/masterwallets/account.abstraction.masterwallet';
 
 @Component({
   selector: 'app-coin-transfer',
@@ -391,10 +392,17 @@ export class CoinTransferPage implements OnInit, OnDestroy {
         } else {
           try {
             if (this.networkWallet.network.isEVMNetwork()) {
-              if (this.fromSubWallet instanceof MainCoinEVMSubWallet) {
-                this.gasLimit = (await this.fromSubWallet.estimateTransferTransactionGas()).toString();
-              } else if (this.fromSubWallet instanceof ERC20SubWallet) {
-                this.gasLimit = (await this.fromSubWallet.estimateTransferTransactionGas()).toString();
+              if (this.isAccountAbstractionWallet()) {
+                // TODO:
+                // Account Abstraction wallet doesn't have a fee for now.
+                // later we should request this to the AA provider.
+                this.gasLimit = null;
+              } else {
+                if (this.fromSubWallet instanceof MainCoinEVMSubWallet) {
+                  this.gasLimit = (await this.fromSubWallet.estimateTransferTransactionGas()).toString();
+                } else if (this.fromSubWallet instanceof ERC20SubWallet) {
+                  this.gasLimit = (await this.fromSubWallet.estimateTransferTransactionGas()).toString();
+                }
               }
             } else if (this.fromSubWallet instanceof BTCSubWallet) {
               // estimate fees after input amount
@@ -431,10 +439,17 @@ export class CoinTransferPage implements OnInit, OnDestroy {
         } else {
           try {
             if (this.networkWallet.network.isEVMNetwork()) {
-              if (this.fromSubWallet instanceof MainCoinEVMSubWallet) {
-                this.gasLimit = (await this.fromSubWallet.estimateTransferTransactionGas()).toString();
-              } else if (this.fromSubWallet instanceof ERC20SubWallet) {
-                this.gasLimit = (await this.fromSubWallet.estimateTransferTransactionGas()).toString();
+              if (this.isAccountAbstractionWallet()) {
+                // TODO:
+                // Account Abstraction wallet doesn't have a fee for now.
+                // later we should request this to the AA provider.
+                this.gasLimit = null;
+              } else {
+                if (this.fromSubWallet instanceof MainCoinEVMSubWallet) {
+                  this.gasLimit = (await this.fromSubWallet.estimateTransferTransactionGas()).toString();
+                } else if (this.fromSubWallet instanceof ERC20SubWallet) {
+                  this.gasLimit = (await this.fromSubWallet.estimateTransferTransactionGas()).toString();
+                }
               }
             }
           } catch (err) {
@@ -458,24 +473,31 @@ export class CoinTransferPage implements OnInit, OnDestroy {
         this.nftAsset = this.nft.getAssetById(assetID);
 
         let fromAddress = this.fromSubWallet.getCurrentReceiverAddress(AddressUsage.EVM_CALL);
-        if (this.nft.type === NFTType.ERC721) {
-          this.gasLimit = (
-            await this.erc721Service.estimateTransferERC721TransactionGas(
-              this.networkWallet,
-              fromAddress,
-              this.nft.contractAddress,
-              this.nftAsset.id
-            )
-          )?.toString();
-        } else if (this.nft.type === NFTType.ERC1155) {
-          this.gasLimit = (
-            await this.erc1155Service.estimateTransferERC1155TransactionGas(
-              this.networkWallet,
-              fromAddress,
-              this.nft.contractAddress,
-              this.nftAsset.id
-            )
-          )?.toString();
+        if (this.isAccountAbstractionWallet()) {
+          // TODO:
+          // Account Abstraction wallet doesn't have a fee for now.
+          // later we should request this to the AA provider.
+          this.gasLimit = null;
+        } else {
+          if (this.nft.type === NFTType.ERC721) {
+            this.gasLimit = (
+              await this.erc721Service.estimateTransferERC721TransactionGas(
+                this.networkWallet,
+                fromAddress,
+                this.nft.contractAddress,
+                this.nftAsset.id
+              )
+            )?.toString();
+          } else if (this.nft.type === NFTType.ERC1155) {
+            this.gasLimit = (
+              await this.erc1155Service.estimateTransferERC1155TransactionGas(
+                this.networkWallet,
+                fromAddress,
+                this.nft.contractAddress,
+                this.nftAsset.id
+              )
+            )?.toString();
+          }
         }
 
         Logger.log('wallet', 'Initialization complete for NFT details', this.networkWallet, this.nft, this.nftAsset);
@@ -805,6 +827,11 @@ export class CoinTransferPage implements OnInit, OnDestroy {
       this.feeLimitOfTRX = Util.ceil(feeSun, 10000000);
       this.feeOfTRX = GlobalTronGridService.instance.fromSun(feeSun.toString()).toString();
       fee = new BigNumber(this.feeOfTRX);
+    } else if (this.isAccountAbstractionWallet()) {
+      // TODO:
+      // Account Abstraction wallet doesn't have a fee for now.
+      // later we should request this to the AA provider.
+      fee = new BigNumber(0);
     } else {
       // TODO: 0.0001 works only for Elastos ESC! Rework this.
       fee = new BigNumber(0.0001);
@@ -859,7 +886,7 @@ export class CoinTransferPage implements OnInit, OnDestroy {
       }
     }
 
-    if (!(this.fromSubWallet instanceof MainCoinSubWallet)) {
+    if (fee && fee.gt(0) && !(this.fromSubWallet instanceof MainCoinSubWallet)) {
       // Balance can cover fee?
       if (!this.networkWallet.getMainTokenSubWallet().isBalanceEnough(fee)) {
         const message = this.translate.instant('wallet.eth-insuff-balance', {
@@ -1540,5 +1567,12 @@ export class CoinTransferPage implements OnInit, OnDestroy {
     }
 
     return true;
+  }
+
+  /**
+   * Checks if the current master wallet is an Account Abstraction wallet
+   */
+  public isAccountAbstractionWallet(): boolean {
+    return this.networkWallet.masterWallet instanceof AccountAbstractionMasterWallet;
   }
 }
