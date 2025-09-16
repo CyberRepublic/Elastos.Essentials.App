@@ -18,6 +18,8 @@ export const zh = {
           'privacy-setting': '隐私',
           'startupscreen-setting': '启动页面',
           'startupscreen-intro-setting': '选择启动Essentials后显示的页面',
+          'display-mode-setting': '显示模式',
+          'display-mode-intro-setting': '选择轻量模式或高级模式',
 
           // Subtitles
           'advanced-setting': '高级设置',
@@ -33,6 +35,8 @@ export const zh = {
           'dark-mode-on': '深色主题',
           'dark': '深',
           'light': '浅',
+          'lightweight': '轻量',
+          'advanced': '高级',
           'log-out': '注销',
           'help': '帮助',
 
@@ -77,6 +81,7 @@ export const zh = {
           'restart-prompt-info': '此操作需要重启应用',
           'restart-app': '重启应用',
           'restart-later': '稍后重启',
+          'display-mode-restart-prompt': '更改显示模式需要重启应用才能生效',
 
           /********** Wallet Connect Page **********/
           'wallet-connect-request': '应用连接请求',

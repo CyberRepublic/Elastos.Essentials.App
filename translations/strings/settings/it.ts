@@ -18,6 +18,8 @@ export const it = {
                 'privacy-setting': 'Privacy',
                 'startupscreen-setting': 'Schermata iniziale',
                 'startupscreen-intro-setting': 'Scegli la schermata da visualizzare all\'avvio di Essentials',
+                'display-mode-setting': 'Modalità di visualizzazione',
+                'display-mode-intro-setting': 'Scegli tra modalità leggera o avanzata',
 
                 // Subtitles
                 'advanced-setting': 'Impostazioni avanzate',
@@ -33,6 +35,8 @@ export const it = {
                 'dark-mode-on': 'MODALITÀ SCURO ATTIVA',
                 'dark': 'SCURO',
                 'light': 'CHIARO',
+                'lightweight': 'Leggera',
+                'advanced': 'Avanzata',
                 'log-out': 'Disconnettiti',
                 'help': 'Aiuto',
 
@@ -77,6 +81,7 @@ export const it = {
                 'restart-prompt-info': 'Questa operazione richiede il riavvio',
                 'restart-app': 'Riavvia l\'applicazione',
                 'restart-later': 'Riavvia più tardi',
+                'display-mode-restart-prompt': 'La modifica della modalità di visualizzazione richiede il riavvio dell\'app per avere effetto',
 
                 /********** Wallet Connect / Sessions Page **********/
                 'wallet-connect-request': 'Collegamento con l\'applicazione',

@@ -18,6 +18,8 @@ export const en = {
                 'privacy-setting': 'Privacy',
                 'startupscreen-setting': 'Startup Screen',
                 'startupscreen-intro-setting': 'Choose which screen to show when Essentials starts',
+                'display-mode-setting': 'Display Mode',
+                'display-mode-intro-setting': 'Choose between lightweight or advanced mode',
 
                 // Subtitles
                 'advanced-setting': 'Advanced settings',
@@ -33,6 +35,8 @@ export const en = {
                 'dark-mode-on': 'DARK MODE ON',
                 'dark': 'DARK',
                 'light': 'LIGHT',
+                'lightweight': 'Lightweight',
+                'advanced': 'Advanced',
                 'log-out': 'Log Out',
                 'help': 'Help',
 
@@ -77,6 +81,7 @@ export const en = {
                 'restart-prompt-info': 'This operation requires to restart',
                 'restart-app': 'Restart Application',
                 'restart-later': 'Restart later',
+                'display-mode-restart-prompt': 'Changing display mode requires restarting the app to take effect',
 
                 /********** Wallet Connect / Sessions Page **********/
                 'wallet-connect-request': 'App Link Request',
