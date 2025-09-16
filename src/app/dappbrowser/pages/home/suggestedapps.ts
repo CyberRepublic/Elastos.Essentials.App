@@ -6,7 +6,7 @@ export type DAppMenuEntry = {
   useExternalBrowser: boolean;
   walletConnectSupported: boolean; // Whether the dapp supports wallet connect or not (needed for external navigation on ios for instance - otherwise we don't recommend)
   networks: string[]; // List of network keys in which this dapp can run. Empty list = available everywhere.
-}
+};
 
 export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
   // {
@@ -25,7 +25,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://glidefinance.io/',
     useExternalBrowser: false,
     walletConnectSupported: true,
-    networks: ["elastossmartchain"]
+    networks: ['elastossmartchain']
   },
   {
     icon: '/assets/browser/dapps/elacity.png',
@@ -34,7 +34,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://ela.city/',
     useExternalBrowser: false,
     walletConnectSupported: true,
-    networks: ["elastossmartchain"]
+    networks: ['elastossmartchain']
   },
   // {
   //   icon: '/assets/browser/dapps/chainge.png',
@@ -73,40 +73,24 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     networks: [] // All networks
   },
   {
-    icon: '/assets/browser/dapps/escription.svg',
-    title: 'EScription',
-    description: 'Inscription marketplace on Elastos ESC.',
-    url: 'https://escription.io/',
-    useExternalBrowser: false,
-    walletConnectSupported: false,
-    networks: ["elastossmartchain"]
-  },
-  {
     icon: '/assets/browser/dapps/anyswap.svg',
     title: 'AnySwap',
-    description: 'Anyswap is a fully decentralized cross chain swap protocol, based on Fusion DCRM technology, with automated pricing and liquidity system.',
+    description:
+      'Anyswap is a fully decentralized cross chain swap protocol, based on Fusion DCRM technology, with automated pricing and liquidity system.',
     url: 'https://anyswap.exchange/',
     useExternalBrowser: false,
     walletConnectSupported: true,
-    networks: ["arbitrum", "avalanchecchain", "bsc", "eth", "fusion", "fantom", "polygon", "telos"]
-  },
-  {
-    icon: '/assets/browser/dapps/creda.png',
-    title: 'CreDA',
-    description: "The world's first trusted decentralized credit rating service to create a universal trust score for Web 3.0.",
-    url: 'https://creda.app/',
-    useExternalBrowser: false,
-    walletConnectSupported: true,
-    networks: ["arbitrum", "elastossmartchain", "bsc", "ethereum"]
+    networks: ['arbitrum', 'avalanchecchain', 'bsc', 'eth', 'fusion', 'fantom', 'polygon', 'telos']
   },
   {
     icon: '/assets/browser/dapps/elk.svg',
     title: 'ElkDex by ElkFinance',
-    description: 'Elk Finance is a decentralized network for cross-chain liquidity. Our motto is "Any chain, anytime, anywhere.™',
+    description:
+      'Elk Finance is a decentralized network for cross-chain liquidity. Our motto is "Any chain, anytime, anywhere.™',
     url: 'https://app.elk.finance/',
     useExternalBrowser: false,
     walletConnectSupported: false,
-    networks: ["elastossmartchain", "bsc", "avalanchecchain", "fantom", "polygon", "telos"]
+    networks: ['elastossmartchain', 'bsc', 'avalanchecchain', 'fantom', 'polygon', 'telos']
   },
   {
     icon: '/assets/browser/dapps/filda.png',
@@ -115,21 +99,12 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://app.filda.io/bank/',
     useExternalBrowser: false,
     walletConnectSupported: true,
-    networks: ["bsc", "elastossmartchain"]
-  },
-  {
-    icon: '/assets/browser/dapps/idriss.png',
-    title: 'IDriss',
-    description: 'Link wallet addresses from multiple networks to emails, phone numbers or @Twitter usernames, enabling quick lookup and payments (registry on Polygon).',
-    url: 'https://www.idriss.xyz/',
-    useExternalBrowser: false,
-    walletConnectSupported: false,
-    networks: ["elastossmartchain", "polygon"]
+    networks: ['bsc', 'elastossmartchain']
   },
   {
     icon: '/assets/browser/dapps/kyc-me.png',
     title: 'Kyc-me',
-    description: "KYC service for W3C DID Verifiable Credentials on Elastos",
+    description: 'KYC service for W3C DID Verifiable Credentials on Elastos',
     url: 'https://kyc-me.io/',
     useExternalBrowser: false,
     walletConnectSupported: true,
@@ -143,15 +118,6 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
       useExternalBrowser: false,
       networks: ["elastossmartchain"]
   }, */
-  {
-    icon: '/assets/browser/dapps/mdex.png',
-    title: 'Mdex',
-    description: 'An AMM-based decentralized transaction protocol that integrates DEX, IMO & DAO',
-    url: 'https://bsc.mdex.co/',
-    useExternalBrowser: false,
-    walletConnectSupported: false,
-    networks: ["bsc", "eth"]
-  },
   // {
   //     icon: '/assets/browser/dapps/rocketx.png',
   //     title: 'RocketX - Skyscanner Crypto',
@@ -161,15 +127,15 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
   //     walletConnectSupported: false,
   //     networks: ["avalanchecchain", "bsc", "ethereum", "polygon"]
   // },
-//   {
-//     icon: '/assets/browser/dapps/raven.png',
-//     title: 'Moe Raven',
-//     description: 'The magical matic yield optimizer',
-//     url: 'https://raven.moe/',
-//     useExternalBrowser: false,
-//     walletConnectSupported: false,
-//     networks: ["elastossmartchain", "polygon"]
-//   },
+  //   {
+  //     icon: '/assets/browser/dapps/raven.png',
+  //     title: 'Moe Raven',
+  //     description: 'The magical matic yield optimizer',
+  //     url: 'https://raven.moe/',
+  //     useExternalBrowser: false,
+  //     walletConnectSupported: false,
+  //     networks: ["elastossmartchain", "polygon"]
+  //   },
   {
     icon: '/assets/browser/dapps/tokbridge.svg',
     title: 'Shadow Tokens',
@@ -177,16 +143,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://tokbridge.net/',
     useExternalBrowser: false,
     walletConnectSupported: false, // Seems to be supported on the website but not working
-    networks: ["elastossmartchain", "bsc", "ethereum"]
-  },
-  {
-    icon: '/assets/browser/dapps/tokswap.png',
-    title: 'TokSwap',
-    description: 'Swap your tokens on the Elastos blockchain',
-    url: 'https://tokswap.net/',
-    useExternalBrowser: false,
-    walletConnectSupported: false,
-    networks: ["elastossmartchain"]
+    networks: ['elastossmartchain', 'bsc', 'ethereum']
   },
   /* {
       icon: '/assets/browser/dapps/tin.jpg',
@@ -213,7 +170,7 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://app.sushi.com/',
     useExternalBrowser: false,
     walletConnectSupported: true,
-    networks: ["ethereum", "fantom", "bsc", "kava", "polygon", "telos"]
+    networks: ['ethereum', 'fantom', 'bsc', 'kava', 'polygon', 'telos']
   },
   {
     icon: '/assets/browser/dapps/kava.svg',
@@ -222,15 +179,15 @@ export const suggestedDApps = (darkMode: boolean): DAppMenuEntry[] => [
     url: 'https://app.kava.io/',
     useExternalBrowser: false,
     walletConnectSupported: true,
-    networks: ["kava"]
+    networks: ['kava']
   },
   {
     icon: '/assets/browser/dapps/chainlist.svg',
     title: 'ChainList',
-    description: "Chainlist is a list of most EVM networks. Easily browse and add custom networks from there",
+    description: 'Chainlist is a list of most EVM networks. Easily browse and add custom networks from there',
     url: 'https://chainlist.org/',
     useExternalBrowser: false,
     walletConnectSupported: false,
     networks: [] // All networks
-  },
+  }
 ];
