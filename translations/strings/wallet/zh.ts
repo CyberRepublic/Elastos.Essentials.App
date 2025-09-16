@@ -813,6 +813,7 @@ export const zh = {
     'ext-tx-info-type-send-nft': '发送 NFT',
     'ext-tx-info-type-send-nft-name': '发送 {{ name }}',
     'ext-tx-info-type-send-erc20': '发送 {{ symbol }}',
+    'ext-tx-info-type-receive-erc20': '接收 {{ symbol }}',
     'ext-tx-info-type-send-tokens': '发送代币',
     'ext-tx-info-type-swap-erc20': '{{ fromSymbol }} → {{ toSymbol }}',
     'ext-tx-info-type-swap-tokens': '交换代币',

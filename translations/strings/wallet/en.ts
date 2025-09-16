@@ -838,6 +838,7 @@ export const en = {
     'ext-tx-info-type-send-nft': 'Send NFT',
     'ext-tx-info-type-send-nft-name': 'Send {{ name }}',
     'ext-tx-info-type-send-erc20': 'Send {{ symbol }}',
+    'ext-tx-info-type-receive-erc20': 'Receive {{ symbol }}',
     'ext-tx-info-type-send-tokens': 'Send tokens',
     'ext-tx-info-type-swap-erc20': '{{ fromSymbol }} → {{ toSymbol }}',
     'ext-tx-info-type-swap-tokens': 'Swap tokens',
