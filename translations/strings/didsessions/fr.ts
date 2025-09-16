@@ -39,6 +39,7 @@ export const fr = {
 
     // Create screen
     'welcome-message1': 'Bienvenue dans le Web3 qui vous donne le contrôle sur votre propre identité numérique',
+    'welcome-message-web3': "Bienvenue dans l'avenir du Web3 avec Essentials. Accrochez-vous, nous préparons tout.",
     'welcome-message2':
       'Avec une clé papier, gérez vos portefeuilles crypto multi-réseaux, votre identité Web3 et votre espace de stockage.',
     'welcome-message3':

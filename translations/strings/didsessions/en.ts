@@ -39,6 +39,7 @@ export const en = {
 
     // Create screen
     'welcome-message1': 'Welcome to Web3, where you take control of your own digital identity',
+    'welcome-message-web3': "Welcome to the future of Web3 with Essentials. Hold on, we're getting everything ready.",
     'welcome-message2':
       'With one mnemonic, manage your multi-network crypto wallets, your Web3 DID identity and your own storage space.',
     'welcome-message3':

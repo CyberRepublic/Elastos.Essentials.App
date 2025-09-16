@@ -22,6 +22,7 @@ import { GlobalFirebaseService } from './services/global.firebase.service';
 import { GlobalHiveService } from './services/global.hive.service';
 import { GlobalIntentService } from './services/global.intent.service';
 import { GlobalLanguageService } from './services/global.language.service';
+import { GlobalLightweightService } from './services/global.lightweight.service';
 import { GlobalNativeService } from './services/global.native.service';
 import { GlobalNavService } from './services/global.nav.service';
 import { GlobalNetworksService } from './services/global.networks.service';
@@ -57,6 +58,7 @@ export class AppComponent {
     private didSessions: GlobalDIDSessionsService,
     private globalAppBackgroundService: GlobalAppBackgroundService,
     private language: GlobalLanguageService,
+    private lightweightService: GlobalLightweightService,
     private intentService: GlobalIntentService,
     private screenOrientation: ScreenOrientation,
     private notificationsService: GlobalNotificationsService,
@@ -117,6 +119,7 @@ export class AppComponent {
       // Initialize mandatory services
       this.theme.init();
       await this.language.init();
+      await this.lightweightService.init();
       await this.globalNetworksService.init();
       await this.globalElastosAPIService.init();
       await this.notificationsService.init();
