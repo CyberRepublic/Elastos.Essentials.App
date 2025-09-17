@@ -14,9 +14,12 @@
 
   <!-- Paymaster section - placeholder for future configurability -->
   <div class="item-row ripple ion-activatable">
-    <div class="item-label">{{ 'wallet.esctransaction-fees' | translate }}</div>
+    <!-- <div class="item-label">{{ 'wallet.esctransaction-fees' | translate }}</div> -->
+    <div class="item-label">{{ 'wallet.esctransaction-estimated-fees' | translate }}</div>
     <div class="item-value">
-      <span>{{ 'wallet.esctransaction-covered-by-paymaster' | translate }}</span>
+      <!-- TODO: get the fee from the AA provider -->
+      <!-- <span>{{ 'wallet.esctransaction-covered-by-paymaster' | translate }}</span> -->
+      <span> 0.04 PGA</span>
     </div>
   </div>
 
@@ -24,7 +27,7 @@
   <div class="item-row ripple ion-activatable">
     <div class="item-label">{{ 'wallet.balance-remaining' | translate }}</div>
     <div class="item-value">
-      <span>{{ uiService.getFixedBalance(balance) }} {{ getCurrencyInUse() }}</span>
+      <span>{{ uiService.getFixedBalance(pgaBalance) }} {{ getCurrencyInUse() }}</span>
     </div>
   </div>
 </div>

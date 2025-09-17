@@ -609,6 +609,7 @@ export const fr = {
     'esctransaction-you-are-using': 'Vous utilisez:',
     'esctransaction-value': 'Montant:',
     'esctransaction-fees': 'Frais maximal estimé:',
+    'esctransaction-estimated-fees': 'Frais estimé:',
     'esctransaction-covered-by-paymaster': 'Couvert par le paymaster',
     'esctransaction-approve-token-spending-cap': 'Spending cap ',
 

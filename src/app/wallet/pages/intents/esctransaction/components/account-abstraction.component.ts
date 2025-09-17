@@ -11,17 +11,21 @@ import { EscTransactionPage } from '../esctransaction.page';
   styleUrls: ['./account-abstraction.component.scss']
 })
 export class AccountAbstractionComponent implements OnInit {
-  @Input() balance: BigNumber;
+  @Input() balance: BigNumber; // TODO: not the ela balance, get the token balance from the AA provider?
   @Input() uiService: UiService;
   @Input() parentPage: EscTransactionPage;
 
   // Transaction cost calculation (simplified for AA)
   public totalTransactionCost: any;
   public signingAndTransacting = false;
+  // TODO: get the Token from the AA provider
+  public pgaBalance = new BigNumber(0);
 
   constructor() {}
 
   ngOnInit() {
+    // TODO: get the token from the AA provider
+    this.pgaBalance = this.parentPage.networkWallet.getSubWallet('0x8152557DD7d8dBFa2E85EaE473f8B897a5b6CCA9').getBalance();
     this.calculateTransactionCost();
   }
 
@@ -46,12 +50,14 @@ export class AccountAbstractionComponent implements OnInit {
   }
 
   public balanceIsEnough(): boolean {
-    return this.totalTransactionCost.totalAsBigNumber.lte(this.balance);
+    return this.totalTransactionCost.totalAsBigNumber.lte(this.pgaBalance);
   }
 
   // ELA, HT, etc
   public getCurrencyInUse(): string {
-    return this.parentPage.getEvmSubWallet().getDisplayTokenName();
+    // TODO: get the token name from the AA provider
+    return 'PGA';
+    // return this.parentPage.getEvmSubWallet().getDisplayTokenName();
   }
 
   // CNY, USD, etc
