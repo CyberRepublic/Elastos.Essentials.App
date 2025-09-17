@@ -606,6 +606,7 @@ export const it = {
     'esctransaction-you-are-using': 'Stai usando:',
     'esctransaction-value': 'Valore:',
     'esctransaction-fees': 'Commissione Max. Stimata:',
+    'esctransaction-estimated-fees': 'Commissione Stimata:',
     'esctransaction-covered-by-paymaster': 'Coperto dal paymaster',
     'esctransaction-approve-token-spending-cap': 'Spending cap ',
 

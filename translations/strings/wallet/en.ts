@@ -603,6 +603,7 @@ export const en = {
     'esctransaction-you-are-using': 'You are using:',
     'esctransaction-value': 'Value:',
     'esctransaction-fees': 'Estimated Max Fee:',
+    'esctransaction-estimated-fees': 'Estimated Fee:',
     'esctransaction-covered-by-paymaster': 'Covered by paymaster',
     'esctransaction-approve-token-spending-cap': 'Spending cap ',
 
