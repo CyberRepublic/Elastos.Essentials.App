@@ -24,12 +24,22 @@ const PG_AA_CHAIN_CONFIGS: PGAAChainConfig[] = [
   {
     chainId: 12343,
     entryPointAddress: '0x8308DF3bb308A669942220614032098BbE62E11A',
-    bundlerRpcUrl: 'https://bundler.eadd.co/rpc',
-    paymasterAddress: '0x0348E7c415cE40188f3e2AFf5d2f936d28D791cb',
+    bundlerRpcUrl: 'https://bundle.pgpgas.org/rpc',
+    paymasterAddress: '0x8152557DD7d8dBFa2E85EaE473f8B897a5b6CCA9',
     factoryAddress: '0x3fDA83ab9564eC18Cb413f4bdf83e2789DD7D173',
-    gasErc20TokenAddress: '0x0348E7c415cE40188f3e2AFf5d2f936d28D791cb', // Test PGA - same as paymaster...
-    gasErc20TokenDecimals: 18 // Test PGA
+    gasErc20TokenAddress: '0x8152557DD7d8dBFa2E85EaE473f8B897a5b6CCA9', // PGA - same as paymaster...
+    gasErc20TokenDecimals: 18 // PGA
   }
+  // TEST
+  // {
+  //   chainId: 12343,
+  //   entryPointAddress: '0x8308DF3bb308A669942220614032098BbE62E11A',
+  //   bundlerRpcUrl: 'https://bundler.eadd.co/rpc',
+  //   paymasterAddress: '0x0348E7c415cE40188f3e2AFf5d2f936d28D791cb',
+  //   factoryAddress: '0x3fDA83ab9564eC18Cb413f4bdf83e2789DD7D173',
+  //   gasErc20TokenAddress: '0x0348E7c415cE40188f3e2AFf5d2f936d28D791cb', // Test PGA - same as paymaster...
+  //   gasErc20TokenDecimals: 18 // Test PGA
+  // }
 ];
 
 /**
