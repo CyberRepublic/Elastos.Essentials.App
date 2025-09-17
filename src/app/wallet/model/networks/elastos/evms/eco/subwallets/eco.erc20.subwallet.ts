@@ -7,6 +7,14 @@ import { ERC20SubWallet } from "../../../../evms/subwallets/erc20.subwallet";
  * Subwallet for Eco-ERC20 tokens.
  */
 export class EcoERC20SubWallet extends ERC20SubWallet {
+  // Centralized mapping for ECO ERC20 token contract addresses to icon assets
+  private static readonly ECO_TOKEN_ICON_MAP: Record<string, string> = {
+    '0x45ec25a63e010bfb84629242f40dda187f83833e': 'assets/wallet/coins/btcd.png',
+    '0x67d8183f13043be52f64fb434f1aa5e5d1c58775': 'assets/wallet/coins/fist.png',
+    '0x8152557dd7d8dbfa2e85eae473f8b897a5b6cca9': 'assets/wallet/coins/pga.png',
+    '0x1c4e7cd89ea67339d4a5ed2780703180a19757d7': 'assets/wallet/coins/usdt.svg',
+  };
+
   constructor(networkWallet: AnyNetworkWallet, coinID: CoinID) {
     let rpcApiUrl = GlobalElastosAPIService.instance.getApiUrlForChainCode(StandardCoinName.ETHECO);
     super(networkWallet, coinID, rpcApiUrl, "ECO-ERC20 token");
@@ -15,15 +23,9 @@ export class EcoERC20SubWallet extends ERC20SubWallet {
   }
 
   public getMainIcon(): string {
-    //TODO: improve it
-    if (this.coin.getContractAddress().toLowerCase() === '0x45ec25a63e010bfb84629242f40dda187f83833e') {
-      return "assets/wallet/coins/btcd.png"
-    } else if (this.coin.getContractAddress().toLowerCase() === '0x67d8183f13043be52f64fb434f1aa5e5d1c58775') {
-      return "assets/wallet/coins/fist.png"
-    // } else if (this.coin.getContractAddress().toLowerCase() === '') {
-    //   return "assets/wallet/coins/pg.png"
-    }
-    return "assets/wallet/networks/elastos-eco.svg";
+    const contract = this.coin.getContractAddress();
+    const addr = contract ? contract.toLowerCase() : '';
+    return EcoERC20SubWallet.ECO_TOKEN_ICON_MAP[addr] ?? 'assets/wallet/networks/elastos-eco.svg';
   }
 
   public getSecondaryIcon(): string {
