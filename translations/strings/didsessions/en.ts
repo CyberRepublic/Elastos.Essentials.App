@@ -38,7 +38,6 @@ export const en = {
     'got-it': 'Got it',
 
     // Create screen
-    'lightweight-message-1': "Welcome to the future of Web3 with Essentials. Hold on, we're getting everything ready.",
     'welcome-message1': 'Welcome to Web3, where you take control of your own digital identity',
     'welcome-message2':
       'With one mnemonic, manage your multi-network crypto wallets, your Web3 DID identity and your own storage space.',
@@ -108,6 +107,8 @@ export const en = {
     'getting-ready': 'Getting ready',
     ready: 'Ready!',
     prepare: {
+      'lightweight-message-1':
+        "Welcome to the future of Web3 with Essentials. Hold on, we're getting everything ready.",
       'publish-title': 'Publishing your identity to the public ledger',
       'publish-intro': 'This is mandatory but takes a few seconds',
       'sign-in-title': 'Signing in...',

@@ -19,6 +19,7 @@ export const fr = {
     'startupscreen-intro-setting': "Choix de l'écran à afficher au démarrage d'Essentials",
     'display-mode-setting': "Mode d'affichage",
     'display-mode-intro-setting': 'Choisir entre le mode léger ou avancé',
+    'configure-interface-style': "Configurer le Style d'Interface",
 
     // Subtitles
     'advanced-setting': 'Paramètres avancés',
@@ -36,6 +37,8 @@ export const fr = {
     light: 'CLAIR',
     lightweight: 'Léger',
     advanced: 'Avancé',
+    'lightweight-mode-enabled': 'Mode Léger Activé',
+    'lightweight-mode-disabled': 'Mode Léger Désactivé',
     'log-out': "Changer d'utilisateur",
     help: 'Aide',
 

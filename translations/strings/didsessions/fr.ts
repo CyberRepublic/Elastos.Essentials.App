@@ -38,7 +38,6 @@ export const fr = {
     'got-it': 'Got it',
 
     // Create screen
-    'lightweight-message-1': "Bienvenue dans l'avenir du Web3 avec Essentials. Accrochez-vous, nous préparons tout.",
     'welcome-message1': 'Bienvenue dans le Web3 qui vous donne le contrôle sur votre propre identité numérique',
     'welcome-message2':
       'Avec une clé papier, gérez vos portefeuilles crypto multi-réseaux, votre identité Web3 et votre espace de stockage.',
@@ -105,6 +104,7 @@ export const fr = {
     'getting-ready': 'Finalisation en cours',
     ready: 'Prêt!',
     prepare: {
+      'lightweight-message-1': "Bienvenue dans l'avenir du Web3 avec Essentials. Accrochez-vous, nous préparons tout.",
       'publish-title': 'Publication de votre identité dans le registre public',
       'publish-intro': 'Cette étape est indispensable et prend quelques secondes, veuillez patienter.',
       'sign-in-title': 'Connexion',
