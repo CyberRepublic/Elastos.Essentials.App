@@ -4,6 +4,9 @@ import { Logger } from 'src/app/logger';
 import { Transfer } from '../../../../services/cointransfer.service';
 import { UiService } from '../../../../services/ui.service';
 import { EscTransactionPage } from '../esctransaction.page';
+import { TranslateService } from '@ngx-translate/core';
+import { AccountAbstractionNetworkWallet } from 'src/app/wallet/model/networks/evms/networkwallets/account-abstraction.networkwallet';
+import { EVMNetwork } from 'src/app/wallet/model/networks/evms/evm.network';
 
 @Component({
   selector: 'app-account-abstraction',
@@ -11,21 +14,27 @@ import { EscTransactionPage } from '../esctransaction.page';
   styleUrls: ['./account-abstraction.component.scss']
 })
 export class AccountAbstractionComponent implements OnInit {
-  @Input() balance: BigNumber; // TODO: not the ela balance, get the token balance from the AA provider?
+  @Input() balance: BigNumber;
   @Input() uiService: UiService;
   @Input() parentPage: EscTransactionPage;
 
   // Transaction cost calculation (simplified for AA)
   public totalTransactionCost: any;
   public signingAndTransacting = false;
-  // TODO: get the Token from the AA provider
-  public pgaBalance = new BigNumber(0);
+  public gasTokenBalance = new BigNumber(0);
+  public gasTokenName = '';
 
-  constructor() {}
+  constructor(public translate: TranslateService) {}
 
   ngOnInit() {
-    // TODO: get the token from the AA provider
-    this.pgaBalance = this.parentPage.networkWallet.getSubWallet('0x8152557DD7d8dBFa2E85EaE473f8B897a5b6CCA9').getBalance();
+    const networkWallet = this.parentPage.networkWallet as AccountAbstractionNetworkWallet;
+    const aaProvider = networkWallet.getAccountAbstractionProvider();
+    const aaProviderChainConfig = aaProvider.getSupportedChain((this.parentPage.networkWallet.network as EVMNetwork).getMainChainID());
+    if (aaProviderChainConfig) {
+      const gasSubWallet = this.parentPage.networkWallet.getSubWallet(aaProviderChainConfig.paymasterAddress);
+      this.gasTokenBalance = gasSubWallet.getBalance();
+      this.gasTokenName = gasSubWallet.getDisplayTokenName();
+    }
     this.calculateTransactionCost();
   }
 
@@ -39,25 +48,41 @@ export class AccountAbstractionComponent implements OnInit {
     let currencyValue = new BigNumber(coinTransferService.payloadParam.value || 0).dividedBy(weiToDisplayCurrencyRatio);
 
     this.totalTransactionCost = {
-      totalAsBigNumber: currencyValue,
+      totalAsBigNumber: currencyValue, // ela + gas (pga) ?
       total: currencyValue?.toFixed(),
-      valueAsBigNumber: currencyValue,
+      valueAsBigNumber: currencyValue, // ela
       value: currencyValue?.toFixed(),
-      feesAsBigNumber: new BigNumber(0),
-      fees: '0',
-      currencyFee: '0'
+      // TODO: hardcode 0.04, it should be calculated through estimation
+      feesAsBigNumber: new BigNumber(0.04), // gas (pga)
+      fees: '0.04',
+      currencyFee: '0.04'
     };
   }
 
-  public balanceIsEnough(): boolean {
-    return this.totalTransactionCost.totalAsBigNumber.lte(this.pgaBalance);
+  public gasTokenBalanceIsEnough(): boolean {
+    return this.totalTransactionCost.feesAsBigNumber.lte(this.gasTokenBalance);
   }
 
-  // ELA, HT, etc
+  public elaBalanceIsEnough(): boolean {
+    return this.totalTransactionCost.totalAsBigNumber.lte(this.balance);
+  }
+
+  public balanceIsEnough(): boolean {
+    return this.elaBalanceIsEnough() && this.gasTokenBalanceIsEnough();
+  }
+
+  public hasELATransaction(): boolean {
+    return this.totalTransactionCost.valueAsBigNumber.gt(0);
+  }
+
+  // ELA, ETH, etc
   public getCurrencyInUse(): string {
-    // TODO: get the token name from the AA provider
-    return 'PGA';
-    // return this.parentPage.getEvmSubWallet().getDisplayTokenName();
+    return this.parentPage.getEvmSubWallet().getDisplayTokenName();
+  }
+
+  // Gas Token, PGA
+  public getGasTokenName(): string {
+    return this.gasTokenName;
   }
 
   // CNY, USD, etc
@@ -141,5 +166,17 @@ export class AccountAbstractionComponent implements OnInit {
 
   async cancelOperation() {
     await this.parentPage.cancelOperation();
+  }
+
+  public getButtonTitle() {
+    let balanceIsNotEnoughToken = null;
+    if (!this.gasTokenBalanceIsEnough()) {
+      balanceIsNotEnoughToken = this.getGasTokenName();
+    } else if (!this.elaBalanceIsEnough()) {
+      balanceIsNotEnoughToken = this.getCurrencyInUse();
+    }
+    return balanceIsNotEnoughToken ?
+        balanceIsNotEnoughToken + ' ' + this.translate.instant('wallet.insufficient-balance')
+        : this.translate.instant('common.cancel');
   }
 }

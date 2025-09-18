@@ -1,25 +1,24 @@
 <!-- Account Abstraction Transaction Component -->
 <div class="msg-container">
-  <p>{{ 'wallet.esctransaction-you-are-using' | translate }}</p>
-  <h1><span>{{ uiService.getFixedBalance(totalTransactionCost.totalAsBigNumber) }} {{
-      getCurrencyInUse() }}</span></h1>
+  <ng-container *ngIf="hasELATransaction()">
+    <p>{{ 'wallet.esctransaction-you-are-using' | translate }}</p>
+    <h1><span>{{ uiService.getFixedBalance(totalTransactionCost.totalAsBigNumber) }} {{ getCurrencyInUse() }}</span></h1>
 
-  <!-- Account Abstraction specific transaction details -->
-  <div class="item-row ripple ion-activatable">
-    <div class="item-label">{{ 'wallet.esctransaction-value' | translate }}</div>
-    <div class="item-value">
-      <span>{{ uiService.getFixedBalance(totalTransactionCost.valueAsBigNumber) }} {{ getCurrencyInUse() }}</span>
+    <!-- Account Abstraction specific transaction details -->
+    <div class="item-row ripple ion-activatable">
+      <div class="item-label">{{ 'wallet.esctransaction-value' | translate }}</div>
+      <div class="item-value">
+        <span>{{ uiService.getFixedBalance(totalTransactionCost.valueAsBigNumber) }} {{ getCurrencyInUse() }}</span>
+      </div>
     </div>
-  </div>
+  </ng-container>
 
   <!-- Paymaster section - placeholder for future configurability -->
   <div class="item-row ripple ion-activatable">
     <!-- <div class="item-label">{{ 'wallet.esctransaction-fees' | translate }}</div> -->
     <div class="item-label">{{ 'wallet.esctransaction-estimated-fees' | translate }}</div>
     <div class="item-value">
-      <!-- TODO: get the fee from the AA provider -->
-      <!-- <span>{{ 'wallet.esctransaction-covered-by-paymaster' | translate }}</span> -->
-      <span> 0.04 PGA</span>
+      <span> {{ uiService.getFixedBalance(totalTransactionCost.feesAsBigNumber) }} {{ getGasTokenName() }}</span>
     </div>
   </div>
 
@@ -27,7 +26,15 @@
   <div class="item-row ripple ion-activatable">
     <div class="item-label">{{ 'wallet.balance-remaining' | translate }}</div>
     <div class="item-value">
-      <span>{{ uiService.getFixedBalance(pgaBalance) }} {{ getCurrencyInUse() }}</span>
+      <span>{{ uiService.getFixedBalance(gasTokenBalance) }} {{ getGasTokenName() }}</span>
+
+    </div>
+  </div>
+
+  <div class="item-row ripple ion-activatable" *ngIf="hasELATransaction()">
+    <div class="item-label"></div>
+    <div class="item-value">
+      <span>{{ uiService.getFixedBalance(balance) }} {{ getCurrencyInUse() }}</span>
     </div>
   </div>
 </div>
@@ -36,7 +43,7 @@
 <div class="footer-buttons">
   <ebutton class="btn cancel" [class.expand]="!balanceIsEnough()" [disabled]="!balanceIsEnough()" mode="cancel"
     (clicked)="cancelOperation()"
-    [title]="(!balanceIsEnough() ? 'wallet.insufficient-balance' : 'common.cancel') | translate">
+    [title]="getButtonTitle()">
   </ebutton>
   <ebutton class="btn confirm" *ngIf="balanceIsEnough()" [disabled]="signingAndTransacting" (clicked)="goTransaction()"
     [title]="'common.confirm' | translate"></ebutton>
