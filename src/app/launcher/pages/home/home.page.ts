@@ -86,7 +86,6 @@ export class HomePage implements OnInit {
   ) {
     // Read lightweight mode synchronously from the service
     this.lightweightMode = this.lightweightService.getCurrentLightweightMode();
-    console.log('HomePage constructor this.lightweightMode=', this.lightweightMode);
 
     // Register containers based on lightweight mode
     if (!this.lightweightMode) {
@@ -96,15 +95,12 @@ export class HomePage implements OnInit {
       this.activeScreenIndex = 1;
     } else {
       // Lightweight mode: only one screen
-      console.log('HomePage constructor lightweight mode registering main container');
       this.widgetsService.registerContainer('main');
-      console.log('HomePage constructor lightweight mode registered main container');
       this.activeScreenIndex = 0;
     }
   }
 
   ngOnInit() {
-    console.log('HomePage ngOnInit');
     this.launcherNotificationsService.init();
 
     void this.storage
@@ -117,12 +113,6 @@ export class HomePage implements OnInit {
       )
       .then(swipeAnimationShown => {
         this.showSwipeIndicator = !swipeAnimationShown;
-        console.log(
-          'Swipe indicator initial state:',
-          this.showSwipeIndicator,
-          'swipeAnimationShown:',
-          swipeAnimationShown
-        );
       });
   }
 
@@ -285,17 +275,9 @@ export class HomePage implements OnInit {
    * Initialize slides visibility
    */
   private initializeSlidesVisibility() {
-    console.log(
-      'initializeSlidesVisibility called, lightweightMode:',
-      this.lightweightMode,
-      'slidesShown:',
-      this.slidesShown
-    );
-
     if (this.lightweightMode) {
       // In lightweight mode, mark slides as shown since we don't use slides
       this.slidesShown = true;
-      console.log('Lightweight mode: slides marked as shown');
       return;
     }
 

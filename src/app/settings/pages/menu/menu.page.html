@@ -24,7 +24,7 @@
             </ion-col>
         </ion-row>
         <!-- Wallet connect -->
-        <ion-row class="section" (click)="open('/settings/walletconnect/sessions')">
+        <ion-row class="section" *ngIf="!lightweightMode" (click)="open('/settings/walletconnect/sessions')">
             <ion-col size="11" class="title-col">
                 <h1>{{ 'settings.wallet-connect-sessions-setting' | translate }}</h1>
                 <h2 class="secondary-text">{{ 'settings.wallet-connect-sessions-intro-setting' | translate }}</h2>
@@ -35,7 +35,7 @@
             </ion-col>
         </ion-row>
         <!-- Startup screen -->
-        <ion-row class="section" (click)="open('/settings/startupscreen')">
+        <ion-row class="section" *ngIf="!lightweightMode" (click)="open('/settings/startupscreen')">
             <ion-col size="11" class="title-col">
                 <h1>{{ 'settings.startupscreen-setting' | translate }}</h1>
                 <h2 class="secondary-text">{{ 'settings.startupscreen-intro-setting' | translate }}</h2>
