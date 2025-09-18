@@ -221,6 +221,10 @@ export class WidgetsService {
   }
 
   public getAvailableBuiltInWidgets(): WidgetState[] {
+    // Honor lightweight mode: only expose widgets marked as available in lightweight mode
+    if (this.lightweightMode) {
+      return builtInWidgets.filter(w => w.availableInLightweightMode);
+    }
     return builtInWidgets;
   }
 
