@@ -59,13 +59,14 @@ export class HomePage implements OnInit {
 
   public widgetsSlidesOpts = {
     autoHeight: true,
-    spaceBetween: 10
-    //initialSlide: 1 // Doesn't work well, shows slide 0 during a short time first...
+    spaceBetween: 10,
+    initialSlide: 1 // Start at middle slide (index 1)
   };
   public slidesShown = false;
   public activeScreenIndex: number;
   public editingWidgets = false;
   public lightweightMode;
+  private hasUserInteractedWithSlides = false;
 
   constructor(
     public toastCtrl: ToastController,
@@ -116,6 +117,12 @@ export class HomePage implements OnInit {
       )
       .then(swipeAnimationShown => {
         this.showSwipeIndicator = !swipeAnimationShown;
+        console.log(
+          'Swipe indicator initial state:',
+          this.showSwipeIndicator,
+          'swipeAnimationShown:',
+          swipeAnimationShown
+        );
       });
   }
 
@@ -217,18 +224,8 @@ export class HomePage implements OnInit {
 
     //void this.widgetsService.onLauncherHomeViewWillEnter();
 
-    // Manually slide to the middle container first, then let the slides appear.
-    // We have to do this otherzise the "initialSlide" option doesn't work well and shows the first slide during
-    // a short time.
-    if (!this.slidesShown && this.widgetsSlides && !this.lightweightMode) {
-      // First entrance only to not come back to middle slide when coming back from other screens
-      void this.widgetsSlides.slideTo(1, 0, false).then(() => {
-        this.slidesShown = true;
-      });
-    } else if (this.lightweightMode) {
-      // In lightweight mode, mark slides as shown since we don't use slides
-      this.slidesShown = true;
-    }
+    // Initialize slides visibility
+    this.initializeSlidesVisibility();
   }
 
   ionViewDidEnter() {
@@ -238,6 +235,12 @@ export class HomePage implements OnInit {
 
     //console.log(this.widgetContainers)
     this.widgetContainers = this.widgetContainersList.toArray();
+
+    // Fallback: ensure slides are shown in non-lightweight mode
+    if (!this.lightweightMode && !this.slidesShown) {
+      console.warn('Slides not shown in ionViewDidEnter, forcing visibility');
+      this.initializeSlidesVisibility();
+    }
   }
 
   ionViewWillLeave() {
@@ -278,17 +281,87 @@ export class HomePage implements OnInit {
     this.widgetContainers[this.activeScreenIndex].addWidget();
   }
 
-  public async onSlideChange(evt) {
-    // Only handle slide changes if not in lightweight mode
-    if (this.widgetsSlides && !this.lightweightMode) {
-      this.activeScreenIndex = await this.widgetsSlides.getActiveIndex();
-      //void this.ionContent.scrollToTop(500);
+  /**
+   * Initialize slides visibility
+   */
+  private initializeSlidesVisibility() {
+    console.log(
+      'initializeSlidesVisibility called, lightweightMode:',
+      this.lightweightMode,
+      'slidesShown:',
+      this.slidesShown
+    );
 
-      void this.widgetsSlides.update();
+    if (this.lightweightMode) {
+      // In lightweight mode, mark slides as shown since we don't use slides
+      this.slidesShown = true;
+      console.log('Lightweight mode: slides marked as shown');
+      return;
+    }
+
+    if (this.slidesShown) {
+      console.log('Slides already shown, returning');
+      return; // Already initialized
+    }
+
+    // With initialSlide: 1, slides should start at the correct position
+    // Just show them after a brief delay to ensure they're properly initialized
+    setTimeout(() => {
+      this.slidesShown = true;
+      console.log('Slides marked as shown after timeout');
+    }, 50);
+  }
+
+  public onSlideTouchEnd() {
+    console.log('onSlideTouchEnd: user has interacted with slides');
+    this.hasUserInteractedWithSlides = true;
+    if (this.showSwipeIndicator) {
+      console.log('Hiding swipe indicator due to user touch end');
+      this.showSwipeIndicator = false;
+      void this.storage.setSetting(
+        DIDSessionsStore.signedInDIDString,
+        NetworkTemplateStore.networkTemplate,
+        'launcher',
+        'swipanimationshown',
+        true
+      );
+    }
+  }
+
+  public async onSlideChange(evt) {
+    console.log(
+      'onSlideChange called, lightweightMode:',
+      this.lightweightMode,
+      'showSwipeIndicator:',
+      this.showSwipeIndicator
+    );
+    console.log('widgetsSlides exists:', !!this.widgetsSlides);
+
+    // Only handle slide changes if not in lightweight mode
+    if (!this.lightweightMode) {
+      console.log('Inside slides handling block');
+
+      // Ignore initial non-user slide changes (from init)
+      if (!this.hasUserInteractedWithSlides) {
+        console.log('Ignoring slide change because user has not interacted yet');
+        return;
+      }
+
+      // Try to get widgetsSlides if available
+      if (this.widgetsSlides) {
+        this.activeScreenIndex = await this.widgetsSlides.getActiveIndex();
+        console.log('Active screen index:', this.activeScreenIndex);
+        //void this.ionContent.scrollToTop(500);
+
+        void this.widgetsSlides.update();
+      } else {
+        console.log('widgetsSlides not available yet, but still handling swipe indicator');
+      }
 
       // User has swiped at least once so he knows. We can hide the swipe indicator and remember this.
-      // Make sure to test the user reached the 0 index slide (left) because this event is received also when starting (main, 1)
-      if (this.showSwipeIndicator && this.activeScreenIndex == 0) {
+      // Hide indicator on any slide change (after user interaction)
+      if (this.showSwipeIndicator) {
+        console.log('Hiding swipe indicator due to slide change (after user interaction)');
         this.showSwipeIndicator = false;
 
         void this.storage.setSetting(
@@ -298,7 +371,11 @@ export class HomePage implements OnInit {
           'swipanimationshown',
           true
         );
+      } else {
+        console.log('showSwipeIndicator is false, not hiding');
       }
+    } else {
+      console.log('Not inside slides handling block - lightweightMode:', this.lightweightMode);
     }
   }
 }

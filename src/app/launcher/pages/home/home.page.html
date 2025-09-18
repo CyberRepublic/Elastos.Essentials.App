@@ -4,7 +4,8 @@
   <ion-grid class="container" [class.light-container]="!theme.darkMode" [class.dark-container]="theme.darkMode">
     <!-- Non lightweight mode: 3 panels with slides -->
     <ion-slides *ngIf="!lightweightMode" #widgetsslides [options]="widgetsSlidesOpts"
-      (ionSlideDidChange)="onSlideChange($event)" class="widgets-containers-slides" [class.hidden]="!slidesShown">
+      (ionSlideDidChange)="onSlideChange($event)" (ionSlideTouchEnd)="onSlideTouchEnd()"
+      class="widgets-containers-slides" [class.hidden]="!slidesShown">
       <ion-slide>
         <widget-container name="left"></widget-container>
       </ion-slide>
