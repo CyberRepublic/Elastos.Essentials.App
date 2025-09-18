@@ -79,6 +79,8 @@ export class CustomNetworkService {
         for (let entry of this.customNetworkDiskEntries) {
             let network = this.createNetworkFromCustomNetworkEntry(entry);
 
+            await network.init();
+
             // Add this new instance to the global list of networks
             await this.networkService.registerNetwork(network);
         }
