@@ -164,6 +164,10 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
   public equals(network: AnyNetwork): boolean {
     return this.key === network.key;
   }
+
+  public isCustom(): boolean {
+    return false;
+  }
 }
 
 export abstract class AnyNetwork extends Network<any> { }

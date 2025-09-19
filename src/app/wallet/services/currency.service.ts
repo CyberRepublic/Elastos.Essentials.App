@@ -411,7 +411,9 @@ export class CurrencyService {
     if (priceUpdated) void this.pricesCache.save();
   }
 
-  // Update pricesCache
+  /**
+   * Update pricesCache
+   */
   public async updateAllNetworkMainTokenValue(): Promise<void> {
     let networks = this.walletNetworkService.getDisplayableNetworks();
 
@@ -446,14 +448,19 @@ export class CurrencyService {
     }
   }
 
-  public async fetchERC20TokenValue(coin: ERC20Coin, network?: EVMNetwork): Promise<void> {
-    let cacheKey = network.key + coin.getContractAddress();
+  public async fetchERC20TokenValue(coin: ERC20Coin, network?: AnyNetwork): Promise<void> {
+    let buildInNetwork = network;
+    // If this network is custom network, try to resolve a built-in EVM network by chain id to fetch prices
+    if (network.isCustom()) {
+      buildInNetwork = this.walletNetworkService.getNetworkByChainId((network as EVMNetwork).getMainChainID());
+    }
 
-    const evmNetwork = <EVMNetwork>network;
+    let cacheKey = network.key + coin.getContractAddress();
+    const evmNetwork = buildInNetwork as EVMNetwork;
     if (evmNetwork.getUniswapCurrencyProvider()) {
-      this.queueUniswapTokenFetch(cacheKey, network, coin);
+      this.queueUniswapTokenFetch(cacheKey, evmNetwork, coin);
     } else if (evmNetwork.getDexScreenerCurrencyProvider()) {
-      void this.dexScreenerTokenFetch(cacheKey, network, coin);
+      void this.dexScreenerTokenFetch(cacheKey, evmNetwork, coin);
     } else {
       let providers = evmNetwork.getCustomCurrencyProviders();
       for (let i = 0; i < providers.length; i++) {

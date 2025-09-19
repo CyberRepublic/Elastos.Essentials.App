@@ -43,4 +43,8 @@ export class CustomNetwork extends EVMNetwork {
       default: throw new Error(`CustomNetwork: getAPIUrlOfType() has no entry for url type ${type.toString()}`);
     }
   }
+
+  public isCustom(): boolean {
+    return true;
+  }
 }
