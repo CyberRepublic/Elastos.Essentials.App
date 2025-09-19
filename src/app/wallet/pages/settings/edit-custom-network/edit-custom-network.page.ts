@@ -13,6 +13,8 @@ import { GlobalThemeService } from 'src/app/services/theming/global.theme.servic
 import { CustomNetworkDiskEntry, CustomNetworkService } from 'src/app/wallet/services/evm/customnetwork.service';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { EditCustomNetworkIntentResult } from './intentresult';
+import { GlobalJsonRPCService } from 'src/app/services/global.jsonrpc.service';
+import { WalletService } from 'src/app/wallet/services/wallet.service';
 
 export type EditCustomNetworkRoutingParams = {
   forEdition: boolean;
@@ -193,13 +195,18 @@ export class EditCustomNetworkPage implements OnInit {
       try {
         await this.native.showLoading("wallet.checking-account-rpc-url");
 
-        const httpOptions = {
-          headers: new HttpHeaders({
-            'Content-Type': 'application/json',
-          })
-        };
+        let address = '0x0000000000000000000000000000000000000064';
+        let networkWallet = await WalletService.instance.getActiveNetworkWallet();
+        if (networkWallet) {
+          let receiverAddress =networkWallet.getMainEvmSubWallet()?.getCurrentReceiverAddress();
+          if (receiverAddress) {
+            address = receiverAddress;
+          }
+        }
 
-        let testCallResult = await this.http.post(this.editedNetworkEntry.accountRpcUrl, JSON.stringify({}), httpOptions).toPromise();
+        let txListUrl = this.editedNetworkEntry.accountRpcUrl
+            + '?module=account&action=txlist&page=0&offset=10&sort=desc&address=' + address;
+        let testCallResult = await GlobalJsonRPCService.instance.httpGet(txListUrl);
         if (testCallResult && "status" in testCallResult)
           accountRpcUrlIsReachable = true;
       }

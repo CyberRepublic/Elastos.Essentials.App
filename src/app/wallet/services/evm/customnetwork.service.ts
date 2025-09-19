@@ -95,6 +95,7 @@ export class CustomNetworkService {
             entry.mainCurrencySymbol || "ETH",
             entry.networkTemplate,
             entry.rpcUrl,
+            entry.accountRpcUrl,
             parseInt(entry.chainId)
         );
     }
@@ -130,7 +131,7 @@ export class CustomNetworkService {
 
             // If we edit the active network, then we need to recreate networkwallet.
             if (WalletNetworkService.instance.activeNetwork.value.key == networkInstance.key) {
-                WalletNetworkService.instance.setActiveNetwork(networkInstance)
+                await WalletNetworkService.instance.setActiveNetwork(networkInstance)
             }
         }
 
