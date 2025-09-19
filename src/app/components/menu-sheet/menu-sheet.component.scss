@@ -9,6 +9,15 @@ ion-grid {
     display: flex;
     flex-direction: column;
 
+    // Scrollable container for long menu lists
+    .items-container {
+        flex: 1 1 auto; // take remaining space
+        min-height: 0; // allow child to shrink for overflow scrolling in flexbox
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch; // smooth scrolling on iOS
+        padding-bottom: 6px; // avoid last item being flush to bottom edge
+    }
+
     .header {
         margin-top: 15px;
         margin-bottom: 10px;

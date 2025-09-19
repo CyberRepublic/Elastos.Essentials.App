@@ -18,7 +18,7 @@
     </ion-row>
 
     <!-- Sub-menus -->
-    <ion-row>
+    <ion-row class="items-container">
       <ion-col size="12">
         <ion-row *ngFor="let menuItem of selectedMenu.items" (click)="onMenuItemClicked(menuItem)"
           class="menu-item ripple ion-activatable" [@enterTrigger]="'fadeIn'">
