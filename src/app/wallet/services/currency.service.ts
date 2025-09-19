@@ -149,7 +149,7 @@ export class CurrencyService {
 
       this.updateInterval = setInterval(() => {
         void this.updateExchangeRatesAndPrice();
-      }, 30000); // 30s
+      }, 60000); // 60s
     }, 1000);
 
     Logger.log('wallet', 'Currency service initialization complete');
@@ -252,8 +252,15 @@ export class CurrencyService {
     try {
       let res: PriceAPITokenStats = await GlobalJsonRPCService.instance.httpGet(this.tokenPriceUrl);
       if (res) {
+        // Normalize all symbols to lowercase
+        const resLower: PriceAPITokenStats = Object.keys(res).reduce((acc, sym) => {
+          acc[sym.toLowerCase()] = res[sym];
+          return acc;
+        }, {} as PriceAPITokenStats);
+
         for (let tokenSymbol in this.networkMainTokenPrice) {
-          let tokenStats = res[tokenSymbol];
+          const key = tokenSymbol.toLowerCase();
+          let tokenStats = resLower[key];
           if (tokenStats) {
             this.networkMainTokenPrice[tokenSymbol] = tokenStats;
           }
