@@ -1,5 +1,5 @@
 <!-- Account Abstraction Transaction Component -->
-<div class="msg-container">
+<div class="msg-container" *ngIf="totalTransactionCost">
   <ng-container *ngIf="hasELATransaction()">
     <p>{{ 'wallet.esctransaction-you-are-using' | translate }}</p>
     <h1><span>{{ uiService.getFixedBalance(totalTransactionCost.totalAsBigNumber) }} {{ getCurrencyInUse() }}</span></h1>
@@ -40,7 +40,7 @@
 </div>
 
 <!-- BUTTONS FOOTER -->
-<div class="footer-buttons">
+<div class="footer-buttons" *ngIf="totalTransactionCost">
   <ebutton class="btn cancel" [class.expand]="!balanceIsEnough()" [disabled]="!balanceIsEnough()" mode="cancel"
     (clicked)="cancelOperation()"
     [title]="getButtonTitle()">

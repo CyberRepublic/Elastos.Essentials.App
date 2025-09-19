@@ -19,7 +19,7 @@ export class AccountAbstractionComponent implements OnInit {
   @Input() parentPage: EscTransactionPage;
 
   // Transaction cost calculation (simplified for AA)
-  public totalTransactionCost: any;
+  public totalTransactionCost: any = null;
   public signingAndTransacting = false;
   public gasTokenBalance = new BigNumber(0);
   public gasTokenName = '';

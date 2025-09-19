@@ -29,7 +29,7 @@ export class StandardAccountComponent implements OnInit, OnDestroy {
   public signingAndTransacting = false;
 
   // Transaction cost calculation
-  public totalTransactionCost: any;
+  public totalTransactionCost: any = null;
 
   private gasSpeedupSub: Subscription;
 
@@ -37,7 +37,6 @@ export class StandardAccountComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     void this.initializeGasParameters();
-    this.calculateTransactionCost();
     this.subscribeToGasSpeedup();
   }
 
@@ -79,6 +78,8 @@ export class StandardAccountComponent implements OnInit, OnDestroy {
 
     this.gasLimitDisplay = this.gasLimit;
     Logger.log('wallet', 'StandardAccountComponent got gas price:', this.gasPrice);
+
+    this.calculateTransactionCost();
   }
 
   private subscribeToGasSpeedup() {
