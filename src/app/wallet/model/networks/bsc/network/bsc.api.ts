@@ -12,7 +12,10 @@ export class BscAPI {
     switch (networkTemplate) {
       case MAINNET_TEMPLATE:
         switch (type) {
-          case BscApiType.RPC: return 'https://binance.llamarpc.com';
+          // case BscApiType.RPC: return 'https://bsc-dataseed1.defibit.io';
+          // case BscApiType.RPC: return 'https://bsc-dataseed1.binance.org';
+          // case BscApiType.RPC: return 'https://binance.llamarpc.com';
+          case BscApiType.RPC: return 'https://bsc-rpc.publicnode.com';
           case BscApiType.ETHERSCAN_API: return 'https://api.bscscan.com/api';
           case BscApiType.BLOCK_EXPLORER: return 'https://bscscan.com';
           default:

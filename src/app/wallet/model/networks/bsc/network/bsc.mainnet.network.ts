@@ -49,7 +49,7 @@ export class BSCMainNetNetwork extends BSCBaseNetwork {
     // Register a limitator to limit api requests speed on BSC> Mostly because of the free API key
     // rate limitation of BSCSCAN: max 5 request per IP per second on the free tier.
     GlobalJsonRPCService.instance.registerLimitator(this.key, {
-      minRequestsInterval: 220 // 5 req per sec max = 1 request / 200 ms + some margin
+      minRequestsInterval: 300 // 5 req per sec max = 1 request / 200 ms + some margin
     });
   }
 
