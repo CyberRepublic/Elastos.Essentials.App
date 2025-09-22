@@ -112,7 +112,7 @@ export class GlobalPreferencesService implements GlobalService {
       'ui.darkmode': true,
       'ui.theme': 'black',
       'ui.variant': 'light',
-      'ui.lightweight': true,
+      'ui.lightweight': false,
       'ui.startupscreen': 'home',
       'network.template': 'MainNet',
       'chain.network.config': '',
@@ -309,6 +309,6 @@ export class GlobalPreferencesService implements GlobalService {
   }
 
   public getLightweightMode(did: string, networkTemplate: string): Promise<boolean> {
-    return this.getPreference(did, networkTemplate, 'ui.lightweight', true);
+    return this.getPreference(did, networkTemplate, 'ui.lightweight', false);
   }
 }
