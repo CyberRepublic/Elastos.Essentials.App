@@ -406,6 +406,6 @@ export class HomePage {
   }
 
   public getRecentApps(): BrowsedAppInfo[] {
-    return this.recentApps.slice(0, Math.min(3, this.recentApps.length));
+    return this.recentApps.slice(0, Math.min(30, this.recentApps.length));
   }
 }
