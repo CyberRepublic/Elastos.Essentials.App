@@ -50,7 +50,7 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
 
     // Discover new transactions globally for all tokens at once, in order to notify user
     // of NEW tokens received, and NEW payments received for existing tokens.
-    provider.refreshEvery(() => this.discoverTokens(), 30000);
+    provider.refreshEvery(() => this.discoverTokens(), 60000);
   }
 
   protected getProviderTransactionInfo(transaction: EthTransaction): ProviderTransactionInfo {
