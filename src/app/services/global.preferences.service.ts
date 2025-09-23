@@ -88,13 +88,17 @@ export class GlobalPreferencesService implements GlobalService {
     return;
   }
 
-  private getDefaultPreferences(): AllPreferences {
+  private getDefaultPreferences(did: string): AllPreferences {
     let isAndroid = this.platform.platforms().indexOf('android') >= 0;
     // By default, because of app store policy reasons, android uses the built in browser,
     // while ios uses external browsers to open urls.
     const useBuiltInBrowser = isAndroid ? true : false;
 
     const enableCreatingRedPacket = isAndroid ? true : false;
+
+    // For signed in users that don't have a saved lightweight mode, use advanced mode (lightweight = false).
+    // When not signed in (DID sessions), use lightweight mode (lightweight = true) so that new users will use lightweight.
+    const lightweightDefault = did ? false : true;
 
     return {
       'locale.language': 'native system',
@@ -112,7 +116,7 @@ export class GlobalPreferencesService implements GlobalService {
       'ui.darkmode': true,
       'ui.theme': 'black',
       'ui.variant': 'light',
-      'ui.lightweight': false,
+      'ui.lightweight': lightweightDefault,
       'ui.startupscreen': 'home',
       'network.template': 'MainNet',
       'chain.network.config': '',
@@ -132,7 +136,7 @@ export class GlobalPreferencesService implements GlobalService {
       networkTemplate,
       'prefservice',
       'preferences',
-      this.getDefaultPreferences()
+      this.getDefaultPreferences(did)
     );
     return key in diskPreferences;
   }
@@ -153,7 +157,7 @@ export class GlobalPreferencesService implements GlobalService {
         'Getting a global preference (no DID set) without allowNullDID set to false is forbidden! key= ' + key
       );
 
-    if (!(key in this.getDefaultPreferences()))
+    if (!(key in this.getDefaultPreferences(did)))
       throw new Error('Preference ' + key + ' is not a registered preference!');
 
     let preferences = await this.getPreferences(did, networkTemplate, allowNullDID);
@@ -176,13 +180,13 @@ export class GlobalPreferencesService implements GlobalService {
       networkTemplate,
       'prefservice',
       'preferences',
-      this.getDefaultPreferences()
+      this.getDefaultPreferences(did)
     );
 
     //Logger.log('PreferenceService', "DISK PREFS", did, diskPreferences)
 
     // Merge saved preferences with default values
-    return Object.assign({}, this.getDefaultPreferences(), diskPreferences);
+    return Object.assign({}, this.getDefaultPreferences(did), diskPreferences);
   }
 
   /**
@@ -198,7 +202,7 @@ export class GlobalPreferencesService implements GlobalService {
     value: AllPreferences[K],
     allowNullDID = false
   ): Promise<void> {
-    if (!(key in this.getDefaultPreferences()))
+    if (!(key in this.getDefaultPreferences(did)))
       throw new Error('Preference ' + key + ' is not a registered preference!');
 
     let preferences = await this.getPreferences(did, networkTemplate, allowNullDID);
@@ -308,7 +312,7 @@ export class GlobalPreferencesService implements GlobalService {
     return this.setPreference(did, networkTemplate, 'ui.lightweight', lightweight, true);
   }
 
-  public getLightweightMode(did: string, networkTemplate: string): Promise<boolean> {
-    return this.getPreference(did, networkTemplate, 'ui.lightweight', false);
+  public getLightweightMode(did: string, networkTemplate: string, allowNullDID = false): Promise<boolean> {
+    return this.getPreference(did, networkTemplate, 'ui.lightweight', allowNullDID);
   }
 }

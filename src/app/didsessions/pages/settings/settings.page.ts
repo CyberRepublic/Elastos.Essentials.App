@@ -67,7 +67,8 @@ export class SettingsPage implements OnInit {
   private async fetchLightweightMode(): Promise<void> {
     this.isLightweightMode = await this.prefsService.getLightweightMode(
       DIDSessionsStore.signedInDIDString,
-      NetworkTemplateStore.networkTemplate
+      NetworkTemplateStore.networkTemplate,
+      true
     );
   }
 

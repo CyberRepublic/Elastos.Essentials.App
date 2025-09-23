@@ -44,6 +44,8 @@ export class PrepareDIDService {
   private hiveSetupAlreadyTried = false;
   private isRunning = false;
 
+  private lightweightMode = false;
+
   constructor(
     private identityService: IdentityService,
     private walletCreationService: WalletCreationService,
@@ -63,6 +65,7 @@ export class PrepareDIDService {
     this.resetState();
 
     try {
+      this.lightweightMode = options.isLightweightMode;
       if (options.isLightweightMode) {
         await this.runLightweightMode(options.callbacks);
       } else {
@@ -358,7 +361,7 @@ export class PrepareDIDService {
     try {
       await Promise.all([
         sleep(MIN_SLIDE_SHOW_DURATION_MS),
-        this.identityService.signIn(this.identityService.identityBeingCreated.didSessionsEntry, false, false)
+        this.identityService.signIn(this.identityService.identityBeingCreated.didSessionsEntry, false, false, this.lightweightMode)
       ]);
       Logger.log('didsessions', 'Sign in complete');
       return true;

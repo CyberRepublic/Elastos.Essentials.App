@@ -59,8 +59,8 @@ export class GlobalLightweightService extends GlobalService {
       Logger.log('LightweightService', 'Lightweight mode from preferences:', lightweightFromPref);
       this.lightweightMode.next(lightweightFromPref);
     } else {
-      // Default to full mode when not signed in
-      this.lightweightMode.next(false);
+      // Default to lightweight mode when not signed in
+      this.lightweightMode.next(true);
     }
   }
 

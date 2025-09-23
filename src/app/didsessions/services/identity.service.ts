@@ -127,7 +127,7 @@ export class IdentityService {
     });
   }
 
-  public async signIn(identityEntry: IdentityEntry, goToLauncher = false, showSignInDialog = false) {
+  public async signIn(identityEntry: IdentityEntry, goToLauncher = false, showSignInDialog = false, lightweightMode = false) {
     // Security check: ask user to enter the master password for the target did.
     try {
       let options: PasswordManagerPlugin.GetPasswordInfoOptions = {
@@ -149,7 +149,8 @@ export class IdentityService {
         );
         signInOptions = {
           sessionLanguage: this.language.activeLanguage.value,
-          showBlockingSignInDialog: showSignInDialog
+          showBlockingSignInDialog: showSignInDialog,
+          lightweightMode:  lightweightMode
         };
         //}
         await this.didSessions.signIn(identityEntry, signInOptions);
