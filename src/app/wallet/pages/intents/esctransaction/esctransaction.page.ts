@@ -175,7 +175,7 @@ export class EscTransactionPage implements OnInit {
       return;
     }
 
-    this.currentNetworkName = this.targetNetwork.name;
+    this.currentNetworkName = this.targetNetwork.getEffectiveName();
 
     this.intentTransfer = this.coinTransferService.intentTransfer;
 

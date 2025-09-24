@@ -157,7 +157,7 @@ export class EthSignPage implements OnInit {
       return;
     }
 
-    this.currentNetworkName = this.targetNetwork.name;
+    this.currentNetworkName = this.targetNetwork.getEffectiveName();
 
     // Determine which network and wallet to use based on available parameters
     let targetNetwork = this.targetNetwork; // Default to target network from chain ID

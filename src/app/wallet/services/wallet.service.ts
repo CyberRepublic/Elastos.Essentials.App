@@ -912,7 +912,7 @@ export class WalletService {
     // Create a network wallet instance
     const networkWallet = await network.createNetworkWallet(masterWallet, false);
     if (!networkWallet) {
-      throw new Error(`Failed to create network wallet for network: ${network.name}`);
+      throw new Error(`Failed to create network wallet for network: ${network.getEffectiveName()}`);
     }
 
     return networkWallet;

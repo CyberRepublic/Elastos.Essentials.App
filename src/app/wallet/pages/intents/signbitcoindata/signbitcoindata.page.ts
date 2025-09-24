@@ -156,7 +156,7 @@ export class SignBitcoinDataPage implements OnInit {
 
     this.targetNetwork = WalletNetworkService.instance.getNetworkByKey('btc');
 
-    this.currentNetworkName = this.targetNetwork.name;
+    this.currentNetworkName = this.targetNetwork.getEffectiveName();
 
     let masterWallet = this.walletManager.getMasterWallet(this.coinTransferService.masterWalletId);
     this.networkWallet = await this.targetNetwork.createNetworkWallet(masterWallet, false);

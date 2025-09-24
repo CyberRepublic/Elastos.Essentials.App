@@ -364,7 +364,8 @@ export class HomePage {
   }
 
   public getActiveNetworkName(): string {
-    if (this.walletNetworkService.activeNetwork.value) return this.walletNetworkService.activeNetwork.value.name;
+    if (this.walletNetworkService.activeNetwork.value)
+      return this.walletNetworkService.activeNetwork.value.getEffectiveName();
     else return '';
   }
 

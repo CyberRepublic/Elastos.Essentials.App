@@ -235,7 +235,7 @@ export class EthereumProtocolService {
     const evmNetworkSub = this.browserWalletConnectionsService.activeDappEVMNetwork.subscribe(network => {
       this.activeEVMNetwork = network;
       if (network) {
-        Logger.log('ethereum', 'EVM network changed for active dApp:', network.name);
+        Logger.log('ethereum', 'EVM network changed for active dApp:', network.getEffectiveName());
         void this.sendActiveNetworkToDApp(network);
       }
     });

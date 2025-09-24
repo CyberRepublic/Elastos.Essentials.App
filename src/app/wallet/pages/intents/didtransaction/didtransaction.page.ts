@@ -134,7 +134,7 @@ export class DidTransactionPage implements OnInit {
 
       void this.estimateGas();
     } else {
-      this.currentNetworkName = WalletNetworkService.instance.activeNetwork.value.name;
+      this.currentNetworkName = WalletNetworkService.instance.activeNetwork.value.getEffectiveName();
     }
   }
 

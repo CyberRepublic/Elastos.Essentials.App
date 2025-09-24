@@ -12,7 +12,7 @@
                 <img class="logo" [src]="networkWithVisibility.network.logo">
             </ion-col>
             <ion-col size="8" class="middle-col">
-                {{ networkWithVisibility.network.name }}
+                {{ networkWithVisibility.network.getEffectiveName() }}
             </ion-col>
             <ion-col size="2" class="right-col">
                 <ion-toggle mode="ios" [(ngModel)]="networkWithVisibility.isShown"

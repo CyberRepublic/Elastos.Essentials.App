@@ -202,7 +202,7 @@ export class AccountAbstractionCreatePage implements OnInit {
    */
   public getNetworkDisplayName(chainId: number): string {
     const network = this.availableNetworks.find(n => n.getMainChainID() === chainId);
-    return network ? network.name : chainId.toString();
+    return network ? network.getEffectiveName() : chainId.toString();
   }
 
   public getControllerWalletName(walletId: string): string {
@@ -305,7 +305,7 @@ export class AccountAbstractionCreatePage implements OnInit {
   async showNetworkSelect() {
     const menuItems: MenuSheetMenu[] = this.availableNetworks.map(network => ({
       icon: network.logo,
-      title: network.name,
+      title: network.getEffectiveName(),
       routeOrAction: () => {
         this.wallet.chainId = network.getMainChainID();
         this.onChainChanged({ detail: { value: network.getMainChainID() } });
@@ -340,7 +340,7 @@ export class AccountAbstractionCreatePage implements OnInit {
 
     const selectedNetwork = this.availableNetworks.find(network => network.getMainChainID() === this.wallet.chainId);
     const selectedNetworkName = selectedNetwork
-      ? selectedNetwork.name
+      ? selectedNetwork.getEffectiveName()
       : this.getNetworkDisplayName(this.wallet.chainId);
     const menu: MenuSheetMenu = {
       title: this.translate.instant('wallet.aa.create.provider') + ' (' + selectedNetworkName + ')',

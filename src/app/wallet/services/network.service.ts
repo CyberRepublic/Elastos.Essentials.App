@@ -127,7 +127,7 @@ export class WalletNetworkService {
 
     // Order networks list alphabetically
     this.networks.sort((a, b) => {
-      return a.name > b.name ? 1 : -1;
+      return a.getEffectiveName() > b.getEffectiveName() ? 1 : -1;
     });
 
     this.networksList.next(this.networks);
@@ -349,15 +349,15 @@ export class WalletNetworkService {
    */
   public getEffectiveNetworkName(network: AnyNetwork): string {
     const override = this.getBuiltinNetworkOverride(network.key);
-    return override?.name || network.name;
+    return override?.name || network.getDefaultName();
   }
 
   /**
-   * Returns the effective RPC URL, considering any override
+   * Returns the overriden RPC URL, if any.
    */
-  public getEffectiveNetworkRpcUrl(network: AnyNetwork): string {
+  public getOverridenNetworkRpcUrl(network: AnyNetwork): string {
     const override = this.getBuiltinNetworkOverride(network.key);
-    return override?.rpcUrl || network.getRPCUrl();
+    return override?.rpcUrl;
   }
 
   /**

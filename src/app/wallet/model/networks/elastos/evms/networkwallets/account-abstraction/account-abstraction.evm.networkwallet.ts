@@ -5,6 +5,6 @@ import { ElastosEVMNetwork } from '../../../network/elastos.evm.network';
 
 export abstract class ElastosAccountAbstractionEVMNetworkWallet extends AccountAbstractionNetworkWallet {
   constructor(masterWallet: AccountAbstractionMasterWallet, network: ElastosEVMNetwork<any>) {
-    super(masterWallet, network, new AccountAbstractionSafe(masterWallet), 'ELA', network.name);
+    super(masterWallet, network, new AccountAbstractionSafe(masterWallet), 'ELA', network.getEffectiveName());
   }
 }

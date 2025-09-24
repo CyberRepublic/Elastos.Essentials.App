@@ -223,7 +223,7 @@ export class MenuPage {
     }
 
     try {
-      return this.connectedEVMNetwork.name || '';
+      return this.connectedEVMNetwork.getEffectiveName() || '';
     } catch (error) {
       console.error('Menu: Error getting EVM network name:', error);
       return '';

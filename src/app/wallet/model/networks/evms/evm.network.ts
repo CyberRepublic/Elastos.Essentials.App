@@ -350,12 +350,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
     coinID: CoinID,
     startBackgroundUpdates = true
   ): Promise<ERC20SubWallet> {
-    let subWallet = new ERC20SubWallet(
-      networkWallet,
-      coinID,
-      networkWallet.network.getAPIUrlOfType(NetworkAPIURLType.RPC),
-      ''
-    );
+    let subWallet = new ERC20SubWallet(networkWallet, coinID, networkWallet.network.getRPCUrl(), '');
     await subWallet.initialize();
 
     if (startBackgroundUpdates) void subWallet.startBackgroundUpdates();

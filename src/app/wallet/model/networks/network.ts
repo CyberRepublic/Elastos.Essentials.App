@@ -18,7 +18,7 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
 
   constructor(
     public key: string, // unique identifier
-    public name: string, // Human readable network name - Elastos, HECO
+    protected name: string, // Human readable network name - Elastos, HECO
     public shortName: string, // Humane readable network name but as short as possible for small UI locations - eg: "ESC" instead of "Elastos Smart Chain"
     public logo: string, // Path to the network icon
     private nativeTokenId: string,
@@ -85,10 +85,17 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
    */
   public abstract getAPIUrlOfType(type: NetworkAPIURLType): string;
 
+  /**
+   * Returns the default RPC url for a built-in network, without any applied overrides.
+   */
+  public getDefaultRPCUrl(): string {
+    return this.getAPIUrlOfType(NetworkAPIURLType.RPC);
+  }
+
   public getRPCUrl(): string {
     // Use overridden value if available, otherwise use the default implementation
     return (
-      WalletNetworkService.instance?.getEffectiveNetworkRpcUrl(this) ?? this.getAPIUrlOfType(NetworkAPIURLType.RPC)
+      WalletNetworkService.instance?.getOverridenNetworkRpcUrl(this) ?? this.getAPIUrlOfType(NetworkAPIURLType.RPC)
     );
   }
 
@@ -97,6 +104,13 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
    */
   public getEffectiveName(): string {
     return WalletNetworkService.instance?.getEffectiveNetworkName(this) ?? this.name;
+  }
+
+  /**
+   * Returns the default network name (without any user overrides)
+   */
+  public getDefaultName(): string {
+    return this.name;
   }
 
   /**

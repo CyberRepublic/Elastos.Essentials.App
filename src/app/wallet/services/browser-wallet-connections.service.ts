@@ -256,7 +256,7 @@ export class BrowserWalletConnectionsService {
         Logger.warn('wallet', 'No suitable EVM network found for wallet:', selectedWallet.name);
         return null;
       }
-      Logger.log('wallet', 'Selected EVM network for connection:', selectedNetwork.name);
+      Logger.log('wallet', 'Selected EVM network for connection:', selectedNetwork.getEffectiveName());
     }
 
     // Save the connection
@@ -378,7 +378,7 @@ export class BrowserWalletConnectionsService {
 
     await this.saveConnections(connections);
 
-    Logger.log('wallet', 'Selected EVM network for dapp:', domain, selectedNetwork.name);
+    Logger.log('wallet', 'Selected EVM network for dapp:', domain, selectedNetwork.getEffectiveName());
 
     // Update reactive subjects if this affects the active dApp
     if (this.activeDappUrl.value === dappUrl) {
@@ -457,7 +457,7 @@ export class BrowserWalletConnectionsService {
         url: currentUrl,
         evmWallet: evmWallet?.masterWallet.name || null,
         bitcoinWallet: bitcoinWallet?.masterWallet.name || null,
-        evmNetwork: selectedEVMNetwork?.name || null
+        evmNetwork: selectedEVMNetwork?.getEffectiveName() || null
       });
     } catch (error) {
       console.error('BrowserWalletConnections: Error updating active dApp connections:', error);
@@ -533,7 +533,7 @@ export class BrowserWalletConnectionsService {
       'Wallet supports',
       supportedEVMNetworks.length,
       'EVM networks:',
-      supportedEVMNetworks.map(n => n.name)
+      supportedEVMNetworks.map(n => n.getEffectiveName())
     );
 
     // 1. Check if there's an active chain for this dapp and wallet supports it
@@ -543,7 +543,7 @@ export class BrowserWalletConnectionsService {
     if (dappConnections?.evmNetwork) {
       const activeNetwork = this.networkService.getNetworkByKey(dappConnections.evmNetwork.networkKey) as EVMNetwork;
       if (activeNetwork && supportedEVMNetworks.includes(activeNetwork)) {
-        Logger.log('wallet', 'Keeping existing active network for dapp:', activeNetwork.name);
+        Logger.log('wallet', 'Keeping existing active network for dapp:', activeNetwork.getEffectiveName());
         return activeNetwork;
       } else {
         Logger.log('wallet', 'Active network not supported by wallet, will select new one');
@@ -557,7 +557,7 @@ export class BrowserWalletConnectionsService {
       globalActiveNetwork.isEVMNetwork() &&
       supportedEVMNetworks.includes(globalActiveNetwork as EVMNetwork)
     ) {
-      Logger.log('wallet', 'Using global active network:', globalActiveNetwork.name);
+      Logger.log('wallet', 'Using global active network:', globalActiveNetwork.getEffectiveName());
 
       // Save this network selection for the dapp
       await this.saveEVMNetworkSelection(dappUrl, globalActiveNetwork as EVMNetwork);
@@ -566,7 +566,7 @@ export class BrowserWalletConnectionsService {
 
     // 3. Use the first supported network as fallback
     const fallbackNetwork = supportedEVMNetworks[0];
-    Logger.log('wallet', 'Using first supported network as fallback:', fallbackNetwork.name);
+    Logger.log('wallet', 'Using first supported network as fallback:', fallbackNetwork.getEffectiveName());
 
     // Save this network selection for the dapp
     await this.saveEVMNetworkSelection(dappUrl, fallbackNetwork);
@@ -601,6 +601,6 @@ export class BrowserWalletConnectionsService {
     };
 
     await this.saveConnections(connections);
-    Logger.log('wallet', 'Saved EVM network selection for dapp:', domain, network.name);
+    Logger.log('wallet', 'Saved EVM network selection for dapp:', domain, network.getEffectiveName());
   }
 }

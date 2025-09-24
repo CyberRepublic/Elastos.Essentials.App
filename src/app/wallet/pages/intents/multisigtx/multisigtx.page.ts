@@ -129,7 +129,7 @@ export class MultiSigTxPage implements OnInit {
             await this.networksService.setActiveNetwork(network);
 
             this.globalNativeService.genericToast(
-              this.translate.instant('wallet.multi-sig-tx-switched-to-network', { network: network.name })
+              this.translate.instant('wallet.multi-sig-tx-switched-to-network', { network: network.getEffectiveName() })
             );
           }
         }

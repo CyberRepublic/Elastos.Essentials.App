@@ -151,18 +151,21 @@ export class EditBuiltinNetworkPage implements OnInit {
 
   public resetName(): void {
     if (this.network) {
-      this.editedName = this.network.getEffectiveName();
+      this.editedName = this.network.getDefaultName();
     }
   }
 
   public resetRpcUrl(): void {
     if (this.network) {
-      this.editedRpcUrl = this.network.getRPCUrl();
+      this.editedRpcUrl = this.network.getDefaultRPCUrl();
     }
   }
 
   public getChainId(): string {
-    if (!this.network) return 'N/A';
+    if (!this.network) {
+      return 'N/A';
+    }
+
     if (this.network.isEVMNetwork()) {
       return (this.network as any).getMainChainID()?.toString() || 'N/A';
     }

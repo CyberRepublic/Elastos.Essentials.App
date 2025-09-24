@@ -10,11 +10,12 @@
 
   <ion-spinner class='spinner' *ngIf="loading && btcSubWallet"></ion-spinner>
 
-  <ion-grid class="container" [class.dark-container]="theme.darkMode" *ngIf="!loading && networkWallet && isSignDataEnable">
+  <ion-grid class="container" [class.dark-container]="theme.darkMode"
+    *ngIf="!loading && networkWallet && isSignDataEnable">
     <div>
       <ion-card>
         <img [src]="networkWallet.network.logo">
-        <h1>{{ networkWallet.network.name }}</h1>
+        <h1>{{ networkWallet.network.getEffectiveName() }}</h1>
       </ion-card>
 
       <ion-card-header>

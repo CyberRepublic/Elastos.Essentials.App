@@ -148,7 +148,7 @@ export class ElamainSignMessagePage implements OnInit {
 
     this.targetNetwork = WalletNetworkService.instance.getNetworkByKey(ElastosMainChainNetworkBase.networkKey);
 
-    this.currentNetworkName = this.targetNetwork.name;
+    this.currentNetworkName = this.targetNetwork.getEffectiveName();
 
     let masterWallet = this.walletManager.getMasterWallet(this.coinTransferService.masterWalletId);
     this.networkWallet = await this.targetNetwork.createNetworkWallet(masterWallet, false);

@@ -345,7 +345,7 @@ export class EVMService {
    * Creates a new Web3 instance or return a cached one, for the given network.
    */
   public async getWeb3(network: AnyNetwork, highPriority = false): Promise<Web3> {
-    let cacheEntry = `${network.name}_${highPriority ? 'high' : 'normal'}`;
+    let cacheEntry = `${network.getEffectiveName()}_${highPriority ? 'high' : 'normal'}`;
 
     if (cacheEntry in this.web3s) {
       return this.web3s[cacheEntry];
