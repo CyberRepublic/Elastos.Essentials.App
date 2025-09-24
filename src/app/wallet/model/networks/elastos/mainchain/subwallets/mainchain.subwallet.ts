@@ -617,7 +617,7 @@ export class MainChainSubWallet extends MainCoinSubWallet<ElastosTransaction, El
     };
 
     let apiurltype = GlobalElastosAPIService.instance.getApiUrlTypeForRpc(subWalletId);
-    const rpcApiUrl = GlobalElastosAPIService.instance.getApiUrl(apiurltype);
+    const rpcApiUrl = GlobalElastosAPIService.instance.getRPCApiUrlWithOverride(apiurltype);
     if (rpcApiUrl === null) {
       return await '';
     }
@@ -818,7 +818,7 @@ export class MainChainSubWallet extends MainCoinSubWallet<ElastosTransaction, El
     }
 
     let apiurltype = GlobalElastosAPIService.instance.getApiUrlTypeForRpc(subWalletId);
-    const rpcApiUrl = GlobalElastosAPIService.instance.getApiUrl(apiurltype);
+    const rpcApiUrl = GlobalElastosAPIService.instance.getRPCApiUrlWithOverride(apiurltype);
     if (rpcApiUrl === null) {
       return null;
     }
@@ -1247,7 +1247,7 @@ export class MainChainSubWallet extends MainCoinSubWallet<ElastosTransaction, El
     spendable = false
   ): Promise<BalanceList> {
     let apiurltype = GlobalElastosAPIService.instance.getApiUrlTypeForRpc(subWalletId);
-    const rpcApiUrl = GlobalElastosAPIService.instance.getApiUrl(apiurltype);
+    const rpcApiUrl = GlobalElastosAPIService.instance.getRPCApiUrlWithOverride(apiurltype);
     if (rpcApiUrl === null) {
       return null;
     }
