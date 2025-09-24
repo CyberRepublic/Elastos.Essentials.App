@@ -40,7 +40,7 @@ export class GlobalJsonRPCService {
 
     private limitators: Map<string, RPCLimitator> = new Map();
 
-    private sourceHeaderValue = 'Elastos.Essentials;platform=unknown;version=unknown';
+    private sourceHeaderValue = 'Essentials;platform=unknown;version=unknown';
 
     constructor(private http: HTTP, private platform: Platform, private appVersion: AppVersion) {
         GlobalJsonRPCService.instance = this;
@@ -52,11 +52,11 @@ export class GlobalJsonRPCService {
             else if (plats.indexOf('ios') >= 0) plt = 'ios';
 
             void this.appVersion.getVersionNumber().then(version => {
-                this.sourceHeaderValue = `Elastos.Essentials;platform=${plt};version=${version || 'unknown'}`;
+                this.sourceHeaderValue = `Essentials;platform=${plt};version=${version || 'unknown'}`;
                 Logger.log('GlobalJsonRPCService', 'Initialized X-Source header:', this.sourceHeaderValue);
             }).catch(err => {
                 Logger.warn('GlobalJsonRPCService', 'Unable to get app version for X-Source header:', err);
-                this.sourceHeaderValue = `Elastos.Essentials;platform=${plt};version=unknown`;
+                this.sourceHeaderValue = `Essentials;platform=${plt};version=unknown`;
             });
         });
         /* this.registerLimitator("default", {
