@@ -3,6 +3,8 @@ import { HTTP } from '@awesome-cordova-plugins/http/ngx';
 import PQueue from 'p-queue';
 import { Logger } from 'src/app/logger';
 import { sleep } from '../helpers/sleep.helper';
+import { Platform } from '@ionic/angular';
+import { AppVersion } from '@awesome-cordova-plugins/app-version/ngx';
 
 
 type JSONRPCResponse = {
@@ -38,8 +40,25 @@ export class GlobalJsonRPCService {
 
     private limitators: Map<string, RPCLimitator> = new Map();
 
-    constructor(private http: HTTP) {
+    private sourceHeaderValue = 'Elastos.Essentials;platform=unknown;version=unknown';
+
+    constructor(private http: HTTP, private platform: Platform, private appVersion: AppVersion) {
         GlobalJsonRPCService.instance = this;
+
+        void this.platform.ready().then(() => {
+            let plt = 'unknown';
+            const plats = this.platform.platforms();
+            if (plats.indexOf('android') >= 0) plt = 'android';
+            else if (plats.indexOf('ios') >= 0) plt = 'ios';
+
+            void this.appVersion.getVersionNumber().then(version => {
+                this.sourceHeaderValue = `Elastos.Essentials;platform=${plt};version=${version || 'unknown'}`;
+                Logger.log('GlobalJsonRPCService', 'Initialized X-Source header:', this.sourceHeaderValue);
+            }).catch(err => {
+                Logger.warn('GlobalJsonRPCService', 'Unable to get app version for X-Source header:', err);
+                this.sourceHeaderValue = `Elastos.Essentials;platform=${plt};version=unknown`;
+            });
+        });
         /* this.registerLimitator("default", {
             minRequestsInterval: 100 // Let's be gentle, apply a max of 10 requests per second even if nothing is specified by default.
         }); */
@@ -94,7 +113,8 @@ export class GlobalJsonRPCService {
                     serializer: "json",
                     headers: {
                         "Accept": "application/json",
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "X-Source": this.sourceHeaderValue
                     },
                     responseType: "text", // Force text response, we want to parse manually
                     timeout: timeout,
@@ -168,7 +188,8 @@ export class GlobalJsonRPCService {
                     serializer: "json",
                     headers: {
                         "Accept": "application/json",
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "X-Source": this.sourceHeaderValue
                     },
                     responseType: "json",
                     followRedirect: true,
@@ -206,7 +227,8 @@ export class GlobalJsonRPCService {
                     serializer: "json",
                     headers: {
                         "Accept": "application/json",
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "X-Source": this.sourceHeaderValue
                     },
                     responseType: "json",
                     followRedirect: true
