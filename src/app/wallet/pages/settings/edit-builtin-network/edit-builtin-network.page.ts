@@ -119,11 +119,11 @@ export class EditBuiltinNetworkPage implements OnInit {
     }
 
     // Check if values have changed from defaults
-    const originalName = this.network.getEffectiveName();
-    const originalRpcUrl = this.network.getRPCUrl();
+    const defaultName = this.network.getDefaultName();
+    const defaultRpcUrl = this.network.getDefaultRPCUrl();
 
-    const nameChanged = this.editedName.trim() !== originalName;
-    const rpcUrlChanged = this.editedRpcUrl.trim() !== originalRpcUrl;
+    const nameChanged = this.editedName.trim() !== defaultName;
+    const rpcUrlChanged = this.editedRpcUrl.trim() !== defaultRpcUrl;
 
     if (nameChanged || rpcUrlChanged) {
       // Save the override
