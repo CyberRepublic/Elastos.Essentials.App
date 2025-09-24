@@ -1,0 +1,107 @@
+@import "src/app/wallet/root.scss";
+
+ion-content {
+  .footer {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 20px;
+    background: var(--essentials-box-color);
+    box-shadow: 0 0px 20px rgb(0 0 0 / 20%);
+    display: flex;
+    flex-direction: row !important;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+
+    .cancel {
+      --background: #f0f0f0;
+      --background-activated: #e0e0e0;
+      color: #640fd4;
+      transition: all 0.3s ease;
+    }
+  }
+
+  .dark-container.footer {
+    .transfer-progress {
+      color: #acb1b6;
+
+      .heading {
+        color: white;
+      }
+    }
+
+    .cancel {
+      --background: linear-gradient(to bottom, #3c3c3c, #2c2c2c);
+      --background-activated: linear-gradient(to bottom, #4c4c4c, #2c2c2c);
+      color: #fff;
+    }
+  }
+}
+
+.container {
+  min-height: 100%;
+  padding: 20px;
+  padding-bottom: 50px; // For the footer
+
+  ion-input {
+    height: inherit;
+  }
+
+  .item-row {
+    border-radius: 10px;
+    margin-top: 3px;
+    margin-bottom: 30px;
+    background: var(--essentials-box-color);
+  }
+
+  .input-container {
+    position: relative;
+
+    .reset-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: var(--ion-color-primary);
+      cursor: pointer;
+      opacity: 0.7;
+      z-index: 10;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .padded-input {
+    --padding-start: 15px;
+    --padding-end: 40px; // Extra padding on the right for reset button space
+  }
+
+  .disabled-input {
+    --background: var(--ion-color-light-shade);
+    --color: var(--ion-color-medium);
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .logo-row {
+    justify-content: center;
+    margin-bottom: 30px;
+
+    .logo-col {
+      display: flex;
+      justify-content: center;
+
+      .network-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: contain;
+      }
+    }
+  }
+}

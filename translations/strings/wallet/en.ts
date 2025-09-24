@@ -487,6 +487,7 @@ export const en = {
     'custom-networks-title': 'Custom networks',
     'add-custom-network-title': 'Add custom network',
     'edit-custom-network-title': 'Edit custom network',
+    'edit-builtin-network-title': 'Edit network',
     'custom-networks-intro': 'Manage your own EVM compatible networks.',
     'add-custom-network': '+ Add custom network',
     'network-name': 'Name',
@@ -1045,7 +1046,8 @@ export const en = {
         subtitle: 'Create a new account abstraction wallet',
         description:
           'The Account Abstraction Wallet is a smart contract wallet. It needs to be generated via the mnemonic phrase or private key of an EOA (Externally Owned Account), and will be associated with the original EOA account after generation.',
-        descriptionSencond: 'Currently, AA (Account Abstraction) account addresses only support Elastos PGP ECO Chain and are temporarily incompatible with other blockchain networks.',
+        descriptionSencond:
+          'Currently, AA (Account Abstraction) account addresses only support Elastos PGP ECO Chain and are temporarily incompatible with other blockchain networks.',
         'wallet-name': 'Wallet Name',
         'wallet-name-placeholder': 'Enter a name for your account abstraction wallet',
         'controller-wallet': 'EOA Wallet',

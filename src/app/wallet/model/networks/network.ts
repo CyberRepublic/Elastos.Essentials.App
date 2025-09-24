@@ -1,16 +1,17 @@
-import type { ConfigInfo } from "@elastosfoundation/wallet-js-sdk";
-import { Logger } from "src/app/logger";
-import { Coin, NativeCoin } from "../coin";
-import { BridgeProvider } from "../earn/bridgeprovider";
-import { EarnProvider } from "../earn/earnprovider";
-import type { SwapProvider } from "../earn/swapprovider";
-import type { MasterWallet } from "../masterwallets/masterwallet";
-import type { PrivateKeyType, WalletNetworkOptions } from "../masterwallets/wallet.types";
-import { TransactionInfoType } from "../tx-providers/transaction.types";
-import { NetworkAPIURLType } from "./base/networkapiurltype";
-import type { AnyNetworkWallet } from "./base/networkwallets/networkwallet";
-import type { ERC1155Provider } from "./evms/nfts/erc1155.provider";
-import { ERC721Provider } from "./evms/nfts/erc721.provider";
+import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
+import { Logger } from 'src/app/logger';
+import { WalletNetworkService } from '../../services/network.service';
+import { Coin, NativeCoin } from '../coin';
+import { BridgeProvider } from '../earn/bridgeprovider';
+import { EarnProvider } from '../earn/earnprovider';
+import type { SwapProvider } from '../earn/swapprovider';
+import type { MasterWallet } from '../masterwallets/masterwallet';
+import type { PrivateKeyType, WalletNetworkOptions } from '../masterwallets/wallet.types';
+import { TransactionInfoType } from '../tx-providers/transaction.types';
+import { NetworkAPIURLType } from './base/networkapiurltype';
+import type { AnyNetworkWallet } from './base/networkwallets/networkwallet';
+import type { ERC1155Provider } from './evms/nfts/erc1155.provider';
+import { ERC721Provider } from './evms/nfts/erc721.provider';
 
 export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOptions> {
   private nativeCoin: Coin = null;
@@ -26,9 +27,8 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
     public swapProviders: SwapProvider[] = [],
     public bridgeProviders: BridgeProvider[] = [],
     public erc1155Providers: ERC1155Provider[] = [],
-    public erc721Providers: ERC721Provider[] = [],
-  ) {
-  }
+    public erc721Providers: ERC721Provider[] = []
+  ) {}
 
   public init(): Promise<void> {
     this.nativeCoin = new NativeCoin(this, this.nativeTokenId, this.getMainTokenSymbol(), this.getMainTokenSymbol());
@@ -51,19 +51,21 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
    * If startBackgroundUpdates is true some initializations such as getting balance or transactions are launched in background.
    * Otherwise, startBackgroundUpdates() has to be called manually later on the network wallet.
    */
-  public async createNetworkWallet(masterWallet: MasterWallet, startBackgroundUpdates = true): Promise<AnyNetworkWallet> {
+  public async createNetworkWallet(
+    masterWallet: MasterWallet,
+    startBackgroundUpdates = true
+  ): Promise<AnyNetworkWallet> {
     // We don't create networkWallet if the master wallet does not support the active network.
     // eg. the ledger wallet has no ela address or evm address.
     if (!masterWallet.supportsNetwork(this)) {
-      Logger.warn("wallet", "Wallet ", masterWallet.name, " does not support network", this.name)
+      Logger.warn('wallet', 'Wallet ', masterWallet.name, ' does not support network', this.name);
       return null;
     }
     let wallet = await this.newNetworkWallet(masterWallet);
     if (wallet) {
       await wallet.initialize();
 
-      if (startBackgroundUpdates)
-        void wallet.startBackgroundUpdates();
+      if (startBackgroundUpdates) void wallet.startBackgroundUpdates();
     }
 
     return wallet;
@@ -84,7 +86,17 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
   public abstract getAPIUrlOfType(type: NetworkAPIURLType): string;
 
   public getRPCUrl(): string {
-    return this.getAPIUrlOfType(NetworkAPIURLType.RPC);
+    // Use overridden value if available, otherwise use the default implementation
+    return (
+      WalletNetworkService.instance?.getEffectiveNetworkRpcUrl(this) ?? this.getAPIUrlOfType(NetworkAPIURLType.RPC)
+    );
+  }
+
+  /**
+   * Returns the effective network name, considering any user overrides
+   */
+  public getEffectiveName(): string {
+    return WalletNetworkService.instance?.getEffectiveNetworkName(this) ?? this.name;
   }
 
   /**
@@ -93,17 +105,17 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
   public getBrowserUrlByType(type: TransactionInfoType, value: string): string {
     let browserUrl = this.getAPIUrlOfType(NetworkAPIURLType.BLOCK_EXPLORER);
     switch (type) {
-        case TransactionInfoType.ADDRESS:
-            browserUrl += '/address/'
+      case TransactionInfoType.ADDRESS:
+        browserUrl += '/address/';
         break;
-        case TransactionInfoType.BLOCKID:
-            browserUrl += '/block/'
+      case TransactionInfoType.BLOCKID:
+        browserUrl += '/block/';
         break;
-        case TransactionInfoType.TXID:
-            browserUrl += '/tx/'
+      case TransactionInfoType.TXID:
+        browserUrl += '/tx/';
         break;
-        default:
-            Logger.warn("wallet", "getBrowserUrlByType: not support ", type);
+      default:
+        Logger.warn('wallet', 'getBrowserUrlByType: not support ', type);
         break;
     }
     return browserUrl + value;
@@ -128,7 +140,7 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
 
   // Ex: ETHHECO, ETHSC, etc
   public getEVMSPVConfigName(): string {
-    return "ETH" + this.key.toUpperCase();
+    return 'ETH' + this.key.toUpperCase();
   }
 
   public supportsERC20Coins(): boolean {
@@ -158,7 +170,6 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
    */
   public getMainColor(): string {
     return null;
-
   }
 
   public equals(network: AnyNetwork): boolean {
@@ -170,4 +181,4 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
   }
 }
 
-export abstract class AnyNetwork extends Network<any> { }
+export abstract class AnyNetwork extends Network<any> {}

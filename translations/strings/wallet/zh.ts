@@ -479,6 +479,7 @@ export const zh = {
     'custom-networks-title': '自定义网络',
     'add-custom-network-title': '添加自定义网络',
     'edit-custom-network-title': '编辑自定义网络',
+    'edit-builtin-network-title': '编辑网络',
     'custom-networks-intro': '管理兼容EVM的网络',
     'add-custom-network': '+ 添加自定义网络',
     'network-name': '名称',

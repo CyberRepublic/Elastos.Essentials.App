@@ -39,6 +39,12 @@ import { LocalStorage } from './storage.service';
 
 export type PriorityNetworkChangeCallback = (newNetwork) => Promise<void>;
 
+export type BuiltinNetworkOverride = {
+  networkKey: string;
+  name?: string; // Optional override for network name
+  rpcUrl?: string; // Optional override for RPC URL
+};
+
 type RawLastUsedNetworks = { [networkKey: string]: number };
 
 export type LastUsedNetworks = {
@@ -60,6 +66,7 @@ export class WalletNetworkService {
   private networkVisibilities: {
     [networkKey: string]: boolean; // Key value of network key -> visible in network chooser or not.
   } = {};
+  private builtinNetworkOverrides: { [networkKey: string]: BuiltinNetworkOverride } = {};
 
   public activeNetwork = new BehaviorSubject<AnyNetwork>(null);
   public lastUsedNetworks = new BehaviorSubject<LastUsedNetworks>({
@@ -89,6 +96,7 @@ export class WalletNetworkService {
   public async init(): Promise<void> {
     this.networks = [];
     await this.loadNetworkVisibilities();
+    await this.loadBuiltinNetworkOverrides();
   }
 
   /**
@@ -287,6 +295,26 @@ export class WalletNetworkService {
     );
   }
 
+  public async loadBuiltinNetworkOverrides(): Promise<void> {
+    this.builtinNetworkOverrides = await this.globalStorageService.getSetting(
+      DIDSessionsStore.signedInDIDString,
+      NetworkTemplateStore.networkTemplate,
+      'wallet',
+      'builtin-network-overrides',
+      {}
+    );
+  }
+
+  public saveBuiltinNetworkOverrides(): Promise<void> {
+    return this.globalStorageService.setSetting(
+      DIDSessionsStore.signedInDIDString,
+      NetworkTemplateStore.networkTemplate,
+      'wallet',
+      'builtin-network-overrides',
+      this.builtinNetworkOverrides
+    );
+  }
+
   public getNetworkVisible(network: AnyNetwork): boolean {
     // By default, if no saved info about a network visibility, we consider the network visible
     if (!(network.key in this.networkVisibilities)) return true;
@@ -297,6 +325,39 @@ export class WalletNetworkService {
   public setNetworkVisible(network: AnyNetwork, visible: boolean): Promise<void> {
     this.networkVisibilities[network.key] = visible;
     return this.saveNetworkVisibilities();
+  }
+
+  public getBuiltinNetworkOverride(networkKey: string): BuiltinNetworkOverride | null {
+    return this.builtinNetworkOverrides[networkKey] || null;
+  }
+
+  public setBuiltinNetworkOverride(networkKey: string, override: BuiltinNetworkOverride): Promise<void> {
+    this.builtinNetworkOverrides[networkKey] = override;
+    return this.saveBuiltinNetworkOverrides();
+  }
+
+  public removeBuiltinNetworkOverride(networkKey: string): Promise<void> {
+    if (this.builtinNetworkOverrides[networkKey]) {
+      delete this.builtinNetworkOverrides[networkKey];
+      return this.saveBuiltinNetworkOverrides();
+    }
+    return Promise.resolve();
+  }
+
+  /**
+   * Returns the effective network name, considering any override
+   */
+  public getEffectiveNetworkName(network: AnyNetwork): string {
+    const override = this.getBuiltinNetworkOverride(network.key);
+    return override?.name || network.name;
+  }
+
+  /**
+   * Returns the effective RPC URL, considering any override
+   */
+  public getEffectiveNetworkRpcUrl(network: AnyNetwork): string {
+    const override = this.getBuiltinNetworkOverride(network.key);
+    return override?.rpcUrl || network.getRPCUrl();
   }
 
   /**

@@ -2,12 +2,18 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
-import { BuiltInIcon, TitleBarIcon, TitleBarIconSlot, TitleBarMenuItem } from 'src/app/components/titlebar/titlebar.types';
+import {
+  BuiltInIcon,
+  TitleBarIcon,
+  TitleBarIconSlot,
+  TitleBarMenuItem
+} from 'src/app/components/titlebar/titlebar.types';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 import { AnyNetwork } from 'src/app/wallet/model/networks/network';
 import { CustomNetworkDiskEntry, CustomNetworkService } from 'src/app/wallet/services/evm/customnetwork.service';
 import { Native } from 'src/app/wallet/services/native.service';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
+import { EditBuiltinNetworkRoutingParams } from '../edit-builtin-network/edit-builtin-network.page';
 import { EditCustomNetworkRoutingParams } from '../edit-custom-network/edit-custom-network.page';
 
 type ManageableNetworkEntry = {
@@ -15,12 +21,12 @@ type ManageableNetworkEntry = {
   isShown: boolean; // Whether this network appears in the network chooser or not.
   isCustom: boolean;
   customNetworkEntry?: CustomNetworkDiskEntry;
-}
+};
 
 @Component({
   selector: 'app-manage-networks',
   templateUrl: './manage-networks.page.html',
-  styleUrls: ['./manage-networks.page.scss'],
+  styleUrls: ['./manage-networks.page.scss']
 })
 export class ManageNetworksPage implements OnInit {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
@@ -40,7 +46,7 @@ export class ManageNetworksPage implements OnInit {
     public networkService: WalletNetworkService,
     private customNetworksService: CustomNetworkService,
     private native: Native
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.netListSubscription = this.networkService.networksList.subscribe(_ => {
@@ -57,14 +63,15 @@ export class ManageNetworksPage implements OnInit {
           isShown: this.networkService.getNetworkVisible(n),
           isCustom: !!customNetworkEntry,
           customNetworkEntry
-        }
+        };
       });
     });
 
-    this.titleBar.addOnItemClickedListener(this.titleBarIconClickedListener = (menuIcon: TitleBarIcon) => {
-      if (menuIcon.key == "add-custom-network")
-        this.addCustomNetwork();
-    });
+    this.titleBar.addOnItemClickedListener(
+      (this.titleBarIconClickedListener = (menuIcon: TitleBarIcon) => {
+        if (menuIcon.key == 'add-custom-network') this.addCustomNetwork();
+      })
+    );
   }
 
   private unsubscribe(subscription: Subscription) {
@@ -81,7 +88,7 @@ export class ManageNetworksPage implements OnInit {
   ionViewWillEnter() {
     this.titleBar.setTitle(this.translate.instant('wallet.manage-networks-title'));
     this.titleBar.setIcon(TitleBarIconSlot.OUTER_RIGHT, {
-      key: "add-custom-network",
+      key: 'add-custom-network',
       iconPath: BuiltInIcon.ADD
     });
   }
@@ -99,14 +106,15 @@ export class ManageNetworksPage implements OnInit {
       forEdition: false,
       intentMode: false
     };
-    this.native.go("/wallet/settings/edit-custom-network", params);
+    this.native.go('/wallet/settings/edit-custom-network', params);
   }
 
   public onNetworkClicked(networkEntry: ManageableNetworkEntry) {
-    if (!networkEntry.isCustom)
-      return; // Can edit only custom networks
-
-    this.editCustomNetwork(networkEntry.customNetworkEntry);
+    if (networkEntry.isCustom) {
+      this.editCustomNetwork(networkEntry.customNetworkEntry);
+    } else {
+      this.editBuiltinNetwork(networkEntry.network);
+    }
   }
 
   private editCustomNetwork(networkEntry: CustomNetworkDiskEntry) {
@@ -115,6 +123,13 @@ export class ManageNetworksPage implements OnInit {
       intentMode: false,
       customNetworkKey: networkEntry.key
     };
-    this.native.go("/wallet/settings/edit-custom-network", params);
+    this.native.go('/wallet/settings/edit-custom-network', params);
+  }
+
+  private editBuiltinNetwork(network: AnyNetwork) {
+    let params: EditBuiltinNetworkRoutingParams = {
+      networkKey: network.key
+    };
+    this.native.go('/wallet/settings/edit-builtin-network', params);
   }
 }

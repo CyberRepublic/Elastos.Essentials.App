@@ -488,6 +488,7 @@ export const it = {
     'custom-networks-title': 'Reti personalizzate',
     'add-custom-network-title': 'Aggiungi rete personalizzata',
     'edit-custom-network-title': 'Modifica rete personalizzata',
+    'edit-builtin-network-title': 'Modifica rete',
     'custom-networks-intro': 'Gestisci qui le tue reti compatibili con EVM (Ethereum).',
     'add-custom-network': '+ Aggiungi rete personalizzata',
     'network-name': 'Nome',
@@ -1049,7 +1050,8 @@ export const it = {
         subtitle: 'Crea un nuovo portafoglio di astrazione account',
         description:
           'I portafogli di astrazione account sono portafogli di contratti intelligenti che offrono sicurezza e funzionalità di esperienza utente migliorate. Sono controllati dal tuo portafoglio esistente.',
-        descriptionSencond: "Attualmente, l'indirizzo del portafoglio astratto dell'account supporta solo Elastos PGP ECO Chain e non è compatibile con altre reti blockchain.",
+        descriptionSencond:
+          "Attualmente, l'indirizzo del portafoglio astratto dell'account supporta solo Elastos PGP ECO Chain e non è compatibile con altre reti blockchain.",
         'wallet-name': 'Nome Portafoglio',
         'wallet-name-placeholder': 'Inserisci un nome per il tuo portafoglio di astrazione account',
         'controller-wallet': 'Portafoglio Controllore',

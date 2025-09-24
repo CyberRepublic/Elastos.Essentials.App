@@ -491,6 +491,7 @@ export const fr = {
     'custom-networks-title': 'Réseaux personnalisés',
     'add-custom-network-title': 'Ajouter un réseau',
     'edit-custom-network-title': 'Modifier un réseau',
+    'edit-builtin-network-title': 'Modifier le réseau',
     'custom-networks-intro': 'Gérez vos propres réseaux compatibles EVM (Ethereum) ici.',
     'add-custom-network': '+ Nouveau Réseau',
     'network-name': 'Nom',
@@ -1022,7 +1023,8 @@ export const fr = {
         subtitle: "Créer un nouveau portefeuille d'abstraction de compte",
         description:
           "Les portefeuilles d'abstraction de compte sont des portefeuilles de contrats intelligents qui offrent une sécurité et une expérience utilisateur améliorées. Ils sont contrôlés par votre portefeuille existant.",
-        descriptionSencond: "Actuellement, l'adresse du portefeuille abstrait du compte ne prend en charge que la chaîne Elastos PGP ECO et n'est pas compatible avec d'autres réseaux blockchain.",
+        descriptionSencond:
+          "Actuellement, l'adresse du portefeuille abstrait du compte ne prend en charge que la chaîne Elastos PGP ECO et n'est pas compatible avec d'autres réseaux blockchain.",
         'wallet-name': 'Nom du Portefeuille',
         'wallet-name-placeholder': "Entrez un nom pour votre portefeuille d'abstraction de compte",
         'controller-wallet': 'Portefeuille Contrôleur',
