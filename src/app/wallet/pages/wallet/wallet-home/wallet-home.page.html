@@ -141,7 +141,8 @@
                     </ion-col>
                     <ion-col [size]="subWallet.getDisplayBalance().isZero() ? 7.5 : 5" class="middle-col">
                         <h1>{{ uiService.getSubwalletTitle(subWallet) }}</h1>
-                        <p class="secondary-text">{{ uiService.getSubwalletSubtitle(subWallet) }}</p>
+                        <!-- <p class="secondary-text">{{ uiService.getSubwalletSubtitle(subWallet) }}</p> -->
+                        <p class="secondary-text">{{ subWallet.getDisplayCoinPrice() }}</p>
                     </ion-col>
                     <ion-col [size]="subWallet.getDisplayBalance().isZero() ? 2.5 : 5" class="right-col">
                         <h1>{{ uiService.getFixedBalance(subWallet.getDisplayBalance()) }}</h1>

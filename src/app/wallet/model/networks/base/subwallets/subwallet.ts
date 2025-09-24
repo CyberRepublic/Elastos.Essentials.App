@@ -147,6 +147,22 @@ export abstract class SubWallet<
   public abstract getOneCoinUSDValue(): BigNumber;
 
   /**
+   * Returns the coin price, in the selected currency
+   */
+  public getDisplayCoinPrice(): string {
+      let coinPrice = this.getAmountInExternalCurrency(new BigNumber(1));
+      if (!coinPrice || coinPrice.isNaN()) return null;
+
+      let decimalplace = 2;
+      if (coinPrice.isLessThan(0.0001)) {
+        decimalplace = 6;
+      } else if (coinPrice.isLessThan(0.01)) {
+        decimalplace = 4;
+      }
+      return coinPrice.toFixed(decimalplace);
+  }
+
+  /**
    * If we get the transactions from cache, then we need update the transactions in 3s.
    */
   public isLoadTxDataFromCache() {
