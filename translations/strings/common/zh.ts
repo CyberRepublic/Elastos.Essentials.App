@@ -60,7 +60,7 @@ export const zh = {
 
         // Related to DID
         'sign-in': '登录',
-        'sign-out': '注销',
+        'sign-out': '退出',
         'nickname': '昵称',
         'bio': '备注',
         'gender': '性别',

@@ -9,7 +9,7 @@ export const zh = {
         'from-unknown-contact': '陌生人的消息',
         'restoring-backup': "恢复备份正在进行中",
         'installed': "已安装",
-        'signing-out': '注销中...',
+        'signing-out': '退出中...',
 
         /********** Notifications Page **********/
         'notifications': '消息通知',
@@ -33,7 +33,7 @@ export const zh = {
         'backup-button': '立即备份',
         'wallet-connect-sessions': '钱包连接会话',
         'active-network': '网络',
-        'active-wallet': '活动钱包',
+        'active-wallet': '钱包',
         'touch-to-create-wallet': '点击创建新钱包',
         'manage-identity': '我的身份',
         'address-copied-to-clipboard': '已复制地址 {{address}} 到剪切板！',

@@ -39,7 +39,7 @@ export const zh = {
     advanced: '高级',
     'lightweight-mode-enabled': '轻量模式已启用',
     'lightweight-mode-disabled': '轻量模式已禁用',
-    'log-out': '注销',
+    'log-out': '退出',
     help: '帮助',
 
     /********** About Page **********/

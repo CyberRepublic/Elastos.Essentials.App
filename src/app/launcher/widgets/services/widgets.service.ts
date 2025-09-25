@@ -605,11 +605,12 @@ export class WidgetsService {
 
     if (this.lightweightMode) {
       if (widgetContainerName === 'main') {
+        widgets.push(this.createBuiltInWidgetState('active-wallet'));
         widgets.push(this.createBuiltInWidgetState('notifications'));
         widgets.push(this.createBuiltInWidgetState('wallet-connect'));
-        widgets.push(this.createBuiltInWidgetState('active-wallet'));
         widgets.push(this.createBuiltInWidgetState('choose-active-network'));
-        widgets.push(this.createBuiltInWidgetState('favorite-apps'));
+        widgets.push(this.createBuiltInWidgetState('discover-dapps'));
+        // widgets.push(this.createBuiltInWidgetState('favorite-apps'));
       }
     } else {
       switch (widgetContainerName) {
