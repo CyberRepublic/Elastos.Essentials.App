@@ -8,6 +8,7 @@ import { runDelayed } from 'src/app/helpers/sleep.helper';
 import { Logger } from 'src/app/logger';
 import { IdentityEntry } from 'src/app/model/didsessions/identityentry';
 import { GlobalHiveService } from 'src/app/services/global.hive.service';
+import { GlobalLightweightService } from 'src/app/services/global.lightweight.service';
 import { GlobalService, GlobalServiceManager } from 'src/app/services/global.service.manager';
 import { GlobalStorageService } from 'src/app/services/global.storage.service';
 import { DIDSessionsStore } from 'src/app/services/stores/didsessions.store';
@@ -50,18 +51,22 @@ export class WidgetsFeedsNewsService implements GlobalService {
   constructor(
     private globalStorageService: GlobalStorageService,
     private globalHiveService: GlobalHiveService,
-    private widgetPluginsService: WidgetPluginsService
+    private widgetPluginsService: WidgetPluginsService,
+    private lightweightService: GlobalLightweightService
   ) {
     WidgetsFeedsNewsService.instance = this;
     GlobalServiceManager.getInstance().registerService(this);
   }
 
   async onUserSignIn(signedInIdentity: IdentityEntry): Promise<void> {
-    await this.loadChannels(signedInIdentity.didString);
-    this.channels.next(this.channels.value);
+    // Only initialize feeds news functionality if not in lightweight mode
+    if (!this.lightweightService.getCurrentLightweightMode()) {
+      await this.loadChannels(signedInIdentity.didString);
+      this.channels.next(this.channels.value);
 
-    // Wait a moment after the boot as fetching feeds posts is a heavy process for now.
-    this.fetchedSubscribedChannelsTimeout = runDelayed(() => this.fetchedSubscribedChannels(), 10000);
+      // Wait a moment after the boot as fetching feeds posts is a heavy process for now.
+      this.fetchedSubscribedChannelsTimeout = runDelayed(() => this.fetchedSubscribedChannels(), 10000);
+    }
   }
 
   onUserSignOut(): Promise<void> {
@@ -214,6 +219,16 @@ export class WidgetsFeedsNewsService implements GlobalService {
 
   private async getRuntimeContext(signedInUserDid: string): Promise<RuntimeContext> {
     const { RuntimeContext } = await lazyFeedsSDKImport();
+    if (!RuntimeContext.isInitialized()) {
+      let provider = await this.globalHiveService.getRawHiveContextProvider(
+        GlobalConfig.FEEDS_APP_DID,
+        signedInUserDid
+      );
+      let didResolverUrl = GlobalElastosAPIService.instance.getApiUrl(ElastosApiUrlType.EID_RPC);
+      // TODO: feeds js sdk need to upgrade did js sdk(^2.3).
+      // RuntimeContext.createInstance(provider, signedInUserDid, didResolverUrl);
+    }
+
     return RuntimeContext.getInstance();
   }
 

@@ -7,6 +7,7 @@ import { AnyNetworkWallet } from '../wallet/model/networks/base/networkwallets/n
 import { ElastosEscMainSubWallet } from '../wallet/model/networks/elastos/evms/esc/subwallets/elastos.esc.main.subwallet';
 import { WalletService } from '../wallet/services/wallet.service';
 import { GlobalLanguageService } from './global.language.service';
+import { GlobalLightweightService } from './global.lightweight.service';
 import { GlobalNotificationsService } from './global.notifications.service';
 import { GlobalPopupService } from './global.popup.service';
 import { GlobalService, GlobalServiceManager } from './global.service.manager';
@@ -22,7 +23,11 @@ export class GlobalESCBPoSNFTService extends GlobalService {
 
   private getClaimableNFTTimer: any = null;
 
-  constructor(private walletManager: WalletService, public globalPopupService: GlobalPopupService) {
+  constructor(
+    private walletManager: WalletService,
+    public globalPopupService: GlobalPopupService,
+    private lightweightService: GlobalLightweightService
+  ) {
     super();
   }
 
@@ -31,12 +36,16 @@ export class GlobalESCBPoSNFTService extends GlobalService {
   }
 
   public onUserSignIn(signedInIdentity: IdentityEntry): Promise<void> {
-    // NOTE: called when the network changes as well, as a new "network wallet" is created.
-    this.activeWalletSubscription = this.walletManager.activeNetworkWallet.subscribe(activeWallet => {
-      // the activeWallet is null if the wallet is not yet initialized or user delete the wallet.
-      this.activeNetworkWallet = activeWallet;
-      this.restartCheckESCBPoSNFTTimeout();
-    });
+    // Only initialize ESC BPoS NFT functionality if not in lightweight mode
+    if (!this.lightweightService.getCurrentLightweightMode()) {
+      // NOTE: called when the network changes as well, as a new "network wallet" is created.
+      this.activeWalletSubscription = this.walletManager.activeNetworkWallet.subscribe(activeWallet => {
+        // the activeWallet is null if the wallet is not yet initialized or user delete the wallet.
+        this.activeNetworkWallet = activeWallet;
+        this.restartCheckESCBPoSNFTTimeout();
+      });
+      Logger.log('GlobalESCBPoSNFTService', 'Initializing ESC BPoS NFT functionality for user');
+    }
 
     return;
   }

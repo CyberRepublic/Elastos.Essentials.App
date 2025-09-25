@@ -3,7 +3,6 @@ import BigNumber from 'bignumber.js';
 import { BehaviorSubject } from 'rxjs';
 import { runDelayed, sleep } from 'src/app/helpers/sleep.helper';
 import { Logger } from 'src/app/logger';
-import { GlobalCosmosService } from 'src/app/services/global.cosmos.service';
 import { GlobalJsonRPCService } from 'src/app/services/global.jsonrpc.service';
 import { GlobalStorageService } from 'src/app/services/global.storage.service';
 import { ERC20Coin, TRC20Coin } from '../model/coin';
@@ -166,7 +165,6 @@ export class CurrencyService {
     try {
       await this.computeExchangeRatesFromCurrenciesService();
       await this.fetchTokenStatsFromPriceService();
-      await this.fetchTokenStatsFromCosmosService();
       return true;
     } catch (e) {
       Logger.warn('wallet', 'Failed to update exchange rates and price', e);
@@ -284,17 +282,6 @@ export class CurrencyService {
     } catch (e) {
       Logger.warn('walletprice', 'Fetch CMC Stats error:', e);
       return false;
-    }
-  }
-
-  private async fetchTokenStatsFromCosmosService() {
-    if (this.walletNetworkService.activeNetwork.value.key == 'atom') {
-      let usdValue = await GlobalCosmosService.instance.getAtomPrice();
-      if (usdValue) {
-        this.networkMainTokenPrice['ATOM'] = usdValue;
-      } else {
-        this.networkMainTokenPrice['ATOM'] = null;
-      }
     }
   }
 

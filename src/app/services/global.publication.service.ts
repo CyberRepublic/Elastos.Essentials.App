@@ -6,14 +6,17 @@ import { Subject } from 'rxjs';
 import { DIDPublishingComponent } from '../components/did-publishing/did-publishing.component';
 import { lazyElastosDIDSDKImport } from '../helpers/import.helper';
 import { Logger } from '../logger';
+import { IdentityEntry } from '../model/didsessions/identityentry';
 import { JSONObject } from '../model/json';
 import { WalletNetworkService } from '../wallet/services/network.service';
 import { ElastosApiUrlType, GlobalElastosAPIService } from './global.elastosapi.service';
 import { GlobalIntentService } from './global.intent.service';
 import { GlobalJsonRPCService } from './global.jsonrpc.service';
+import { GlobalLightweightService } from './global.lightweight.service';
 import { GlobalNativeService } from './global.native.service';
 import { GlobalNetworksService, MAINNET_TEMPLATE, TESTNET_TEMPLATE } from './global.networks.service';
 import { GlobalPreferencesService } from './global.preferences.service';
+import { GlobalService, GlobalServiceManager } from './global.service.manager';
 import { GlobalStorageService } from './global.storage.service';
 import { GlobalSwitchNetworkService } from './global.switchnetwork.service';
 import { DIDSessionsStore } from './stores/didsessions.store';
@@ -660,7 +663,7 @@ class DIDPublishingManager {
 @Injectable({
   providedIn: 'root'
 })
-export class GlobalPublicationService {
+export class GlobalPublicationService extends GlobalService {
   public static instance: GlobalPublicationService = null;
 
   private manager: DIDPublishingManager = null;
@@ -677,8 +680,10 @@ export class GlobalPublicationService {
     private globalNetworksService: GlobalNetworksService,
     private globalIntentService: GlobalIntentService,
     private globalNativeService: GlobalNativeService,
-    private globalSwitchNetworkService: GlobalSwitchNetworkService
+    private globalSwitchNetworkService: GlobalSwitchNetworkService,
+    private lightweightService: GlobalLightweightService
   ) {
+    super();
     GlobalPublicationService.instance = this;
 
     this.manager = new DIDPublishingManager(
@@ -696,8 +701,22 @@ export class GlobalPublicationService {
   }
 
   public async init(): Promise<void> {
+    GlobalServiceManager.getInstance().registerService(this);
     await this.manager.init();
     this.publicationStatus = new Subject<PublicationStatus>();
+  }
+
+  public onUserSignIn(signedInIdentity: IdentityEntry): Promise<void> {
+    // Only initialize publication functionality if not in lightweight mode
+    if (!this.lightweightService.getCurrentLightweightMode()) {
+      Logger.log('GlobalPublicationService', 'Initializing publication functionality for user');
+    }
+    return;
+  }
+
+  public onUserSignOut(): Promise<void> {
+    // Clean up publication specific resources if needed
+    return;
   }
 
   /**

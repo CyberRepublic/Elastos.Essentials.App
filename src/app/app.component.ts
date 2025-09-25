@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { FirebaseX } from "@awesome-cordova-plugins/firebase-x/ngx";
+import { FirebaseX } from '@awesome-cordova-plugins/firebase-x/ngx';
 import { ScreenOrientation } from '@awesome-cordova-plugins/screen-orientation/ngx';
 import { StatusBar } from '@awesome-cordova-plugins/status-bar/ngx';
 import { connectivity } from '@elastosfoundation/elastos-connectivity-sdk-js';
@@ -13,7 +13,6 @@ import { GlobalCredentialToolboxService } from './services/credential-toolbox/gl
 import { GlobalCredentialTypesService } from './services/credential-types/global.credential.types.service';
 import { GlobalAppBackgroundService } from './services/global.appbackground.service';
 import { GlobalBTCRPCService } from './services/global.btc.service';
-import { GlobalCosmosService } from './services/global.cosmos.service';
 import { GlobalDIDSessionsService } from './services/global.didsessions.service';
 import { GlobalELAUtxoService } from './services/global.ela.utxo.service';
 import { GlobalElastosAPIService } from './services/global.elastosapi.service';
@@ -23,6 +22,7 @@ import { GlobalFirebaseService } from './services/global.firebase.service';
 import { GlobalHiveService } from './services/global.hive.service';
 import { GlobalIntentService } from './services/global.intent.service';
 import { GlobalLanguageService } from './services/global.language.service';
+import { GlobalLightweightService } from './services/global.lightweight.service';
 import { GlobalNativeService } from './services/global.native.service';
 import { GlobalNavService } from './services/global.nav.service';
 import { GlobalNetworksService } from './services/global.networks.service';
@@ -33,15 +33,15 @@ import { GlobalSecurityService } from './services/global.security.service';
 import { GlobalStartupService } from './services/global.startup.service';
 import { GlobalStorageService } from './services/global.storage.service';
 import { GlobalTronGridService } from './services/global.tron.service';
+import { GlobalUnisatApiService } from './services/global.unisat.service';
 import { GlobalThemeService } from './services/theming/global.theme.service';
 import { GlobalWalletConnectService } from './services/walletconnect/global.walletconnect.service';
 import { VoteService } from './voting/services/vote.service';
-import { GlobalUnisatApiService } from './services/global.unisat.service';
 import { AppMinimize } from '@ionic-native/app-minimize/ngx';
 
 @Component({
   selector: 'app-root',
-  template: '<ion-app><ion-router-outlet [swipeGesture]="false"></ion-router-outlet></ion-app>',
+  template: '<ion-app><ion-router-outlet [swipeGesture]="false"></ion-router-outlet></ion-app>'
   // BPI 20200322: With the onpush detection strategy angular seems to work 5 to 10x faster for rendering
   // But this created some refresh bugs in some components, as we need to manually push more changes
   // To be continued. NOTE: Comment out the line below if too many problems for now!
@@ -60,6 +60,7 @@ export class AppComponent {
     private didSessions: GlobalDIDSessionsService,
     private globalAppBackgroundService: GlobalAppBackgroundService,
     private language: GlobalLanguageService,
+    private lightweightService: GlobalLightweightService,
     private intentService: GlobalIntentService,
     private screenOrientation: ScreenOrientation,
     private notificationsService: GlobalNotificationsService,
@@ -75,7 +76,6 @@ export class AppComponent {
     public globalBTCService: GlobalBTCRPCService, // IMPORTANT: Unused by this component, but keep it here for instantiation by angular
     public globalUnisatApiService: GlobalUnisatApiService, // IMPORTANT: Unused by this component, but keep it here for instantiation by angular
     public globalTronGridService: GlobalTronGridService, // IMPORTANT: Unused by this component, but keep it here for instantiation by angular
-    public globalCosmosService: GlobalCosmosService, // IMPORTANT: Unused by this component, but keep it here for instantiation by angular
     private voteService: VoteService,
     private credentialTypesService: GlobalCredentialTypesService,
     private credentialToolboxService: GlobalCredentialToolboxService,
@@ -84,8 +84,8 @@ export class AppComponent {
     private globalESCBPoSNFTService: GlobalESCBPoSNFTService,
     private globalNativeService: GlobalNativeService, // IMPORTANT: Unused by this component, but keep it here for instantiation by angular
     private firebase: FirebaseX,
-    private widgetsService: WidgetsService,
-  ) { }
+    private widgetsService: WidgetsService
+  ) {}
 
   ngOnInit() {
     this.initializeApp();
@@ -93,16 +93,16 @@ export class AppComponent {
 
   initializeApp() {
     void this.platform.ready().then(async () => {
-      Logger.log("Global", "Main app component initialization is starting");
+      Logger.log('Global', 'Main app component initialization is starting');
 
       this.globalStartupService.init();
 
       // Force Essentials orientation to portrait only
-      void this.screenOrientation.lock("portrait");
+      void this.screenOrientation.lock('portrait');
 
       // Must do it in ios, otherwise the titlebar and status bar will overlap.
       this.statusBar.overlaysWebView(false);
-      this.statusBar.backgroundColorByHexString("#ff000000");
+      this.statusBar.backgroundColorByHexString('#ff000000');
 
       // Initialize our connectivity SDK helper (customize the connectivity SDK logger, storage layers)
       ElastosSDKHelper.init();
@@ -121,6 +121,7 @@ export class AppComponent {
       // Initialize mandatory services
       this.theme.init();
       await this.language.init();
+      await this.lightweightService.init();
       await this.globalNetworksService.init();
       await this.globalElastosAPIService.init();
       await this.notificationsService.init();
@@ -135,7 +136,6 @@ export class AppComponent {
       void this.globalESCBPoSNFTService.init();
       // Init after globalNetworksService.init()
       void this.globalTronGridService.init();
-      void this.globalCosmosService.init();
       void this.globalUnisatApiService.init();
 
       await this.widgetsService.init();
@@ -144,7 +144,7 @@ export class AppComponent {
       await this.globalAppBackgroundService.init();
       await this.voteService.init(); // Should be after elastos api init
 
-      Logger.log("Global", "All awaited init services have been initialized");
+      Logger.log('Global', 'All awaited init services have been initialized');
 
       // This method WILL SIGN IN (if there is a previously signed in DID), so it must come last.
       await this.didSessions.init();

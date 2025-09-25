@@ -243,7 +243,8 @@
     "https": false,
     "os": false,
     "fs": false,
-    "querystring": false
+    "querystring": false,
+    "vm": false
   },
   "browserslist": [
     "> 0.5%",

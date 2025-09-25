@@ -173,6 +173,8 @@ export class WalletInitService extends GlobalService {
   private async registerNetworks(): Promise<void> {
     let networkTemplate = this.globalNetworksService.activeNetworkTemplate.value;
 
+    Logger.log('wallet', 'Registering networks for network template:', networkTemplate);
+
     // Register all networks, no matter if they are for the active network template or not,
     // as they are sometimes needed.
     await this.createAndRegisterNetwork(new ElastosMainChainMainNetNetwork());
@@ -181,7 +183,6 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new ElastosECOMainNetNetwork());
     await this.createAndRegisterNetwork(new BTCMainNetNetwork());
     await this.createAndRegisterNetwork(new EthereumMainNetNetwork());
-    // await this.createAndRegisterNetwork(new HECOMainNetNetwork());
     await this.createAndRegisterNetwork(new BSCMainNetNetwork());
     await this.createAndRegisterNetwork(new FusionMainNetNetwork());
     await this.createAndRegisterNetwork(new ArbitrumMainNetNetwork());
@@ -190,7 +191,6 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new AvalancheCChainMainNetNetwork());
     await this.createAndRegisterNetwork(new TelosMainNetNetwork());
     await this.createAndRegisterNetwork(new IoTeXMainNetNetwork());
-    // await this.createAndRegisterNetwork(new HooMainNetNetwork());
     await this.createAndRegisterNetwork(new GnosisMainNetNetwork());
     await this.createAndRegisterNetwork(new FuseMainNetNetwork());
     await this.createAndRegisterNetwork(new CronosMainNetNetwork());
@@ -198,7 +198,6 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new EvmosMainNetNetwork());
     await this.createAndRegisterNetwork(new TronMainNetNetwork());
     await this.createAndRegisterNetwork(new CeloMainNetNetwork());
-    // await this.createAndRegisterNetwork(new AtomMainNetNetwork());
     await this.createAndRegisterNetwork(new BttcMainNetNetwork());
 
     await this.createAndRegisterNetwork(new ElastosMainChainTestNetNetwork());
@@ -207,7 +206,6 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new ElastosECOTestNetNetwork());
     await this.createAndRegisterNetwork(new BTCTestNetNetwork());
     await this.createAndRegisterNetwork(new EthereumGoerliNetwork());
-    // await this.createAndRegisterNetwork(new HECOTestNetNetwork());
     await this.createAndRegisterNetwork(new BSCTestNetNetwork());
     await this.createAndRegisterNetwork(new FusionTestNetNetwork());
     await this.createAndRegisterNetwork(new ArbitrumTestNetNetwork());
@@ -216,13 +214,11 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new AvalancheCChainTestNetNetwork());
     await this.createAndRegisterNetwork(new TelosTestNetNetwork());
     await this.createAndRegisterNetwork(new IoTeXTestNetNetwork());
-    // await this.createAndRegisterNetwork(new HooTestNetNetwork());
     await this.createAndRegisterNetwork(new CronosTestNetNetwork());
     await this.createAndRegisterNetwork(new KavaTestNetNetwork());
     await this.createAndRegisterNetwork(new EvmosTestNetNetwork());
     await this.createAndRegisterNetwork(new TronShastaTestNetNetwork());
     await this.createAndRegisterNetwork(new CeloTestNetNetwork());
-    // await this.createAndRegisterNetwork(new AtomTestNetNetwork());
     await this.createAndRegisterNetwork(new BttcTestNetNetwork());
 
     await this.createAndRegisterNetwork(new ElastosLRWNetwork(), networkTemplate === 'LRW');
@@ -251,9 +247,6 @@ export class WalletInitService extends GlobalService {
     this.nameResolvingService.registerNameResolver(new CryptoNameResolver(this.httpClient));
     this.nameResolvingService.registerNameResolver(new UnstoppableDomainsAddressResolver(this.httpClient));
     this.nameResolvingService.registerNameResolver(new IdrissResolver());
-    // TODO : build error (HookWebpackError: Cannot read properties of undefined) with @ensdomains/ensjs": "3.0.0-alpha.20"
-    // Temporarily remove ENSResolver, Try to upgrade @ensdomains/ensjs later
-    // this.nameResolvingService.registerNameResolver(new ENSResolver());
     this.nameResolvingService.registerNameResolver(new ELADomainResolver());
   }
 

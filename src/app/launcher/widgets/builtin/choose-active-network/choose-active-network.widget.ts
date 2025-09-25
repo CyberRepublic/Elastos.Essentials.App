@@ -54,7 +54,9 @@ export class ChooseActiveNetworkWidget extends WidgetBase implements OnInit, OnD
    * for the widget.
    */
   private prepareLastUsedNetworks(lastUsedNetworks: LastUsedNetworks) {
-    if (!lastUsedNetworks) return;
+    if (!lastUsedNetworks) {
+      return;
+    }
 
     this.lastUsedNetworks = [];
 
@@ -63,14 +65,10 @@ export class ChooseActiveNetworkWidget extends WidgetBase implements OnInit, OnD
     // but always 4 entries.
     // By display priority order.
     const defaultNetworks: AnyNetwork[] = [
-      this.walletNetworkService.getNetworkByKey('elastossmartchain'),
-      this.walletNetworkService.getNetworkByKey('ethereum'),
-      this.walletNetworkService.getNetworkByKey('btc'),
-      this.walletNetworkService.getNetworkByKey('bsc'),
-      this.walletNetworkService.getNetworkByKey('elastos'),
-      this.walletNetworkService.getNetworkByKey('polygon'),
-      this.walletNetworkService.getNetworkByKey('iotex'),
-      this.walletNetworkService.getNetworkByKey('heco')
+      this.walletNetworkService.getNetworkByKey('bsc'), // Binance Smart Chain
+      this.walletNetworkService.getNetworkByKey('btc'), // Bitcoin
+      this.walletNetworkService.getNetworkByKey('elastoseco'), // Elastos ECO
+      this.walletNetworkService.getNetworkByKey('elastos') // Elastos mainchain
     ].filter(n => !!n); // Filter undefined networks to make sure we are ready
 
     // only one network on LRW.
@@ -83,7 +81,9 @@ export class ChooseActiveNetworkWidget extends WidgetBase implements OnInit, OnD
     let checkedIndex = 0;
     while (networksList.length < maxCount) {
       let existingIndex = networksList.findIndex(n => n.key === defaultNetworks[checkedIndex].key);
-      if (existingIndex < 0) networksList.push(defaultNetworks[checkedIndex]);
+      if (existingIndex < 0) {
+        networksList.push(defaultNetworks[checkedIndex]);
+      }
       checkedIndex++;
     }
 

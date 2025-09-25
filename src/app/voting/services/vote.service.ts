@@ -12,6 +12,7 @@ import { WalletPendingTransactionException } from 'src/app/model/exceptions/wall
 import { Util } from 'src/app/model/util';
 import { ElastosApiUrlType, GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
 import { GlobalJsonRPCService } from 'src/app/services/global.jsonrpc.service';
+import { GlobalLightweightService } from 'src/app/services/global.lightweight.service';
 import { GlobalNativeService } from 'src/app/services/global.native.service';
 import { GlobalNavService } from 'src/app/services/global.nav.service';
 import { GlobalPopupService } from 'src/app/services/global.popup.service';
@@ -73,7 +74,8 @@ export class VoteService implements GlobalService {
     private globalSwitchNetworkService: GlobalSwitchNetworkService,
     private globalElastosAPIService: GlobalElastosAPIService,
     public translate: TranslateService,
-    private globalNative: GlobalNativeService
+    private globalNative: GlobalNativeService,
+    private lightweightService: GlobalLightweightService
   ) {
     this.elastosChainCode = StandardCoinName.ELA;
   }
@@ -83,11 +85,15 @@ export class VoteService implements GlobalService {
   }
 
   onUserSignIn(signedInIdentity: IdentityEntry): Promise<void> {
-    // The mainnet is already a BPOS consensus, so hardcode to DPoSV2.
-    this.dPoSStatus.next(DposStatus.DPoSV2);
-    // void this.getDPoSStatus().then(status => {
-    //     this.dPoSStatus.next(status);
-    // });
+    // Only initialize voting functionality if not in lightweight mode
+    if (!this.lightweightService.getCurrentLightweightMode()) {
+      // The mainnet is already a BPOS consensus, so hardcode to DPoSV2.
+      this.dPoSStatus.next(DposStatus.DPoSV2);
+      // void this.getDPoSStatus().then(status => {
+      //     this.dPoSStatus.next(status);
+      // });
+      Logger.log('VoteService', 'Initializing voting functionality for user');
+    }
     return;
   }
 

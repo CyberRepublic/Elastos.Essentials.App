@@ -24,16 +24,13 @@ import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core'
 import { Router } from '@angular/router';
 import { Platform, PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import { runDelayed } from 'src/app/helpers/sleep.helper';
 import { Logger } from 'src/app/logger';
-import { App } from 'src/app/model/app.enum';
 import { Util } from 'src/app/model/util';
-import { UIToken } from 'src/app/multiswap/model/uitoken';
-import { MultiSwapHomePageParams } from 'src/app/multiswap/pages/home/home';
 import { GlobalDIDSessionsService } from 'src/app/services/global.didsessions.service';
 import { GlobalEvents } from 'src/app/services/global.events.service';
 import { GlobalNavService } from 'src/app/services/global.nav.service';
@@ -585,45 +582,6 @@ export class CoinHomePage implements OnInit {
       subWalletId: subWallet.id
     });
   }
-
-  public swap(subWallet: AnySubWallet) {
-    // Prevent from subwallet main div to get the click (do not open transactions list)
-    //event.preventDefault();
-    //event.stopPropagation();
-
-    /* this.native.go("/wallet/coin-swap", {
-            masterWalletId: subWallet.networkWallet.masterWallet.id,
-            subWalletId: subWallet.id
-        }); */
-
-    let targetToken: UIToken = {
-      token: this.subWallet.getCoin(),
-      amount: this.subWallet.getBalance()
-    };
-
-    // If there is a balance, use this token as source token for the swap (UI convenience).
-    // If balance is 0, use it as destination (assume user wants to receive that token because he has none).
-    let selectTokenAsSource = targetToken.amount.gt(0);
-    let params: MultiSwapHomePageParams = {
-      sourceToken: selectTokenAsSource ? targetToken : undefined,
-      destinationToken: !selectTokenAsSource ? targetToken : undefined
-    };
-
-    void this.globalNav.navigateTo(App.MULTI_SWAP, '/multiswap/home', {
-      state: params
-    });
-  }
-
-  /* public bridge(subWallet: AnySubWallet) {
-        // Prevent from subwallet main div to get the click (do not open transactions list)
-        //event.preventDefault();
-        //event.stopPropagation();
-
-        this.native.go("/wallet/coin-bridge", {
-            masterWalletId: subWallet.networkWallet.masterWallet.id,
-            subWalletId: subWallet.id
-        });
-    } */
 
   /**
    * Returns the ion-col size for the transfer/send/receive row, based on the available features.
