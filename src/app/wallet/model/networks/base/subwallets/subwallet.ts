@@ -151,7 +151,7 @@ export abstract class SubWallet<
    */
   public getDisplayCoinPrice(): string {
       let coinPrice = this.getAmountInExternalCurrency(new BigNumber(1));
-      if (!coinPrice || coinPrice.isNaN()) return null;
+      if (!coinPrice || coinPrice.isNaN() || coinPrice.isLessThan(0.000001)) return null;
 
       let decimalplace = 2;
       if (coinPrice.isLessThan(0.0001)) {
