@@ -118,6 +118,12 @@ export class PrepareDIDPage {
       },
       onAllStepsCompleted: () => {
         Logger.log('didsessions', 'All preparation steps completed');
+
+        // If lightweight mode, directly finalize the preparation.
+        // In advanced mode, keep the last "all done" shown waiting for user to click "continue".
+        if (this.isLightweightMode) {
+          this.finalizePreparation();
+        }
       }
     };
 

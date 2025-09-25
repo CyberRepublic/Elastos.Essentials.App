@@ -20,14 +20,12 @@
 
     <ion-slide class="ion-text-center">
       <div class="slide-card">
-        <img src="assets/shared/essentials-black-circle.svg">
-        <h1>{{ 'didsessions.prepare.done-title' | translate }}</h1>
-        <p>{{ 'didsessions.prepare.done-intro' | translate }}</p>
-        <ebutton (clicked)="onFinalizePreparation()" *ngIf="!finalizingPreparation"
-          [title]="'common.continue' | translate"></ebutton>
+        <img src="assets/didsessions/onboard/slide4.svg">
+        <lottie-player src="../../../assets/identity/animations/block-loader.json" background="transparent" speed="1"
+          style="width: 160x; height: 160px;" autoplay loop></lottie-player>
+        <span>{{ 'common.please-wait' | translate }}</span>
       </div>
     </ion-slide>
-
   </ion-slides>
 
   <ion-row *ngIf="slideIndex < 1 || finalizingPreparation" class="slide-circle-row">
