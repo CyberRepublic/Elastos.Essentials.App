@@ -615,7 +615,7 @@ export class WidgetsService {
     } else {
       switch (widgetContainerName) {
         case 'left':
-          widgets.push(this.createBuiltInWidgetState('active-network-coin-price'));
+          // widgets.push(this.createBuiltInWidgetState('active-network-coin-price'));
           widgets.push(this.createBuiltInWidgetState('recent-apps'));
           widgets.push(this.createBuiltInWidgetState('choose-active-network'));
           widgets.push(this.createBuiltInWidgetState('wallet-connect'));
