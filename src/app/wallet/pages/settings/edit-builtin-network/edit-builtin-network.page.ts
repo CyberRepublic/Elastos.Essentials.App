@@ -30,6 +30,8 @@ export class EditBuiltinNetworkPage implements OnInit {
   public editedName = '';
   public editedRpcUrl = '';
 
+  private isEditingCurrentNetwork = false;
+
   constructor(
     public theme: GlobalThemeService,
     public translate: TranslateService,
@@ -61,6 +63,10 @@ export class EditBuiltinNetworkPage implements OnInit {
         this.native.errToast('Network not found');
         void this.globalNav.navigateBack();
         return;
+      }
+
+      if (this.networkService.activeNetwork.value.key === params.networkKey) {
+        this.isEditingCurrentNetwork = true;
       }
 
       // Get existing override or create empty one
@@ -126,6 +132,9 @@ export class EditBuiltinNetworkPage implements OnInit {
     const nameChanged = this.editedName.trim() !== defaultName;
     const rpcUrlChanged = this.editedRpcUrl.trim() !== defaultRpcUrl;
 
+    // Check if rpc url has changed from current rpc url
+    const rpcUrlChangedFromCurrent = this.editedRpcUrl.trim() !== this.network.getRPCUrl();
+
     if (nameChanged || rpcUrlChanged) {
       // Save the override
       const override: BuiltinNetworkOverride = {
@@ -139,7 +148,13 @@ export class EditBuiltinNetworkPage implements OnInit {
       await this.networkService.removeBuiltinNetworkOverride(this.network.key);
     }
 
-    void this.globalNav.navigateBack();
+    // If we are editing the current network, show a restart prompt, otherwise navigate back
+    if (this.isEditingCurrentNetwork && rpcUrlChangedFromCurrent) {
+      // We need to restart, so the web3 in subwallet can use the new rpc url.
+      void this.globalNav.showRestartPrompt();
+    } else {
+      void this.globalNav.navigateBack();
+    }
   }
 
   public hasNameOverride(): boolean {
