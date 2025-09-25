@@ -10,6 +10,33 @@ export type DAppMenuEntry = {
 
 export const suggestedDApps = (darkMode: boolean, lightweightMode = false): DAppMenuEntry[] => [
   {
+    icon: '/assets/browser/dapps/pga.png',
+    title: 'BTCD Stablecoin Minting',
+    description: "The world's first fully Bitcoin-backed stablecoin. Put your Bitcoin to work without selling it.",
+    url: 'https://btcd.pgachain.org/',
+    useExternalBrowser: false,
+    walletConnectSupported: false,
+    networks: ["elastoseco"]
+  },
+  {
+    icon: '/assets/browser/dapps/pgp.png',
+    title: 'PGP Swap',
+    description: '',
+    url: 'https://swap.pgachain.org',
+    useExternalBrowser: false,
+    walletConnectSupported: false,
+    networks: ["elastoseco"]
+  },
+  {
+    icon: '/assets/browser/dapps/pgp.png',
+    title: 'PGA Miner',
+    description: '',
+    url: 'https://miner.pgachain.org',
+    useExternalBrowser: false,
+    walletConnectSupported: false,
+    networks: ["elastoseco"]
+  },
+  {
     icon: '/assets/browser/dapps/glidefinance.png',
     title: 'Glide Finance',
     description: 'Elastos ecosystem decentralized exchange',
