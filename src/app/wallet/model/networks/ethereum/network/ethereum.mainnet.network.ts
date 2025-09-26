@@ -26,6 +26,12 @@ export class EthereumMainNetNetwork extends EthereumBaseNetwork {
       MAINNET_TEMPLATE,
       1,
       [],
+      [
+        {
+          name: 'Ethereum RPC',
+          url: 'https://eth.llamarpc.com'
+        }
+      ],
       [],
       [ethereumMainnetUniswapSwapProvider],
       [ethereumMainnetBinanceBridgeProvider, ethereumMainnetShadowTokenBridgeProvider]

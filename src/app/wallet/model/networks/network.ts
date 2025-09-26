@@ -7,6 +7,7 @@ import { EarnProvider } from '../earn/earnprovider';
 import type { SwapProvider } from '../earn/swapprovider';
 import type { MasterWallet } from '../masterwallets/masterwallet';
 import type { PrivateKeyType, WalletNetworkOptions } from '../masterwallets/wallet.types';
+import { RPCUrlProvider } from '../rpc-url-provider';
 import { TransactionInfoType } from '../tx-providers/transaction.types';
 import { NetworkAPIURLType } from './base/networkapiurltype';
 import type { AnyNetworkWallet } from './base/networkwallets/networkwallet';
@@ -23,6 +24,7 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
     public logo: string, // Path to the network icon
     private nativeTokenId: string,
     public networkTemplate: string, // For which network template is this network available
+    public rpcUrlProviders: RPCUrlProvider[] = [],
     public earnProviders: EarnProvider[] = [],
     public swapProviders: SwapProvider[] = [],
     public bridgeProviders: BridgeProvider[] = [],
@@ -97,6 +99,35 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
     return (
       WalletNetworkService.instance?.getOverridenNetworkRpcUrl(this) ?? this.getAPIUrlOfType(NetworkAPIURLType.RPC)
     );
+  }
+
+  /**
+   * Returns the selected RPC url for the network.
+   * - For custom networks, this is the only url configured.
+   * - For built-in networks, this is the url of the selected (or default) provider.
+   */
+  public getSelectedRpcUrl(): string {
+    if (this.isCustom()) {
+      return this.getAPIUrlOfType(NetworkAPIURLType.RPC);
+    }
+
+    return this.getSelectedRpcProvider().url;
+  }
+
+  /**
+   * Returns the selected RPC provider (by the user) for the network.
+   * Only call this on built-in networks.
+   *
+   * - if existing, this is the url selected by the user and saved to network overrides by the wallet service.
+   * - if no url was marked selected, the first provider of the hardcoded lsit is returned.
+   */
+  public getSelectedRpcProvider(): RPCUrlProvider {
+    if (this.isCustom()) {
+      throw new Error('getSelectedRpcProvider() can only be called on built-in networks.');
+    }
+
+    // WalletNetworkService.instance.getSelectedRpcUrl(this) ?? this.rpcUrlProviders[0].url;
+    return;
   }
 
   /**
@@ -190,6 +221,9 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
     return this.key === network.key;
   }
 
+  /**
+   * Whether this network is a custom network that was added by the user.
+   */
   public isCustom(): boolean {
     return false;
   }

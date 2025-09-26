@@ -10,6 +10,7 @@ import { BridgeProvider } from '../../earn/bridgeprovider';
 import { EarnProvider } from '../../earn/earnprovider';
 import { SwapProvider } from '../../earn/swapprovider';
 import { PrivateKeyType, WalletNetworkOptions } from '../../masterwallets/wallet.types';
+import { RPCUrlProvider } from '../../rpc-url-provider';
 import { NetworkAPIURLType } from '../base/networkapiurltype';
 import { AnyNetwork, Network } from '../network';
 import { CustomCurrencyProvider } from './custom.currencyprovider';
@@ -43,6 +44,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
     networkTemplate: string, // For which network template is this network available
     protected chainID: number,
     protected builtInCoins?: ERC20Coin[],
+    rpcUrlProviders: RPCUrlProvider[] = [],
     earnProviders: EarnProvider[] = [],
     swapProviders: SwapProvider[] = [],
     bridgeProviders: BridgeProvider[] = [],
@@ -56,6 +58,7 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
       logo,
       'ETH' + key.toUpperCase(),
       networkTemplate,
+      rpcUrlProviders,
       earnProviders,
       swapProviders,
       bridgeProviders,

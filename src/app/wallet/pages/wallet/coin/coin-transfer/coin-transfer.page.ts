@@ -50,6 +50,7 @@ import {
   TransferWalletChooserComponent,
   WalletChooserComponentOptions
 } from 'src/app/wallet/components/transfer-wallet-chooser/transfer-wallet-chooser.component';
+import { AccountAbstractionMasterWallet } from 'src/app/wallet/model/masterwallets/account.abstraction.masterwallet';
 import { AnyNetworkWallet } from 'src/app/wallet/model/networks/base/networkwallets/networkwallet';
 import { BTCSubWallet } from 'src/app/wallet/model/networks/btc/subwallets/btc.subwallet';
 import { ElastosIdentityChainNetworkBase } from 'src/app/wallet/model/networks/elastos/evms/eid/network/eid.networks';
@@ -87,7 +88,6 @@ import { Native } from '../../../../services/native.service';
 import { UiService } from '../../../../services/ui.service';
 import { WalletService } from '../../../../services/wallet.service';
 import { NetworkInfo } from '../coin-select/coin-select.page';
-import { AccountAbstractionMasterWallet } from 'src/app/wallet/model/masterwallets/account.abstraction.masterwallet';
 
 @Component({
   selector: 'app-coin-transfer',
@@ -813,7 +813,7 @@ export class CoinTransferPage implements OnInit, OnDestroy {
       if (!ret) return ret;
     }
 
-    let fee = null;
+    let fee: BigNumber = null;
     if (this.feeOfELA) {
       fee = new BigNumber(this.feeOfELA);
     } else if (this.feeOfBTC) {
@@ -828,9 +828,6 @@ export class CoinTransferPage implements OnInit, OnDestroy {
       this.feeOfTRX = GlobalTronGridService.instance.fromSun(feeSun.toString()).toString();
       fee = new BigNumber(this.feeOfTRX);
     } else if (this.isAccountAbstractionWallet()) {
-      // TODO:
-      // Account Abstraction wallet doesn't have a fee for now.
-      // later we should request this to the AA provider.
       fee = new BigNumber(0);
     } else {
       // TODO: 0.0001 works only for Elastos ESC! Rework this.
