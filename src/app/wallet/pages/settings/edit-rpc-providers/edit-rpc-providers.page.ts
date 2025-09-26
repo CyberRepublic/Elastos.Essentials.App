@@ -294,16 +294,4 @@ export class EditRpcProvidersPage implements OnInit, OnDestroy {
     if (!status) return '--';
     return this.qualityService.formatPingTime(status.pingTime);
   }
-
-  /**
-   * Copy RPC URL to clipboard
-   */
-  public async copyUrlToClipboard(url: string): Promise<void> {
-    try {
-      await this.native.copyClipboard(url);
-      this.native.genericToast('wallet.rpc-url-copied');
-    } catch (error) {
-      this.native.errToast('wallet.copy-failed');
-    }
-  }
 }

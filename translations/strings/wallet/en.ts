@@ -521,8 +521,6 @@ export const en = {
     'rpc-url-already-exists': 'RPC URL already exists',
     'network-visibility': 'Network Visibility',
     'network-visibility-description': 'Show this network in the network selector',
-    'rpc-url-copied': 'RPC URL copied to clipboard',
-    'copy-failed': 'Failed to copy to clipboard',
     builtin: 'Built-in',
     custom: 'Custom',
 

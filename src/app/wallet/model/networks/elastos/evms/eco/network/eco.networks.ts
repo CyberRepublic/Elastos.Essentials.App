@@ -98,6 +98,18 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
             GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECO),
             MAINNET_TEMPLATE
           )
+        },
+        {
+          name: 'Primary PGP Chain',
+          url: 'https://sknode.pgachain.org'
+        },
+        {
+          name: 'Official Elastos Node',
+          url: 'https://api.elastos.io/eco'
+        },
+        {
+          name: 'Hong Kong Node',
+          url: 'https://node.shenzhou-crypto.com'
         }
       ]
     );
