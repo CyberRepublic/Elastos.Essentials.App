@@ -164,6 +164,7 @@ export class EditRpcProvidersPage implements OnInit, OnDestroy {
         .create({
           header: this.translate.instant('wallet.add-rpc-provider'),
           message,
+          backdropDismiss: false,
           inputs: [
             {
               name: 'input',
