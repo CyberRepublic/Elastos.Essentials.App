@@ -78,13 +78,24 @@ export class EditRpcProvidersPage implements OnInit, OnDestroy {
 
       // Initialize RPC providers data
       this.allRpcProviders = this.network.getAllRpcProviders();
-      this.selectedRpcUrl = this.network.getSelectedRpcProvider().url;
-      this.originalSelectedRpcUrl = this.selectedRpcUrl; // Remember the original selection
+      // Use setTimeout to ensure the radio group binding updates properly
+      setTimeout(() => {
+        this.selectedRpcUrl = this.network.getSelectedRpcProvider().url;
+        this.originalSelectedRpcUrl = this.selectedRpcUrl; // Remember the original selection
+      }, 0);
     });
   }
 
   ionViewWillEnter() {
     this.titleBar.setTitle(this.translate.instant('wallet.edit-rpc-providers-title'));
+
+    // Refresh the selected RPC provider in case it was changed elsewhere
+    if (this.network) {
+      // Use setTimeout to ensure the radio group binding updates properly
+      setTimeout(() => {
+        this.selectedRpcUrl = this.network.getSelectedRpcProvider().url;
+      }, 0);
+    }
 
     // Start quality monitoring
     this.qualityService.startMonitoring(this.allRpcProviders);
