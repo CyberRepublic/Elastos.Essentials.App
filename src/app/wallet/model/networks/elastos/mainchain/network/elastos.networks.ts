@@ -1,29 +1,34 @@
-import type { ConfigInfo } from "@elastosfoundation/wallet-js-sdk";
-import { GlobalElastosAPIService } from "src/app/services/global.elastosapi.service";
-import { MAINNET_TEMPLATE, TESTNET_TEMPLATE } from "src/app/services/global.networks.service";
-import { StandardCoinName } from "src/app/wallet/model/coin";
-import type { LedgerMasterWallet } from "src/app/wallet/model/masterwallets/ledger.masterwallet";
-import type { MasterWallet, StandardMasterWallet } from "src/app/wallet/model/masterwallets/masterwallet";
-import type { StandardMultiSigMasterWallet } from "src/app/wallet/model/masterwallets/standard.multisig.masterwallet";
-import { ElastosMainChainWalletNetworkOptions, WalletType } from "src/app/wallet/model/masterwallets/wallet.types";
-import { NetworkAPIURLType } from "../../../base/networkapiurltype";
-import type { AnyNetworkWallet } from "../../../base/networkwallets/networkwallet";
-import { ElastosNetworkBase } from "../../network/elastos.base.network";
+import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
+import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
+import { MAINNET_TEMPLATE, TESTNET_TEMPLATE } from 'src/app/services/global.networks.service';
+import { StandardCoinName } from 'src/app/wallet/model/coin';
+import type { LedgerMasterWallet } from 'src/app/wallet/model/masterwallets/ledger.masterwallet';
+import type { MasterWallet, StandardMasterWallet } from 'src/app/wallet/model/masterwallets/masterwallet';
+import type { StandardMultiSigMasterWallet } from 'src/app/wallet/model/masterwallets/standard.multisig.masterwallet';
+import { ElastosMainChainWalletNetworkOptions, WalletType } from 'src/app/wallet/model/masterwallets/wallet.types';
+import { NetworkAPIURLType } from '../../../base/networkapiurltype';
+import type { AnyNetworkWallet } from '../../../base/networkwallets/networkwallet';
+import { ElastosNetworkBase } from '../../network/elastos.base.network';
 
 export abstract class ElastosMainChainNetworkBase extends ElastosNetworkBase<ElastosMainChainWalletNetworkOptions> {
   // eslint-disable-next-line @typescript-eslint/prefer-as-const
-  public static networkKey: "elastos" = "elastos";
+  public static networkKey: 'elastos' = 'elastos';
 
   public async newNetworkWallet(masterWallet: MasterWallet): Promise<AnyNetworkWallet> {
     switch (masterWallet.type) {
       case WalletType.STANDARD:
-        const ElastosMainChainStandardNetworkWallet = (await import("../networkwallets/standard/mainchain.networkwallet")).ElastosMainChainStandardNetworkWallet;
+        const ElastosMainChainStandardNetworkWallet = (
+          await import('../networkwallets/standard/mainchain.networkwallet')
+        ).ElastosMainChainStandardNetworkWallet;
         return new ElastosMainChainStandardNetworkWallet(masterWallet as StandardMasterWallet, this);
       case WalletType.LEDGER:
-        const ElastosMainChainLedgerNetworkWallet = (await import("../networkwallets/ledger/mainchain.networkwallet")).ElastosMainChainLedgerNetworkWallet;
+        const ElastosMainChainLedgerNetworkWallet = (await import('../networkwallets/ledger/mainchain.networkwallet'))
+          .ElastosMainChainLedgerNetworkWallet;
         return new ElastosMainChainLedgerNetworkWallet(masterWallet as LedgerMasterWallet, this);
       case WalletType.MULTI_SIG_STANDARD:
-        const ElastosMainChainStandardMultiSigNetworkWallet = (await import("../networkwallets/standardmultisig/mainchain.networkwallet")).ElastosMainChainStandardMultiSigNetworkWallet;
+        const ElastosMainChainStandardMultiSigNetworkWallet = (
+          await import('../networkwallets/standardmultisig/mainchain.networkwallet')
+        ).ElastosMainChainStandardMultiSigNetworkWallet;
         return new ElastosMainChainStandardMultiSigNetworkWallet(masterWallet as StandardMultiSigMasterWallet, this);
       default:
         return null;
@@ -34,11 +39,11 @@ export abstract class ElastosMainChainNetworkBase extends ElastosNetworkBase<Ela
     return {
       network: ElastosMainChainNetworkBase.networkKey,
       singleAddress: true
-    }
+    };
   }
 
   public getMainColor(): string {
-    return "0a1530";
+    return '0a1530';
   }
 }
 
@@ -49,20 +54,31 @@ export class ElastosMainChainMainNetNetwork extends ElastosMainChainNetworkBase 
   constructor() {
     super(
       ElastosMainChainNetworkBase.networkKey,
-      "Elastos Main Chain",
-      "Elastos Main",
-      "assets/wallet/networks/elastos.png",
-      MAINNET_TEMPLATE
+      'Elastos Main Chain',
+      'Elastos Main',
+      'assets/wallet/networks/elastos.png',
+      MAINNET_TEMPLATE,
+      [
+        {
+          name: 'Elastos Main Chain RPC',
+          url: 'https://api.elastos.io/ela'
+        }
+      ]
     );
   }
 
   public getAPIUrlOfType(type: NetworkAPIURLType): string {
     if (type === NetworkAPIURLType.RPC)
-      return GlobalElastosAPIService.instance.getApiUrl(GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ELA), MAINNET_TEMPLATE);
+      return GlobalElastosAPIService.instance.getApiUrl(
+        GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ELA),
+        MAINNET_TEMPLATE
+      );
     else if (type === NetworkAPIURLType.BLOCK_EXPLORER)
-      return GlobalElastosAPIService.instance.getApiUrl(GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(StandardCoinName.ELA), MAINNET_TEMPLATE);
-    else
-      return null;
+      return GlobalElastosAPIService.instance.getApiUrl(
+        GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(StandardCoinName.ELA),
+        MAINNET_TEMPLATE
+      );
+    else return null;
   }
 
   public getMainChainID(): number {
@@ -83,25 +99,35 @@ export class ElastosMainChainMainNetNetwork extends ElastosMainChainNetworkBase 
   }
 }
 
-
 export class ElastosMainChainTestNetNetwork extends ElastosMainChainNetworkBase {
   constructor() {
     super(
       ElastosMainChainNetworkBase.networkKey,
-      "Elastos Main Chain Testnet",
-      "Elastos Main Testnet",
-      "assets/wallet/networks/elastos.png",
-      TESTNET_TEMPLATE
+      'Elastos Main Chain Testnet',
+      'Elastos Main Testnet',
+      'assets/wallet/networks/elastos.png',
+      TESTNET_TEMPLATE,
+      [
+        {
+          name: 'Elastos Main Chain Testnet RPC',
+          url: 'https://api-testnet.elastos.io/ela'
+        }
+      ]
     );
   }
 
   public getAPIUrlOfType(type: NetworkAPIURLType): string {
     if (type === NetworkAPIURLType.RPC)
-      return GlobalElastosAPIService.instance.getApiUrl(GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ELA), TESTNET_TEMPLATE);
+      return GlobalElastosAPIService.instance.getApiUrl(
+        GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ELA),
+        TESTNET_TEMPLATE
+      );
     else if (type === NetworkAPIURLType.BLOCK_EXPLORER)
-      return GlobalElastosAPIService.instance.getApiUrl(GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(StandardCoinName.ELA), TESTNET_TEMPLATE);
-    else
-      return null;
+      return GlobalElastosAPIService.instance.getApiUrl(
+        GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(StandardCoinName.ELA),
+        TESTNET_TEMPLATE
+      );
+    else return null;
   }
 
   public getMainChainID(): number {

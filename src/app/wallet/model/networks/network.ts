@@ -109,6 +109,13 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
       return this.getAPIUrlOfType(NetworkAPIURLType.RPC);
     }
 
+    const selectedRpcProvider = this.getSelectedRpcProvider();
+    if (!selectedRpcProvider) {
+      throw new Error(
+        `getSelectedRpcUrl(): no selected RPC provider found for network ${this.key} this is abnormal. Have rpc url providers been configured for this network?`
+      );
+    }
+
     return this.getSelectedRpcProvider().url;
   }
 
