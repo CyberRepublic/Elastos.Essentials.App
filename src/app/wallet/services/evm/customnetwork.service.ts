@@ -112,6 +112,8 @@ export class CustomNetworkService {
 
             let network = this.createNetworkFromCustomNetworkEntry(networkDiskEntry);
 
+            await network.init();
+
             // Add this new instance to the global list of networks
             await this.networkService.registerNetwork(network);
         }
