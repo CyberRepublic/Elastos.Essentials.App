@@ -203,7 +203,7 @@ export class RpcProvidersQualityService {
    */
   formatPingTime(pingTime: number): string {
     if (pingTime === -1) {
-      return '--';
+      return 'Unavailable';
     } else if (pingTime < 1000) {
       return `${pingTime}ms`;
     } else {

@@ -292,7 +292,7 @@ export class EditRpcProvidersPage implements OnInit, OnDestroy {
    */
   public formatPingTime(provider: RPCUrlProvider): string {
     const status = this.getProviderStatus(provider);
-    if (!status) return '--';
+    if (!status) return 'Unavailable';
     return this.qualityService.formatPingTime(status.pingTime);
   }
 }

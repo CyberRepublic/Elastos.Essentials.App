@@ -269,7 +269,7 @@ export class EditBuiltinNetworkPage implements OnInit {
    */
   public formatPingTime(provider: RPCUrlProvider): string {
     const status = this.getProviderStatus(provider);
-    if (!status) return '--';
+    if (!status) return 'Unavailable';
     return this.qualityService.formatPingTime(status.pingTime);
   }
 }
