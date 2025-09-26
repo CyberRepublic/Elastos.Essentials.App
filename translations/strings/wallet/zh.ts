@@ -511,6 +511,8 @@ export const zh = {
     'selected-rpc-provider-not-found': '未找到选中的 RPC 提供商',
     'invalid-rpc-url': '无效的 RPC URL 格式',
     'rpc-url-already-exists': 'RPC URL 已存在',
+    'network-visibility': '网络可见性',
+    'network-visibility-description': '在网络选择器中显示此网络',
     builtin: '内置',
     custom: '自定义',
 

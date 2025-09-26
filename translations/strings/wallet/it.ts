@@ -521,6 +521,8 @@ export const it = {
     'selected-rpc-provider-not-found': 'Provider RPC selezionato non trovato',
     'invalid-rpc-url': 'Formato URL RPC non valido',
     'rpc-url-already-exists': 'URL RPC già esistente',
+    'network-visibility': 'Visibilità della rete',
+    'network-visibility-description': 'Mostra questa rete nel selettore di rete',
     builtin: 'Integrato',
     custom: 'Personalizzato',
 
