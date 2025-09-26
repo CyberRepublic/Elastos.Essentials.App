@@ -100,7 +100,11 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
           )
         },
         {
-          name: 'Primary PGP Chain',
+          name: '大陆高防BGP节点',
+          url: 'https://pgpnode.battlechicken.cn'
+        },
+        {
+          name: '全球备用节点',
           url: 'https://sknode.pgachain.org'
         },
         {
