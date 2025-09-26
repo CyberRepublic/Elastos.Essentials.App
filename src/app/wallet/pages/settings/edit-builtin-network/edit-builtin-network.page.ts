@@ -35,6 +35,9 @@ export class EditBuiltinNetworkPage implements OnInit {
   public selectedRpcUrl = '';
   public isNetworkVisible = false;
 
+  // Original values (for change detection)
+  private originalSelectedRpcUrl = '';
+
   // Quality monitoring
   public providersStatus = new Map<string, RpcProviderStatus>();
 
@@ -90,6 +93,7 @@ export class EditBuiltinNetworkPage implements OnInit {
       this.editedName = this.network.getEffectiveName();
       this.allRpcProviders = this.network.getAllRpcProviders();
       this.selectedRpcUrl = this.network.getSelectedRpcProvider().url;
+      this.originalSelectedRpcUrl = this.selectedRpcUrl; // Remember original value for change detection
       this.isNetworkVisible = this.networkService.getNetworkVisible(this.network);
     });
   }
@@ -160,7 +164,7 @@ export class EditBuiltinNetworkPage implements OnInit {
     const currentVisibility = this.networkService.getNetworkVisible(this.network);
 
     const nameChanged = this.editedName.trim() !== defaultName;
-    const selectedRpcUrlChanged = this.selectedRpcUrl.trim() !== currentSelectedRpcUrl;
+    const selectedRpcUrlChanged = this.originalSelectedRpcUrl.trim() !== currentSelectedRpcUrl;
     const visibilityChanged = this.isNetworkVisible !== currentVisibility;
 
     // Get custom RPC providers (those not in the built-in list)
@@ -188,13 +192,7 @@ export class EditBuiltinNetworkPage implements OnInit {
       await this.networkService.setNetworkVisible(this.network, this.isNetworkVisible);
     }
 
-    // If we are editing the current network and RPC URL changed, show a restart prompt
-    if (this.isEditingCurrentNetwork && selectedRpcUrlChanged) {
-      // We need to restart, so the web3 in subwallet can use the new rpc url.
-      void this.globalNav.showRestartPrompt();
-    } else {
-      void this.globalNav.navigateBack();
-    }
+    void this.globalNav.navigateBack();
   }
 
   public hasNameOverride(): boolean {
