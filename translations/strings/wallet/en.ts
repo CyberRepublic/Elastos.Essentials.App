@@ -480,6 +480,7 @@ export const en = {
     'manage-networks-title': 'Manage networks',
     'manage-networks-intro':
       "Select networks that you want to see in networks list. Hide networks that you don't use. You can also add custom ethereum-compatible networks from the plus icon above.",
+    'no-custom-networks': 'No custom networks added yet. Tap the + icon above to add your first custom network.',
 
     /***********************
      * Custom networks Page *

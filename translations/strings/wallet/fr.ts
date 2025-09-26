@@ -484,6 +484,8 @@ export const fr = {
     'manage-networks-title': 'Gestion des réseaux',
     'manage-networks-intro':
       "Sélectionnez les réseaux que vous souhaitez voir dans la liste des réseaux courants. Cachez ceux que vous n'utilisez pas. Vous pouvez aussi ajouter des réseaux personnalisés compatibles Ethereum via l'icône plus ci-dessus.",
+    'no-custom-networks':
+      "Aucun réseau personnalisé ajouté pour le moment. Appuyez sur l'icône + ci-dessus pour ajouter votre premier réseau personnalisé.",
 
     /***********************
      * Custom networks Page *

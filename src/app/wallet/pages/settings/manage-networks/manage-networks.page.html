@@ -54,6 +54,13 @@
                 </ion-col>
                 <ion-ripple-effect></ion-ripple-effect>
             </ion-row>
+
+            <!-- No custom networks message -->
+            <ion-row *ngIf="!customNetworks || customNetworks.length === 0" class="no-networks-row">
+                <ion-col size="12" class="no-networks-message">
+                    {{ 'wallet.no-custom-networks' | translate }}
+                </ion-col>
+            </ion-row>
         </div>
     </ion-grid>
 </ion-content>
