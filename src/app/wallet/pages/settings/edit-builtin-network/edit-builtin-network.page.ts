@@ -101,9 +101,10 @@ export class EditBuiltinNetworkPage implements OnInit {
   ionViewWillEnter() {
     this.titleBar.setTitle(this.translate.instant('wallet.edit-builtin-network-title'));
 
-    // Refresh the selected RPC provider in case it was changed in the edit-rpc-providers page
+    // Refresh the selected RPC provider and RPC providers list in case they were changed in the edit-rpc-providers page
     if (this.network) {
       this.selectedRpcUrl = this.network.getSelectedRpcProvider().url;
+      this.allRpcProviders = this.network.getAllRpcProviders();
     }
 
     // Start quality monitoring

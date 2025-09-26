@@ -433,6 +433,30 @@ export class WalletNetworkService {
   }
 
   /**
+   * Adds a custom RPC provider to a built-in network.
+   */
+  public addCustomRpcUrl(networkKey: string, rpcProvider: RPCUrlProvider): Promise<void> {
+    const customRpcUrls = this.getCustomRpcUrls(networkKey);
+
+    // Check if URL already exists
+    if (customRpcUrls.some(p => p.url === rpcProvider.url)) {
+      return Promise.resolve(); // Already exists, no-op
+    }
+
+    customRpcUrls.push(rpcProvider);
+    return this.setCustomRpcUrls(networkKey, customRpcUrls);
+  }
+
+  /**
+   * Removes a custom RPC provider from a built-in network.
+   */
+  public removeCustomRpcUrl(networkKey: string, rpcUrl: string): Promise<void> {
+    const customRpcUrls = this.getCustomRpcUrls(networkKey);
+    const filteredUrls = customRpcUrls.filter(p => p.url !== rpcUrl);
+    return this.setCustomRpcUrls(networkKey, filteredUrls);
+  }
+
+  /**
    * Sets the selected RPC URL for a built-in network.
    */
   public setSelectedRpcUrl(networkKey: string, selectedRpcUrl: string): Promise<void> {

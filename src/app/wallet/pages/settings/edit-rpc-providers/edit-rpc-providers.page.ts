@@ -165,6 +165,9 @@ export class EditRpcProvidersPage implements OnInit, OnDestroy {
 
     this.allRpcProviders.push(newProvider);
 
+    // Immediately save the new custom RPC provider to persist the change
+    void this.networkService.addCustomRpcUrl(this.network.key, newProvider);
+
     // Restart monitoring with updated provider list
     this.qualityService.startMonitoring(this.allRpcProviders);
   }
@@ -234,16 +237,14 @@ export class EditRpcProvidersPage implements OnInit, OnDestroy {
 
     this.allRpcProviders = this.allRpcProviders.filter(p => p.url !== provider.url);
 
+    // Immediately remove the custom RPC provider to persist the change
+    void this.networkService.removeCustomRpcUrl(this.network.key, provider.url);
+
     // Restart monitoring with updated provider list
     this.qualityService.startMonitoring(this.allRpcProviders);
   }
 
   public saveChanges(): void {
-    // Get custom RPC providers (those not in the built-in list)
-    const customRpcProviders = this.allRpcProviders.filter(
-      provider => !this.network.rpcUrlProviders.some(builtin => builtin.url === provider.url)
-    );
-
     // Check if selected RPC URL is still valid
     const selectedProvider = this.allRpcProviders.find(p => p.url === this.selectedRpcUrl);
     if (!selectedProvider) {
@@ -251,15 +252,8 @@ export class EditRpcProvidersPage implements OnInit, OnDestroy {
       return;
     }
 
-    // Save the override with updated RPC providers
-    const override: BuiltinNetworkOverride = {
-      networkKey: this.network.key,
-      customRpcUrls: customRpcProviders,
-      selectedRpcUrl: this.selectedRpcUrl
-    };
-
-    // Update the network override
-    void this.networkService.setBuiltinNetworkOverride(this.network.key, override);
+    // Save the selected RPC URL
+    void this.networkService.setSelectedRpcUrl(this.network.key, this.selectedRpcUrl);
 
     // Navigate back
     void this.globalNav.navigateBack();
