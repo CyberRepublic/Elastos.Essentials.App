@@ -9,6 +9,7 @@ import { CurrencySelectPage } from './currency-select/currency-select.page';
 import { CustomNetworksPage } from './custom-networks/custom-networks.page';
 import { EditBuiltinNetworkPage } from './edit-builtin-network/edit-builtin-network.page';
 import { EditCustomNetworkPage } from './edit-custom-network/edit-custom-network.page';
+import { EditRpcProvidersPage } from './edit-rpc-providers/edit-rpc-providers.page';
 import { ManageNetworksPage } from './manage-networks/manage-networks.page';
 import { SettingsPage } from './settings.page';
 
@@ -19,7 +20,8 @@ import { SettingsPage } from './settings.page';
     CurrencySelectPage,
     CustomNetworksPage,
     EditCustomNetworkPage,
-    EditBuiltinNetworkPage
+    EditBuiltinNetworkPage,
+    EditRpcProvidersPage
   ],
   imports: [
     SharedComponentsModule,
@@ -33,7 +35,8 @@ import { SettingsPage } from './settings.page';
       { path: 'manage-networks', component: ManageNetworksPage },
       { path: 'custom-networks', component: CustomNetworksPage },
       { path: 'edit-custom-network', component: EditCustomNetworkPage },
-      { path: 'edit-builtin-network', component: EditBuiltinNetworkPage }
+      { path: 'edit-builtin-network', component: EditBuiltinNetworkPage },
+      { path: 'edit-rpc-providers', component: EditRpcProvidersPage }
     ])
   ],
   exports: [RouterModule],

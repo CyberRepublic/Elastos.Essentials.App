@@ -96,9 +96,7 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
 
   public getRPCUrl(): string {
     // Use overridden value if available, otherwise use the default implementation
-    return (
-      WalletNetworkService.instance?.getOverridenNetworkRpcUrl(this) ?? this.getAPIUrlOfType(NetworkAPIURLType.RPC)
-    );
+    return WalletNetworkService.instance?.getOverridenNetworkRpcUrl(this) ?? this.getSelectedRpcUrl();
   }
 
   /**
@@ -119,15 +117,57 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
    * Only call this on built-in networks.
    *
    * - if existing, this is the url selected by the user and saved to network overrides by the wallet service.
-   * - if no url was marked selected, the first provider of the hardcoded lsit is returned.
+   * - if no url was marked selected, the first provider of the hardcoded list is returned.
    */
   public getSelectedRpcProvider(): RPCUrlProvider {
     if (this.isCustom()) {
       throw new Error('getSelectedRpcProvider() can only be called on built-in networks.');
     }
 
-    // WalletNetworkService.instance.getSelectedRpcUrl(this) ?? this.rpcUrlProviders[0].url;
-    return;
+    // Check if there's a selected RPC URL from the wallet service
+    const selectedRpcUrl = WalletNetworkService.instance?.getSelectedRpcUrl(this.key);
+    if (selectedRpcUrl) {
+      // First check built-in providers
+      const builtinProvider = this.rpcUrlProviders.find(provider => provider.url === selectedRpcUrl);
+      if (builtinProvider) {
+        return builtinProvider;
+      }
+
+      // Then check custom providers
+      const customProviders = WalletNetworkService.instance?.getCustomRpcUrls(this.key) || [];
+      const customProvider = customProviders.find(provider => provider.url === selectedRpcUrl);
+      if (customProvider) {
+        return customProvider;
+      }
+    }
+
+    // No selection or selected URL not found, return the first built-in provider
+    return this.rpcUrlProviders[0];
+  }
+
+  /**
+   * Returns all available RPC providers for this network (built-in + custom).
+   * Only call this on built-in networks.
+   */
+  public getAllRpcProviders(): RPCUrlProvider[] {
+    if (this.isCustom()) {
+      throw new Error('getAllRpcProviders() can only be called on built-in networks.');
+    }
+
+    const customProviders = WalletNetworkService.instance?.getCustomRpcUrls(this.key) || [];
+    return [...this.rpcUrlProviders, ...customProviders];
+  }
+
+  /**
+   * Sets the selected RPC URL for this network.
+   * Only call this on built-in networks.
+   */
+  public async setSelectedRpcUrl(rpcUrl: string): Promise<void> {
+    if (this.isCustom()) {
+      throw new Error('setSelectedRpcUrl() can only be called on built-in networks.');
+    }
+
+    await WalletNetworkService.instance?.setSelectedRpcUrl(this.key, rpcUrl);
   }
 
   /**

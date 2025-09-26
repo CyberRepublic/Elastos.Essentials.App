@@ -508,6 +508,26 @@ export const fr = {
       "Le réseau actif ne peut pas être supprimé. Veuillez d'abord choisir un autre réseau.",
     'delete-network-prompt-title': 'Supprimer le réseau ?',
     'delete-network-prompt-text': 'Voulez-vous vraiment supprimer ce réseau ?',
+    'network-rpc-provider': 'Fournisseur RPC',
+    'edit-rpc-providers-title': 'Modifier les fournisseurs RPC',
+    'rpc-providers-subtitle': 'Gérer les fournisseurs RPC pour ce réseau',
+    'add-rpc-provider': 'Ajouter un fournisseur RPC',
+    'rpc-provider-name': 'Nom du fournisseur',
+    'rpc-provider-name-placeholder': 'Entrez le nom du fournisseur',
+    'rpc-provider-url': 'URL RPC',
+    'rpc-provider-url-placeholder': "Entrez l'URL RPC",
+    'remove-rpc-provider': 'Supprimer le fournisseur RPC',
+    'confirm-remove-provider': 'Êtes-vous sûr de vouloir supprimer "{{name}}" ?',
+    'cannot-remove-builtin-provider': 'Impossible de supprimer les fournisseurs RPC intégrés',
+    'cannot-remove-selected-provider': 'Impossible de supprimer le fournisseur RPC actuellement sélectionné',
+    'cannot-remove-original-selected-provider':
+      "Impossible de supprimer le fournisseur qui était à l'origine sélectionné",
+    'cannot-remove-last-provider': 'Impossible de supprimer le dernier fournisseur RPC',
+    'selected-rpc-provider-not-found': 'Fournisseur RPC sélectionné introuvable',
+    'invalid-rpc-url': "Format d'URL RPC invalide",
+    'rpc-url-already-exists': "L'URL RPC existe déjà",
+    builtin: 'Intégré',
+    custom: 'Personnalisé',
 
     /***********************
      * Asset Overview Page *

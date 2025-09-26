@@ -8,7 +8,10 @@ import { GlobalNavService } from 'src/app/services/global.nav.service';
 import { GlobalPopupService } from 'src/app/services/global.popup.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 import type { AnyNetwork } from 'src/app/wallet/model/networks/network';
+import type { RPCUrlProvider } from 'src/app/wallet/model/rpc-url-provider';
+import { Native } from 'src/app/wallet/services/native.service';
 import { BuiltinNetworkOverride, WalletNetworkService } from 'src/app/wallet/services/network.service';
+import { RpcProvidersQualityService, RpcProviderStatus } from 'src/app/wallet/services/rpc-providers-quality.service';
 
 export type EditBuiltinNetworkRoutingParams = {
   networkKey: string; // Key of the builtin network to edit
@@ -28,7 +31,12 @@ export class EditBuiltinNetworkPage implements OnInit {
 
   // Edited values (bound to UI)
   public editedName = '';
-  public editedRpcUrl = '';
+  public allRpcProviders: RPCUrlProvider[] = [];
+  public selectedRpcUrl = '';
+  public isNetworkVisible = false;
+
+  // Quality monitoring
+  public providersStatus = new Map<string, RpcProviderStatus>();
 
   private isEditingCurrentNetwork = false;
 
@@ -38,10 +46,12 @@ export class EditBuiltinNetworkPage implements OnInit {
     public networkService: WalletNetworkService,
     private router: Router,
     private native: GlobalNativeService,
+    private navNative: Native,
     private globalNav: GlobalNavService,
     private http: HttpClient,
     public globalPopupService: GlobalPopupService,
-    private zone: NgZone
+    private zone: NgZone,
+    private qualityService: RpcProvidersQualityService
   ) {}
 
   ngOnInit() {
@@ -49,6 +59,8 @@ export class EditBuiltinNetworkPage implements OnInit {
   }
 
   ngOnDestroy() {
+    // Stop quality monitoring when component is destroyed
+    this.qualityService.stopMonitoring();
     void this.native.hideLoading(); // Maybe RPC request timeout
   }
 
@@ -76,12 +88,29 @@ export class EditBuiltinNetworkPage implements OnInit {
 
       // Initialize edited values with current effective values
       this.editedName = this.network.getEffectiveName();
-      this.editedRpcUrl = this.network.getRPCUrl();
+      this.allRpcProviders = this.network.getAllRpcProviders();
+      this.selectedRpcUrl = this.network.getSelectedRpcProvider().url;
+      this.isNetworkVisible = this.networkService.getNetworkVisible(this.network);
     });
   }
 
   ionViewWillEnter() {
     this.titleBar.setTitle(this.translate.instant('wallet.edit-builtin-network-title'));
+
+    // Refresh the selected RPC provider in case it was changed in the edit-rpc-providers page
+    if (this.network) {
+      this.selectedRpcUrl = this.network.getSelectedRpcProvider().url;
+    }
+
+    // Start quality monitoring
+    this.qualityService.startMonitoring(this.allRpcProviders);
+
+    // Subscribe to status updates
+    this.qualityService.status$.subscribe(status => {
+      this.zone.run(() => {
+        this.providersStatus = status;
+      });
+    });
   }
 
   cancel() {
@@ -89,11 +118,11 @@ export class EditBuiltinNetworkPage implements OnInit {
   }
 
   public canSave(): boolean {
-    return this.editedName.trim() !== '' && this.editedRpcUrl.trim() !== '';
+    return this.editedName.trim() !== '' && this.selectedRpcUrl.trim() !== '';
   }
 
   public async saveChanges(): Promise<void> {
-    // First, check that the RPC URL is accessible
+    // First, check that the selected RPC URL is accessible
     let rpcUrlIsReachable = false;
     try {
       await this.native.showLoading('wallet.checking-rpc-url');
@@ -109,7 +138,7 @@ export class EditBuiltinNetworkPage implements OnInit {
       // So it is better to call eth_blockNumber.
       let testCallResult = await this.http
         .post(
-          this.editedRpcUrl,
+          this.selectedRpcUrl,
           JSON.stringify({ method: 'eth_blockNumber', jsonrpc: '2.0', id: 'test01' }),
           httpOptions
         )
@@ -127,20 +156,26 @@ export class EditBuiltinNetworkPage implements OnInit {
 
     // Check if values have changed from defaults
     const defaultName = this.network.getDefaultName();
-    const defaultRpcUrl = this.network.getDefaultRPCUrl();
+    const currentSelectedRpcUrl = this.network.getSelectedRpcProvider().url;
+    const currentVisibility = this.networkService.getNetworkVisible(this.network);
 
     const nameChanged = this.editedName.trim() !== defaultName;
-    const rpcUrlChanged = this.editedRpcUrl.trim() !== defaultRpcUrl;
+    const selectedRpcUrlChanged = this.selectedRpcUrl.trim() !== currentSelectedRpcUrl;
+    const visibilityChanged = this.isNetworkVisible !== currentVisibility;
 
-    // Check if rpc url has changed from current rpc url
-    const rpcUrlChangedFromCurrent = this.editedRpcUrl.trim() !== this.network.getRPCUrl();
+    // Get custom RPC providers (those not in the built-in list)
+    const customRpcProviders = this.allRpcProviders.filter(
+      provider => !this.network.rpcUrlProviders.some(builtin => builtin.url === provider.url)
+    );
 
-    if (nameChanged || rpcUrlChanged) {
+    // Save changes
+    if (nameChanged || selectedRpcUrlChanged || customRpcProviders.length > 0) {
       // Save the override
       const override: BuiltinNetworkOverride = {
         networkKey: this.network.key,
         ...(nameChanged && { name: this.editedName.trim() }),
-        ...(rpcUrlChanged && { rpcUrl: this.editedRpcUrl.trim() })
+        ...(customRpcProviders.length > 0 && { customRpcUrls: customRpcProviders }),
+        ...(selectedRpcUrlChanged && { selectedRpcUrl: this.selectedRpcUrl.trim() })
       };
       await this.networkService.setBuiltinNetworkOverride(this.network.key, override);
     } else {
@@ -148,8 +183,13 @@ export class EditBuiltinNetworkPage implements OnInit {
       await this.networkService.removeBuiltinNetworkOverride(this.network.key);
     }
 
-    // If we are editing the current network, show a restart prompt, otherwise navigate back
-    if (this.isEditingCurrentNetwork && rpcUrlChangedFromCurrent) {
+    // Save visibility setting
+    if (visibilityChanged) {
+      await this.networkService.setNetworkVisible(this.network, this.isNetworkVisible);
+    }
+
+    // If we are editing the current network and RPC URL changed, show a restart prompt
+    if (this.isEditingCurrentNetwork && selectedRpcUrlChanged) {
       // We need to restart, so the web3 in subwallet can use the new rpc url.
       void this.globalNav.showRestartPrompt();
     } else {
@@ -161,20 +201,14 @@ export class EditBuiltinNetworkPage implements OnInit {
     return this.network && this.editedName.trim() !== this.network.getEffectiveName();
   }
 
-  public hasRpcUrlOverride(): boolean {
-    return this.network && this.editedRpcUrl.trim() !== this.network.getRPCUrl();
-  }
-
   public resetName(): void {
     if (this.network) {
       this.editedName = this.network.getDefaultName();
     }
   }
 
-  public resetRpcUrl(): void {
-    if (this.network) {
-      this.editedRpcUrl = this.network.getDefaultRPCUrl();
-    }
+  public isBuiltinProvider(provider: RPCUrlProvider): boolean {
+    return this.network.rpcUrlProviders.some(builtin => builtin.url === provider.url);
   }
 
   public getChainId(): string {
@@ -186,5 +220,56 @@ export class EditBuiltinNetworkPage implements OnInit {
       return (this.network as any).getMainChainID()?.toString() || 'N/A';
     }
     return 'N/A';
+  }
+
+  public getSelectedRpcProvider(): RPCUrlProvider | null {
+    if (!this.network || !this.selectedRpcUrl) {
+      return null;
+    }
+    return this.network.getAllRpcProviders().find(provider => provider.url === this.selectedRpcUrl) || null;
+  }
+
+  public editRpcProviders(): void {
+    this.navNative.go('/wallet/settings/edit-rpc-providers', {
+      networkKey: this.network.key
+    });
+  }
+
+  public onVisibilityChange(event: CustomEvent): void {
+    this.isNetworkVisible = event.detail.checked;
+  }
+
+  /**
+   * Get quality status for a provider
+   */
+  public getProviderStatus(provider: RPCUrlProvider): RpcProviderStatus | undefined {
+    return this.providersStatus.get(provider.url);
+  }
+
+  /**
+   * Get status icon for a provider
+   */
+  public getStatusIcon(provider: RPCUrlProvider): string {
+    const status = this.getProviderStatus(provider);
+    if (!status) return 'help-circle';
+    return this.qualityService.getStatusIcon(status.status);
+  }
+
+  /**
+   * Get status color class for a provider
+   */
+  public getStatusColorClass(provider: RPCUrlProvider): string {
+    const status = this.getProviderStatus(provider);
+    if (!status) return 'status-unknown';
+    return this.qualityService.getStatusColorClass(status.status);
+  }
+
+  /**
+   * Format ping time for display
+   */
+  public formatPingTime(provider: RPCUrlProvider): string {
+    const status = this.getProviderStatus(provider);
+    if (!status) return '--';
+    return this.qualityService.formatPingTime(status.pingTime);
   }
 }

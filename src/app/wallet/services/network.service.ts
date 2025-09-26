@@ -34,6 +34,7 @@ import type { MasterWallet } from '../model/masterwallets/masterwallet';
 import { BTCNetworkBase } from '../model/networks/btc/network/btc.base.network';
 import type { EVMNetwork } from '../model/networks/evms/evm.network';
 import type { AnyNetwork } from '../model/networks/network';
+import type { RPCUrlProvider } from '../model/rpc-url-provider';
 import { Native } from './native.service';
 import { LocalStorage } from './storage.service';
 
@@ -42,7 +43,8 @@ export type PriorityNetworkChangeCallback = (newNetwork) => Promise<void>;
 export type BuiltinNetworkOverride = {
   networkKey: string;
   name?: string; // Optional override for network name
-  rpcUrl?: string; // Optional override for RPC URL
+  customRpcUrls?: RPCUrlProvider[]; // User's custom RPC URLs (in addition to built-in ones)
+  selectedRpcUrl?: string; // Selected RPC URL (can be from built-in or custom)
 };
 
 type RawLastUsedNetworks = { [networkKey: string]: number };
@@ -353,11 +355,45 @@ export class WalletNetworkService {
   }
 
   /**
-   * Returns the overriden RPC URL, if any.
+   * Returns the selected RPC URL from network overrides, if any.
    */
   public getOverridenNetworkRpcUrl(network: AnyNetwork): string {
     const override = this.getBuiltinNetworkOverride(network.key);
-    return override?.rpcUrl;
+    return override?.selectedRpcUrl;
+  }
+
+  /**
+   * Returns the custom RPC URLs for a built-in network.
+   */
+  public getCustomRpcUrls(networkKey: string): RPCUrlProvider[] {
+    const override = this.getBuiltinNetworkOverride(networkKey);
+    return override?.customRpcUrls || [];
+  }
+
+  /**
+   * Sets the custom RPC URLs for a built-in network.
+   */
+  public setCustomRpcUrls(networkKey: string, customRpcUrls: RPCUrlProvider[]): Promise<void> {
+    const override = this.getBuiltinNetworkOverride(networkKey) || { networkKey };
+    override.customRpcUrls = customRpcUrls;
+    return this.setBuiltinNetworkOverride(networkKey, override);
+  }
+
+  /**
+   * Sets the selected RPC URL for a built-in network.
+   */
+  public setSelectedRpcUrl(networkKey: string, selectedRpcUrl: string): Promise<void> {
+    const override = this.getBuiltinNetworkOverride(networkKey) || { networkKey };
+    override.selectedRpcUrl = selectedRpcUrl;
+    return this.setBuiltinNetworkOverride(networkKey, override);
+  }
+
+  /**
+   * Gets the selected RPC URL for a built-in network, or null if none selected.
+   */
+  public getSelectedRpcUrl(networkKey: string): string | null {
+    const override = this.getBuiltinNetworkOverride(networkKey);
+    return override?.selectedRpcUrl || null;
   }
 
   /**

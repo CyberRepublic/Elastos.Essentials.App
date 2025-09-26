@@ -36,7 +36,7 @@ export abstract class ElastosEVMNetwork<WalletNetworkOptionsType extends WalletN
       'ELA',
       networkTemplate,
       chainID,
-      [],
+      [], // builtInCoins
       rpcUrlProviders,
       earnProviders,
       swapProviders,
