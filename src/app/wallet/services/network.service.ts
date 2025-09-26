@@ -167,10 +167,40 @@ export class WalletNetworkService {
     let networks = this.networks.filter(n => n.networkTemplate === networkTemplate);
 
     if (masterWallet) {
-      return networks.filter(n => masterWallet.supportsNetwork(n));
-    } else {
-      return networks;
+      networks = networks.filter(n => masterWallet.supportsNetwork(n));
     }
+
+    // Define hardcoded preferred network keys that should appear first
+    const preferredNetworkKeys = [
+      'elastos',
+      'elastoseco',
+      'btc',
+      'bsc',
+      'ethereum',
+      'elastossmartchain',
+      'elastosidchain'
+    ];
+
+    // Separate preferred networks (maintaining hardcoded order) and remaining networks
+    const preferredNetworks: AnyNetwork[] = [];
+    const remainingNetworks: AnyNetwork[] = [];
+
+    networks.forEach(network => {
+      const preferredIndex = preferredNetworkKeys.indexOf(network.key);
+      if (preferredIndex >= 0) {
+        preferredNetworks[preferredIndex] = network;
+      } else {
+        remainingNetworks.push(network);
+      }
+    });
+
+    // Remove undefined entries from preferred networks array (in case some preferred networks don't exist)
+    const filteredPreferredNetworks = preferredNetworks.filter(n => n !== undefined);
+
+    // Sort remaining networks alphabetically
+    remainingNetworks.sort((a, b) => a.getEffectiveName().localeCompare(b.getEffectiveName()));
+
+    return [...filteredPreferredNetworks, ...remainingNetworks];
   }
 
   /**

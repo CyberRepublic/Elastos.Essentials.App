@@ -22,7 +22,7 @@
 
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import moment from 'moment';
 import { MenuSheetMenu } from 'src/app/components/menu-sheet/menu-sheet.component';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
