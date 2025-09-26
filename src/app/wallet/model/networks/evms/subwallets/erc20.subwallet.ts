@@ -1,4 +1,4 @@
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import { Subject } from 'rxjs';
 import { GlobalRedPacketServiceAddresses } from 'src/app/config/globalconfig';
 import { lazyWeb3Import } from 'src/app/helpers/import.helper';
@@ -6,10 +6,7 @@ import { runDelayed } from 'src/app/helpers/sleep.helper';
 import { Logger } from 'src/app/logger';
 import { Util } from 'src/app/model/util';
 import { GlobalEthereumRPCService } from 'src/app/services/global.ethereum.service';
-import { GlobalStorageService } from 'src/app/services/global.storage.service';
 import { GlobalTranslationService } from 'src/app/services/global.translation.service';
-import { DIDSessionsStore } from 'src/app/services/stores/didsessions.store';
-import { NetworkTemplateStore } from 'src/app/services/stores/networktemplate.store';
 import { BridgeService } from 'src/app/wallet/services/evm/bridge.service';
 import { EarnService } from 'src/app/wallet/services/evm/earn.service';
 import { SwapService } from 'src/app/wallet/services/evm/swap.service';
@@ -42,9 +39,6 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
   private network: EVMNetwork;
   /** Coin related to this wallet */
   public coin: ERC20Coin;
-  /** Web3 variables to call smart contracts */
-  protected web3: Web3;
-  protected highPriorityWeb3: Web3;
   private erc20ABI: any;
 
   private tokenAddress = '';
@@ -88,7 +82,6 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
   public constructor(
     public networkWallet: AnyNetworkWallet,
     id: CoinID,
-    private rpcApiUrl: string,
     protected displayableERC20TokenInfo: string // Ex: "HRC20 Token"
   ) {
     super(networkWallet, id, CoinType.ERC20);
@@ -104,19 +97,23 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
 
     await super.initialize();
 
-    // Get Web3 and the ERC20 contract ready
-    const EssentialsWeb3Provider = (await import('src/app/model/essentialsweb3provider')).EssentialsWeb3Provider;
-
-    const Web3 = await lazyWeb3Import();
-    this.web3 = new Web3(new EssentialsWeb3Provider(this.rpcApiUrl, this.network.key, false));
-    this.highPriorityWeb3 = new Web3(new EssentialsWeb3Provider(this.rpcApiUrl, this.network.key, true));
-
     // Standard ERC20 contract ABI
     this.erc20ABI = require('src/assets/wallet/ethereum/StandardErc20ABI.json');
 
     this.redPacketServerAddress = GlobalRedPacketServiceAddresses[this.spvConfigEVMCode];
 
     this.txInfoParser = new ETHTransactionInfoParser(this.networkWallet.network);
+  }
+
+  /**
+   * Creates a new Web3 instance with fresh RPC URL. We recreate it each time to ensure
+   * we always use the latest selected RPC URL instead of a cached one.
+   */
+  private async createWeb3(highPriority = false): Promise<Web3> {
+    const EssentialsWeb3Provider = (await import('src/app/model/essentialsweb3provider')).EssentialsWeb3Provider;
+    const Web3 = await lazyWeb3Import();
+    const rpcUrl = this.networkWallet.network.getSelectedRpcUrl();
+    return new Web3(new EssentialsWeb3Provider(rpcUrl, this.network.key, highPriority));
   }
 
   public async startBackgroundUpdates(): Promise<void> {
@@ -206,46 +203,6 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
     return this.networkWallet
       .getTransactionDiscoveryProvider()
       .transactionsListChanged(this.getUniqueIdentifierOnNetwork());
-  }
-
-  /**
-   * Tries to retrieve the token decimals from local cache if we saved this earlier.
-   * Otherwise, fetches it from chain.
-   */
-  private async fetchTokenDecimals(): Promise<void> {
-    // Check cache
-    let tokenCacheKey = this.masterWallet.id + this.coin.getContractAddress();
-    this.tokenDecimals = await GlobalStorageService.instance.getSetting(
-      DIDSessionsStore.signedInDIDString,
-      NetworkTemplateStore.networkTemplate,
-      'wallet',
-      tokenCacheKey,
-      null
-    );
-
-    if (this.tokenDecimals === null) {
-      try {
-        const tokenAccountAddress = this.getTokenAccountAddress();
-        const contractAddress = this.coin.getContractAddress();
-        const erc20Contract = new this.web3.eth.Contract(this.erc20ABI, contractAddress, { from: tokenAccountAddress });
-        this.tokenDecimals = await erc20Contract.methods.decimals().call();
-        await GlobalStorageService.instance.setSetting(
-          DIDSessionsStore.signedInDIDString,
-          NetworkTemplateStore.networkTemplate,
-          'wallet',
-          tokenCacheKey,
-          this.tokenDecimals
-        );
-
-        Logger.log('wallet', 'Got ERC20 token decimals', this.id, 'Decimals: ', this.tokenDecimals, '. Saving to disk');
-      } catch (error) {
-        Logger.log('wallet', 'ERC20 Token (', this.id, ') fetchTokenDecimals error:', error);
-      }
-    } else {
-      //Logger.log('wallet', "Got ERC20 token decimals from cache", this.id, "Decimals: ", this.tokenDecimals);
-    }
-
-    this.tokenAmountMulipleTimes = new BigNumber(10).pow(this.tokenDecimals);
   }
 
   public getDisplayBalance(): BigNumber {
@@ -356,7 +313,8 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
     try {
       const tokenAccountAddress = this.getTokenAccountAddress();
       const contractAddress = this.coin.getContractAddress();
-      const erc20Contract = new this.web3.eth.Contract(this.erc20ABI, contractAddress, { from: tokenAccountAddress });
+      const web3 = await this.createWeb3(); // Create fresh web3 instance to get latest RPC URL
+      const erc20Contract = new web3.eth.Contract(this.erc20ABI, contractAddress, { from: tokenAccountAddress });
 
       // TODO: what's the integer type returned by web3? Are we sure we can directly convert it to BigNumber like this? To be tested
       const rawBalance = await erc20Contract.methods.balanceOf(tokenAccountAddress).call();
@@ -414,7 +372,7 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
 
   public async getTransactionDetails(txid: string): Promise<EthTransaction> {
     let result = await GlobalEthereumRPCService.instance.eth_getTransactionByHash(
-      this.rpcApiUrl,
+      this.networkWallet.network.getSelectedRpcUrl(),
       txid,
       this.networkWallet.network.key
     );
@@ -589,11 +547,12 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
   public async estimateTransferTransactionGas() {
     const tokenAccountAddress = this.getTokenAccountAddress();
     const contractAddress = this.coin.getContractAddress();
-    const erc20Contract = new this.highPriorityWeb3.eth.Contract(this.erc20ABI, contractAddress, {
+    const highPriorityWeb3 = await this.createWeb3(true); // Create fresh high-priority web3 instance to get latest RPC URL
+    const erc20Contract = new highPriorityWeb3.eth.Contract(this.erc20ABI, contractAddress, {
       from: tokenAccountAddress
     });
     let toAddress = '0x298163B65453Dcd05418A9a5333E4605eDA6D998'; // Fake address, doesn't impact the transfer cost
-    const method = erc20Contract.methods.transfer(toAddress, this.highPriorityWeb3.utils.toBN(1));
+    const method = erc20Contract.methods.transfer(toAddress, highPriorityWeb3.utils.toBN(1));
 
     let gasLimit = 100000;
     try {
@@ -619,12 +578,13 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
 
     const tokenAccountAddress = this.getTokenAccountAddress();
     const contractAddress = this.coin.getContractAddress();
-    const erc20Contract = new this.highPriorityWeb3.eth.Contract(this.erc20ABI, contractAddress, {
+    const highPriorityWeb3 = await this.createWeb3(true); // Create fresh high-priority web3 instance to get latest RPC URL
+    const erc20Contract = new highPriorityWeb3.eth.Contract(this.erc20ABI, contractAddress, {
       from: tokenAccountAddress
     });
     let gasPrice = gasPriceArg;
     if (gasPrice == null) {
-      gasPrice = await this.highPriorityWeb3.eth.getGasPrice();
+      gasPrice = await highPriorityWeb3.eth.getGasPrice();
     }
 
     Logger.log('wallet', 'createPaymentTransaction toAddress:', toAddress, ' amount:', amount, 'gasPrice:', gasPrice);
@@ -638,7 +598,7 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
     }
 
     // Incompatibility between our bignumber lib and web3's BN lib. So we must convert by using intermediate strings
-    const web3BigNumber = this.highPriorityWeb3.utils.toBN(amountWithDecimals.toString(10));
+    const web3BigNumber = highPriorityWeb3.utils.toBN(amountWithDecimals.toString(10));
     const method = erc20Contract.methods.transfer(toAddress, web3BigNumber);
 
     let gasLimit = gasLimitArg;
@@ -721,7 +681,8 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
    * Returns the current gas price on chain.
    */
   public async getGasPrice(): Promise<string> {
-    const gasPrice = await this.highPriorityWeb3.eth.getGasPrice();
+    const highPriorityWeb3 = await this.createWeb3(true); // Create fresh high-priority web3 instance to get latest RPC URL
+    const gasPrice = await highPriorityWeb3.eth.getGasPrice();
     // Logger.log('wallet', "GAS PRICE: ", gasPrice)
     return gasPrice;
   }
@@ -729,7 +690,11 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
   private getNonce() {
     const address = this.getTokenAccountAddress();
     try {
-      return GlobalEthereumRPCService.instance.getETHSCNonce(this.rpcApiUrl, address, this.networkWallet.network.key);
+      return GlobalEthereumRPCService.instance.getETHSCNonce(
+        this.networkWallet.network.getSelectedRpcUrl(),
+        address,
+        this.networkWallet.network.key
+      );
     } catch (err) {
       Logger.error('wallet', 'getNonce failed, ', this.id, ' error:', err);
     }

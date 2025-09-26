@@ -9,7 +9,7 @@ import { ERC20SubWallet } from '../../../../evms/subwallets/erc20.subwallet';
 export class ElastosEscERC20SubWallet extends ERC20SubWallet {
   constructor(networkWallet: AnyNetworkWallet, coinID: CoinID) {
     let rpcApiUrl = GlobalElastosAPIService.instance.getApiUrlForChainCode(StandardCoinName.ETHSC);
-    super(networkWallet, coinID, rpcApiUrl, 'Elastos-ERC20 token');
+    super(networkWallet, coinID, 'Elastos-ERC20 token');
 
     this.spvConfigEVMCode = StandardCoinName.ETHSC;
   }

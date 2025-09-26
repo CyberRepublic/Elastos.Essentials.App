@@ -1,4 +1,4 @@
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import { GlobalRedPacketServiceAddresses } from 'src/app/config/globalconfig';
 import { Logger } from 'src/app/logger';
 import { Util } from 'src/app/model/util';

@@ -342,13 +342,22 @@ export class SendBitcoinPage implements OnInit {
   private async computeBTCFeeRate() {
     try {
       // BTC/kB to sat/vB
-      let fast = await GlobalBTCRPCService.instance.estimatesmartfee(this.btcSubWallet.rpcApiUrl, BTCFeeSpeed.FAST);
+      let fast = await GlobalBTCRPCService.instance.estimatesmartfee(
+        this.btcSubWallet.networkWallet.network.getSelectedRpcUrl(),
+        BTCFeeSpeed.FAST
+      );
       this.feeSpeedsInSatPerVB[BTCFeeSpeed.FAST] = btcToSats(fast).dividedBy(1000).toNumber();
 
-      let avg = await GlobalBTCRPCService.instance.estimatesmartfee(this.btcSubWallet.rpcApiUrl, BTCFeeSpeed.AVERAGE);
+      let avg = await GlobalBTCRPCService.instance.estimatesmartfee(
+        this.btcSubWallet.networkWallet.network.getSelectedRpcUrl(),
+        BTCFeeSpeed.AVERAGE
+      );
       this.feeSpeedsInSatPerVB[BTCFeeSpeed.AVERAGE] = btcToSats(avg).dividedBy(1000).toNumber();
 
-      let slow = await GlobalBTCRPCService.instance.estimatesmartfee(this.btcSubWallet.rpcApiUrl, BTCFeeSpeed.SLOW);
+      let slow = await GlobalBTCRPCService.instance.estimatesmartfee(
+        this.btcSubWallet.networkWallet.network.getSelectedRpcUrl(),
+        BTCFeeSpeed.SLOW
+      );
       this.feeSpeedsInSatPerVB[BTCFeeSpeed.SLOW] = btcToSats(slow).dividedBy(1000).toNumber();
     } catch (e) {
       Logger.warn('wallet', 'computeBTCFeeRate() error:', e);

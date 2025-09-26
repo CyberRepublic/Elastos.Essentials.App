@@ -271,7 +271,7 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
     coinID: CoinID,
     startBackgroundUpdates = true
   ): Promise<TRC20SubWallet> {
-    let subWallet = new TRC20SubWallet(networkWallet, coinID, networkWallet.network.getRPCUrl());
+    let subWallet = new TRC20SubWallet(networkWallet, coinID);
     await subWallet.initialize();
 
     if (startBackgroundUpdates) void subWallet.startBackgroundUpdates();

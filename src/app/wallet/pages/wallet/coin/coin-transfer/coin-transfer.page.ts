@@ -1398,17 +1398,17 @@ export class CoinTransferPage implements OnInit, OnDestroy {
   private async getAllBTCFeerate() {
     try {
       let fast = await GlobalBTCRPCService.instance.estimatesmartfee(
-        (<BTCSubWallet>this.fromSubWallet).rpcApiUrl,
+        (<BTCSubWallet>this.fromSubWallet).networkWallet.network.getSelectedRpcUrl(),
         BTCFeeSpeed.FAST
       );
       this.btcFeerates[BTCFeeSpeed.FAST] = Util.accMul(fast, Config.SATOSHI) / 1000;
       let avg = await GlobalBTCRPCService.instance.estimatesmartfee(
-        (<BTCSubWallet>this.fromSubWallet).rpcApiUrl,
+        (<BTCSubWallet>this.fromSubWallet).networkWallet.network.getSelectedRpcUrl(),
         BTCFeeSpeed.AVERAGE
       );
       this.btcFeerates[BTCFeeSpeed.AVERAGE] = Util.accMul(avg, Config.SATOSHI) / 1000;
       let slow = await GlobalBTCRPCService.instance.estimatesmartfee(
-        (<BTCSubWallet>this.fromSubWallet).rpcApiUrl,
+        (<BTCSubWallet>this.fromSubWallet).networkWallet.network.getSelectedRpcUrl(),
         BTCFeeSpeed.SLOW
       );
       this.btcFeerates[BTCFeeSpeed.SLOW] = Util.accMul(slow, Config.SATOSHI) / 1000;
