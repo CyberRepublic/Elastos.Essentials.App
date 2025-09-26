@@ -14,6 +14,14 @@ export class BTCMainNetNetwork extends BTCNetworkBase {
         {
           name: 'BTC RPC',
           url: 'https://btc.nownodes.io'
+        },
+        {
+          name: 'PublicNode',
+          url: 'https://bitcoin-rpc.publicnode.com'
+        },
+        {
+          name: 'BlastAPI',
+          url: 'https://bitcoin-mainnet.public.blastapi.io'
         }
       ],
       [],

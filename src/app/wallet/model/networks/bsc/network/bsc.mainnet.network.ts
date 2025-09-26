@@ -30,6 +30,26 @@ export class BSCMainNetNetwork extends BSCBaseNetwork {
         {
           name: 'BSC RPC',
           url: 'https://bsc-rpc.publicnode.com'
+        },
+        {
+          name: 'Defibit',
+          url: 'https://bsc-dataseed3.defibit.io'
+        },
+        {
+          name: 'Lamarpc',
+          url: 'https://binance.llamarpc.com'
+        },
+        {
+          name: 'Binance',
+          url: 'https://bsc-dataseed.binance.org'
+        },
+        {
+          name: 'Defibit',
+          url: 'https://bsc-dataseed1.defibit.io'
+        },
+        {
+          name: 'Defibit',
+          url: 'https://bsc-dataseed2.defibit.io'
         }
       ],
       [bscMainnetElkEarnProvider],
