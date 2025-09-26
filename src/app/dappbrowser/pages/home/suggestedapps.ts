@@ -39,7 +39,7 @@ export const suggestedDApps = (darkMode: boolean, lightweightMode = false): DApp
   {
     icon: '/assets/browser/dapps/ela.svg',
     title: 'PGP Explorer',
-    description: 'Elastos ECO blockchain explorer - View Elastos ECO stats',
+    description: '',
     url: 'https://eco.elastos.io/',
     useExternalBrowser: false,
     walletConnectSupported: false,
