@@ -348,10 +348,33 @@ export class WalletNetworkService {
   }
 
   public getNetworkVisible(network: AnyNetwork): boolean {
-    // By default, if no saved info about a network visibility, we consider the network visible
-    if (!(network.key in this.networkVisibilities)) return true;
+    // Default networks that should be visible to new users
+    const defaultVisibleNetworks = [
+      'elastos',
+      'elastoseeco',
+      'elastossmartchain',
+      'elastosidchain',
+      'ethereum',
+      'bsc',
+      'tron',
+      'btc',
+      'polygon',
+      'arbitrum',
+      'avalanchecchain'
+    ];
 
-    return this.networkVisibilities[network.key];
+    // If user has explicitly set visibility, use that preference
+    if (network.key in this.networkVisibilities) {
+      return this.networkVisibilities[network.key];
+    }
+
+    // Otherwise, check if it's in the default visible list
+    if (defaultVisibleNetworks.includes(network.key)) {
+      return true;
+    }
+
+    // If not in visibilities and not in defaults, hide by default
+    return false;
   }
 
   public setNetworkVisible(network: AnyNetwork, visible: boolean): Promise<void> {
