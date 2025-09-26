@@ -351,7 +351,7 @@ export class WalletNetworkService {
     // Default networks that should be visible to new users
     const defaultVisibleNetworks = [
       'elastos',
-      'elastoseeco',
+      'elastoseco',
       'elastossmartchain',
       'elastosidchain',
       'ethereum',
