@@ -37,6 +37,42 @@ export const suggestedDApps = (darkMode: boolean, lightweightMode = false): DApp
     networks: ["elastoseco"]
   },
   {
+    icon: '/assets/browser/dapps/ela.svg',
+    title: 'PGP Explorer',
+    description: 'Elastos ECO blockchain explorer - View Elastos ECO stats',
+    url: 'https://eco.elastos.io/',
+    useExternalBrowser: false,
+    walletConnectSupported: false,
+    networks: ["elastoseco"]
+  },
+  {
+    icon: '/assets/browser/dapps/ela.svg',
+    title: 'Elastos Smart Chain (ESC) Blockchain Explorer',
+    description: '',
+    url: 'https://esc.elastos.io/',
+    useExternalBrowser: false,
+    walletConnectSupported: false,
+    networks: ["elastossmartchain"]
+  },
+  {
+    icon: '/assets/browser/dapps/ela.svg',
+    title: 'Elastos Mainchain Blockchain Explorer',
+    description: '',
+    url: 'https://ela.elastos.io/',
+    useExternalBrowser: false,
+    walletConnectSupported: false,
+    networks: []
+  },
+  {
+    icon: '/assets/browser/dapps/oklink.png',
+    title: 'Bitcoin 区块链浏览器 | OKLink',
+    description: '',
+    url: 'https://www.oklink.com/zh-hans/bitcoin',
+    useExternalBrowser: false,
+    walletConnectSupported: false,
+    networks: ['btc']
+  },
+  {
     icon: '/assets/browser/dapps/glidefinance.png',
     title: 'Glide Finance',
     description: 'Elastos ecosystem decentralized exchange',
