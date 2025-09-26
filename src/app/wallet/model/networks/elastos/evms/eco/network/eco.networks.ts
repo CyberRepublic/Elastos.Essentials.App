@@ -90,11 +90,36 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
       'ECO',
       'assets/wallet/networks/elastos-eco.svg',
       MAINNET_TEMPLATE,
-      12343
+      12343,
+      [
+        {
+          name: 'Elastos ECO Chain RPC',
+          url: GlobalElastosAPIService.instance.getApiUrl(
+            GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECO),
+            MAINNET_TEMPLATE
+          )
+        },
+        {
+          name: '大陆高防BGP节点',
+          url: 'https://pgpnode.battlechicken.cn'
+        },
+        {
+          name: '全球备用节点',
+          url: 'https://sknode.pgachain.org'
+        },
+        {
+          name: 'Official Elastos Node',
+          url: 'https://api.elastos.io/eco'
+        },
+        {
+          name: 'Hong Kong Node',
+          url: 'https://node.shenzhou-crypto.com'
+        }
+      ]
     );
 
     this.builtInCoins = [
-      new ERC20Coin(this, "USDT", "PGA-USDT", "0x1C4E7cd89ea67339d4A5ed2780703180a19757d7", 18, false, true),
+      new ERC20Coin(this, 'USDT', 'PGA-USDT', '0x1C4E7cd89ea67339d4A5ed2780703180a19757d7', 18, false, true),
       new ERC20Coin(this, 'BTCD', 'BTC Dollar', '0x45ec25a63e010BFb84629242f40DDa187f83833E', 18, false, true),
       new ERC20Coin(this, 'FIST', 'FIST on ECO', '0x67d8183f13043Be52F64FB434F1AA5e5d1C58775', 18, false, true),
       new ERC20Coin(this, 'PGA', 'PanGu Asset', '0x8152557DD7d8dBFa2E85EaE473f8B897a5b6CCA9', 18, false, true)
@@ -152,7 +177,16 @@ export class ElastosECOTestNetNetwork extends ElastosECONetworkBase {
       'ECO Testnet',
       'assets/wallet/networks/elastos-eco.svg',
       TESTNET_TEMPLATE,
-      800007
+      800007,
+      [
+        {
+          name: 'Elastos ECO Chain Testnet RPC',
+          url: GlobalElastosAPIService.instance.getApiUrl(
+            GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECO),
+            TESTNET_TEMPLATE
+          )
+        }
+      ]
     );
   }
 

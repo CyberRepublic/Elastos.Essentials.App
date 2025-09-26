@@ -6,7 +6,7 @@ import { ERC20SubWallet } from '../../evms/subwallets/erc20.subwallet';
 
 export class KavaERC20Subwallet extends ERC20SubWallet {
   constructor(public networkWallet: AnyNetworkWallet, id: CoinID) {
-    super(networkWallet, id, networkWallet.network.getRPCUrl(), 'Kava ERC20 Token');
+    super(networkWallet, id, 'Kava ERC20 Token');
   }
 
   public async isAddressValid(address: string): Promise<boolean> {

@@ -481,6 +481,8 @@ export const it = {
     'manage-networks-title': 'Manage networks',
     'manage-networks-intro':
       "Select networks that you want to see in networks list. Hide networks that you don't use. You can also add custom ethereum-compatible networks from the plus icon above.",
+    'no-custom-networks':
+      "Nessuna rete personalizzata aggiunta ancora. Tocca l'icona + sopra per aggiungere la tua prima rete personalizzata.",
 
     /***********************
      * Custom networks Page *
@@ -504,6 +506,27 @@ export const it = {
     'cant-delete-active-network': "La rete attiva non può essere eliminata. Scegli prima un'altra rete.",
     'delete-network-prompt-title': 'Eliminare la rete ?',
     'delete-network-prompt-text': 'Vuoi davvero eliminare questa rete ?',
+    'network-rpc-provider': 'Provider RPC',
+    'edit-rpc-providers-title': 'Modifica Provider RPC',
+    'rpc-providers-subtitle': 'Gestisci i provider RPC per questa rete',
+    'add-rpc-provider': 'Aggiungi Provider RPC',
+    'rpc-provider-name': 'Nome Provider',
+    'rpc-provider-name-placeholder': 'Inserisci nome provider',
+    'rpc-provider-url': 'URL RPC',
+    'rpc-provider-url-placeholder': 'Inserisci URL RPC',
+    'remove-rpc-provider': 'Rimuovi Provider RPC',
+    'confirm-remove-provider': 'Sei sicuro di voler rimuovere "{{name}}"?',
+    'cannot-remove-builtin-provider': 'Impossibile rimuovere i provider RPC integrati',
+    'cannot-remove-selected-provider': 'Impossibile rimuovere il provider RPC attualmente selezionato',
+    'cannot-remove-original-selected-provider': 'Impossibile rimuovere il provider che era originariamente selezionato',
+    'cannot-remove-last-provider': "Impossibile rimuovere l'ultimo provider RPC",
+    'selected-rpc-provider-not-found': 'Provider RPC selezionato non trovato',
+    'invalid-rpc-url': 'Formato URL RPC non valido',
+    'rpc-url-already-exists': 'URL RPC già esistente',
+    'network-visibility': 'Visibilità della rete',
+    'network-visibility-description': 'Mostra questa rete nel selettore di rete',
+    builtin: 'Integrato',
+    custom: 'Personalizzato',
 
     /***********************
      * Asset Overview Page *

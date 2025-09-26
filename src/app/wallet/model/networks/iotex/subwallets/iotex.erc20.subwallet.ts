@@ -5,7 +5,7 @@ import { ERC20SubWallet } from '../../evms/subwallets/erc20.subwallet';
 
 export class IoTeXERC20Subwallet extends ERC20SubWallet {
   constructor(public networkWallet: AnyNetworkWallet, id: CoinID) {
-    super(networkWallet, id, networkWallet.network.getRPCUrl(), 'IoTeX XRC20 Token');
+    super(networkWallet, id, 'IoTeX XRC20 Token');
   }
 
   // For sending funds - must be a iotex address format, not EVM

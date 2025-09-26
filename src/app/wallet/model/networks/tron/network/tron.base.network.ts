@@ -10,6 +10,7 @@ import { EarnProvider } from '../../../earn/earnprovider';
 import { SwapProvider } from '../../../earn/swapprovider';
 import type { MasterWallet, StandardMasterWallet } from '../../../masterwallets/masterwallet';
 import { PrivateKeyType, WalletNetworkOptions, WalletType } from '../../../masterwallets/wallet.types';
+import { RPCUrlProvider } from '../../../rpc-url-provider';
 import { TransactionInfoType } from '../../../tx-providers/transaction.types';
 import { NetworkAPIURLType } from '../../base/networkapiurltype';
 import type { AnyNetworkWallet } from '../../base/networkwallets/networkwallet';
@@ -36,6 +37,7 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
     displayName: string,
     networkTemplate: string,
     protected builtInCoins?: TRC20Coin[],
+    rpcUrlProviders?: RPCUrlProvider[],
     earnProviders?: EarnProvider[],
     swapProviders?: SwapProvider[],
     bridgeProviders?: BridgeProvider[]
@@ -47,6 +49,7 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
       'assets/wallet/networks/tron.svg',
       'TRON',
       networkTemplate,
+      rpcUrlProviders,
       earnProviders,
       swapProviders,
       bridgeProviders
@@ -268,7 +271,7 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
     coinID: CoinID,
     startBackgroundUpdates = true
   ): Promise<TRC20SubWallet> {
-    let subWallet = new TRC20SubWallet(networkWallet, coinID, networkWallet.network.getRPCUrl());
+    let subWallet = new TRC20SubWallet(networkWallet, coinID);
     await subWallet.initialize();
 
     if (startBackgroundUpdates) void subWallet.startBackgroundUpdates();

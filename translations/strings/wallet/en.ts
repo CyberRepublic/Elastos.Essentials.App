@@ -480,6 +480,7 @@ export const en = {
     'manage-networks-title': 'Manage networks',
     'manage-networks-intro':
       "Select networks that you want to see in networks list. Hide networks that you don't use. You can also add custom ethereum-compatible networks from the plus icon above.",
+    'no-custom-networks': 'No custom networks added yet. Tap the + icon above to add your first custom network.',
 
     /***********************
      * Custom networks Page *
@@ -502,6 +503,27 @@ export const en = {
     'cant-delete-active-network': "The active network can't be deleted. Please first change the current network.",
     'delete-network-prompt-title': 'Delete network ?',
     'delete-network-prompt-text': 'Do you really want to delete this network ?',
+    'network-rpc-provider': 'RPC Provider',
+    'edit-rpc-providers-title': 'Edit RPC Providers',
+    'rpc-providers-subtitle': 'Manage RPC providers for this network',
+    'add-rpc-provider': 'Add RPC Provider',
+    'rpc-provider-name': 'Provider Name',
+    'rpc-provider-name-placeholder': 'Enter provider name',
+    'rpc-provider-url': 'RPC URL',
+    'rpc-provider-url-placeholder': 'Enter RPC URL',
+    'remove-rpc-provider': 'Remove RPC Provider',
+    'confirm-remove-provider': 'Are you sure you want to remove "{{name}}"?',
+    'cannot-remove-builtin-provider': 'Cannot remove built-in RPC providers',
+    'cannot-remove-selected-provider': 'Cannot remove the currently selected RPC provider',
+    'cannot-remove-original-selected-provider': 'Cannot remove the provider that was originally selected',
+    'cannot-remove-last-provider': 'Cannot remove the last RPC provider',
+    'selected-rpc-provider-not-found': 'Selected RPC provider not found',
+    'invalid-rpc-url': 'Invalid RPC URL format',
+    'rpc-url-already-exists': 'RPC URL already exists',
+    'network-visibility': 'Network Visibility',
+    'network-visibility-description': 'Show this network in the network selector',
+    builtin: 'Built-in',
+    custom: 'Custom',
 
     /***********************
      * Asset Overview Page *

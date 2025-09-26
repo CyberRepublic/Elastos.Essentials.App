@@ -34,6 +34,7 @@ import type { MasterWallet } from '../model/masterwallets/masterwallet';
 import { BTCNetworkBase } from '../model/networks/btc/network/btc.base.network';
 import type { EVMNetwork } from '../model/networks/evms/evm.network';
 import type { AnyNetwork } from '../model/networks/network';
+import type { RPCUrlProvider } from '../model/rpc-url-provider';
 import { Native } from './native.service';
 import { LocalStorage } from './storage.service';
 
@@ -42,7 +43,8 @@ export type PriorityNetworkChangeCallback = (newNetwork) => Promise<void>;
 export type BuiltinNetworkOverride = {
   networkKey: string;
   name?: string; // Optional override for network name
-  rpcUrl?: string; // Optional override for RPC URL
+  customRpcUrls?: RPCUrlProvider[]; // User's custom RPC URLs (in addition to built-in ones)
+  selectedRpcUrl?: string; // Selected RPC URL (can be from built-in or custom)
 };
 
 type RawLastUsedNetworks = { [networkKey: string]: number };
@@ -165,10 +167,40 @@ export class WalletNetworkService {
     let networks = this.networks.filter(n => n.networkTemplate === networkTemplate);
 
     if (masterWallet) {
-      return networks.filter(n => masterWallet.supportsNetwork(n));
-    } else {
-      return networks;
+      networks = networks.filter(n => masterWallet.supportsNetwork(n));
     }
+
+    // Define hardcoded preferred network keys that should appear first
+    const preferredNetworkKeys = [
+      'elastos',
+      'elastoseco',
+      'btc',
+      'bsc',
+      'ethereum',
+      'elastossmartchain',
+      'elastosidchain'
+    ];
+
+    // Separate preferred networks (maintaining hardcoded order) and remaining networks
+    const preferredNetworks: AnyNetwork[] = [];
+    const remainingNetworks: AnyNetwork[] = [];
+
+    networks.forEach(network => {
+      const preferredIndex = preferredNetworkKeys.indexOf(network.key);
+      if (preferredIndex >= 0) {
+        preferredNetworks[preferredIndex] = network;
+      } else {
+        remainingNetworks.push(network);
+      }
+    });
+
+    // Remove undefined entries from preferred networks array (in case some preferred networks don't exist)
+    const filteredPreferredNetworks = preferredNetworks.filter(n => n !== undefined);
+
+    // Sort remaining networks alphabetically
+    remainingNetworks.sort((a, b) => a.getEffectiveName().localeCompare(b.getEffectiveName()));
+
+    return [...filteredPreferredNetworks, ...remainingNetworks];
   }
 
   /**
@@ -316,10 +348,33 @@ export class WalletNetworkService {
   }
 
   public getNetworkVisible(network: AnyNetwork): boolean {
-    // By default, if no saved info about a network visibility, we consider the network visible
-    if (!(network.key in this.networkVisibilities)) return true;
+    // Default networks that should be visible to new users
+    const defaultVisibleNetworks = [
+      'elastos',
+      'elastoseeco',
+      'elastossmartchain',
+      'elastosidchain',
+      'ethereum',
+      'bsc',
+      'tron',
+      'btc',
+      'polygon',
+      'arbitrum',
+      'avalanchecchain'
+    ];
 
-    return this.networkVisibilities[network.key];
+    // If user has explicitly set visibility, use that preference
+    if (network.key in this.networkVisibilities) {
+      return this.networkVisibilities[network.key];
+    }
+
+    // Otherwise, check if it's in the default visible list
+    if (defaultVisibleNetworks.includes(network.key)) {
+      return true;
+    }
+
+    // If not in visibilities and not in defaults, hide by default
+    return false;
   }
 
   public setNetworkVisible(network: AnyNetwork, visible: boolean): Promise<void> {
@@ -353,11 +408,69 @@ export class WalletNetworkService {
   }
 
   /**
-   * Returns the overriden RPC URL, if any.
+   * Returns the selected RPC URL from network overrides, if any.
    */
   public getOverridenNetworkRpcUrl(network: AnyNetwork): string {
     const override = this.getBuiltinNetworkOverride(network.key);
-    return override?.rpcUrl;
+    return override?.selectedRpcUrl;
+  }
+
+  /**
+   * Returns the custom RPC URLs for a built-in network.
+   */
+  public getCustomRpcUrls(networkKey: string): RPCUrlProvider[] {
+    const override = this.getBuiltinNetworkOverride(networkKey);
+    return override?.customRpcUrls || [];
+  }
+
+  /**
+   * Sets the custom RPC URLs for a built-in network.
+   */
+  public setCustomRpcUrls(networkKey: string, customRpcUrls: RPCUrlProvider[]): Promise<void> {
+    const override = this.getBuiltinNetworkOverride(networkKey) || { networkKey };
+    override.customRpcUrls = customRpcUrls;
+    return this.setBuiltinNetworkOverride(networkKey, override);
+  }
+
+  /**
+   * Adds a custom RPC provider to a built-in network.
+   */
+  public addCustomRpcUrl(networkKey: string, rpcProvider: RPCUrlProvider): Promise<void> {
+    const customRpcUrls = this.getCustomRpcUrls(networkKey);
+
+    // Check if URL already exists
+    if (customRpcUrls.some(p => p.url === rpcProvider.url)) {
+      return Promise.resolve(); // Already exists, no-op
+    }
+
+    customRpcUrls.push(rpcProvider);
+    return this.setCustomRpcUrls(networkKey, customRpcUrls);
+  }
+
+  /**
+   * Removes a custom RPC provider from a built-in network.
+   */
+  public removeCustomRpcUrl(networkKey: string, rpcUrl: string): Promise<void> {
+    const customRpcUrls = this.getCustomRpcUrls(networkKey);
+    const filteredUrls = customRpcUrls.filter(p => p.url !== rpcUrl);
+    return this.setCustomRpcUrls(networkKey, filteredUrls);
+  }
+
+  /**
+   * Sets the selected RPC URL for a built-in network.
+   */
+  public setSelectedRpcUrl(networkKey: string, selectedRpcUrl: string): Promise<void> {
+    const override = this.getBuiltinNetworkOverride(networkKey) || { networkKey };
+    override.selectedRpcUrl = selectedRpcUrl;
+    return this.setBuiltinNetworkOverride(networkKey, override);
+  }
+
+  /**
+   * Gets the selected RPC URL for a built-in network, or null if none selected.
+   */
+  public getSelectedRpcUrl(networkKey: string): string | null {
+    const override = this.getBuiltinNetworkOverride(networkKey);
+    return override?.selectedRpcUrl || null;
   }
 
   /**

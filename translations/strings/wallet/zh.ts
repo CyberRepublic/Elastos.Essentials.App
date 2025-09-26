@@ -471,7 +471,8 @@ export const zh = {
      ************************/
     'manage-networks-title': '管理网络',
     'manage-networks-intro':
-      '在“网络”列表中选择要查看的网络。隐藏您不使用的网络。您还可以点击上面的“+”图标来添加与以太坊兼容的自定义网络。',
+      '在"网络"列表中选择要查看的网络。隐藏您不使用的网络。您还可以点击上面的"+"图标来添加与以太坊兼容的自定义网络。',
+    'no-custom-networks': '尚未添加自定义网络。点击上面的 + 图标添加您的第一个自定义网络。',
 
     /***********************
      * Custom networks Page *
@@ -494,6 +495,27 @@ export const zh = {
     'cant-delete-active-network': '不能删除当前活动网络， 如需删除，请先切换到其他网络！',
     'delete-network-prompt-title': '删除网络?',
     'delete-network-prompt-text': '确定需要删除此网络?',
+    'network-rpc-provider': 'RPC 提供商',
+    'edit-rpc-providers-title': '编辑 RPC 提供商',
+    'rpc-providers-subtitle': '管理此网络的 RPC 提供商',
+    'add-rpc-provider': '添加 RPC 提供商',
+    'rpc-provider-name': '提供商名称',
+    'rpc-provider-name-placeholder': '输入提供商名称',
+    'rpc-provider-url': 'RPC URL',
+    'rpc-provider-url-placeholder': '输入 RPC URL',
+    'remove-rpc-provider': '删除 RPC 提供商',
+    'confirm-remove-provider': '确定要删除 "{{name}}" 吗？',
+    'cannot-remove-builtin-provider': '无法删除内置 RPC 提供商',
+    'cannot-remove-selected-provider': '无法删除当前选中的 RPC 提供商',
+    'cannot-remove-original-selected-provider': '无法删除原本选中的提供商',
+    'cannot-remove-last-provider': '无法删除最后一个 RPC 提供商',
+    'selected-rpc-provider-not-found': '未找到选中的 RPC 提供商',
+    'invalid-rpc-url': '无效的 RPC URL 格式',
+    'rpc-url-already-exists': 'RPC URL 已存在',
+    'network-visibility': '网络可见性',
+    'network-visibility-description': '在网络选择器中显示此网络',
+    builtin: '内置',
+    custom: '自定义',
 
     /***********************
      * Asset Overview Page *

@@ -32,7 +32,10 @@ export class ManageNetworksPage implements OnInit {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
 
   public availableNetworks: ManageableNetworkEntry[] = [];
+  public builtinNetworks: ManageableNetworkEntry[] = [];
+  public customNetworks: ManageableNetworkEntry[] = [];
   public customNetworkEntries: CustomNetworkDiskEntry[] = [];
+  public activeTab: 'builtin' | 'custom' = 'builtin';
 
   // Events
   private netListSubscription: Subscription = null;
@@ -65,6 +68,10 @@ export class ManageNetworksPage implements OnInit {
           customNetworkEntry
         };
       });
+
+      // Separate networks into built-in and custom
+      this.builtinNetworks = this.availableNetworks.filter(n => !n.isCustom);
+      this.customNetworks = this.availableNetworks.filter(n => n.isCustom);
     });
 
     this.titleBar.addOnItemClickedListener(
@@ -97,8 +104,8 @@ export class ManageNetworksPage implements OnInit {
     this.titleBar.setIcon(TitleBarIconSlot.OUTER_RIGHT, null);
   }
 
-  public async onVisibilityChange(evt: CustomEvent, networkEntry: ManageableNetworkEntry) {
-    await this.networkService.setNetworkVisible(networkEntry.network, networkEntry.isShown);
+  public switchTab(tab: 'builtin' | 'custom') {
+    this.activeTab = tab;
   }
 
   public addCustomNetwork() {
@@ -110,10 +117,9 @@ export class ManageNetworksPage implements OnInit {
   }
 
   public onNetworkClicked(networkEntry: ManageableNetworkEntry) {
+    // Only custom networks can be clicked (built-in networks are handled separately)
     if (networkEntry.isCustom) {
       this.editCustomNetwork(networkEntry.customNetworkEntry);
-    } else {
-      this.editBuiltinNetwork(networkEntry.network);
     }
   }
 

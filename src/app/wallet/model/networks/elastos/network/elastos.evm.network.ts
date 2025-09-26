@@ -4,6 +4,7 @@ import { BridgeProvider } from '../../../earn/bridgeprovider';
 import { EarnProvider } from '../../../earn/earnprovider';
 import { SwapProvider } from '../../../earn/swapprovider';
 import { WalletNetworkOptions } from '../../../masterwallets/wallet.types';
+import { RPCUrlProvider } from '../../../rpc-url-provider';
 import { AnyNetworkWallet } from '../../base/networkwallets/networkwallet';
 import { EVMNetwork } from '../../evms/evm.network';
 import { ERC1155Provider } from '../../evms/nfts/erc1155.provider';
@@ -19,6 +20,7 @@ export abstract class ElastosEVMNetwork<WalletNetworkOptionsType extends WalletN
     logo: string,
     networkTemplate: string,
     chainID: number,
+    rpcUrlProviders?: RPCUrlProvider[],
     earnProviders?: EarnProvider[],
     swapProviders?: SwapProvider[],
     bridgeProviders?: BridgeProvider[],
@@ -34,7 +36,8 @@ export abstract class ElastosEVMNetwork<WalletNetworkOptionsType extends WalletN
       'ELA',
       networkTemplate,
       chainID,
-      [],
+      [], // builtInCoins
+      rpcUrlProviders,
       earnProviders,
       swapProviders,
       bridgeProviders,
