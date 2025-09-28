@@ -49,6 +49,7 @@ export const zh = {
         // Popups, error messages
         'something-went-wrong': '出错啦，请稍后再试',
         'please-wait': "请稍候...",
+        'ready-soon': "即将准备就绪",
         "sorry": "抱歉",
         'name-is-missing': "请输入名称",
         'error': '错误',
