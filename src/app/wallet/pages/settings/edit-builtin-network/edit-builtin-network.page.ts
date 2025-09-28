@@ -41,8 +41,6 @@ export class EditBuiltinNetworkPage implements OnInit {
   // Quality monitoring
   public providersStatus = new Map<string, RpcProviderStatus>();
 
-  private isEditingCurrentNetwork = false;
-
   constructor(
     public theme: GlobalThemeService,
     public translate: TranslateService,
@@ -80,10 +78,6 @@ export class EditBuiltinNetworkPage implements OnInit {
         return;
       }
 
-      if (this.networkService.activeNetwork.value.key === params.networkKey) {
-        this.isEditingCurrentNetwork = true;
-      }
-
       // Get existing override or create empty one
       this.networkOverride = this.networkService.getBuiltinNetworkOverride(params.networkKey) || {
         networkKey: params.networkKey
@@ -94,7 +88,7 @@ export class EditBuiltinNetworkPage implements OnInit {
       this.allRpcProviders = this.network.getAllRpcProviders();
       this.selectedRpcUrl = this.network.getSelectedRpcProvider().url;
       this.originalSelectedRpcUrl = this.selectedRpcUrl; // Remember original value for change detection
-      this.isNetworkVisible = this.networkService.getNetworkVisible(this.network);
+      this.isNetworkVisible = this.networkService.getNetworkVisible(this.network.key);
     });
   }
 
@@ -162,7 +156,7 @@ export class EditBuiltinNetworkPage implements OnInit {
     // Check if values have changed from defaults
     const defaultName = this.network.getDefaultName();
     const currentSelectedRpcUrl = this.network.getSelectedRpcProvider().url;
-    const currentVisibility = this.networkService.getNetworkVisible(this.network);
+    const currentVisibility = this.networkService.getNetworkVisible(this.network.key);
 
     const nameChanged = this.editedName.trim() !== defaultName;
     const selectedRpcUrlChanged = this.originalSelectedRpcUrl.trim() !== currentSelectedRpcUrl;
@@ -190,7 +184,7 @@ export class EditBuiltinNetworkPage implements OnInit {
 
     // Save visibility setting
     if (visibilityChanged) {
-      await this.networkService.setNetworkVisible(this.network, this.isNetworkVisible);
+      await this.networkService.setNetworkVisible(this.network.key, this.isNetworkVisible);
     }
 
     void this.globalNav.navigateBack();

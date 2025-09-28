@@ -121,8 +121,6 @@ export class EditCustomNetworkPage implements OnInit {
           };
         }
       }
-      //this.editedNetworkEntry.rpcUrl = "https://http-mainnet.hecochain.com" // TMP TEST
-      //this.editedNetworkEntry.accountRpcUrl = "https://api.hecoinfo.com" // TMP TEST
     });
   }
 
@@ -236,6 +234,9 @@ export class EditCustomNetworkPage implements OnInit {
 
     // Everything ok, save the network
     await this.customNetworksService.upsertCustomNetwork(this.editedNetworkEntry);
+
+    // Save the network visibility
+    void this.networkService.setNetworkVisible(this.editedNetworkEntry.key, true);
 
     if (this.intentMode) {
       let result: EditCustomNetworkIntentResult = {

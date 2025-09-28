@@ -208,7 +208,7 @@ export class WalletNetworkService {
    * to make visible in settings.
    */
   public getDisplayableNetworks(): AnyNetwork[] {
-    return this.getAvailableNetworks().filter(n => this.getNetworkVisible(n));
+    return this.getAvailableNetworks().filter(n => this.getNetworkVisible(n.key));
   }
 
   /**
@@ -347,7 +347,7 @@ export class WalletNetworkService {
     );
   }
 
-  public getNetworkVisible(network: AnyNetwork): boolean {
+  public getNetworkVisible(networkKey: string): boolean {
     // Default networks that should be visible to new users
     const defaultVisibleNetworks = [
       'elastos',
@@ -364,12 +364,12 @@ export class WalletNetworkService {
     ];
 
     // If user has explicitly set visibility, use that preference
-    if (network.key in this.networkVisibilities) {
-      return this.networkVisibilities[network.key];
+    if (networkKey in this.networkVisibilities) {
+      return this.networkVisibilities[networkKey];
     }
 
     // Otherwise, check if it's in the default visible list
-    if (defaultVisibleNetworks.includes(network.key)) {
+    if (defaultVisibleNetworks.includes(networkKey)) {
       return true;
     }
 
@@ -377,8 +377,8 @@ export class WalletNetworkService {
     return false;
   }
 
-  public setNetworkVisible(network: AnyNetwork, visible: boolean): Promise<void> {
-    this.networkVisibilities[network.key] = visible;
+  public setNetworkVisible(networkKey: string, visible: boolean): Promise<void> {
+    this.networkVisibilities[networkKey] = visible;
     return this.saveNetworkVisibilities();
   }
 

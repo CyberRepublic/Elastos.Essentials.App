@@ -63,7 +63,7 @@ export class ManageNetworksPage implements OnInit {
 
         return {
           network: n,
-          isShown: this.networkService.getNetworkVisible(n),
+          isShown: this.networkService.getNetworkVisible(n.key),
           isCustom: !!customNetworkEntry,
           customNetworkEntry
         };
