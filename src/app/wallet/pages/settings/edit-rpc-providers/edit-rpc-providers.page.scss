@@ -106,14 +106,11 @@ ion-content {
                 justify-content: center;
 
                 &.builtin {
-                  background: var(--ion-color-primary);
-                  color: white;
+                  background: var(--ion-text-color);
+                  color: var(--ion-background-color);;
                 }
 
                 &.custom {
-                  background: var(--ion-color-secondary);
-                  color: white;
-
                   .custom-icon {
                     font-size: 12px;
                     margin: 0;
