@@ -1,17 +1,16 @@
 import { Injectable, NgZone } from '@angular/core';
-import type WalletConnect from "@walletconnect/client";
+import type WalletConnect from '@walletconnect/client';
 import { parseUri } from '@walletconnect/utils';
 import { Logger } from '../../logger';
-import { IdentityEntry } from "../../model/didsessions/identityentry";
+import { IdentityEntry } from '../../model/didsessions/identityentry';
 import { GlobalIntentService } from '../global.intent.service';
+import { GlobalNativeService } from '../global.native.service';
 import { GlobalNavService } from '../global.nav.service';
 import { GlobalService, GlobalServiceManager } from '../global.service.manager';
-import { GlobalStorageService } from '../global.storage.service';
 import { WalletConnectInstance } from './instances';
 import { walletConnectStore } from './store';
 import { WalletConnectV1Service } from './walletconnect.v1.service';
 import { WalletConnectV2Service } from './walletconnect.v2.service';
-import { GlobalNativeService } from '../global.native.service';
 
 /**
  * Indicates from where a request to initiate a new WC session came from
@@ -50,15 +49,15 @@ export class GlobalWalletConnectService extends GlobalService {
   async init() {
     GlobalServiceManager.getInstance().registerService(this);
 
-    Logger.log("walletconnect", "Registering to intent events");
-    this.globalIntentService.intentListener.subscribe((receivedIntent) => {
-      Logger.log("walletconnect", "Received intent event", receivedIntent);
-      if (!receivedIntent)
-        return;
+    Logger.log('walletconnect', 'Registering to intent events');
+    this.globalIntentService.intentListener.subscribe(receivedIntent => {
+      Logger.log('walletconnect', 'Received intent event', receivedIntent);
+      if (!receivedIntent) return;
 
       // Android receives the raw url.
-      if (receivedIntent.action === "rawurl") {
-        if (receivedIntent.params && receivedIntent.params.url) { // NOTE: urL
+      if (receivedIntent.action === 'rawurl') {
+        if (receivedIntent.params && receivedIntent.params.url) {
+          // NOTE: urL
           // Make sure this raw url coming from outside is for us
           let rawUrl: string = receivedIntent.params.url;
           if (this.canHandleUri(rawUrl)) {
@@ -66,14 +65,12 @@ export class GlobalWalletConnectService extends GlobalService {
               this.zone.run(() => {
                 void this.handleWCURIRequest(rawUrl, WalletConnectSessionRequestSource.EXTERNAL_INTENT, receivedIntent);
               });
-            }
-            else {
+            } else {
               // Send empty intent response to unlock the intent service
               void this.globalIntentService.sendIntentResponse({}, receivedIntent.intentId, false);
             }
           }
-        }
-        else {
+        } else {
           // Send empty intent response to unlock the intent service
           void this.globalIntentService.sendIntentResponse({}, receivedIntent.intentId, false);
         }
@@ -81,8 +78,12 @@ export class GlobalWalletConnectService extends GlobalService {
       // iOS receives:
       // - https://essentials.elastos.net/wc?uri=wc:xxxx for real connections
       // - optionally, https://essentials.elastos.net/wc to just "reappear", like on android - should not be handled
-      else if (receivedIntent.action === "https://essentials.elastos.net/wc" || receivedIntent.action === "https://essentials.web3essentials.io/wc") {
-        if (receivedIntent.params && receivedIntent.params.uri) { // NOTE: urI
+      else if (
+        receivedIntent.action === 'https://essentials.elastos.net/wc' ||
+        receivedIntent.action === 'https://essentials.web3essentials.io/wc'
+      ) {
+        if (receivedIntent.params && receivedIntent.params.uri) {
+          // NOTE: urI
           // Make sure this raw url coming from outside is for us
           let rawUrl: string = receivedIntent.params.uri;
           if (this.canHandleUri(rawUrl)) {
@@ -90,14 +91,12 @@ export class GlobalWalletConnectService extends GlobalService {
               this.zone.run(() => {
                 void this.handleWCURIRequest(rawUrl, WalletConnectSessionRequestSource.EXTERNAL_INTENT, receivedIntent);
               });
-            }
-            else {
+            } else {
               // Send empty intent response to unlock the intent service
               void this.globalIntentService.sendIntentResponse({}, receivedIntent.intentId, false);
             }
           }
-        }
-        else {
+        } else {
           // Send empty intent response to unlock the intent service
           void this.globalIntentService.sendIntentResponse({}, receivedIntent.intentId, false);
         }
@@ -116,7 +115,7 @@ export class GlobalWalletConnectService extends GlobalService {
   }
 
   public canHandleUri(uri: string): boolean {
-    if (!uri || !uri.startsWith("wc:")) {
+    if (!uri || !uri.startsWith('wc:')) {
       //Logger.log("walletconnect", "DEBUG CANNOT HANDLE URI", uri);
       return false;
     }
@@ -127,8 +126,7 @@ export class GlobalWalletConnectService extends GlobalService {
   public shouldIgnoreUri(uri: string): boolean {
     // We should ignore urls even if starting with "wc:", if they don't contain params, according to wallet connect documentation
     // https://docs.walletconnect.org/mobile-linking
-    if (uri.startsWith("wc:") && uri.indexOf("?") < 0)
-      return true;
+    if (uri.startsWith('wc:') && uri.indexOf('?') < 0) return true;
 
     return false;
   }
@@ -137,27 +135,29 @@ export class GlobalWalletConnectService extends GlobalService {
    * Handles a scanned or received wc:// url in order to initiate a session with a wallet connect proxy
    * server and client.
    */
-  public async handleWCURIRequest(uri: string, source: WalletConnectSessionRequestSource, receivedIntent?: EssentialsIntentPlugin.ReceivedIntent) {
+  public async handleWCURIRequest(
+    uri: string,
+    source: WalletConnectSessionRequestSource,
+    receivedIntent?: EssentialsIntentPlugin.ReceivedIntent
+  ) {
     // No one may be awaiting this response but we need to send the intent response to release the
     // global intent manager queue.
-    if (receivedIntent)
-      await this.globalIntentService.sendIntentResponse({}, receivedIntent.intentId, false);
+    if (receivedIntent) await this.globalIntentService.sendIntentResponse({}, receivedIntent.intentId, false);
 
-    if (!this.canHandleUri(uri))
-      throw new Error("Invalid WalletConnect URL: " + uri);
+    if (!this.canHandleUri(uri)) throw new Error('Invalid WalletConnect URL: ' + uri);
 
-    Logger.log("walletconnect", "Handling uri request", uri, source);
+    Logger.log('walletconnect', 'Handling uri request', uri, source);
 
     this.onGoingRequestSource = source;
 
     // We support both WC v1 and 2. Detect which one is received here.
     const { version } = parseUri(uri);
 
-    if ((version !== 1) && (version !== 2)) {
+    if (version !== 1 && version !== 2) {
       if (Number.isNaN(version)) {
-        this.globalNativeService.genericToast(`Invalid wallet connect URL: ${uri}!`, 5000)
+        this.globalNativeService.genericToast(`Invalid wallet connect URL: ${uri}!`, 5000);
       } else {
-        this.globalNativeService.genericToast(`Unsupported wallet connect version ${version}!`, 5000)
+        this.globalNativeService.genericToast(`Unsupported wallet connect version ${version}!`, 5000);
       }
       return;
     }
@@ -167,7 +167,7 @@ export class GlobalWalletConnectService extends GlobalService {
     // to let the user wait.
     // TODO: PROBABLY REPLACE THIS WITH A CANCELLABLE DIALOG, FULL SCREEN IS UGLY
     this.zone.run(() => {
-      void this.nav.navigateTo("walletconnectsession", "/settings/walletconnect/preparetoconnect", {
+      void this.nav.navigateTo('walletconnectsession', '/settings/walletconnect/preparetoconnect', {
         state: { version }
       });
     });
@@ -175,16 +175,14 @@ export class GlobalWalletConnectService extends GlobalService {
     try {
       if (version === 1) {
         await this.v1.handleWCURIRequest(uri, source, receivedIntent);
-      }
-      else if (version === 2) {
+      } else if (version === 2) {
         await this.v2.handleWCURIRequest(uri, source, receivedIntent);
       }
-    }
-    catch (e) {
-      Logger.error("WalletConnect initialization error: ", e);
-      let message = typeof (e) === "string" ? e : e.message;
+    } catch (e) {
+      Logger.error('WalletConnect initialization error: ', e);
+      let message = typeof e === 'string' ? e : e.message;
       if (message && message.includes('Expired')) {
-        this.globalNativeService.genericToast(message, 5000)
+        this.globalNativeService.genericToast(message, 5000);
       }
     }
   }
@@ -197,7 +195,7 @@ export class GlobalWalletConnectService extends GlobalService {
     await this.v1.killAllSessions();
     await this.v2.killAllSessions();
 
-    Logger.log("walletconnect", "Killed all sessions");
+    Logger.log('walletconnect', 'Killed all sessions');
   }
 
   public getActiveInstances(): WalletConnectInstance[] {
