@@ -4,12 +4,6 @@
 const patch_dirs = [
   {
     "hook": "before_plugin_install",
-    "platform": "android",
-    "plugin_id": "cordova-plugin-firebasex",
-    "patch_dir": "patches/before_plugin_install_firebase"
-  },
-  {
-    "hook": "before_plugin_install",
     "platform": "all",
     "plugin_id": "cordova-plugin-printer",
     "patch_dir": "patches/before_plugin_install_printer"

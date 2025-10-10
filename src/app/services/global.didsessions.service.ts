@@ -11,7 +11,6 @@ import { Direction, GlobalNavService } from './global.nav.service';
 import { GlobalNetworksService, MAINNET_TEMPLATE } from './global.networks.service';
 import { GlobalServiceManager } from './global.service.manager';
 import { GlobalStorageService } from './global.storage.service';
-import { MigrationService } from './migrator/migration.service';
 import { DIDSessionsStore } from './stores/didsessions.store';
 import { NetworkTemplateStore } from './stores/networktemplate.store';
 import { GlobalLightweightService } from './global.lightweight.service';
@@ -40,7 +39,6 @@ export class GlobalDIDSessionsService {
   public activeIdentityBackedUp = new BehaviorSubject<boolean>(true); // Whether the active identity is backed up or not. Tru by default whilte loading, to now show any false backup prompt to users.
 
   constructor(private storage: GlobalStorageService,
-    private migrationService: MigrationService,
     private globalNavService: GlobalNavService,
     private globalNetworkService: GlobalNetworksService,
     private globalIntentService: GlobalIntentService,
@@ -103,11 +101,6 @@ export class GlobalDIDSessionsService {
     if (this.getIdentityIndex(entry.didString) >= 0) {
       // Delete before adding again (update)
       this.deleteIdentityEntryIfExists(entry.didString);
-    }
-    else {
-      // Real DID creation
-      // Let the migration service know about this newly created session
-      await this.migrationService.onDIDSessionCreated(entry.didString);
     }
 
     // Save the session creation date
@@ -182,10 +175,6 @@ export class GlobalDIDSessionsService {
       entry.creationDate = moment().unix();
       await this.saveDidSessionsToDisk();
     }
-
-    // Check if some migrations are due - fully block the process and UI until all
-    // migrations are fully completed
-    await this.migrationService.checkAndNavigateToMigration(entry);
 
     this.signedInIdentity = entry;
 

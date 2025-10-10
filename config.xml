@@ -33,17 +33,21 @@
     <preference name="CustomSchemeFilters" value="wc:" />
     <preference name="LoadUrlTimeoutValue" value="50000" />
     <preference name="GradlePluginGoogleServicesEnabled" value="true" />
-    <preference name="GradlePluginGoogleServicesVersion" value="4.3.14" />
+    <preference name="GradlePluginGoogleServicesVersion" value="4.3.15" />
     <platform name="android">
         <preference name="AndroidLaunchMode" value="singleTask" />
         <preference name="AndroidXEnabled" value="true" />
-        <preference name="GradleVersion" value="8.4" />
+        <preference name="GradleVersion" value="8.7" />
         <preference name="GradlePluginKotlinEnabled" value="true" />
-        <preference name="AndroidGradlePluginVersion" value="8.3.1" />
+        <preference name="GradlePluginKotlinVersion" value="1.9.0" />
+        <preference name="GradlePluginKotlinCodeStyle" value="official" />
+        <preference name="AndroidGradlePluginVersion" value="8.5.1" />
         <preference name="LottieEnableHardwareAcceleration" value="true" />
         <preference name="android-targetSdkVersion" value="35" />
+        <preference name="android-compileSdkVersion" value="35" />
         <preference name="android-minSdkVersion" value="24" />
         <preference name="SplashScreenDelay" value="1" />
+        <preference name="LottieHideTimeout" value="10000" />
         <preference name="AndroidWindowSplashScreenBackground" value="#000000" />
         <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest">
             <manifest xmlns:tools="http://schemas.android.com/tools" />
@@ -190,6 +194,7 @@
         <allow-intent href="itms-apps:*" />
         <preference name="deployment-target" value="13.0" />
         <preference name="WKWebViewOnly" value="true" />
+        <preference name="LottieHideTimeout" value="10" />
         <feature name="CDVWKWebViewEngine">
             <param name="ios-package" value="CDVWKWebViewEngine" />
         </feature>
@@ -358,7 +363,6 @@
         <splash height="1792" src="resources/ios/splash/Default-1792h~iphone.png" width="828" />
         <splash height="828" src="resources/ios/splash/Default-Landscape-1792h~iphone.png" width="1792" />
     </platform>
-    <hook src="scripts/download_3rdparty.js" type="after_platform_add" />
     <hook src="scripts/modify_xcode_project.js" type="after_platform_add" />
     <hook src="scripts/apply_patches.js" type="before_plugin_install" />
     <hook src="scripts/podDeploymentTargetFix.js" type="after_prepare" />

@@ -72,7 +72,6 @@ import { Native } from './native.service';
 import { WalletNetworkService } from './network.service';
 import { OfflineTransactionsService } from './offlinetransactions.service';
 import { SafeService } from './safe.service';
-import { SPVService } from './spv.service';
 import { LocalStorage } from './storage.service';
 
 class SubwalletTransactionStatus {
@@ -123,9 +122,6 @@ export class WalletService {
 
   public masterWalletMangerJS: MasterWalletManager = null;
 
-  // TODO: Remove it if spvservice is not required at all.
-  public spvBridge: SPVService = null;
-
   private networkTemplate: string;
 
   public activeNetworkWallet = new BehaviorSubject<AnyNetworkWallet>(null);
@@ -160,8 +156,6 @@ export class WalletService {
     Logger.log('wallet', 'Wallet service is initializing');
     this.masterWallets = {};
     this.networkWallets = {};
-
-    this.spvBridge = new SPVService(this.native, this.events, this.globalPopupService);
 
     const hasWallets = await this.initWallets();
 

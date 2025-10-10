@@ -621,62 +621,6 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
     return this.networkWallet.publishTransaction(this, signedTransaction, visualFeedback);
   }
 
-  /* public signAndSendRawTransaction(transaction: string, transfer: Transfer): Promise<RawTransactionPublishResult> {
-        Logger.log('wallet', "ERC20 signAndSendRawTransaction transaction:", transaction, transfer);
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
-        return new Promise(async (resolve) => {
-            try {
-                const password = await WalletService.instance.openPayModal(transfer);
-                if (!password) {
-                    Logger.log('wallet', "No password received. Cancelling");
-                    resolve({
-                        published: false,
-                        txid: null,
-                        status: 'cancelled'
-                    });
-                    return;
-                }
-
-                Logger.log('wallet', "Password retrieved. Now signing the transaction.");
-
-                const signedTx = await SPVService.instance.signTransaction(
-                    jsToSpvWalletId(this.masterWallet.id),
-                    this.spvConfigEVMCode,
-                    transaction,
-                    password
-                );
-
-                Logger.log('wallet', "Transaction signed. Now publishing.", this);
-
-                const txid = await this.publishTransaction(signedTx);
-                Logger.log('wallet', "Published transaction id:", txid);
-
-                let published = true;
-                let status = 'published';
-                if (!txid || txid.length == 0) {
-                    published = false;
-                    status = 'error';
-                }
-                resolve({
-                    published,
-                    status,
-                    txid
-                });
-            }
-            catch (err) {
-                await Native.instance.hideLoading();
-                Logger.error("wallet", "Publish error:", err);
-                resolve({
-                    published: false,
-                    txid: null,
-                    status: 'error',
-                    code: err.code,
-                    message: err.message,
-                });
-            }
-        });
-    } */
-
   /**
    * Returns the current gas price on chain.
    */
