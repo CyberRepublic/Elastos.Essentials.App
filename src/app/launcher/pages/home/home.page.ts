@@ -42,7 +42,7 @@ import { WidgetsService } from '../../widgets/services/widgets.service';
 export class HomePage implements OnInit {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
   @ViewChild(IonContent, { static: true }) ionContent: IonContent;
-  @ViewChild('widgetsslides', { static: true }) widgetsSlides: IonSlides | undefined;
+  @ViewChild('widgetsslides', { static: false }) widgetsSlides: IonSlides | undefined;
   @ViewChildren(WidgetContainerComponent) widgetContainersList: QueryList<WidgetContainerComponent>;
 
   private widgetContainers: WidgetContainerComponent[] = [];
