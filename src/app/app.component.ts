@@ -38,6 +38,7 @@ import { GlobalThemeService } from './services/theming/global.theme.service';
 import { GlobalWalletConnectService } from './services/walletconnect/global.walletconnect.service';
 import { VoteService } from './voting/services/vote.service';
 import { AppMinimize } from '@ionic-native/app-minimize/ngx';
+import { GlobalTranslationService } from './services/global.translation.service';
 
 @Component({
   selector: 'app-root',
@@ -83,6 +84,7 @@ export class AppComponent {
     private globalELAUtxoService: GlobalELAUtxoService,
     private globalESCBPoSNFTService: GlobalESCBPoSNFTService,
     private globalNativeService: GlobalNativeService, // IMPORTANT: Unused by this component, but keep it here for instantiation by angular
+    private translate: GlobalTranslationService, // for init
     private firebase: FirebaseX,
     private widgetsService: WidgetsService
   ) {}

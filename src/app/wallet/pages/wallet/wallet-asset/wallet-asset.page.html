@@ -47,7 +47,7 @@
                 <div *ngIf="netWallet.show">
                     <ion-row class="network-row" *ngFor="let network of netWallet.networks">
                         <ion-col [size]="12" class="left-title">
-                            <h1>{{ network.getEffectiveName() }}</h1>
+                            <h1>{{ network.name }}</h1>
                             <h2>
                                 {{ network.balanceString }}
                                 <span> {{ currencyService.selectedCurrency.symbol }}</span>
