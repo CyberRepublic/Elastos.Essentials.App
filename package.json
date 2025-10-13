@@ -201,7 +201,7 @@
     "colors": "^1.4.0",
     "cordova-android": "^14.0.0",
     "cordova-clipboard": "1.3.0",
-    "cordova-ios": "7.1.0",
+    "cordova-ios": "7.1.1",
     "cordova-plugin-add-swift-support": "2.0.2",
     "cordova-plugin-advanced-http": "^3.3.1",
     "cordova-plugin-app-version": "0.1.12",
@@ -209,7 +209,8 @@
     "cordova-plugin-ble-central": "^1.5.2",
     "cordova-plugin-camera": "8.0.0",
     "cordova-plugin-file": "^7.0.0",
-    "cordova-plugin-firebasex": "17.0.0-cli",
+    "cordova-plugin-firebase-analytics": "^8.0.0",
+    "cordova-plugin-firebase-crashlytics": "^1.2.0",
     "cordova-plugin-ionic-keyboard": "2.2.0",
     "cordova-plugin-ionic-webview": "5.0.0",
     "cordova-plugin-lottie-splashscreen": "^0.9.6",
@@ -276,13 +277,6 @@
       "elastos-essentials-plugin-intent": {},
       "cordova-plugin-statusbar": {},
       "cordova-sqlite-storage": {},
-      "cordova-plugin-firebasex": {
-        "FIREBASE_ANALYTICS_COLLECTION_ENABLED": "true",
-        "FIREBASE_PERFORMANCE_COLLECTION_ENABLED": "true",
-        "FIREBASE_CRASHLYTICS_COLLECTION_ENABLED": "true",
-        "ANDROID_ICON_ACCENT": "#FF00FFFF",
-        "ANDROID_FIREBASE_PERFORMANCE_MONITORING": "false"
-      },
       "elastos-essentials-plugin-dappbrowser": {},
       "cordova-plugin-ble-central": {
         "BLUETOOTH_RESTORE_STATE": "true",
@@ -295,7 +289,13 @@
         "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
       },
       "elastos-essentials-plugin-internal": {},
-      "cordova-plugin-appminimize": {}
+      "cordova-plugin-appminimize": {},
+      "cordova-plugin-firebase-analytics": {
+        "ANALYTICS_COLLECTION_ENABLED": "true",
+        "AUTOMATIC_SCREEN_REPORTING_ENABLED": "true",
+        "IOS_FIREBASE_POD_VERSION": "10.17.0"
+      },
+      "cordova-plugin-firebase-crashlytics": {}
     },
     "platforms": [
       "android"

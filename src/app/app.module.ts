@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouteReuseStrategy } from '@angular/router';
 import { AppVersion } from '@awesome-cordova-plugins/app-version/ngx';
-import { FirebaseX } from "@awesome-cordova-plugins/firebase-x/ngx";
+// import { FirebaseX } from "@awesome-cordova-plugins/firebase-x/ngx";
 import { AppMinimize } from '@ionic-native/app-minimize/ngx';
 import { HTTP } from '@awesome-cordova-plugins/http/ngx';
 import { Keyboard } from '@awesome-cordova-plugins/keyboard/ngx';
@@ -252,7 +252,7 @@ let providers: Provider[] = [
   ScreenOrientation,
   AppMinimize,
   StatusBar,
-  FirebaseX,
+  // FirebaseX,
   HTTP,
   { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
   // { provide: RouteReuseStrategy, useClass: CustomRouteReuseStrategy },

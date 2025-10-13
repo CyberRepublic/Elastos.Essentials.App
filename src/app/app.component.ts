@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { FirebaseX } from '@awesome-cordova-plugins/firebase-x/ngx';
+// import { FirebaseX } from '@awesome-cordova-plugins/firebase-x/ngx';
 import { ScreenOrientation } from '@awesome-cordova-plugins/screen-orientation/ngx';
 import { StatusBar } from '@awesome-cordova-plugins/status-bar/ngx';
 import { connectivity } from '@elastosfoundation/elastos-connectivity-sdk-js';
@@ -85,7 +85,7 @@ export class AppComponent {
     private globalESCBPoSNFTService: GlobalESCBPoSNFTService,
     private globalNativeService: GlobalNativeService, // IMPORTANT: Unused by this component, but keep it here for instantiation by angular
     private translate: GlobalTranslationService, // for init
-    private firebase: FirebaseX,
+    // private firebase: FirebaseX,
     private widgetsService: WidgetsService
   ) {}
 
