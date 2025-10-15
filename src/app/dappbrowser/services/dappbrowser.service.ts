@@ -27,6 +27,7 @@ import type { BrowsedAppInfo } from '../model/browsedappinfo';
 import { ElastosMainchainProtocolService } from './web3-provider-protocols/elastos-mainchain-protocol.service';
 import { EthereumProtocolService } from './web3-provider-protocols/ethereum-protocol.service';
 import { UnisatProtocolService } from './web3-provider-protocols/unisat-protocol.service';
+import PQueue from 'p-queue';
 
 declare let dappBrowser: DappBrowserPlugin.DappBrowser;
 
@@ -107,6 +108,8 @@ export class DappBrowserService implements GlobalService {
   public confirming = false;
 
   public askedDomains = [];
+
+  private queue: PQueue = new PQueue({ concurrency: 1 });
 
   constructor(
     public translate: TranslateService,
@@ -285,7 +288,7 @@ export class DappBrowserService implements GlobalService {
 
     // Set the active dApp and update wallet connections/subscriptions
     await this.browserWalletConnectionsService.setActiveDapp(url);
-    this.setupDappWalletSubscriptions();
+    // this.setupDappWalletSubscriptions();
     //await this.updateWalletAddressesForCurrentDapp();
 
     var options: any = {
@@ -582,7 +585,7 @@ export class DappBrowserService implements GlobalService {
   /**
    * Handles Web3 requests received from a dApp through the injected web3 provider.
    */
-  private async handleDABMessage(message: DABMessage) {
+  private handleDABMessage(message: DABMessage) {
     if (message.type != 'message') {
       Logger.warn('dappbrowser', 'Received unknown message type', message.type);
       return;
@@ -590,31 +593,39 @@ export class DappBrowserService implements GlobalService {
 
     Logger.log('dappbrowser', 'Received dApp message:', message.data);
 
-    // UNISAT
-    if (message.data.name.startsWith('unisat_')) {
-      await this.unisatProtocolService.handleMessage(message);
-      return;
-    }
+    return this.queue.add(async () => {
+      try {
+        // UNISAT
+        if (message.data.name.startsWith('unisat_')) {
+          await this.unisatProtocolService.handleMessage(message);
+          return;
+        }
 
-    // Elastos main chain and Elastos connector
-    if (message.data.name.startsWith('elamain_') || message.data.name.startsWith('elastos_')) {
-      await this.elastosMainchainProtocolService.handleMessage(message);
-      return;
-    }
+        // Elastos main chain and Elastos connector
+        if (message.data.name.startsWith('elamain_') || message.data.name.startsWith('elastos_')) {
+          await this.elastosMainchainProtocolService.handleMessage(message);
+          return;
+        }
 
-    // Ethereum/EVM messages
-    if (
-      message.data.name.startsWith('eth_') ||
-      message.data.name.startsWith('wallet_') ||
-      message.data.name === 'personal_sign' ||
-      message.data.name === 'signInsecureMessage'
-    ) {
-      await this.ethereumProtocolService.handleMessage(message);
-      return;
-    }
+        // Ethereum/EVM messages
+        if (
+          message.data.name.startsWith('eth_') ||
+          message.data.name.startsWith('wallet_') ||
+          message.data.name === 'personal_sign' ||
+          message.data.name === 'signInsecureMessage'
+        ) {
+          await this.zone.run(async () => {
+            await this.ethereumProtocolService.handleMessage(message);
+          })
+          return;
+        }
 
-    // If we get here, it's an unhandled message type
-    Logger.warn('dappbrowser', 'Unhandled message command', message.data.name);
+        // If we get here, it's an unhandled message type
+        Logger.warn('dappbrowser', 'Unhandled message command', message.data.name);
+      } catch (error) {
+        Logger.error('dappbrowser', 'Error handling dApp message:', error);
+      }
+    });
   }
 
   private handleDABExit() {
