@@ -25,6 +25,7 @@ export class PrivacyPage implements OnInit {
   public sendCredentialToolboxStats = true;
   public useHiveDataSync = false;
   public enableCreatingRedPackets = false;
+  public allowBitcoinSignData = false;
 
   public isIOS = false;
   public lightweightMode = false;
@@ -53,6 +54,7 @@ export class PrivacyPage implements OnInit {
     this.lightweightMode = this.lightweightService.getCurrentLightweightMode();
 
     await this.fetchUseBuiltInBrowser();
+    await this.fetchAllowBitcoinSignData();
     await this.fetchPublishIdentityMedium();
     await this.fetchCredentialToolboxStats();
     if (this.isIOS) {
@@ -84,6 +86,25 @@ export class PrivacyPage implements OnInit {
       DIDSessionsStore.signedInDIDString,
       NetworkTemplateStore.networkTemplate,
       this.useBuiltInBrowser
+    );
+  }
+
+  private async fetchAllowBitcoinSignData(): Promise<void> {
+    this.allowBitcoinSignData = await this.prefs.getBitcoinSignData(
+      DIDSessionsStore.signedInDIDString,
+      NetworkTemplateStore.networkTemplate
+    );
+  }
+
+  public getAllowBitcoinSignDataTitle(): string {
+    return this.translate.instant('settings.developer-bitcoin-signdata-prompt');
+  }
+
+  public toggleAllowBitcoinSignDataChanged() {
+    void this.prefs.setBitcoinSignData(
+      DIDSessionsStore.signedInDIDString,
+      NetworkTemplateStore.networkTemplate,
+      this.allowBitcoinSignData
     );
   }
 

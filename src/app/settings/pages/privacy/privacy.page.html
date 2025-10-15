@@ -15,6 +15,17 @@
       </ion-col>
     </ion-row>
 
+    <ion-row class="section">
+      <ion-col size="10.5" class="title-col">
+        <h1>{{ 'settings.developer-bitcoin-signdata' | translate }}</h1>
+        <h2 class="secondary-text">{{ getAllowBitcoinSignDataTitle() }}</h2>
+      </ion-col>
+      <ion-col size="1.5" class="right-col">
+        <ion-toggle [(ngModel)]="allowBitcoinSignData" (ionChange)="toggleAllowBitcoinSignDataChanged()" mode="ios">
+        </ion-toggle>
+      </ion-col>
+    </ion-row>
+
     <!-- Hive data sync -->
     <ion-row class="section">
       <ion-col size="10.5" class="title-col">

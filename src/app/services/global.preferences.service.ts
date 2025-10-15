@@ -20,7 +20,7 @@ export interface AllPreferences {
   /** Whether to collect logs */
   'developer.collectLogs': boolean;
   /** Whether to allow dangerous Bitcoin sign data operations */
-  'developer.bitcoinSignData': boolean;
+  'privacy.bitcoinSignData': boolean;
   /** Whether to use built-in browser (Android uses built-in, iOS uses external) */
   'privacy.browser.usebuiltin': boolean;
   /** Core developer mode for essentials developers or testers to access dev/tests screens */
@@ -107,7 +107,7 @@ export class GlobalPreferencesService implements GlobalService {
       'developer.backgroundservices.startonboot': true,
       'developer.screencapture': false,
       'developer.collectLogs': false,
-      'developer.bitcoinSignData': false,
+      'privacy.bitcoinSignData': true,
       'privacy.browser.usebuiltin': useBuiltInBrowser,
       'developer.core.mode': false,
       'privacy.identity.publication.medium': 'assist',
@@ -283,11 +283,11 @@ export class GlobalPreferencesService implements GlobalService {
     did: string,
     networkTemplate: string = NetworkTemplateStore.networkTemplate
   ): Promise<boolean> {
-    return this.getPreference(did, networkTemplate, 'developer.bitcoinSignData');
+    return this.getPreference(did, networkTemplate, 'privacy.bitcoinSignData');
   }
 
   public setBitcoinSignData(did: string, networkTemplate: string, bitcoinSignData: boolean): Promise<void> {
-    return this.setPreference(did, networkTemplate, 'developer.bitcoinSignData', bitcoinSignData);
+    return this.setPreference(did, networkTemplate, 'privacy.bitcoinSignData', bitcoinSignData);
   }
 
   public getUseHiveSync(did: string, networkTemplate: string = NetworkTemplateStore.networkTemplate): Promise<boolean> {
