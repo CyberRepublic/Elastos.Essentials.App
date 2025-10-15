@@ -238,9 +238,11 @@ export class UnisatProtocolService {
           BrowserConnectionType.BITCOIN
         );
 
-        // Get the network wallet from the master wallet.
-        const bitcoinNetwork = this.getBitcoinNetwork();
-        btcWallet = (await bitcoinNetwork.createNetworkWallet(connectedMasterWallet, false)) as AnyBTCNetworkWallet;
+        if (connectedMasterWallet) {
+          // Get the network wallet from the master wallet.
+          const bitcoinNetwork = this.getBitcoinNetwork();
+          btcWallet = (await bitcoinNetwork.createNetworkWallet(connectedMasterWallet, false)) as AnyBTCNetworkWallet;
+        }
 
         Logger.log('unisatprotocol', 'BTC wallet selection result:', {
           hasWallet: !!btcWallet,

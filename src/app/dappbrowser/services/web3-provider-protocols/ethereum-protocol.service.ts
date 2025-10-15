@@ -411,9 +411,11 @@ export class EthereumProtocolService {
           BrowserConnectionType.EVM
         );
 
-        // Get the network wallet from the master wallet.
-        const connectedNetwork = this.browserWalletConnectionsService.activeDappEVMNetwork.value;
-        evmWallet = (await connectedNetwork.createNetworkWallet(connectedMasterWallet, false)) as AnyEVMNetworkWallet;
+        if (connectedMasterWallet) {
+          // Get the network wallet from the master wallet.
+          const connectedNetwork = this.browserWalletConnectionsService.activeDappEVMNetwork.value;
+          evmWallet = (await connectedNetwork.createNetworkWallet(connectedMasterWallet, false)) as AnyEVMNetworkWallet;
+        }
 
         if (evmWallet) {
           // Update the injected provider with the new wallet
