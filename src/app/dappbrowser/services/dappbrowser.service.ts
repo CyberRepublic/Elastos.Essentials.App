@@ -308,7 +308,9 @@ export class DappBrowserService implements GlobalService {
     }
 
     dappBrowser.addEventListener(ret => {
-      void this.handleEvent(ret);
+      this.zone.run(() => {
+        void this.handleEvent(ret);
+      });
     });
 
     await dappBrowser.open(url, target, options);
