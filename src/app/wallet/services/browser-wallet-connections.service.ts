@@ -229,7 +229,7 @@ export class BrowserWalletConnectionsService {
         // The actual network compatibility will be checked when creating the connection
         if (connectionType === BrowserConnectionType.EVM) {
           // Allow wallets that support EVM networks or have no network wallet (will be filtered later)
-          return !networkWallet || networkWallet.network instanceof EVMNetwork;
+          return masterWallet.getSupportedNetworks().some(network => network instanceof EVMNetwork);
         } else if (connectionType === BrowserConnectionType.BITCOIN) {
           // Get bitcoin networks
           const bitcoinNetworks = this.networkService.networksList.value.filter(
