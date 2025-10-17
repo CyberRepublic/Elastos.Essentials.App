@@ -21,7 +21,8 @@ export class ElastosIdentityChainStandardNetworkWallet extends ElastosStandardEV
 
   protected prepareStandardSubWallets(): Promise<void> {
     try {
-      this.subWallets[StandardCoinName.ETHDID] = new EidSubWallet(this);
+      this.mainTokenSubWallet = new EidSubWallet(this);
+      this.subWallets[StandardCoinName.ETHDID] = this.mainTokenSubWallet;
     } catch (err) {
       Logger.error('wallet', 'Can not Create Elastos EID subwallet', err);
     }
@@ -41,13 +42,5 @@ export class ElastosIdentityChainStandardNetworkWallet extends ElastosStandardEV
     }
 
     return addresses;
-  }
-
-  public getMainEvmSubWallet(): ElastosEVMSubWallet {
-    return null;
-  }
-
-  public getMainTokenSubWallet(): AnySubWallet {
-    return this.subWallets[StandardCoinName.ETHDID];
   }
 }

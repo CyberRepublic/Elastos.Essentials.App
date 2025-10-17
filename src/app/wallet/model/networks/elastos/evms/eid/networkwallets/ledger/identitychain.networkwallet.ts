@@ -18,7 +18,8 @@ export class ElastosIdentityChainLedgerNetworkWallet extends ElastosLedgerEVMNet
 
   protected prepareStandardSubWallets(): Promise<void> {
     try {
-      this.subWallets[StandardCoinName.ETHDID] = new EidSubWallet(this);
+      this.mainTokenSubWallet = new EidSubWallet(this);
+      this.subWallets[StandardCoinName.ETHDID] = this.mainTokenSubWallet;
     } catch (err) {
       Logger.error('wallet', 'Can not Create Elastos EID subwallet', err);
     }
