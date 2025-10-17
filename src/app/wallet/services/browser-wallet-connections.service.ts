@@ -204,6 +204,7 @@ export class BrowserWalletConnectionsService {
   public async connectWallet(
     dappUrl: string,
     connectionType: BrowserConnectionType,
+    useActiveWallet?: boolean,
     masterWalletId?: string
   ): Promise<MasterWallet | null> {
     const domain = this.extractDomain(dappUrl);
@@ -218,7 +219,13 @@ export class BrowserWalletConnectionsService {
         Logger.warn('wallet', 'Provided masterWalletId not found:', masterWalletId);
         return null;
       }
-    } else {
+    } else if (useActiveWallet) {
+      selectedWallet = this.walletService.getActiveMasterWallet();
+      if (!selectedWallet) {
+        Logger.warn('wallet', 'Active master wallet not found');
+        return null;
+      }
+    } else  {
       // Let user pick a wallet
       const filter: WalletChooserFilter = (walletEntry: WalletChooserEntry) => {
         console.log('wallet', 'Filtering wallet entry:', walletEntry);

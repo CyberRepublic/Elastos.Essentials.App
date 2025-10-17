@@ -106,9 +106,11 @@ export class EthereumProtocolService {
         break;
       case 'wallet_switchEthereumChain':
         Logger.log('ethereum', 'Received switch ethereum chain request');
-        dappBrowser.hide();
+        // Only hide the browser if it is indeed necessary to switch networks,
+        // so move the hide/show logic inside the handleSwitchEthereumChain method
+        // dappBrowser.hide();
         await this.handleSwitchEthereumChain(message);
-        this.showBrowser();
+        // this.showBrowser();
         break;
       case 'wallet_addEthereumChain':
         Logger.log('ethereum', 'Received add ethereum chain request');
@@ -401,14 +403,17 @@ export class EthereumProtocolService {
     if (!evmWallet) {
       Logger.log('ethereum', 'No connected EVM wallet found, triggering wallet selection');
 
+      let useActiveWallet = true;
+
       // Hide the browser and prompt for wallet selection
-      dappBrowser.hide();
+      if (!useActiveWallet) dappBrowser.hide();
 
       try {
         // Ask user to pick a EVM wallet.
         const connectedMasterWallet = await this.browserWalletConnectionsService.connectWallet(
           this.currentUrl,
-          BrowserConnectionType.EVM
+          BrowserConnectionType.EVM,
+          useActiveWallet
         );
 
         if (connectedMasterWallet) {
@@ -431,7 +436,7 @@ export class EthereumProtocolService {
             code: 4001,
             message: 'User rejected the request.'
           });
-          this.showBrowser();
+          if (!useActiveWallet) this.showBrowser();
           return;
         }
       } catch (error) {
@@ -440,12 +445,12 @@ export class EthereumProtocolService {
           code: -32603,
           message: 'Internal error'
         });
-        this.showBrowser();
+        if (!useActiveWallet) this.showBrowser();
         return;
       }
 
       // Show the browser again
-      this.showBrowser();
+      if (useActiveWallet) this.showBrowser();
     }
 
     // Return the connected wallet address
@@ -537,7 +542,19 @@ export class EthereumProtocolService {
         return;
       }
 
+      // this.activeEVMNetwork is wrong and the active network is the right network
+      // We don't need to switch network, just update the EVM network in the browser wallet connections service
+      if (WalletNetworkService.instance.activeNetwork.value.key === targetNetwork.key) {
+        Logger.log('ethereum', 'Already on the right network');
+        // Update the EVM network in the browser wallet connections service
+        await this.browserWalletConnectionsService.selectEVMNetwork(this.currentUrl, targetNetwork.key);
+        this.sendInjectedResponse('ethereum', message.data.id, {});
+        return;
+      }
+
+      dappBrowser.hide();
       const networkSwitched = await GlobalSwitchNetworkService.instance.promptSwitchToNetwork(targetNetwork);
+      void dappBrowser.show()
       if (networkSwitched) {
         Logger.log('ethereum', 'Successfully switched to the new network');
 

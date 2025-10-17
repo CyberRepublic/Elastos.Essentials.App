@@ -241,14 +241,17 @@ export class UnisatProtocolService {
     if (!btcWallet) {
       Logger.log('unisatprotocol', 'No connected BTC wallet found, triggering wallet selection');
 
+      let useActiveWallet = true;
+
       // Hide the browser and prompt for wallet selection
-      dappBrowser.hide();
+      if (!useActiveWallet) dappBrowser.hide();
 
       try {
         // Ask user to pick a BTC wallet.
         const connectedMasterWallet = await this.browserWalletConnectionsService.connectWallet(
           currentUrl,
-          BrowserConnectionType.BITCOIN
+          BrowserConnectionType.BITCOIN,
+          useActiveWallet
         );
 
         if (connectedMasterWallet) {
@@ -273,7 +276,7 @@ export class UnisatProtocolService {
             code: 4001,
             message: 'User rejected the request.'
           });
-          void dappBrowser.show();
+          if (!useActiveWallet) void dappBrowser.show();
           return;
         }
       } catch (error) {
@@ -282,12 +285,12 @@ export class UnisatProtocolService {
           code: -32603,
           message: 'Internal error'
         });
-        void dappBrowser.show();
+        if (!useActiveWallet) void dappBrowser.show();
         return;
       }
 
       // Show the browser again
-      void dappBrowser.show();
+      if (!useActiveWallet) void dappBrowser.show();
     }
 
     // Return the connected wallet address
