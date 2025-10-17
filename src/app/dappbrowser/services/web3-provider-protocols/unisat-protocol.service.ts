@@ -158,9 +158,22 @@ export class UnisatProtocolService {
       if (bitcoinWallet) {
         Logger.log('unisatprotocol', 'Bitcoin wallet changed for active dApp:', bitcoinWallet.masterWallet.name);
         // Handle async operations without blocking the subscribe callback
-        void this.updateBitcoinWalletAddress(bitcoinWallet.masterWallet).catch(error => {
-          Logger.error('unisatprotocol', 'Error updating Bitcoin wallet address:', error);
-        });
+        void (async () => {
+          try {
+            // Get the wallet address
+            const walletAddress = await this.getWalletBitcoinAddress(bitcoinWallet.masterWallet);
+
+            // Update local state
+            this.userBTCAddress = walletAddress;
+            Logger.log('unisatprotocol', 'Updated Bitcoin address:', this.userBTCAddress);
+
+            // Update the injected provider so it emits accountsChanged
+            await this.updateProviderWithWallet(this.getCurrentUrl(), walletAddress);
+          } catch (error) {
+            Logger.error('unisatprotocol', 'Error updating Bitcoin wallet address:', error);
+            this.userBTCAddress = null;
+          }
+        })();
       } else {
         Logger.log('unisatprotocol', 'Bitcoin wallet disconnected for active dApp');
         this.userBTCAddress = null;
