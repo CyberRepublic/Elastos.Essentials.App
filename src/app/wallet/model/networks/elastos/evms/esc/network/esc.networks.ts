@@ -88,7 +88,11 @@ export class ElastosSmartChainMainNetNetwork extends ElastosSmartChainNetworkBas
       [
         {
           name: 'Elastos Smart Chain RPC',
-          url: 'https://api.elastos.io/eth'
+          url: 'https://api.elastos.io/esc'
+        },
+        {
+          name: 'Elastos Smart Chain RPC 2',
+          url: 'https://api2.elastos.io/esc'
         }
       ],
       [elastosMainnetElkEarnProvider],
@@ -168,7 +172,7 @@ export class ElastosSmartChainTestNetNetwork extends ElastosSmartChainNetworkBas
       [
         {
           name: 'Elastos Smart Chain Testnet RPC',
-          url: 'https://api-testnet.elastos.io/eth'
+          url: 'https://api-testnet.elastos.io/esc'
         }
       ],
       [],

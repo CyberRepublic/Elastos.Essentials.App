@@ -62,6 +62,10 @@ export class ElastosMainChainMainNetNetwork extends ElastosMainChainNetworkBase 
         {
           name: 'Elastos Main Chain RPC',
           url: 'https://api.elastos.io/ela'
+        },
+        {
+          name: 'Elastos Main Chain RPC 2',
+          url: 'https://api2.elastos.io/ela'
         }
       ]
     );

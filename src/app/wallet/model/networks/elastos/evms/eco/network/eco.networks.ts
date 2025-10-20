@@ -112,6 +112,10 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
           url: 'https://api.elastos.io/eco'
         },
         {
+          name: 'Official Elastos Node 2',
+          url: 'https://api2.elastos.io/eco'
+        },
+        {
           name: 'Hong Kong Node',
           url: 'https://node.shenzhou-crypto.com'
         }

@@ -448,7 +448,7 @@ export class GlobalElastosAPIService extends GlobalService {
    * Returns the right API endpoint for the given URL service type (esc rpc, eid misc, etc) and based
    * on the currenly active network template and elastos API provider.
    *
-   * Ex: "MainNet" network template + "elastos.io" provider + "ETHSC_RPC" api type ==> https://api.elastos.io/eth
+   * Ex: "MainNet" network template + "elastos.io" provider + "ETHSC_RPC" api type ==> https://api.elastos.io/esc
    *
    * NOTE: this api returns the hardcoded urls, not regarding potential overrides user could have
    * done on the manage wallet networks page.
