@@ -84,6 +84,7 @@ export class CRCouncilService {
   public crmembers: any[] = [];
   public selectedMember: CRMemberInfo;
   public selectedMemberDid: string;
+  public selectedMemberNickname: string;
   public candidateInfo: CandidateBaseInfo;
   public crmemberInfo: CRMemberInfo;
   public updateInfo: any;
