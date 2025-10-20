@@ -9,7 +9,7 @@ import { ElastosECOChainTransactionProvider } from '../../tx-providers/elastos.e
 
 export class ElastosECOLedgerNetworkWallet extends ElastosLedgerEVMNetworkWallet {
   constructor(masterWallet: LedgerMasterWallet, network: EVMNetwork) {
-    super(masterWallet, network, 'ECO', 'Elastos PGP ECO Chain', StandardCoinName.ETHECO);
+    super(masterWallet, network, 'ELA', 'Elastos PGP ECO Chain', StandardCoinName.ETHECO);
   }
 
   protected createTransactionDiscoveryProvider(): TransactionProvider<any> {
