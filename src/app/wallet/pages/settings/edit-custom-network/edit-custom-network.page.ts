@@ -175,8 +175,7 @@ export class EditCustomNetworkPage implements OnInit {
 
       const httpOptions = {
         headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-          'X-Source': 'Essentials'
+          'Content-Type': 'application/json'
         })
       };
 

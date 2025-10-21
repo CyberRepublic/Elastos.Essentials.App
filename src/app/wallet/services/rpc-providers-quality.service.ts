@@ -101,8 +101,7 @@ export class RpcProvidersQualityService {
     try {
       const httpOptions = {
         headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-          'X-Source': 'Essentials-Quality-Check'
+          'Content-Type': 'application/json'
         })
       };
 
