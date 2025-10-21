@@ -104,11 +104,11 @@ export const suggestedDApps = (darkMode: boolean, lightweightMode = false): DApp
       ]
     : []),
   {
-    icon: '/assets/browser/dapps/anyswap.svg',
-    title: 'AnySwap',
+    icon: '/assets/browser/dapps/multichain.png',
+    title: 'Multichain',
     description:
-      'Anyswap is a fully decentralized cross chain swap protocol, based on Fusion DCRM technology, with automated pricing and liquidity system.',
-    url: 'https://anyswap.exchange/',
+      'Cross-ChainRouter Protocol',
+    url: 'https://multichain.org/',
     useExternalBrowser: false,
     walletConnectSupported: true,
     networks: ['arbitrum', 'avalanchecchain', 'bsc', 'eth', 'fusion', 'fantom', 'polygon', 'telos']
