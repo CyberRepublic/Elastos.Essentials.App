@@ -45,6 +45,10 @@
                 font-weight: 500;
                 line-height: 1.46;
                 margin: 0 15px;
+                max-width: 100%;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
             }
         }
     }
