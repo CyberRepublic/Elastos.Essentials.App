@@ -17,9 +17,17 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
   private withdrawContract: any;
   private withdrawContractAddress: string;
 
+  // Centralized mapping for ECO ERC20 token contract addresses to icon assets
+  private static readonly TOKEN_ICON_MAP: Record<string, string> = {
+    '0x0000000000000000000000000000000000000065': 'assets/wallet/networks/elastos.png',
+    '0x45ec25a63e010bfb84629242f40dda187f83833e': 'assets/wallet/coins/btcd.png',
+    '0x67d8183f13043be52f64fb434f1aa5e5d1c58775': 'assets/wallet/coins/fist.png',
+    '0x8152557dd7d8dbfa2e85eae473f8b897a5b6cca9': 'assets/wallet/coins/pga.png',
+    '0x1c4e7cd89ea67339d4a5ed2780703180a19757d7': 'assets/wallet/coins/usdt.svg'
+  };
+
   constructor(networkWallet: AnyNetworkWallet, coinID: CoinID) {
-    let rpcApiUrl = GlobalElastosAPIService.instance.getApiUrlForChainCode(StandardCoinName.ETHECOPGP);
-    super(networkWallet, coinID, rpcApiUrl, "PGP-ERC20 token");
+    super(networkWallet, coinID, "PGP-ERC20 token");
 
     this.spvConfigEVMCode = StandardCoinName.ETHECOPGP;
     this.withdrawContractAddress = Config.ETHECOPGP_WITHDRAW_ADDRESS.toLowerCase();
@@ -27,10 +35,9 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
   }
 
   public getMainIcon(): string {
-    if (this.isELAToken()) {
-      return "assets/wallet/networks/elastos.png";
-    }
-    return "assets/wallet/coins/pga.png";
+    const contract = this.coin.getContractAddress();
+    const addr = contract ? contract.toLowerCase() : '';
+    return PGPERC20SubWallet.TOKEN_ICON_MAP[addr] ?? 'assets/wallet/coins/pga.png';
   }
 
   public getSecondaryIcon(): string {
@@ -86,9 +93,9 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
         "stateMutability": "nonpayable",
         "type": "function"
       }];
-      this.withdrawContract = new (this.highPriorityWeb3.eth.Contract)(contractAbi, this.withdrawContractAddress);
+      const highPriorityWeb3 = await this.createWeb3(true);
+      this.withdrawContract = new (highPriorityWeb3.eth.Contract)(contractAbi, this.withdrawContractAddress);
     }
-    Logger.warn('wallet', ' ----pgp getWithdrawContract')
     return await this.withdrawContract;
   }
 
@@ -104,7 +111,8 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
         to: this.withdrawContractAddress,
         value: '100000',
       }
-      let tempGasLimit = await this.highPriorityWeb3.eth.estimateGas(tx);
+      const highPriorityWeb3 = await this.createWeb3(true);
+      let tempGasLimit = await highPriorityWeb3.eth.estimateGas(tx);
       // Make sure the gaslimit is big enough - add a bit of margin for fluctuating gas price
       estimateGas = Util.ceil(tempGasLimit * 1.5, 100);
 

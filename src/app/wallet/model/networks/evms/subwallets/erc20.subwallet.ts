@@ -109,7 +109,7 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
    * Creates a new Web3 instance with fresh RPC URL. We recreate it each time to ensure
    * we always use the latest selected RPC URL instead of a cached one.
    */
-  private async createWeb3(highPriority = false): Promise<Web3> {
+  protected async createWeb3(highPriority = false): Promise<Web3> {
     const EssentialsWeb3Provider = (await import('src/app/model/essentialsweb3provider')).EssentialsWeb3Provider;
     const Web3 = await lazyWeb3Import();
     const rpcUrl = this.networkWallet.network.getSelectedRpcUrl();

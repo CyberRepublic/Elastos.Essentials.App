@@ -87,9 +87,9 @@ export class Config {
 
     // PGP
     // Send ELA from mainchain to ETHECOPGP
-    public static ETHECOPGP_DEPOSIT_ADDRESS = "XSfBNGnTSDqoUFK4MRJ9tD7k7fX98i8U6N";
+    public static ETHECOPGP_DEPOSIT_ADDRESS = "XQ1CtUgM5gEmNoByQWoW4syhtiixuLgfSF";
     public static ETHECOPGP_DEPOSIT_ADDRESS_MAINNET = "XV5cSp1y1PU4xXSQs5oaaLExgHA2xHYjp5";
-    public static ETHECOPGP_DEPOSIT_ADDRESS_TESTNET = "XSfBNGnTSDqoUFK4MRJ9tD7k7fX98i8U6N";
+    public static ETHECOPGP_DEPOSIT_ADDRESS_TESTNET = "XQ1CtUgM5gEmNoByQWoW4syhtiixuLgfSF";
 
     // Send ELA from ETHECOPGP to mainchain by smartcontract
     public static ETHECOPGP_WITHDRAW_ADDRESS = "0x0000000000000000000000000000000000000064";

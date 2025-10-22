@@ -11,6 +11,7 @@ import type { AnyNetworkWallet } from "../../../../base/networkwallets/networkwa
 import { ElastosEVMNetwork } from "../../../network/elastos.evm.network";
 import { ERC20SubWallet } from "../../../../evms/subwallets/erc20.subwallet";
 import { PGPERC20SubWallet } from "../subwallets/pgp.erc20.subwallet";
+import { ElastosECOPGPOracleCustomCurrencyProvider } from "../currency/pgp.oracle.custom.currency.provider";
 
 export abstract class ElastosPGPNetworkBase extends ElastosEVMNetwork<WalletNetworkOptions> {
   public static NETWORK_KEY = "elastosecopgp";
@@ -18,10 +19,12 @@ export abstract class ElastosPGPNetworkBase extends ElastosEVMNetwork<WalletNetw
   public async newNetworkWallet(masterWallet: MasterWallet): Promise<AnyNetworkWallet> {
     switch (masterWallet.type) {
       case WalletType.STANDARD:
-        const ElastosPGPChainStandardNetworkWallet = (await import("../networkwallets/standard/pgp.networkwallet")).ElastosPGPChainStandardNetworkWallet;
+        const ElastosPGPChainStandardNetworkWallet = (await import("../networkwallets/standard/pgp.networkwallet"))
+          .ElastosPGPChainStandardNetworkWallet;
         return new ElastosPGPChainStandardNetworkWallet(masterWallet as StandardMasterWallet, this);
       case WalletType.LEDGER:
-        const ElastosPGPLedgerNetworkWallet = (await import("../networkwallets/ledger/pgp.networkwallet")).ElastosPGPLedgerNetworkWallet;
+        const ElastosPGPLedgerNetworkWallet = (await import("../networkwallets/ledger/pgp.networkwallet"))
+          .ElastosPGPLedgerNetworkWallet;
         return new ElastosPGPLedgerNetworkWallet(masterWallet as LedgerMasterWallet, this);
       default:
         Logger.warn('wallet', 'PGP does not support ', masterWallet.type);
@@ -29,11 +32,14 @@ export abstract class ElastosPGPNetworkBase extends ElastosEVMNetwork<WalletNetw
     }
   }
 
-  public async createERC20SubWallet(networkWallet: AnyNetworkWallet, coinID: CoinID, startBackgroundUpdates = true): Promise<ERC20SubWallet> {
+  public async createERC20SubWallet(
+      networkWallet: AnyNetworkWallet,
+      coinID: CoinID,
+      startBackgroundUpdates = true
+  ): Promise<ERC20SubWallet> {
     let subWallet = new PGPERC20SubWallet(networkWallet, coinID);
     await subWallet.initialize();
-    if (startBackgroundUpdates)
-      void subWallet.startBackgroundUpdates();
+    if (startBackgroundUpdates) void subWallet.startBackgroundUpdates();
     return subWallet;
   }
 
@@ -87,17 +93,39 @@ export class ElastosPGPMainNetNetwork extends ElastosPGPNetworkBase {
       "PGP",
       "assets/wallet/networks/pgp.png",
       MAINNET_TEMPLATE,
-      12343
+      12343,
+      [
+        {
+          name: 'Official Elastos Node',
+          url: 'https://api.elastos.io/eco'
+        }
+      ]
     );
+
+    this.builtInCoins = [
+      new ERC20Coin(this, "ELA", "ELA", "0x0000000000000000000000000000000000000065", 8, false, true),
+      // new ERC20Coin(this, 'USDT', 'PGA-USDT', '0x1C4E7cd89ea67339d4A5ed2780703180a19757d7', 18, false, true),
+      // new ERC20Coin(this, 'BTCD', 'BTC Dollar', '0x45ec25a63e010BFb84629242f40DDa187f83833E', 18, false, true),
+      // new ERC20Coin(this, 'FIST', 'FIST on ECO', '0x67d8183f13043Be52F64FB434F1AA5e5d1C58775', 18, false, true),
+      // new ERC20Coin(this, 'PGA', 'PanGu Asset', '0x8152557DD7d8dBFa2E85EaE473f8B897a5b6CCA9', 18, false, true)
+    ];
+
+    this.customCurrencyProviders.push(new ElastosECOPGPOracleCustomCurrencyProvider(this));
   }
 
   public getAPIUrlOfType(type: NetworkAPIURLType): string {
     if (type === NetworkAPIURLType.RPC)
-      return GlobalElastosAPIService.instance.getApiUrl(GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECOPGP), MAINNET_TEMPLATE);
+      return GlobalElastosAPIService.instance.getApiUrl(
+        GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECOPGP),
+        MAINNET_TEMPLATE);
     else if (type === NetworkAPIURLType.ETHERSCAN) {
-      return GlobalElastosAPIService.instance.getApiUrl(GlobalElastosAPIService.instance.getApiUrlTypeForBrowser(StandardCoinName.ETHECOPGP), MAINNET_TEMPLATE);
+      return GlobalElastosAPIService.instance.getApiUrl(
+        GlobalElastosAPIService.instance.getApiUrlTypeForBrowser(StandardCoinName.ETHECOPGP),
+        MAINNET_TEMPLATE);
     } else if (type === NetworkAPIURLType.BLOCK_EXPLORER) {
-      return GlobalElastosAPIService.instance.getApiUrl(GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(StandardCoinName.ETHECOPGP), MAINNET_TEMPLATE);
+      return GlobalElastosAPIService.instance.getApiUrl(
+        GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(StandardCoinName.ETHECOPGP),
+        MAINNET_TEMPLATE);
     } else
       return null;
   }
@@ -109,7 +137,7 @@ export class ElastosPGPMainNetNetwork extends ElastosPGPNetworkBase {
   // When the user manually sets the gas price, it cannot be less than this value.
   // The unit is gwei.
   public getMinGasprice(): number {
-    return 50;
+    return 1;
   }
 }
 
@@ -121,7 +149,16 @@ export class ElastosPGPTestNetNetwork extends ElastosPGPNetworkBase {
       "PGP Testnet",
       "assets/wallet/networks/pgp.png",
       TESTNET_TEMPLATE,
-      12345
+      12345,
+      [
+        {
+          name: 'Elastos ECO Chain Testnet RPC',
+          url: GlobalElastosAPIService.instance.getApiUrl(
+            GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECOPGP),
+            TESTNET_TEMPLATE
+          )
+        }
+      ]
     );
 
     this.builtInCoins = [
@@ -131,11 +168,17 @@ export class ElastosPGPTestNetNetwork extends ElastosPGPNetworkBase {
 
   public getAPIUrlOfType(type: NetworkAPIURLType): string {
     if (type === NetworkAPIURLType.RPC)
-      return GlobalElastosAPIService.instance.getApiUrl(GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECOPGP), TESTNET_TEMPLATE);
+      return GlobalElastosAPIService.instance.getApiUrl(
+        GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECOPGP),
+        TESTNET_TEMPLATE);
     else if (type === NetworkAPIURLType.ETHERSCAN) {
-      return GlobalElastosAPIService.instance.getApiUrl(GlobalElastosAPIService.instance.getApiUrlTypeForBrowser(StandardCoinName.ETHECOPGP), TESTNET_TEMPLATE);
+      return GlobalElastosAPIService.instance.getApiUrl(
+        GlobalElastosAPIService.instance.getApiUrlTypeForBrowser(StandardCoinName.ETHECOPGP),
+        TESTNET_TEMPLATE);
     } else if (type === NetworkAPIURLType.BLOCK_EXPLORER) {
-      return GlobalElastosAPIService.instance.getApiUrl(GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(StandardCoinName.ETHECOPGP), TESTNET_TEMPLATE);
+      return GlobalElastosAPIService.instance.getApiUrl(
+        GlobalElastosAPIService.instance.getApiUrlTypeForBlockExplorer(StandardCoinName.ETHECOPGP),
+        TESTNET_TEMPLATE);
     } else
       return null;
   }
@@ -147,6 +190,6 @@ export class ElastosPGPTestNetNetwork extends ElastosPGPNetworkBase {
   // When the user manually sets the gas price, it cannot be less than this value.
   // The unit is gwei.
   public getMinGasprice(): number {
-    return 50;
+    return 1;
   }
 }

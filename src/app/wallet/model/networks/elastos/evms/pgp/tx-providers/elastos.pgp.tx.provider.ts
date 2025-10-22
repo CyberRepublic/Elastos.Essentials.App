@@ -36,15 +36,13 @@ export class ElastosPGPChainTransactionProvider extends TransactionProvider<Elas
 
       // Discover new transactions globally for all tokens at once, in order to notify user
       // of NEW tokens received, and NEW payments received for existing tokens.
-      this.refreshEvery(() => this.tokenProvider.discoverTokens(), 30000);
+      this.refreshEvery(() => this.tokenProvider.discoverTokens(), 60000);
     }
   }
 
   protected getSubWalletTransactionProvider(subWallet: AnySubWallet): AnySubWalletTransactionProvider {
-    if (subWallet instanceof PGPSubWallet)
-      return this.elaPGPProvider;
-    else if (subWallet instanceof PGPERC20SubWallet)
-      return this.tokenProvider;
+    if (subWallet instanceof PGPSubWallet) return this.elaPGPProvider;
+    else if (subWallet instanceof PGPERC20SubWallet) return this.tokenProvider;
     else
       throw new Error("Transactions provider: getSubWalletTransactionProvider() is called with an unknown subwallet!");
   }
