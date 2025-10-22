@@ -18,7 +18,11 @@ export class ElastosTokenSubWalletProvider extends SubWalletTransactionProvider<
 
   protected getProviderTransactionInfo(transaction: EthTransaction): ProviderTransactionInfo {
     return {
-      cacheKey: this.subWallet.masterWallet.id + "-" + this.subWallet.networkWallet.network.key + "-" + transaction.contractAddress.toLowerCase() + "-transactions",
+      cacheKey:
+        this.subWallet.masterWallet.id +
+        "-" + this.subWallet.networkWallet.network.key +
+        "-" + transaction.contractAddress.toLowerCase() +
+        "-transactions",
       cacheEntryKey: transaction.hash,
       cacheTimeValue: parseInt(transaction.timeStamp),
       subjectKey: transaction.contractAddress
@@ -34,7 +38,6 @@ export class ElastosTokenSubWalletProvider extends SubWalletTransactionProvider<
 
     try {
       let tokenList = await GlobalElastosAPIService.instance.getERC20TokenList(StandardCoinName.ETHECO, address);
-      Logger.warn('wallet', 'eco discoverTokens', tokenList)
       // Let the provider know what we have found
       await this.provider.onTokenInfoFound(tokenList);
     }
@@ -52,8 +55,11 @@ export class ElastosTokenSubWalletProvider extends SubWalletTransactionProvider<
     let page = 1;
     // Compute the page to fetch from the api, based on the current position of "afterTransaction" in the list
     if (afterTransaction) {
-      let afterTransactionIndex = (await this.getTransactions(erc20SubWallet)).findIndex(t => t.hash === afterTransaction.hash);
-      if (afterTransactionIndex) { // Just in case, should always be true but...
+      let afterTransactionIndex = (await this.getTransactions(erc20SubWallet)).findIndex(
+        t => t.hash === afterTransaction.hash
+      );
+      if (afterTransactionIndex) {
+        // Just in case, should always be true but...
         // Ex: if tx index in current list of transactions is 18 and we use 8 results per page
         // then the page to fetch is 2: Math.floor(18 / 8) + 1 - API page index starts at 1
         page = 1 + Math.floor((afterTransactionIndex + 1) / MAX_RESULTS_PER_FETCH);

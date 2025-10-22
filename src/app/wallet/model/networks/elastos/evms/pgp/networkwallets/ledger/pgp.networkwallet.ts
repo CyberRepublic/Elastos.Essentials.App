@@ -12,12 +12,7 @@ import { ElastosPGPChainTransactionProvider } from "../../tx-providers/elastos.p
 
 export class ElastosPGPLedgerNetworkWallet extends ElastosLedgerEVMNetworkWallet {
   constructor(masterWallet: LedgerMasterWallet, network: EVMNetwork) {
-    super(
-      masterWallet,
-      network,
-      "PGP",
-      "PGP Chain"
-    );
+    super(masterWallet, network, 'PGA', 'PGP Chain', StandardCoinName.ETHECOPGP);
   }
 
   protected createTransactionDiscoveryProvider(): TransactionProvider<any> {
@@ -34,29 +29,5 @@ export class ElastosPGPLedgerNetworkWallet extends ElastosLedgerEVMNetworkWallet
     }
 
     return;
-  }
-
-  public getAddresses(): WalletAddressInfo[] {
-    let addresses = [];
-
-    if (this.subWallets[StandardCoinName.ETHECOPGP]) {
-      addresses.push({
-        title: "EVM",
-        address: this.subWallets[StandardCoinName.ETHECOPGP].getCurrentReceiverAddress()
-      });
-    }
-    return addresses;
-  }
-
-  public getMainEvmSubWallet(): ElastosEVMSubWallet {
-    return this.mainTokenSubWallet as ElastosEVMSubWallet;
-  }
-
-  public getMainTokenSubWallet(): AnySubWallet {
-    return this.mainTokenSubWallet;
-  }
-
-  public getAverageBlocktime(): number {
-    return 5;
   }
 }

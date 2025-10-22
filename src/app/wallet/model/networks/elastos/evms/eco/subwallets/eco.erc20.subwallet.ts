@@ -16,7 +16,6 @@ export class EcoERC20SubWallet extends ERC20SubWallet {
   };
 
   constructor(networkWallet: AnyNetworkWallet, coinID: CoinID) {
-    let rpcApiUrl = GlobalElastosAPIService.instance.getApiUrlForChainCode(StandardCoinName.ETHECO);
     super(networkWallet, coinID, 'ECO-ERC20 token');
 
     this.spvConfigEVMCode = StandardCoinName.ETHECO;

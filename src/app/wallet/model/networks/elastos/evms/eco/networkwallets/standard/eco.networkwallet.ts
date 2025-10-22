@@ -26,17 +26,4 @@ export class ElastosECOChainStandardNetworkWallet extends ElastosStandardEVMNetw
     }
     return Promise.resolve();
   }
-
-  public getAddresses(): WalletAddressInfo[] {
-    let addresses = [];
-
-    if (this.subWallets[StandardCoinName.ETHECO]) {
-      addresses.push({
-        title: 'EVM',
-        address: this.subWallets[StandardCoinName.ETHECO].getCurrentReceiverAddress()
-      });
-    }
-
-    return addresses;
-  }
 }
