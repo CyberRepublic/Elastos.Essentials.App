@@ -642,7 +642,7 @@ export const zh = {
     'signbitcoindata-intro': '应用程序需要您使用钱包签署交易才能继续，请确认',
     'signbitcoindata-danger': '只有在您清楚交易内容或完全信任请求网站的情况下，才能签署此交易。',
     'signbitcoindata-enable-signdata-request':
-      '这个请求可能存在危险。 请先在Essentials设置中启用开发者模式，然后启用 Bitcoin signData()功能',
+      '这个请求可能存在危险。 请先在Essentials设置 → 隐私中启用 Bitcoin signData()功能',
 
     /***********************
      * Push Bitcoin Tx Page *

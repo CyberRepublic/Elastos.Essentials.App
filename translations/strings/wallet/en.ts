@@ -655,7 +655,7 @@ export const en = {
     'signbitcoindata-danger':
       "Only sign this transaction if you know what you're doing or completely trust the requesting site.",
     'signbitcoindata-enable-signdata-request':
-      'This request can be dangerous. Please first enable the developer mode in Essentials settings, and activate the bitcoin signData() feature',
+      'This request can be dangerous. Please enable the Bitcoin signData() feature in the Essentials Settings → Privacy section',
 
     /***********************
      * Push Bitcoin Tx Page *
