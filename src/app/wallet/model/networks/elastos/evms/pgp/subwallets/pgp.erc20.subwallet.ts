@@ -1,4 +1,3 @@
-import { GlobalElastosAPIService } from "src/app/services/global.elastosapi.service";
 import { CoinID, StandardCoinName } from "../../../../../coin";
 import { AnyNetworkWallet } from "../../../../base/networkwallets/networkwallet";
 import { ERC20SubWallet } from "../../../../evms/subwallets/erc20.subwallet";
@@ -45,7 +44,7 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
   }
 
   public getDisplayableERC20TokenInfo(): string {
-    return "";// GlobalLanguageService.instance.translate('wallet.ela-erc20'); // "Elastos ERC20 token" is confusing.
+    return "";
   }
 
   public supportInternalTransactions() {
@@ -66,6 +65,15 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
       return this.networkWallet.masterWallet.hasMnemonicSupport()
     }
     else return false;
+  }
+
+  public getCrossChainFee(): number {
+    if (this.isELAToken()) {
+      // The minimum gas price set for eco sidechain is 50, The gas limit for cross chain transactions is approximately 21512,
+      // so the fee set in the SDK is 150000.
+      return 150000;
+    }
+    else return -1;
   }
 
   protected async getWithdrawContract() {
@@ -119,26 +127,22 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
     } catch (error) {
         Logger.error('wallet', 'pgp estimateWithdrawTransactionGas error:', error);
     }
-Logger.warn("wallet", ' -- estimateGas', estimateGas)
+
     return estimateGas;
   }
 
   public async createWithdrawTransaction(toAddress: string, toAmount: number, memo: string, gasPriceArg: string, gasLimitArg: string, nonceArg = -1): Promise<string> {
     const withdrawContract = await this.getWithdrawContract()
-    Logger.warn("wallet", ' --createWithdrawTransaction  toAddress', toAddress, ' toAmount:', toAmount)
     let gasPrice = gasPriceArg;
     if (gasPrice === null) {
       gasPrice = await this.getGasPrice();
     }
-
-    Logger.warn("wallet", '------->>gasPrice', gasPrice)
 
     let gasLimit = gasLimitArg;
     if (gasLimit === null) {
       let estimateGas = await this.estimateWithdrawTransactionGas(toAddress);
       gasLimit = estimateGas.toString();
     }
-    Logger.warn("wallet", ' --createWithdrawTransaction  gasLimit', gasLimit, ' gasPrice:', gasPrice)
 
     let amountWithDecimals: BigNumber;
     if (toAmount === -1) { //-1: send all.
@@ -154,7 +158,7 @@ Logger.warn("wallet", ' -- estimateGas', estimateGas)
       nonce = await EVMService.instance.getNonce(this.networkWallet.network, this.networkWallet.getAddresses()[0].address);
     }
     Logger.log('wallet', 'pgp createWithdrawTransaction gasPrice:', gasPrice.toString(), ' toAmountSend:', amountWithDecimals.toString(), ' nonce:', nonce, ' withdrawContractAddress:', this.withdrawContractAddress);
-    return null;
+
     return (this.networkWallet.safe as unknown as EVMSafe).createContractTransaction(this.withdrawContractAddress, '0', gasPrice, gasLimit, nonce, method.encodeABI());
   }
 }
