@@ -1324,7 +1324,13 @@ export class CoinTransferPage implements OnInit, OnDestroy {
   async getELASubwalletByID(id: StandardCoinName) {
     let network = this.getELANetworkByID(id);
     let networkWallet = await network.createNetworkWallet(this.networkWallet.masterWallet, false);
-    return networkWallet?.getSubWallet(id);
+    if (id === StandardCoinName.ETHECOPGP) {
+      // The ela token is erc20 token on pgp sidechain. Cross chain transactions require a chain ID.
+      let elaTokenAddress = (networkWallet.network as ElastosPGPNetworkBase).getELATokenContract();
+      return networkWallet.getSubWallet(elaTokenAddress);
+    } else {
+      return networkWallet?.getSubWallet(id);
+    }
   }
 
   public isTransferTypeSendNFT(): boolean {

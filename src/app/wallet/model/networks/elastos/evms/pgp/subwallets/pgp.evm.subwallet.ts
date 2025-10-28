@@ -4,8 +4,6 @@ import { AnyEVMNetworkWallet } from "../../../../evms/networkwallets/evm.network
 import { ElastosEVMSubWallet } from "../../subwallets/standard/elastos.evm.subwallet";
 
 export class PGPSubWallet extends ElastosEVMSubWallet {
-  private withdrawContract: any = null;
-
   constructor(networkWallet: AnyEVMNetworkWallet) {
     super(networkWallet, StandardCoinName.ETHECOPGP, "PGP Chain");
   }

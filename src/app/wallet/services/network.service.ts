@@ -174,6 +174,7 @@ export class WalletNetworkService {
     const preferredNetworkKeys = [
       'elastos',
       'elastoseco',
+      'elastosecopgp',
       'btc',
       'bsc',
       'ethereum',
@@ -352,6 +353,7 @@ export class WalletNetworkService {
     const defaultVisibleNetworks = [
       'elastos',
       'elastoseco',
+      'elastosecopgp',
       'elastossmartchain',
       'elastosidchain',
       'ethereum',

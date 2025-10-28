@@ -14,6 +14,7 @@ import { CurrencyService } from '../../../../services/currency.service';
 import { Native } from '../../../../services/native.service';
 import { UiService } from '../../../../services/ui.service';
 import { WalletService } from '../../../../services/wallet.service';
+import { ElastosPGPNetworkBase } from 'src/app/wallet/model/networks/elastos/evms/pgp/network/pgp.networks';
 
 // The multi-sign wallet doesn't support sidechain, we directly return the specified information.
 // User need to select the destination Network.
@@ -72,6 +73,8 @@ export class CoinSelectPage implements OnInit {
     } else {
       this.subWallets = await this.getELASideChainSubwallets();
       if (this.subWallets.length === 0) {
+        // The multi-sign wallet doesn't support sidechain,
+        // so we can't get the to subwallet, user only select the destination Network.
         this.initELASideChainNetworks();
       }
     }
@@ -80,6 +83,10 @@ export class CoinSelectPage implements OnInit {
   onItem(wallet: AnySubWallet) {
     // Define subwallets to transfer to and from
     this.coinTransferService.toSubWalletId = wallet.id;
+    // The ela token is erc20 token on pgp sidechain. Cross chain transactions require a chain ID.
+    if (this.coinTransferService.toSubWalletId === '0x0000000000000000000000000000000000000065') {
+      this.coinTransferService.toSubWalletId = StandardCoinName.ETHECOPGP;
+    }
 
     this.native.go('/wallet/coin-transfer');
   }
@@ -120,7 +127,8 @@ export class CoinSelectPage implements OnInit {
     let ecoPGPChain = WalletNetworkService.instance.getNetworkByKey('elastosecopgp');
     let ecoPGPNetworkWallet = await ecoPGPChain.createNetworkWallet(this.networkWallet.masterWallet, false);
     if (ecoPGPNetworkWallet) {
-      let ecoPGPsubwallet = ecoPGPNetworkWallet.getSubWallet(StandardCoinName.ETHECOPGP);
+      let elaTokenAddress = (ecoPGPNetworkWallet.network as ElastosPGPNetworkBase).getELATokenContract();
+      let ecoPGPsubwallet = ecoPGPNetworkWallet.getSubWallet(elaTokenAddress);
       subwallets.push(ecoPGPsubwallet);
     }
     return subwallets;
