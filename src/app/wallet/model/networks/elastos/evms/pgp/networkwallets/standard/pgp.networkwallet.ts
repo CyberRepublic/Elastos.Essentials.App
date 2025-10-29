@@ -1,12 +1,9 @@
 import { Logger } from "src/app/logger";
-import { AnySubWallet } from "src/app/wallet/model/networks/base/subwallets/subwallet";
 import { EVMNetwork } from "src/app/wallet/model/networks/evms/evm.network";
 import { StandardCoinName } from "../../../../../../coin";
 import { StandardMasterWallet } from "../../../../../../masterwallets/masterwallet";
 import { TransactionProvider } from "../../../../../../tx-providers/transaction.provider";
-import { WalletAddressInfo } from "../../../../../base/networkwallets/networkwallet";
 import { ElastosStandardEVMNetworkWallet } from "../../../networkwallets/standard/standard.evm.networkwallet";
-import { ElastosEVMSubWallet } from "../../../subwallets/standard/elastos.evm.subwallet";
 import { PGPSubWallet } from "../../subwallets/pgp.evm.subwallet";
 import { ElastosPGPChainTransactionProvider } from "../../tx-providers/elastos.pgp.tx.provider";
 
