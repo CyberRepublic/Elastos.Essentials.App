@@ -61,7 +61,7 @@ export class SignTypedDataPage implements OnInit {
   @ViewChild(TitleBarComponent, { static: true }) titleBar: TitleBarComponent;
 
   public targetNetwork: AnyNetwork = null;
-  private networkWallet: AnyNetworkWallet = null;
+  public networkWallet: AnyNetworkWallet = null;
   public evmSubWallet: AnyMainCoinEVMSubWallet = null;
   public showEditGasPrice = false;
   public hasOpenETHSCChain = false;
@@ -266,5 +266,28 @@ export class SignTypedDataPage implements OnInit {
       Logger.error('wallet', 'Sign typed data - unable to sign, sending empty response:', e);
       await this.sendIntentResponse({ data: null }, this.receivedIntent.intentId);
     }
+  }
+
+  /**
+   * Get the signing wallet name
+   */
+  public getSigningWalletName(): string {
+    if (this.networkWallet && this.networkWallet.masterWallet) {
+      return this.networkWallet.masterWallet.name;
+    }
+    return '';
+  }
+
+  /**
+   * Get the signing wallet address
+   */
+  public getSigningWalletAddress(): string {
+    if (this.networkWallet) {
+      const addresses = this.networkWallet.getAddresses();
+      if (addresses && addresses.length > 0) {
+        return addresses[0].address;
+      }
+    }
+    return '';
   }
 }

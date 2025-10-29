@@ -169,4 +169,27 @@ export class SignBitcoinMessagePage implements OnInit {
     this.alreadySentIntentResponse = true;
     await this.globalIntentService.sendIntentResponse(result, this.receivedIntent.intentId, navigateBack);
   }
+
+  /**
+   * Get the signing wallet name
+   */
+  public getSigningWalletName(): string {
+    if (this.networkWallet && this.networkWallet.masterWallet) {
+      return this.networkWallet.masterWallet.name;
+    }
+    return '';
+  }
+
+  /**
+   * Get the signing wallet address
+   */
+  public getSigningWalletAddress(): string {
+    if (this.networkWallet) {
+      const addresses = this.networkWallet.getAddresses();
+      if (addresses && addresses.length > 0) {
+        return addresses[0].address;
+      }
+    }
+    return '';
+  }
 }

@@ -468,6 +468,29 @@ export class SendBitcoinPage implements OnInit {
     return this.getFeeSpeedTitle(this.forcedFeeSpeed);
   }
 
+  /**
+   * Get the signing wallet name
+   */
+  public getSigningWalletName(): string {
+    if (this.networkWallet && this.networkWallet.masterWallet) {
+      return this.networkWallet.masterWallet.name;
+    }
+    return '';
+  }
+
+  /**
+   * Get the signing wallet address
+   */
+  public getSigningWalletAddress(): string {
+    if (this.networkWallet) {
+      const addresses = this.networkWallet.getAddresses();
+      if (addresses && addresses.length > 0) {
+        return addresses[0].address;
+      }
+    }
+    return '';
+  }
+
   // Not using inscription utxo
   // public async showConfirmIfNeedUseInscriptionUtxos(amount: BigNumber) {
   //   if (this.inscriptionUtxoBalanceSATOnBTC.isZero())

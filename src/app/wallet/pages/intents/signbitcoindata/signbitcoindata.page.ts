@@ -181,20 +181,7 @@ export class SignBitcoinDataPage implements OnInit {
     //   Logger.warn('wallet', 'BTC.Transaction.fromBuffer error:', e)
     // }
 
-    void this.updateBalance();
-
     this.loading = false;
-  }
-
-  private async updateBalance() {
-    try {
-      await this.btcSubWallet.updateBalance();
-      this.balanceBTC = await this.btcSubWallet.getDisplayBalance();
-    } catch (e) {
-      setTimeout(() => {
-        void this.updateBalance();
-      }, 1000);
-    }
   }
 
   async signData() {
@@ -237,17 +224,26 @@ export class SignBitcoinDataPage implements OnInit {
     await this.signData();
   }
 
-  public balanceIsEnough() {
-    return true;
+  /**
+   * Get the signing wallet name
+   */
+  public getSigningWalletName(): string {
+    if (this.networkWallet && this.networkWallet.masterWallet) {
+      return this.networkWallet.masterWallet.name;
+    }
+    return '';
   }
 
-  // ELA, HT, etc
-  public getCurrencyInUse(): string {
-    return this.btcSubWallet.getDisplayTokenName();
-  }
-
-  // CNY, USD, etc
-  public getNativeCurrencyInUse(): string {
-    return CurrencyService.instance.selectedCurrency.symbol;
+  /**
+   * Get the signing wallet address
+   */
+  public getSigningWalletAddress(): string {
+    if (this.networkWallet) {
+      const addresses = this.networkWallet.getAddresses();
+      if (addresses && addresses.length > 0) {
+        return addresses[0].address;
+      }
+    }
+    return '';
   }
 }
