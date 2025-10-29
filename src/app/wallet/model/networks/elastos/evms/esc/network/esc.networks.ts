@@ -1,4 +1,3 @@
-import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { Logger } from 'src/app/logger';
 import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
 import { MAINNET_TEMPLATE, TESTNET_TEMPLATE } from 'src/app/services/global.networks.service';
@@ -154,10 +153,6 @@ export class ElastosSmartChainMainNetNetwork extends ElastosSmartChainNetworkBas
 
     return availableCoins;
   }
-
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['ETHSC'] = { chainID: '20', NetworkID: '20' };
-  }
 }
 
 export class ElastosSmartChainTestNetNetwork extends ElastosSmartChainNetworkBase {
@@ -208,10 +203,6 @@ export class ElastosSmartChainTestNetNetwork extends ElastosSmartChainNetworkBas
     //availableCoins.push(new ERC20Coin("TTECH", "Trinity Tech", "0xFDce7FB4050CD43C654C6ceCeAd950343990cE75", 0, TESTNET_TEMPLATE, false));
 
     return availableCoins;
-  }
-
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['ETHSC'] = { chainID: '21', NetworkID: '21' };
   }
 
   // When the user manually sets the gas price, it cannot be less than this value.

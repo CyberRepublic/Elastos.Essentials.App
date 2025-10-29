@@ -1,4 +1,3 @@
-import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { Logger } from 'src/app/logger';
 import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
 import { MAINNET_TEMPLATE, TESTNET_TEMPLATE } from 'src/app/services/global.networks.service';
@@ -114,10 +113,6 @@ export class ElastosIdentityChainMainNetNetwork extends ElastosIdentityChainNetw
       );
     } else return null;
   }
-
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['ETHDID'] = { chainID: '22', NetworkID: '22' };
-  }
 }
 
 /**
@@ -156,10 +151,6 @@ export class ElastosIdentityChainTestNetNetwork extends ElastosIdentityChainNetw
         TESTNET_TEMPLATE
       );
     } else return null;
-  }
-
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['ETHDID'] = { chainID: '23', NetworkID: '23' };
   }
 
   // When the user manually sets the gas price, it cannot be less than this value.

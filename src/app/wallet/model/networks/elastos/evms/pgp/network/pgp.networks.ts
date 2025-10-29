@@ -131,10 +131,6 @@ export class ElastosPGPMainNetNetwork extends ElastosPGPNetworkBase {
       return null;
   }
 
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['ETHECOPGP'] = { chainID: '12343', NetworkID: '12343' };
-  }
-
   // When the user manually sets the gas price, it cannot be less than this value.
   // The unit is gwei.
   public getMinGasprice(): number {
@@ -185,10 +181,6 @@ export class ElastosPGPTestNetNetwork extends ElastosPGPNetworkBase {
         TESTNET_TEMPLATE);
     } else
       return null;
-  }
-
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['ETHECOPGP'] = { chainID: '12345', NetworkID: '12345' };
   }
 
   // When the user manually sets the gas price, it cannot be less than this value.

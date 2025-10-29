@@ -1,4 +1,3 @@
-import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { Logger } from 'src/app/logger';
 import { BitcoinAddressType } from '../../../btc.types';
 import { CoinID, StandardCoinName } from '../../../coin';
@@ -108,10 +107,6 @@ export abstract class BTCNetworkBase extends Network<BTCWalletNetworkOptions> {
 
   public supportedWalletCreateTypes(): WalletCreateType[] {
     return [WalletCreateType.MNEMONIC, WalletCreateType.KEYSTORE];
-  }
-
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['BTC'] = {};
   }
 
   public supportedPrivateKeyTypes(): PrivateKeyType[] {
