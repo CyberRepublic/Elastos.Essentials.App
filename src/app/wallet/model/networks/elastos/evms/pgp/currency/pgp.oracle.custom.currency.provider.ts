@@ -6,6 +6,9 @@ import { ERC20Coin } from '../../../../../coin';
 import { CustomCurrencyProvider } from '../../../../evms/custom.currencyprovider';
 import { EVMNetwork } from '../../../../evms/evm.network';
 import { AnyNetwork } from '../../../../network';
+import { ElastosPGPNetworkBase } from '../network/pgp.networks';
+import { CurrencyService } from 'src/app/wallet/services/currency.service';
+import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 
 export class ElastosECOPGPOracleCustomCurrencyProvider implements CustomCurrencyProvider {
   private priceOracelContract = '0xFDABE9B3375A0B169d0967a18197c45Bda3820D7';
@@ -17,6 +20,13 @@ export class ElastosECOPGPOracleCustomCurrencyProvider implements CustomCurrency
   }
 
   public async getTokenPrice(coin: ERC20Coin): Promise<number> {
+    // TODO: This is a temporary solution to get the price of the ela token on the pgp sidechain.
+    let elaTokenAddress = (this.network as ElastosPGPNetworkBase).getELATokenContract();
+    if (coin.getContractAddress() === elaTokenAddress) {
+      let elaNetwork = WalletNetworkService.instance.getNetworkByKey('elastos')
+      return CurrencyService.instance.getMainTokenValue(new BigNumber(1), elaNetwork, 'USD').toNumber();
+    }
+
     const ecoPriceOracleAbi = [
       {
         inputs: [

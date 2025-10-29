@@ -91,7 +91,8 @@ export class ElastosPGPMainNetNetwork extends ElastosPGPNetworkBase {
       ElastosPGPNetworkBase.NETWORK_KEY,
       "PGP Chain",
       "PGP",
-      "assets/wallet/networks/pgp.png",
+      // "assets/wallet/networks/pgp.png",
+      'assets/wallet/networks/elastos-eco.svg',
       MAINNET_TEMPLATE,
       12343,
       [
@@ -147,7 +148,8 @@ export class ElastosPGPTestNetNetwork extends ElastosPGPNetworkBase {
       ElastosPGPNetworkBase.NETWORK_KEY,
       "PGP Testnet",
       "PGP Testnet",
-      "assets/wallet/networks/pgp.png",
+      // "assets/wallet/networks/pgp.png",
+      'assets/wallet/networks/elastos-eco.svg',
       TESTNET_TEMPLATE,
       12345,
       [
@@ -164,6 +166,8 @@ export class ElastosPGPTestNetNetwork extends ElastosPGPNetworkBase {
     this.builtInCoins = [
       new ERC20Coin(this, "ELA", "ELA on PGP", "0x0000000000000000000000000000000000000065", 8, false, true),
     ];
+
+    this.customCurrencyProviders.push(new ElastosECOPGPOracleCustomCurrencyProvider(this));
   }
 
   public getAPIUrlOfType(type: NetworkAPIURLType): string {
