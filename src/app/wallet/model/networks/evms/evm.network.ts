@@ -1,4 +1,3 @@
-import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { Subject } from 'rxjs';
 import { Logger } from 'src/app/logger';
 import { GlobalNetworksService } from 'src/app/services/global.networks.service';
@@ -387,13 +386,6 @@ export abstract class EVMNetwork extends Network<WalletNetworkOptions> {
    */
   public getMainChainID(networkTemplate?: string): number {
     return this.chainID;
-  }
-
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo, networkTemplate: string) {
-    onGoingConfig[this.getEVMSPVConfigName()] = {
-      chainID: this.getMainChainID(networkTemplate).toString(),
-      NetworkID: this.getMainChainID(networkTemplate).toString()
-    };
   }
 
   public supportedPrivateKeyTypes(): PrivateKeyType[] {

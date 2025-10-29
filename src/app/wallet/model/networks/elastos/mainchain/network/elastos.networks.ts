@@ -1,4 +1,3 @@
-import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
 import { MAINNET_TEMPLATE, TESTNET_TEMPLATE } from 'src/app/services/global.networks.service';
 import { StandardCoinName } from 'src/app/wallet/model/coin';
@@ -89,11 +88,6 @@ export class ElastosMainChainMainNetNetwork extends ElastosMainChainNetworkBase 
     return -1;
   }
 
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['ELA'] = {};
-    onGoingConfig['IDChain'] = {};
-  }
-
   public supportsERC20Coins() {
     return false;
   }
@@ -136,10 +130,5 @@ export class ElastosMainChainTestNetNetwork extends ElastosMainChainNetworkBase 
 
   public getMainChainID(): number {
     return -1;
-  }
-
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['ELA'] = {};
-    onGoingConfig['IDChain'] = {};
   }
 }

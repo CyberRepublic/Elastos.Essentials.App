@@ -1,4 +1,3 @@
-import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { StandardCoinName } from '../../../coin';
 import { BridgeProvider } from '../../../earn/bridgeprovider';
 import { EarnProvider } from '../../../earn/earnprovider';
@@ -45,6 +44,4 @@ export abstract class ElastosNetworkBase<
   public getMainColor(): string {
     return '5D37C0';
   }
-
-  public abstract updateSPVNetworkConfig(onGoingConfig: ConfigInfo);
 }

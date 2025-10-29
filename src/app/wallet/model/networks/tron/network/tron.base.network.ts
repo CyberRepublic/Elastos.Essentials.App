@@ -1,4 +1,3 @@
-import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { Subject } from 'rxjs';
 import { Logger } from 'src/app/logger';
 import { GlobalNetworksService } from 'src/app/services/global.networks.service';
@@ -312,8 +311,6 @@ export abstract class TronNetworkBase extends Network<WalletNetworkOptions> {
   public getMainChainID(): number {
     return -1;
   }
-
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {}
 
   public supportedPrivateKeyTypes(): PrivateKeyType[] {
     return [PrivateKeyType.EVM];

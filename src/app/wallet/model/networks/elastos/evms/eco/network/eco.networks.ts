@@ -1,4 +1,3 @@
-import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { Logger } from 'src/app/logger';
 import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
 import { MAINNET_TEMPLATE, TESTNET_TEMPLATE } from 'src/app/services/global.networks.service';
@@ -161,10 +160,6 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
     return this.builtInCoins;
   }
 
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['ETHECO'] = { chainID: '12343', NetworkID: '12343' };
-  }
-
   // When the user manually sets the gas price, it cannot be less than this value.
   // The unit is gwei.
   public getMinGasprice(): number {
@@ -215,10 +210,6 @@ export class ElastosECOTestNetNetwork extends ElastosECONetworkBase {
 
   public getBuiltInERC20Coins(): ERC20Coin[] {
     return [];
-  }
-
-  public updateSPVNetworkConfig(onGoingConfig: ConfigInfo) {
-    onGoingConfig['ETHECO'] = { chainID: '800007', NetworkID: '800007' };
   }
 
   // When the user manually sets the gas price, it cannot be less than this value.

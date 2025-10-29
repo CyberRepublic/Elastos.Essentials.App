@@ -39,8 +39,7 @@ export class TronSubWallet extends MainCoinSubWallet<TronTransaction, any> {
   }
 
   public async initialize(): Promise<void> {
-    super.initialize();
-
+    await super.initialize();
     await this.loadStakedBalanceFromCache();
   }
 
@@ -314,7 +313,7 @@ export class TronSubWallet extends MainCoinSubWallet<TronTransaction, any> {
   }
 
   // Get staked balance, the unit is TRX.
-  public async getStakedBalance() {
+  public getStakedBalance() {
     return this.stakedBalance;
   }
 
@@ -447,7 +446,7 @@ export class TronSubWallet extends MainCoinSubWallet<TronTransaction, any> {
         this.stakedBalance = GlobalTronGridService.instance.fromSun(frozenBalance);
       } else this.stakedBalance = 0;
 
-      this.saveStakedBalanceToCache();
+      void this.saveStakedBalanceToCache();
 
       // TRC20
       if (accountInfo.trc20?.length > 0) {
@@ -476,7 +475,7 @@ export class TronSubWallet extends MainCoinSubWallet<TronTransaction, any> {
   }
 
   async getTransactionDetails(txid: string): Promise<any> {
-    return null;
+    return await null;
   }
 
   public getAvailableEarnProviders(): EarnProvider[] {

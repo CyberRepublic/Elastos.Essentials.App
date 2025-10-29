@@ -1,4 +1,3 @@
-import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { Logger } from 'src/app/logger';
 import { WalletNetworkService } from '../../services/network.service';
 import { Coin, NativeCoin } from '../coin';
@@ -227,8 +226,6 @@ export abstract class Network<WalletNetworkOptionsType extends WalletNetworkOpti
     // the network can't handle any import by private key
     return [];
   }
-
-  public abstract updateSPVNetworkConfig(onGoingConfig: ConfigInfo, networkTemplate: string);
 
   // Ex: ETHHECO, ETHSC, etc
   public getEVMSPVConfigName(): string {

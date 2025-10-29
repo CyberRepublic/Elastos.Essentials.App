@@ -1,11 +1,8 @@
-import type { ConfigInfo } from '@elastosfoundation/wallet-js-sdk';
 import { Logger } from 'src/app/logger';
-import { GlobalNetworksService } from 'src/app/services/global.networks.service';
 import { EVMNetwork } from 'src/app/wallet/model/networks/evms/evm.network';
 import { StandardCoinName } from '../../../../../../coin';
 import { StandardMasterWallet } from '../../../../../../masterwallets/masterwallet';
 import { TransactionProvider } from '../../../../../../tx-providers/transaction.provider';
-import { WalletAddressInfo } from '../../../../../base/networkwallets/networkwallet';
 import { ElastosStandardEVMNetworkWallet } from '../../../networkwallets/standard/standard.evm.networkwallet';
 import { ElastosEVMChainTransactionProvider } from '../../../tx-providers/elastos.evm.tx.provider';
 import { ElastosEscMainSubWallet } from '../../subwallets/elastos.esc.main.subwallet';
@@ -20,19 +17,12 @@ export class ElastosSmartChainStandardNetworkWallet extends ElastosStandardEVMNe
   }
 
   protected prepareStandardSubWallets(): Promise<void> {
-    this.mainTokenSubWallet = new ElastosEscMainSubWallet(this);
-
     try {
-      // TODO: No ETHSC in LRW
-      // Remove it if there is ETHSC in LRW.
-      let networkConfig: ConfigInfo = {};
-      this.network.updateSPVNetworkConfig(networkConfig, GlobalNetworksService.instance.getActiveNetworkTemplate());
-      if (networkConfig['ETHSC']) {
-        this.subWallets[StandardCoinName.ETHSC] = this.mainTokenSubWallet;
-      }
+      this.mainTokenSubWallet = new ElastosEscMainSubWallet(this);
+      this.subWallets[StandardCoinName.ETHSC] = this.mainTokenSubWallet;
     } catch (err) {
-      Logger.error('wallet', 'Can not Create Elastos EVM subwallets ', err);
+      Logger.error('wallet', 'Can not Create Elastos Smart Chain subwallets ', err);
     }
-    return Promise.resolve();
+    return;
   }
 }
