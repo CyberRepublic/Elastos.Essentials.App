@@ -88,7 +88,9 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
       contractAddress,
       page,
       MAX_RESULTS_PER_FETCH,
-      this.apiKey);
+      this.apiKey,
+      this.apiVersion,
+      this.chainid);
 
     this.canFetchMore = canFetchMore;
     await this.saveTransactions(transactions);

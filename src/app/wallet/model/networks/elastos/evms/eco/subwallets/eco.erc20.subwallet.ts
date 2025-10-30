@@ -1,4 +1,3 @@
-import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
 import { CoinID, StandardCoinName } from '../../../../../coin';
 import { AnyNetworkWallet } from '../../../../base/networkwallets/networkwallet';
 import { ERC20SubWallet } from '../../../../evms/subwallets/erc20.subwallet';
@@ -16,7 +15,6 @@ export class EcoERC20SubWallet extends ERC20SubWallet {
   };
 
   constructor(networkWallet: AnyNetworkWallet, coinID: CoinID) {
-    let rpcApiUrl = GlobalElastosAPIService.instance.getApiUrlForChainCode(StandardCoinName.ETHECO);
     super(networkWallet, coinID, 'ECO-ERC20 token');
 
     this.spvConfigEVMCode = StandardCoinName.ETHECO;
