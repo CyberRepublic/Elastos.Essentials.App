@@ -40,6 +40,8 @@ export class EditCustomNetworkPage implements OnInit {
   public intentMode = false;
   public intentId: number;
 
+  public isNetworkVisible = false;
+
   private alreadySentIntentResponse = false;
 
   constructor(
@@ -86,6 +88,8 @@ export class EditCustomNetworkPage implements OnInit {
             .find(n => n.key === navigation.extras.state.customNetworkKey)
         );
 
+        this.isNetworkVisible = this.networkService.getNetworkVisible(this.editedNetworkEntry.key);
+
         //this.editedNetworkEntry.rpcUrl = "https://http-mainnet.hecochain.com" // TMP TEST
         //this.editedNetworkEntry.accountRpcUrl = "https://api.hecoinfo.com" // TMP TEST
 
@@ -120,6 +124,7 @@ export class EditCustomNetworkPage implements OnInit {
             colorScheme: '#9A67EB'
           };
         }
+        this.isNetworkVisible = true;
       }
     });
   }
@@ -234,8 +239,19 @@ export class EditCustomNetworkPage implements OnInit {
     // Everything ok, save the network
     await this.customNetworksService.upsertCustomNetwork(this.editedNetworkEntry);
 
-    // Save the network visibility
-    void this.networkService.setNetworkVisible(this.editedNetworkEntry.key, true);
+    if (this.editionMode) {
+      const currentVisibility = this.networkService.getNetworkVisible(this.editedNetworkEntry.key);
+      const visibilityChanged = this.isNetworkVisible !== currentVisibility;
+      // Save visibility setting
+      if (visibilityChanged) {
+        await this.networkService.setNetworkVisible(this.editedNetworkEntry.key, this.isNetworkVisible);
+      }
+    }
+    else {
+      // New network, always visible
+      await this.networkService.setNetworkVisible(this.editedNetworkEntry.key, true);
+    }
+
 
     if (this.intentMode) {
       let result: EditCustomNetworkIntentResult = {
@@ -247,5 +263,9 @@ export class EditCustomNetworkPage implements OnInit {
     } else {
       void this.globalNav.navigateBack();
     }
+  }
+
+  public onVisibilityChange(event: CustomEvent): void {
+    this.isNetworkVisible = event.detail.checked;
   }
 }
