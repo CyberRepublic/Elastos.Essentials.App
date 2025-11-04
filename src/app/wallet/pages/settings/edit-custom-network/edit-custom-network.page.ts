@@ -248,8 +248,7 @@ export class EditCustomNetworkPage implements OnInit {
       }
     }
     else {
-      // New network, always visible
-      await this.networkService.setNetworkVisible(this.editedNetworkEntry.key, true);
+      await this.networkService.setNetworkVisible(this.editedNetworkEntry.key, this.isNetworkVisible);
     }
 
 
