@@ -16,6 +16,10 @@ export class ElastosECOOracleCustomCurrencyProvider implements CustomCurrencyPro
     return EVMService.instance.getWeb3(this.network as EVMNetwork);
   }
 
+  public getWrappedNativeCoin(): ERC20Coin {
+    return null;
+  }
+
   public async getTokenPrice(coin: ERC20Coin): Promise<number> {
     const ecoPriceOracleAbi = [
       {

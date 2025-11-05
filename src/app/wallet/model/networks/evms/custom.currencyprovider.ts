@@ -12,4 +12,10 @@ export abstract class CustomCurrencyProvider {
    * @returns the current price of the token in USD, or undefined if no way to find it / failed.
    */
   public abstract getTokenPrice(erc20Token: ERC20Coin): Promise<number>;
+
+  /**
+   * Wrapped "ETH" for the network, used for swap operations and as art of a "mandatory" liquidity
+   * pair to compute trades.
+   */
+  public abstract getWrappedNativeCoin(): ERC20Coin;
 }

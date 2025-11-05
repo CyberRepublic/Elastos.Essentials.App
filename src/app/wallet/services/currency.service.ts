@@ -390,6 +390,21 @@ export class CurrencyService {
             <EVMNetwork>network,
             (<EVMNetwork>network).getDexScreenerCurrencyProvider().getWrappedNativeCoin()
           );
+        } else {
+          let providers = (<EVMNetwork>network).getCustomCurrencyProviders();
+          for (let i = 0; i < providers.length; i++) {
+            let provider = providers[i];
+            let wrappedNativeCoin = provider.getWrappedNativeCoin();
+            if (wrappedNativeCoin) {
+              let value = await provider.getTokenPrice(wrappedNativeCoin);
+              if (value) {
+                let currentTime = Date.now() / 1000;
+                this.pricesCache.set(cacheKey, { usdValue: value }, currentTime);
+              }
+              priceUpdated = true;
+              break;
+            }
+          }
         }
       } else {
         this.pricesCache.remove(cacheKey);

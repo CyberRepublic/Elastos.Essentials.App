@@ -11,12 +11,17 @@ import { CurrencyService } from 'src/app/wallet/services/currency.service';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 
 export class ElastosECOPGPOracleCustomCurrencyProvider implements CustomCurrencyProvider {
-  private priceOracelContract = '0xFDABE9B3375A0B169d0967a18197c45Bda3820D7';
+  private priceOracelContract = '0xAaCb8fD571F1dA27D5F7af9CdaF0158245f4d915';
+  private wrappedNativeCoin = new ERC20Coin(this.network, "WPGA", "Wrapped PGA", "0x1369a5f999618607bB0bb92892Ef69e2233F88f8", 18, false, true);
 
   constructor(private network: AnyNetwork) {}
 
   protected getWeb3(): Promise<Web3> {
     return EVMService.instance.getWeb3(this.network as EVMNetwork);
+  }
+
+  public getWrappedNativeCoin(): ERC20Coin {
+    return this.wrappedNativeCoin;
   }
 
   public async getTokenPrice(coin: ERC20Coin): Promise<number> {

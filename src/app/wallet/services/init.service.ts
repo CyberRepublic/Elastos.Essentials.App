@@ -186,7 +186,7 @@ export class WalletInitService extends GlobalService {
     await this.createAndRegisterNetwork(new ElastosSmartChainMainNetNetwork(), networkTemplate === MAINNET_TEMPLATE);
     await this.createAndRegisterNetwork(new ElastosIdentityChainMainNetNetwork());
     await this.createAndRegisterNetwork(new ElastosECOMainNetNetwork());
-    // await this.createAndRegisterNetwork(new ElastosPGPMainNetNetwork());
+    await this.createAndRegisterNetwork(new ElastosPGPMainNetNetwork());
     await this.createAndRegisterNetwork(new BTCMainNetNetwork());
     await this.createAndRegisterNetwork(new EthereumMainNetNetwork());
     await this.createAndRegisterNetwork(new BSCMainNetNetwork());

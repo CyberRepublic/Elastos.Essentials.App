@@ -94,21 +94,20 @@ export class ElastosPGPMainNetNetwork extends ElastosPGPNetworkBase {
       // "assets/wallet/networks/pgp.png",
       'assets/wallet/networks/elastos-eco.svg',
       MAINNET_TEMPLATE,
-      12343,
+      860621,
       [
         {
           name: 'Official Elastos Node',
-          url: 'https://api.elastos.io/pgp'
+          url: 'https://api.elastos.io/pg'
         }
       ]
     );
 
     this.builtInCoins = [
       new ERC20Coin(this, "ELA", "ELA on PGP", "0x0000000000000000000000000000000000000065", 8, false, true),
-      // new ERC20Coin(this, 'USDT', 'PGA-USDT', '0x1C4E7cd89ea67339d4A5ed2780703180a19757d7', 18, false, true),
-      // new ERC20Coin(this, 'BTCD', 'BTC Dollar', '0x45ec25a63e010BFb84629242f40DDa187f83833E', 18, false, true),
-      // new ERC20Coin(this, 'FIST', 'FIST on ECO', '0x67d8183f13043Be52F64FB434F1AA5e5d1C58775', 18, false, true),
-      // new ERC20Coin(this, 'PGA', 'PanGu Asset', '0x8152557DD7d8dBFa2E85EaE473f8B897a5b6CCA9', 18, false, true)
+      new ERC20Coin(this, 'USDT', 'PGP-USDT', '0xdF72788af68E7902F61377D246Dd502b0b383385', 18, false, true),
+      new ERC20Coin(this, 'BTCD', 'BTC Dollar', '0xF9BF836FEd97a9c9Bfe4D4c28316b9400C59Cc6B', 18, false, true),
+      new ERC20Coin(this, 'FIST', 'FIST on PGP', '0x800E5c441b84a3E809E2ec922BeEE9f32f954B11', 18, false, true),
     ];
 
     this.customCurrencyProviders.push(new ElastosECOPGPOracleCustomCurrencyProvider(this));

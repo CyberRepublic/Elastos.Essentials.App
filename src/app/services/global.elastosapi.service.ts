@@ -196,7 +196,7 @@ export class GlobalElastosAPIService extends GlobalService {
             ecoRPC: 'https://eco-api.btcdtech.app',
             ecoOracleRPC: 'https://api.elastos.io/eco-oracle',
             ecoBrowserRPC: 'https://eco.elastos.io/api',
-            ecoPGPRPC: 'https://api.elastos.io/pgp',
+            ecoPGPRPC: 'https://api.elastos.io/pg',
             ecoPGPOracleRPC: 'https://api.elastos.io/pgp-oracle',
             ecoPGPBrowserRPC: 'https://pgp.elastos.io/api',
             crRPC: 'https://api.cyberrepublic.org',
