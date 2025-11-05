@@ -108,23 +108,30 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
 
   public async estimateWithdrawTransactionGas(toAddress: string) {
     const ethscWithdrawContract = await this.getWithdrawContract()
+
+    const highPriorityWeb3 = await this.createWeb3(true);
     const method = ethscWithdrawContract.methods.withdraw(toAddress, '100000', Config.PGP_WITHDRAW_GASPRICE);
 
     let estimateGas = 3000000;
     try {
-      // Can not use method.estimateGas(), must set the "value"
+      // IMPORTANT: The withdraw method is nonpayable (ERC20 token withdraw), so we don't set "value" field.
+      // We use the real token owner address because cost estimation works only when "from" actually owns tokens
+      // and has approved the withdraw contract.
+      const tokenAccountAddress = this.getTokenAccountAddress();
       let tx = {
+        from: tokenAccountAddress,
         data: method.encodeABI(),
         to: this.withdrawContractAddress,
-        value: '100000',
+        // No "value" field - withdraw is nonpayable, it works with ERC20 tokens via transferFrom
       }
-      const highPriorityWeb3 = await this.createWeb3(true);
       let tempGasLimit = await highPriorityWeb3.eth.estimateGas(tx);
       // Make sure the gaslimit is big enough - add a bit of margin for fluctuating gas price
       estimateGas = Util.ceil(tempGasLimit * 1.5, 100);
 
     } catch (error) {
-        Logger.error('wallet', 'pgp estimateWithdrawTransactionGas error:', error);
+        // Estimate may fail if allowance is not set or balance is insufficient.
+        // This is expected and we fall back to the default gas limit.
+        Logger.warn('wallet', 'pgp estimateWithdrawTransactionGas error (using default):', error);
     }
 
     return estimateGas;
@@ -150,7 +157,10 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
         amountWithDecimals = new BigNumber(toAmount).multipliedBy(this.tokenAmountMulipleTimes);
     }
 
-    const method = withdrawContract.methods.withdraw(toAddress, amountWithDecimals, Config.PGP_WITHDRAW_GASPRICE);
+    // Incompatibility between our bignumber lib and web3's BN lib. So we must convert by using intermediate strings
+    const highPriorityWeb3 = await this.createWeb3(true);
+    const web3BigNumber = highPriorityWeb3.utils.toBN(amountWithDecimals.toString(10));
+    const method = withdrawContract.methods.withdraw(toAddress, web3BigNumber, Config.PGP_WITHDRAW_GASPRICE);
 
     let nonce = nonceArg;
     if (nonce === -1) {
