@@ -364,8 +364,14 @@ export class CurrencyService {
       );
       priceUpdated = true;
     } else {
-      Logger.log('wallet', 'No currency in token API for', network.getMainTokenSymbol(), '. Trying other methods');
       if (network.isEVMNetwork()) {
+        let pricesCache = this.pricesCache.get(cacheKey);
+        if (pricesCache && pricesCache.timeValue && pricesCache.timeValue > currentTime - 60) {
+          return;
+        }
+
+        Logger.log('wallet', 'No currency in token API for', network.getMainTokenSymbol(), '. Trying other methods');
+
         if ((<EVMNetwork>network).getUniswapCurrencyProvider()) {
           // If this is a EVM network, try to get price from the wrapped ETH on uniswap compatible DEX.
           let usdValue = await this.uniswapCurrencyService.getTokenUSDValue(
