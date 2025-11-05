@@ -96,6 +96,7 @@ export type ElastosAPIProvider = {
       escBlockExplorer: string;
       eidBlockExplorer: string;
       ecoBlockExplorer: string;
+      ecoPGPBlockExplorer: string;
       // Widgets
       widgets: string;
       images: string; // nodes or CRC avatar
@@ -204,6 +205,7 @@ export class GlobalElastosAPIService extends GlobalService {
             escBlockExplorer: 'https://esc.elastos.io',
             eidBlockExplorer: 'https://eid.elastos.io',
             ecoBlockExplorer: 'https://eco.elastos.io',
+            ecoPGPBlockExplorer: 'https://pgp.elastos.io',
             widgets: 'https://api.elastos.io/widgets',
             images: 'https://api.elastos.io/images'
           },
@@ -227,6 +229,7 @@ export class GlobalElastosAPIService extends GlobalService {
             escBlockExplorer: 'https://esc-testnet.elastos.io',
             eidBlockExplorer: 'https://eid-testnet.elastos.io',
             ecoBlockExplorer: 'https://eco-testnet.elastos.io',
+            ecoPGPBlockExplorer: 'https://pgp-testnet.elastos.io',
             widgets: 'https://api-testnet.elastos.io/widgets',
             images: 'https://api.elastos.io/images'
           },
@@ -250,6 +253,7 @@ export class GlobalElastosAPIService extends GlobalService {
             escBlockExplorer: '',
             eidBlockExplorer: '',
             ecoBlockExplorer: '',
+            ecoPGPBlockExplorer: '',
             widgets: 'https://api.elastos.io/widgets',
             images: 'https://api.elastos.io/images'
           }
@@ -281,6 +285,7 @@ export class GlobalElastosAPIService extends GlobalService {
             escBlockExplorer: 'https://esc.elastos.io',
             eidBlockExplorer: 'https://eid.elastos.io',
             ecoBlockExplorer: 'https://eco.elastos.io',
+            ecoPGPBlockExplorer: 'https://pgp.elastos.io',
             widgets: 'https://api2.elastos.io/widgets',
             images: 'https://api2.elastos.io/images'
           },
@@ -304,6 +309,7 @@ export class GlobalElastosAPIService extends GlobalService {
             escBlockExplorer: 'https://esc-testnet.elastos.io',
             eidBlockExplorer: 'https://eid-testnet.elastos.io',
             ecoBlockExplorer: 'https://eco-testnet.elastos.io',
+            ecoPGPBlockExplorer: 'https://pgp-testnet.elastos.io',
             widgets: 'https://api2-testnet.elastos.io/widgets',
             images: 'https://api2.elastos.io/images'
           },
@@ -327,6 +333,7 @@ export class GlobalElastosAPIService extends GlobalService {
             escBlockExplorer: '',
             eidBlockExplorer: '',
             ecoBlockExplorer: '',
+            ecoPGPBlockExplorer: '',
             widgets: 'https://api.elastos.io/widgets',
             images: 'https://api.elastos.io/images'
           }
