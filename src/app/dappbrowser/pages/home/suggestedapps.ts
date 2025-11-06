@@ -10,6 +10,15 @@ export type DAppMenuEntry = {
 
 export const suggestedDApps = (darkMode: boolean, lightweightMode = false): DAppMenuEntry[] => [
   {
+    icon: '/assets/browser/dapps/ela.svg',
+    title: 'PGP Explorer',
+    description: '',
+    url: 'https://pgp.elastos.io/',
+    useExternalBrowser: false,
+    walletConnectSupported: false,
+    networks: ["elastosecopgp"]
+  },
+  {
     icon: '/assets/browser/dapps/pga.png',
     title: 'BTCD Stablecoin Minting',
     description: "The world's first fully Bitcoin-backed stablecoin. Put your Bitcoin to work without selling it.",
