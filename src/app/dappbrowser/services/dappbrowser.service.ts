@@ -313,7 +313,13 @@ export class DappBrowserService implements GlobalService {
       });
     });
 
-    await dappBrowser.open(url, target, options);
+    try {
+      await dappBrowser.open(url, target, options);
+    } catch (error) {
+      Logger.error('dappbrowser', 'dappBrowser.open error:', error);
+      return;
+    }
+
     if (target == '_webview' && navigate) {
       void this.nav.navigateTo(App.DAPP_BROWSER, '/dappbrowser/browser', {
         animated: false
