@@ -17,7 +17,7 @@ export const it = {
     'privacy-setting': 'Privacy',
     'startupscreen-setting': 'Schermata iniziale',
     'startupscreen-intro-setting': "Scegli la schermata da visualizzare all'avvio di Essentials",
-    'display-mode-setting': 'Modalità di visualizzazione',
+    'display-mode-setting': 'Portafoglio Modalità',
     'display-mode-intro-setting': 'Scegli tra modalità leggera o avanzata',
     'configure-interface-style': 'Configura Stile Interfaccia',
 

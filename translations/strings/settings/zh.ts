@@ -17,7 +17,7 @@ export const zh = {
     'privacy-setting': '隐私',
     'startupscreen-setting': '启动页面',
     'startupscreen-intro-setting': '选择启动Essentials后显示的页面',
-    'display-mode-setting': '显示模式',
+    'display-mode-setting': '钱包模式',
     'display-mode-intro-setting': '选择轻量模式或高级模式',
     'configure-interface-style': '配置界面样式',
 

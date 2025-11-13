@@ -17,8 +17,8 @@ export const en = {
     'privacy-setting': 'Privacy',
     'startupscreen-setting': 'Startup Screen',
     'startupscreen-intro-setting': 'Choose which screen to show when Essentials starts',
-    'display-mode-setting': 'Display Mode',
-    'display-mode-intro-setting': 'Choose between lightweight or advanced mode',
+    'display-mode-setting': 'Wallet Mode',
+    'display-mode-intro-setting': 'Choose between lite or advanced mode',
     'configure-interface-style': 'Configure Interface Style',
 
     // Subtitles
@@ -35,10 +35,10 @@ export const en = {
     'dark-mode-on': 'DARK MODE ON',
     dark: 'DARK',
     light: 'LIGHT',
-    lightweight: 'Lightweight',
+    lightweight: 'Lite',
     advanced: 'Advanced',
-    'lightweight-mode-enabled': 'Lightweight Mode Enabled',
-    'lightweight-mode-disabled': 'Lightweight Mode Disabled',
+    'lightweight-mode-enabled': 'Lite Mode Enabled',
+    'lightweight-mode-disabled': 'Lite Mode Disabled',
     'log-out': 'Log Out',
     help: 'Help',
 

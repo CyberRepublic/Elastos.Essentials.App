@@ -17,7 +17,7 @@ export const fr = {
     'privacy-setting': 'Vie privée',
     'startupscreen-setting': 'Ecran de démarrage',
     'startupscreen-intro-setting': "Choix de l'écran à afficher au démarrage d'Essentials",
-    'display-mode-setting': "Mode d'affichage",
+    'display-mode-setting': "Mode portefeuille",
     'display-mode-intro-setting': 'Choisir entre le mode léger ou avancé',
     'configure-interface-style': "Configurer le Style d'Interface",
 
