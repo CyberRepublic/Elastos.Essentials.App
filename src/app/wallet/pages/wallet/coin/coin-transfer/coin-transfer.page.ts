@@ -880,6 +880,12 @@ export class CoinTransferPage implements OnInit, OnDestroy {
           return false;
         }
 
+        let balance = this.fromSubWallet.getBalance();
+        if (balance.isZero()) {
+          this.conditionalShowToast('wallet.amount-invalid', showToast);
+          return false;
+        }
+
         // if (!(await this.showConfirmIfNeedUseInscriptionUtxos(null))) {
         //     return false;
         // }
