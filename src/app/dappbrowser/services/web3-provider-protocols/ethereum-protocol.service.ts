@@ -316,11 +316,11 @@ export class EthereumProtocolService {
     } else {
       Logger.log('ethereum', 'Sending wallet disconnection to dapp');
 
-      // When disconnecting, both address and chain must become udnefined
+      // When disconnecting, set address to undefined (setAddress handles undefined properly and emits disconnect event)
+      // Note: Do not call setChainId(undefined) as it expects a number and will cause errors
       void this.executeScript(`
         if (window.ethereum && window.ethereum.setAddress) {
           window.ethereum.setAddress(undefined);
-          window.ethereum.setChainId(undefined);
         }
       `);
     }
