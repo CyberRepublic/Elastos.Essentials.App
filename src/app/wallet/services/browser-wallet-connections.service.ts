@@ -224,6 +224,24 @@ export class BrowserWalletConnectionsService {
       if (!selectedWallet) {
         Logger.warn('wallet', 'Active master wallet not found');
         return null;
+      } else {
+        if (connectionType === BrowserConnectionType.EVM) {
+          // Allow wallets that support EVM networks or have no network wallet (will be filtered later)
+          if (!selectedWallet.getSupportedNetworks().some(network => network instanceof EVMNetwork)) {
+            Logger.warn('wallet', 'Active master wallet does not support any EVM networks');
+            return null;
+          }
+        } else if (connectionType === BrowserConnectionType.BITCOIN) {
+          // Get bitcoin networks
+          const bitcoinNetworks = this.networkService.networksList.value.filter(
+            network => network instanceof BTCNetworkBase
+          );
+
+          if (!bitcoinNetworks.some(network => selectedWallet.supportsNetwork(network))) {
+            Logger.warn('wallet', 'Active master wallet does not support any bitcoin networks');
+            return null;
+          }
+        }
       }
     } else  {
       // Let user pick a wallet
