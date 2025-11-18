@@ -10,22 +10,22 @@ export type DAppMenuEntry = {
 
 export const suggestedDApps = (darkMode: boolean, lightweightMode = false): DAppMenuEntry[] => [
   {
-    icon: '/assets/browser/dapps/ela.svg',
-    title: 'PGP Explorer',
-    description: '',
-    url: 'https://pgp.elastos.io/',
+    icon: '/assets/browser/dapps/pga.png',
+    title: 'BTCD Stablecoin Minting',
+    description: "The world's first fully Bitcoin-backed stablecoin. Put your Bitcoin to work without selling it.",
+    url: 'https://newbtcd.pgachain.org/',
     useExternalBrowser: false,
     walletConnectSupported: false,
-    networks: ["elastosecopgp"]
+    networks: ['elastosecopgp']
   },
   {
     icon: '/assets/browser/dapps/pga.png',
     title: 'BTCD Stablecoin Minting',
     description: "The world's first fully Bitcoin-backed stablecoin. Put your Bitcoin to work without selling it.",
-    url: 'https://btcd.pgachain.org/',
+    url: 'https://ecobtcd.pgachain.org/',
     useExternalBrowser: false,
     walletConnectSupported: false,
-    networks: ["elastoseco"]
+    networks: ['elastoseco']
   },
   {
     icon: '/assets/browser/dapps/pgp.png',
@@ -34,7 +34,7 @@ export const suggestedDApps = (darkMode: boolean, lightweightMode = false): DApp
     url: 'https://swap.pgachain.org',
     useExternalBrowser: false,
     walletConnectSupported: false,
-    networks: ["elastoseco"]
+    networks: ['elastoseco', 'elastosecopgp']
   },
   {
     icon: '/assets/browser/dapps/pgp.png',
@@ -43,7 +43,16 @@ export const suggestedDApps = (darkMode: boolean, lightweightMode = false): DApp
     url: 'https://miner.pgachain.org',
     useExternalBrowser: false,
     walletConnectSupported: false,
-    networks: ["elastoseco"]
+    networks: ['elastoseco', 'elastosecopgp']
+  },
+  {
+    icon: '/assets/browser/dapps/ela.svg',
+    title: 'PGP Explorer',
+    description: '',
+    url: 'https://pgp.elastos.io/',
+    useExternalBrowser: false,
+    walletConnectSupported: false,
+    networks: ['elastosecopgp']
   },
   {
     icon: '/assets/browser/dapps/ela.svg',
@@ -52,7 +61,7 @@ export const suggestedDApps = (darkMode: boolean, lightweightMode = false): DApp
     url: 'https://eco.elastos.io/',
     useExternalBrowser: false,
     walletConnectSupported: false,
-    networks: ["elastoseco"]
+    networks: ['elastoseco']
   },
   {
     icon: '/assets/browser/dapps/ela.svg',
@@ -61,7 +70,7 @@ export const suggestedDApps = (darkMode: boolean, lightweightMode = false): DApp
     url: 'https://esc.elastos.io/',
     useExternalBrowser: false,
     walletConnectSupported: false,
-    networks: ["elastossmartchain"]
+    networks: ['elastossmartchain']
   },
   {
     icon: '/assets/browser/dapps/ela.svg',
