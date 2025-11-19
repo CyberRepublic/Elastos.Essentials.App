@@ -289,7 +289,6 @@ export class DappBrowserService implements GlobalService {
     // Set the active dApp and update wallet connections/subscriptions
     await this.browserWalletConnectionsService.setActiveDapp(url);
     // this.setupDappWalletSubscriptions();
-    //await this.updateWalletAddressesForCurrentDapp();
 
     var options: any = {
       titlebarheight: 50,

@@ -448,6 +448,22 @@ export class BrowserWalletConnectionsService {
     console.log('BrowserWalletConnections: Setting active dApp:', dappUrl);
     this.activeDappUrl.next(dappUrl);
 
+    // Check if there are saved connections for this dApp
+    const connections = await this.getDappConnections(dappUrl);
+    // If no connection info is saved, default to connect current wallet
+    if (!connections.evm && !connections.btc) {
+      const activeWallet = this.walletService.getActiveMasterWallet();
+      if (activeWallet) {
+        // Try to connect wallets by default
+        try {
+          await this.connectWallet(dappUrl, BrowserConnectionType.EVM, true);
+          await this.connectWallet(dappUrl, BrowserConnectionType.BITCOIN, true);
+        } catch (error) {
+          Logger.warn('wallet', 'Failed to auto-connect EVM and BTC wallets:', error);
+        }
+      }
+    }
+
     // Update reactive subjects with the current connections for this dApp
     await this.updateActiveDappConnections();
   }
