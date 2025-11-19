@@ -99,6 +99,14 @@ export class ElastosPGPMainNetNetwork extends ElastosPGPNetworkBase {
         {
           name: 'Official Elastos Node',
           url: 'https://api.elastos.io/pg'
+        },
+        {
+          name: 'Official Elastos Node 2',
+          url: 'https://api2.elastos.io/pg'
+        },
+        {
+          name: 'Official Elastos Node 3',
+          url: 'https://pgp-node.elastos.io'
         }
       ]
     );
