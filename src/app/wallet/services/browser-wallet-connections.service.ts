@@ -90,6 +90,19 @@ export class BrowserWalletConnectionsService {
   }
 
   /**
+   * Normalizes a URL by removing trailing slashes for consistent comparison
+   * @param url The URL to normalize
+   * @returns Normalized URL without trailing slash
+   */
+  private normalizeUrl(url: string): string {
+    if (!url) {
+      return url;
+    }
+    // Remove trailing slash, but keep the protocol and other parts
+    return url.replace(/\/+$/, '');
+  }
+
+  /**
    * Extracts the domain from a URL for sandboxing connections
    * @param url The full URL of the dapp
    * @returns Domain in format "domain:port"
@@ -307,7 +320,7 @@ export class BrowserWalletConnectionsService {
 
     // Update reactive subjects if this affects the active dApp
     console.log('active dapp url:', this.activeDappUrl.value, 'dapp url:', dappUrl);
-    if (this.activeDappUrl.value === dappUrl) {
+    if (this.normalizeUrl(this.activeDappUrl.value) === this.normalizeUrl(dappUrl)) {
       await this.updateActiveDappConnections();
     }
 
@@ -356,7 +369,7 @@ export class BrowserWalletConnectionsService {
     );
 
     // Update reactive subjects if this affects the active dApp
-    if (this.activeDappUrl.value === dappUrl) {
+    if (this.normalizeUrl(this.activeDappUrl.value) === this.normalizeUrl(dappUrl)) {
       await this.updateActiveDappConnections();
     }
   }
@@ -406,7 +419,7 @@ export class BrowserWalletConnectionsService {
     Logger.log('wallet', 'Selected EVM network for dapp:', domain, selectedNetwork.getEffectiveName());
 
     // Update reactive subjects if this affects the active dApp
-    if (this.activeDappUrl.value === dappUrl) {
+    if (this.normalizeUrl(this.activeDappUrl.value) === this.normalizeUrl(dappUrl)) {
       await this.updateActiveDappConnections();
     }
 
@@ -440,7 +453,7 @@ export class BrowserWalletConnectionsService {
    * @param dappUrl The URL of the active dApp
    */
   public async setActiveDapp(dappUrl: string): Promise<void> {
-    if (this.activeDappUrl.value === dappUrl) {
+    if (this.normalizeUrl(this.activeDappUrl.value) === this.normalizeUrl(dappUrl)) {
       console.log('BrowserWalletConnections: URL already active, skipping:', dappUrl);
       return; // Already active
     }
