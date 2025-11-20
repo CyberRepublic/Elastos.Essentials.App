@@ -57,6 +57,11 @@ export type DABLoadStop = {
   url: string;
 };
 
+export type DABUrlChangedEvent = {
+  type: 'urlchanged';
+  url: string;
+};
+
 // AddressType enum moved to ElastosMainchainProtocolService
 
 type WalletPermissionCaveat = {
@@ -447,6 +452,7 @@ export class DappBrowserService implements GlobalService {
         }
         break;
       case 'urlchanged':
+        await this.handleUrlChangedEvent(event as DABUrlChangedEvent);
         if (this.dabClient != null && this.dabClient.onUrlChanged) {
           this.dabClient.onUrlChanged(event.url);
         }
@@ -497,6 +503,12 @@ export class DappBrowserService implements GlobalService {
 
     // Wallet subscriptions are now handled by setupDappWalletSubscriptions()
 
+    return;
+  }
+
+  private async handleUrlChangedEvent(event: DABUrlChangedEvent): Promise<void> {
+    // Update the active dApp connections
+    await this.browserWalletConnectionsService.setActiveDapp(event.url);
     return;
   }
 
