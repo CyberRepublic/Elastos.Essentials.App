@@ -271,10 +271,10 @@ export class UnisatProtocolService {
           await this.updateProviderWithWallet(currentUrl, address);
           Logger.log('unisatprotocol', 'Successfully connected BTC wallet for dapp:', currentUrl);
         } else {
-          Logger.log('unisatprotocol', 'BTC wallet selection cancelled');
+          Logger.log('unisatprotocol', 'The wallet does not support BTC');
           this.sendInjectedError('unisat', message.data.id, {
-            code: 4001,
-            message: 'User rejected the request.'
+            code: 4902,
+            message: 'Not support BTC network. Please use a wallet that supports Bitcoin.'
           });
           if (!useActiveWallet) void dappBrowser.show();
           return;
