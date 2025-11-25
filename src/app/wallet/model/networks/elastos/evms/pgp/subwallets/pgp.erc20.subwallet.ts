@@ -152,9 +152,14 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
 
     let amountWithDecimals: BigNumber;
     if (toAmount === -1) { //-1: send all.
-        amountWithDecimals = this.balance;
+      const crossChainFee = new BigNumber(10000);
+      if (this.balance.lt(crossChainFee)) {
+        // If the balance is less than the cross chain fee, return null
+        return null;
+      }
+      amountWithDecimals = this.balance.minus(crossChainFee);
     } else {
-        amountWithDecimals = new BigNumber(toAmount).multipliedBy(this.tokenAmountMulipleTimes);
+      amountWithDecimals = new BigNumber(toAmount).multipliedBy(this.tokenAmountMulipleTimes);
     }
 
     // Incompatibility between our bignumber lib and web3's BN lib. So we must convert by using intermediate strings
