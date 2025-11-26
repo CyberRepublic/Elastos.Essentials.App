@@ -753,7 +753,7 @@ export class CoinTransferPage implements OnInit, OnDestroy {
   }
 
   async pasteFromClipboard() {
-    this.toAddress = await this.native.pasteFromClipboard();
+    this.toAddress = (await this.native.pasteFromClipboard()).trim();
 
     const isAddressValid = await this.isAddressValid(this.toAddress);
     if (!isAddressValid) {
