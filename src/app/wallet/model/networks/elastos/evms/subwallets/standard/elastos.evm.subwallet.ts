@@ -34,13 +34,6 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
     return 5;
   }
 
-  /*
-   * Unit: sela
-   */
-  public getCrossChainFee(): number {
-    return 10000;
-  }
-
   public async getTransactionDetails(txid: string): Promise<EthTransaction> {
     let result = await GlobalEthereumRPCService.instance.eth_getTransactionByHash(
       GlobalElastosAPIService.instance.getApiUrlForChainCode(this.id as StandardCoinName),

@@ -90,6 +90,7 @@ import { WalletService } from '../../../../services/wallet.service';
 import { NetworkInfo } from '../coin-select/coin-select.page';
 import { ERC20CoinService } from 'src/app/wallet/services/evm/erc20coin.service';
 import { ElastosPGPNetworkBase } from 'src/app/wallet/model/networks/elastos/evms/pgp/network/pgp.networks';
+import { ElastosEVMNetwork } from 'src/app/wallet/model/networks/elastos/network/elastos.evm.network';
 
 @Component({
   selector: 'app-coin-transfer',
@@ -348,10 +349,10 @@ export class CoinTransferPage implements OnInit, OnDestroy {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         this.transaction = this.createRechargeTransaction;
 
-        let crossChainfee = (this.toSubWallet as ElastosEVMSubWallet).getCrossChainFee();
-        let fee = 10000 + crossChainfee;
+        const crossChainFee = (network as ElastosEVMNetwork<any>).getCrossChainFee();
+        const fee = 10000 + crossChainFee;
         this.feeOfELA = Util.toELA(fee);
-
+        Logger.log('wallet', 'Cross chain fee', this.feeOfELA);
         Logger.log('wallet', 'Transferring from..', this.fromSubWallet);
         Logger.log('wallet', 'Transferring To..', this.toSubWallet);
         Logger.log('wallet', 'Subwallet address', this.toAddress);
@@ -1330,12 +1331,16 @@ export class CoinTransferPage implements OnInit, OnDestroy {
   async getELASubwalletByID(id: StandardCoinName) {
     let network = this.getELANetworkByID(id);
     let networkWallet = await network.createNetworkWallet(this.networkWallet.masterWallet, false);
+    if (!networkWallet) {
+      return null; // eg. Multi signature wallet does not support EVM chain.
+    }
+
     if (id === StandardCoinName.ETHECOPGP) {
       // The ela token is erc20 token on pgp sidechain. Cross chain transactions require a chain ID.
       let elaTokenAddress = (networkWallet.network as ElastosPGPNetworkBase).getELATokenContract();
       return networkWallet.getSubWallet(elaTokenAddress);
     } else {
-      return networkWallet?.getSubWallet(id);
+      return networkWallet.getSubWallet(id);
     }
   }
 
