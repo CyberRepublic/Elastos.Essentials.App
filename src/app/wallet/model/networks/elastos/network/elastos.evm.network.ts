@@ -70,5 +70,12 @@ export abstract class ElastosEVMNetwork<WalletNetworkOptionsType extends WalletN
     return this.mainTokenSymbol;
   }
 
+  /*
+   * Unit: sela
+   */
+  public getCrossChainFee(): number {
+    return 10000;
+  }
+
   //public abstract getMainChainID(): number;
 }

@@ -23,12 +23,6 @@ export class PGPSubWallet extends ElastosEVMSubWallet {
     return false;
   }
 
-  public getCrossChainFee(): number {
-    // The minimum gas price set for eco sidechain is 50, The gas limit for cross chain transactions is approximately 21512,
-    // so the fee set in the SDK is 150000.
-    return 150000;
-  }
-
   public getMainIcon(): string {
     return "assets/wallet/coins/pga.png";
   }

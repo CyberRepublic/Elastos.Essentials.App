@@ -66,15 +66,6 @@ export class PGPERC20SubWallet extends ERC20SubWallet {
     else return false;
   }
 
-  public getCrossChainFee(): number {
-    if (this.isELAToken()) {
-      // The minimum gas price set for eco sidechain is 50, The gas limit for cross chain transactions is approximately 21512,
-      // so the fee set in the SDK is 150000.
-      return 150000;
-    }
-    else return -1;
-  }
-
   protected async getWithdrawContract() {
     if (!this.withdrawContract) {
       const contractAbi = [{
