@@ -252,6 +252,8 @@ export class CoinTxInfoPage implements OnInit {
 
         if (this.transactionInfo.isCrossChain === true && this.transactionInfo.crossChainToAddress) {
             this.targetAddress = this.transactionInfo.crossChainToAddress;
+            // TODO: Only transactions withdrawn from the sidechain to the mainchain will be displayed.
+            this.crossChainNetworkKey = 'elastos'
         }
 
         // Create array of displayable details for txs
