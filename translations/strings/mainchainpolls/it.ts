@@ -31,7 +31,7 @@ export const it = {
     'vote-error': 'Voto Fallito',
     'vote-error-message': 'Invio del voto fallito. Riprova.',
     'confirm-vote': 'Conferma Voto',
-    'confirm-vote-message': 'Stai per votare per "{{choice}}" con {{amount}} ELA. Questa azione non può essere annullata.'
+    'confirm-vote-message': 'Stai per votare con {{amount}} ELA. Nota che il voto non può essere modificato e i tuoi token non vengono spesi, vengono utilizzati solo come potere di voto.'
   }
 };
 

@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import BigNumber from 'bignumber.js';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
@@ -28,6 +27,7 @@ export class PollDetailPage implements OnInit {
   public pollId: string;
   public pollDetails: VotingDetails | null = null;
   public loading = false;
+  public loadingWalletInfo = false;
   public voting = false;
 
   // Wallet info
@@ -47,8 +47,7 @@ export class PollDetailPage implements OnInit {
     public translate: TranslateService,
     private walletNetworkService: WalletNetworkService,
     private walletService: WalletService,
-    private popupService: GlobalPopupService,
-    private alertController: AlertController
+    private popupService: GlobalPopupService
   ) {
     this.pollId = this.route.snapshot.params.id;
   }
@@ -85,27 +84,32 @@ export class PollDetailPage implements OnInit {
 
   async loadWalletInfo() {
     try {
+      this.loadingWalletInfo = true;
       const networkWallet = this.walletService.activeNetworkWallet.value;
       if (!networkWallet) {
         Logger.warn(App.MAINCHAIN_POLLS, 'No active network wallet');
+        this.loadingWalletInfo = false;
         return;
       }
 
       const mainchainNetwork = this.walletNetworkService.getNetworkByKey('elastos');
       if (!mainchainNetwork) {
         Logger.warn(App.MAINCHAIN_POLLS, 'Elastos mainchain network not found');
+        this.loadingWalletInfo = false;
         return;
       }
 
       const mainchainWallet = await mainchainNetwork.createNetworkWallet(networkWallet.masterWallet, false);
       if (!mainchainWallet) {
         Logger.warn(App.MAINCHAIN_POLLS, 'Failed to create mainchain wallet');
+        this.loadingWalletInfo = false;
         return;
       }
 
       const mainchainSubWallet = mainchainWallet.getSubWallet(StandardCoinName.ELA) as MainChainSubWallet;
       if (!mainchainSubWallet) {
         Logger.warn(App.MAINCHAIN_POLLS, 'Mainchain subwallet not found');
+        this.loadingWalletInfo = false;
         return;
       }
 
@@ -130,6 +134,8 @@ export class PollDetailPage implements OnInit {
       }
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'loadWalletInfo error:', err);
+    } finally {
+      this.loadingWalletInfo = false;
     }
   }
 
@@ -195,28 +201,16 @@ export class PollDetailPage implements OnInit {
     }
     const voteAmountString = voteAmount.dividedBy(Config.SELAAsBigNumber).toFixed(3);
 
-    const alert = await this.alertController.create({
-      header: this.translate.instant('mainchainpolls.confirm-vote'),
-      message: this.translate.instant('mainchainpolls.confirm-vote-message', {
-        choice: this.pollDetails?.choices[this.selectedChoice] || '',
+    const confirmed = await this.popupService.showConfirmationPopup(
+      this.translate.instant('mainchainpolls.confirm-vote'),
+      this.translate.instant('mainchainpolls.confirm-vote-message', {
         amount: voteAmountString
       }),
-      buttons: [
-        {
-          text: this.translate.instant('common.cancel'),
-          role: 'cancel',
-          handler: () => false
-        },
-        {
-          text: this.translate.instant('common.confirm'),
-          handler: () => true
-        }
-      ]
-    });
+      this.translate.instant('common.confirm'),
+      '' // No icon
+    );
 
-    await alert.present();
-    const { role } = await alert.onDidDismiss();
-    return role !== 'cancel';
+    return confirmed;
   }
 
   formatDate(timestamp: number): string {

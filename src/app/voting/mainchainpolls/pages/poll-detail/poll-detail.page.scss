@@ -151,6 +151,25 @@ ion-content {
         }
 
         .not-voted-info {
+            .balance-loading {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                margin-bottom: 20px;
+
+                ion-spinner {
+                    margin-bottom: 12px;
+                }
+
+                p {
+                    font-size: 14px;
+                    color: var(--ion-color-medium);
+                    margin: 0;
+                }
+            }
+
             .available-balance {
                 font-size: 16px;
                 font-weight: 600;
@@ -190,8 +209,9 @@ ion-content {
                     --border-width: 0px;
                     --border-style: none;
                     --inner-border-width: 0px;
-                    align-items: center;
+                    align-items: flex-start;
                     width: 100%;
+                    white-space: normal;
 
                     &::part(native) {
                         border: none;
@@ -215,6 +235,9 @@ ion-content {
                         align-items: center;
                         margin: 0;
                         flex: 1;
+                        white-space: normal;
+                        overflow: visible;
+                        text-overflow: clip;
 
                         h2 {
                             font-size: 15px;
@@ -222,6 +245,11 @@ ion-content {
                             color: var(--ion-text-color);
                             margin: 0;
                             line-height: 1.4;
+                            white-space: normal;
+                            overflow: visible;
+                            text-overflow: clip;
+                            word-wrap: break-word;
+                            word-break: break-word;
                         }
                     }
 

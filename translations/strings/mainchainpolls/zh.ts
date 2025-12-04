@@ -31,7 +31,7 @@ export const zh = {
     'vote-error': '投票失败',
     'vote-error-message': '提交投票失败，请重试。',
     'confirm-vote': '确认投票',
-    'confirm-vote-message': '您即将使用 {{amount}} ELA 投票给 "{{choice}}"。此操作无法撤销。'
+    'confirm-vote-message': '您即将使用 {{amount}} ELA 投票。请注意，投票无法更改，您的代币不会被花费，仅用作投票权。'
   }
 };
 

@@ -53,14 +53,23 @@
             <!-- Show choices and voting UI when poll is active and not voted -->
             <div *ngIf="!userVote && pollDetails && pollDetails.status.toLowerCase() === 'active' && !loading"
                 class="not-voted-info">
-                <p class="available-balance">
-                    {{ 'mainchainpolls.available-balance' | translate }}: {{ formatBalance(availableBalance) }} ELA
-                </p>
+                <!-- Show spinner while loading wallet balance -->
+                <div *ngIf="loadingWalletInfo" class="balance-loading">
+                    <ion-spinner name="crescent"></ion-spinner>
+                    <p>{{ 'mainchainpolls.loading' | translate }}</p>
+                </div>
 
-                <div *ngIf="!availableBalance || availableBalance.isLessThanOrEqualTo(0)"
-                    class="insufficient-balance-warning">
-                    <p>{{ 'mainchainpolls.insufficient-balance' | translate }}</p>
-                    <p class="warning-note">You can still select a choice to test memo generation</p>
+                <!-- Show balance when loaded -->
+                <div *ngIf="!loadingWalletInfo">
+                    <p class="available-balance">
+                        {{ 'mainchainpolls.available-balance' | translate }}: {{ formatBalance(availableBalance) }} ELA
+                    </p>
+
+                    <div *ngIf="availableBalance !== null && (!availableBalance || availableBalance.isLessThanOrEqualTo(0))"
+                        class="insufficient-balance-warning">
+                        <p>{{ 'mainchainpolls.insufficient-balance' | translate }}</p>
+                        <p class="warning-note">You can still select a choice to test memo generation</p>
+                    </div>
                 </div>
 
                 <div class="choices-list">

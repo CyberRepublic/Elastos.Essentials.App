@@ -1,11 +1,12 @@
 export const en = {
   mainchainpolls: {
     title: 'Elastos Voting',
-    intro: 'Participate in mainchain polls by voting with your ELA. Your vote is recorded on-chain in transaction memos.',
+    intro:
+      'Participate in mainchain polls by voting with your ELA. Your vote is recorded on-chain in transaction memos.',
     'poll-detail': 'Poll Details',
     'no-polls': 'No polls available',
     'poll-not-found': 'Poll not found',
-    'loading': 'Loading...',
+    loading: 'Loading...',
     choices: 'choices',
     status: {
       active: 'Active',
@@ -31,7 +32,7 @@ export const en = {
     'vote-error': 'Vote Failed',
     'vote-error-message': 'Failed to submit your vote. Please try again.',
     'confirm-vote': 'Confirm Vote',
-    'confirm-vote-message': 'You are about to vote for "{{choice}}" with {{amount}} ELA. This action cannot be undone.'
+    'confirm-vote-message':
+      'You are about to vote with {{amount}} ELA. Note that the vote cannot be changed, and your tokens are not spent, they are only used as voting power.'
   }
 };
-

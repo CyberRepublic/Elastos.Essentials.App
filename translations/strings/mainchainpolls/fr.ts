@@ -31,7 +31,7 @@ export const fr = {
     'vote-error': 'Échec du Vote',
     'vote-error-message': 'Échec de la soumission de votre vote. Veuillez réessayer.',
     'confirm-vote': 'Confirmer le Vote',
-    'confirm-vote-message': 'Vous êtes sur le point de voter pour "{{choice}}" avec {{amount}} ELA. Cette action ne peut pas être annulée.'
+    'confirm-vote-message': 'Vous êtes sur le point de voter avec {{amount}} ELA. Notez que le vote ne peut pas être modifié et que vos jetons ne sont pas dépensés, ils sont uniquement utilisés comme pouvoir de vote.'
   }
 };
 

@@ -20,9 +20,8 @@ export class MainchainPollsService {
   // TODO: Set the actual API base URL
   private apiBaseUrl = 'https://api.example.com/mainchain-polls'; // Stub URL
 
-  // TODO: Get this from InitiateVoting Flag - exact byte length required
-  private readonly USER_VOTE_FLAG = 'VOTE'; // Example - replace with actual flag
-  private readonly USER_VOTE_FLAG_BYTE_LENGTH = 8; // InitFlag is 8 bytes
+  private readonly USER_VOTE_FLAG = 'uservote';
+  private readonly USER_VOTE_FLAG_BYTE_LENGTH = 8; // 8 bytes
 
   constructor(
     private http: HttpClient,
@@ -137,7 +136,12 @@ export class MainchainPollsService {
                   description: 'Test Poll - Mainchain Voting',
                   startTime: Math.floor(Date.now() / 1000) - 86400, // 1 day ago
                   endTime: Math.floor(Date.now() / 1000) + 86400 * 7, // 7 days from now
-                  choices: ['Choice A', 'Choice B', 'Choice C', 'Choice D']
+                  choices: [
+                    'Approve the proposal to increase the block size limit to 4MB',
+                    'Reject the proposal and maintain current block size limit',
+                    'Request further discussion and delay the decision',
+                    'Approve with modifications to implement gradual increase over 6 months'
+                  ]
                 } as VotingInfo
               ]
             : ([] as VotingInfo[])
@@ -176,7 +180,12 @@ export class MainchainPollsService {
           description: 'Test Poll - Mainchain Voting',
           startTime: Math.floor(Date.now() / 1000) - 86400, // 1 day ago
           endTime: Math.floor(Date.now() / 1000) + 86400 * 7, // 7 days from now
-          choices: ['Choice A', 'Choice B', 'Choice C', 'Choice D'],
+          choices: [
+            'Approve the proposal to increase the block size limit to 4MB',
+            'Reject the proposal and maintain current block size limit',
+            'Request further discussion and delay the decision',
+            'Approve with modifications to implement gradual increase over 6 months'
+          ],
           votes: []
         };
       }
