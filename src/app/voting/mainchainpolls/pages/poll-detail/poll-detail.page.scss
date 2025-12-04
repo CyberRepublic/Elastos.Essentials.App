@@ -1,0 +1,307 @@
+@import "../../root.scss";
+
+ion-content {
+    --padding-bottom: 80px;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    margin-top: 80px;
+}
+
+.container {
+    padding: 10px;
+
+    .poll-header {
+        border-radius: 17px;
+        padding: 20px 15px;
+        margin: 0 10px 12.5px;
+        background: var(--essentials-box-color);
+        display: flex;
+        flex-direction: column;
+
+        .poll-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--ion-text-color);
+            line-height: 1.4;
+        }
+
+        .poll-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .poll-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+
+            &.active {
+                background: rgba(0, 185, 120, 0.15);
+                color: #00b978;
+            }
+
+            &.ended {
+                background: var(--essentials-box-color);
+                color: var(--ion-color-medium);
+            }
+
+            &.upcoming {
+                background: rgba(115, 44, 206, 0.15);
+                color: #732cce;
+            }
+        }
+
+        .poll-dates {
+            margin-top: 8px;
+
+            ion-row {
+                margin: 0;
+            }
+
+            ion-col {
+                padding: 0;
+            }
+
+            .date-label {
+                font-size: 12px;
+                color: var(--ion-color-medium);
+                margin: 0 0 4px 0;
+                font-weight: 400;
+                opacity: 0.7;
+            }
+
+            .date-value {
+                font-size: 13px;
+                color: var(--ion-text-color);
+                margin: 0;
+                font-weight: 500;
+            }
+        }
+    }
+
+    .vote-section {
+        margin: 0 10px;
+        padding: 20px 15px;
+        background: var(--essentials-box-color);
+        border-radius: 17px;
+        margin-bottom: 20px;
+
+        h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--ion-text-color);
+        }
+
+        .wallet-info {
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--essentials-border-separator-color);
+            margin-bottom: 16px;
+
+            .wallet-address-label {
+                font-size: 12px;
+                color: var(--ion-color-medium);
+                margin-bottom: 6px;
+                opacity: 0.7;
+            }
+
+            .wallet-address {
+                font-size: 13px;
+                font-family: monospace;
+                word-break: break-all;
+                color: var(--ion-text-color);
+                font-weight: 500;
+            }
+        }
+
+        .voted-info {
+            text-align: center;
+            padding: 20px 0;
+
+            .voted-badge {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                color: #00b978;
+                font-weight: 600;
+                margin-bottom: 16px;
+                font-size: 16px;
+
+                ion-icon {
+                    font-size: 24px;
+                }
+            }
+
+            .vote-details {
+                font-size: 14px;
+                color: var(--ion-color-medium);
+                margin: 8px 0;
+                font-weight: 400;
+            }
+        }
+
+        .not-voted-info {
+            .available-balance {
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--ion-text-color);
+                margin-bottom: 20px;
+                text-align: center;
+                padding: 12px;
+                background: var(--ion-background-color);
+                border-radius: 8px;
+            }
+
+            .choices-list {
+                margin-bottom: 20px;
+
+                h3 {
+                    font-size: 14px;
+                    font-weight: 600;
+                    margin-bottom: 12px;
+                    color: var(--ion-text-color);
+                }
+
+                ion-radio-group {
+                    width: 100%;
+                }
+
+                ion-item {
+                    --padding-start: 15px;
+                    --padding-end: 0px;
+                    --padding-top: 12px;
+                    --padding-bottom: 12px;
+                    --min-height: 48px;
+                    --inner-padding-end: 0px;
+                    margin-bottom: 8px;
+                    border-radius: 8px;
+                    --background: var(--ion-background-color);
+                    --border-radius: 8px;
+                    --border-width: 0px;
+                    --border-style: none;
+                    --inner-border-width: 0px;
+                    align-items: center;
+                    width: 100%;
+
+                    &::part(native) {
+                        border: none;
+                        border-bottom: none;
+                        padding-right: 0px;
+                    }
+
+                    &.selected {
+                        --background: rgba(0, 185, 120, 0.15);
+
+                        ion-label {
+                            h2 {
+                                color: #00b978;
+                                font-weight: 600;
+                            }
+                        }
+                    }
+
+                    ion-label {
+                        display: flex;
+                        align-items: center;
+                        margin: 0;
+                        flex: 1;
+
+                        h2 {
+                            font-size: 15px;
+                            font-weight: 500;
+                            color: var(--ion-text-color);
+                            margin: 0;
+                            line-height: 1.4;
+                        }
+                    }
+
+                    ion-radio {
+                        margin: 0;
+                        margin-right: 15px;
+                    }
+                }
+            }
+
+            .vote-button-container {
+                margin-top: 20px;
+                width: 100%;
+            }
+
+            .test-memo-button {
+                margin-top: 12px;
+                --border-radius: 8px;
+                height: 40px;
+                font-size: 12px;
+                --color: var(--ion-color-medium);
+            }
+        }
+
+        .cannot-vote-info {
+            text-align: center;
+            padding: 20px 0;
+            color: var(--ion-color-medium);
+            font-size: 14px;
+        }
+
+        .insufficient-balance-warning {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(255, 56, 56, 0.1);
+            border-radius: 8px;
+            text-align: center;
+
+            p {
+                margin: 4px 0;
+                color: var(--ion-color-danger);
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            .warning-note {
+                font-size: 12px;
+                color: var(--ion-color-medium);
+                font-weight: 400;
+                margin-top: 8px;
+            }
+        }
+
+        .test-memo-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--essentials-border-separator-color);
+
+            .test-memo-button {
+                --border-radius: 8px;
+                height: 40px;
+                font-size: 12px;
+                --color: var(--ion-color-medium);
+            }
+
+            .test-memo-hint {
+                font-size: 12px;
+                color: var(--ion-color-medium);
+                text-align: center;
+                margin-top: 8px;
+                opacity: 0.7;
+            }
+        }
+    }
+}
+
+.no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ion-color-medium);
+    font-size: 14px;
+    font-weight: 500;
+}

@@ -26,6 +26,7 @@ const routes: Routes = [
   //{ path: 'easybridge', loadChildren: () => import('./easybridge/module').then(x => x.EasyBridgeModule) },
   // { path: 'multiswap', loadChildren: () => import('./multiswap/module').then(x => x.MultiSwapModule) },
   { path: 'staking', loadChildren: () => import('./voting/staking/module').then(x => x.StakingModule), canActivate: [AuthGuardService] },
+  { path: 'mainchainpolls', loadChildren: () => import('./voting/mainchainpolls/module').then(x => x.MainchainPollsModule), canActivate: [AuthGuardService] },
 
   // Prevent angular from calling a random default route sometimes when starting,
   // leading to crashes if platform is not ready yet

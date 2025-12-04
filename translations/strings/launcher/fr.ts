@@ -88,6 +88,8 @@ export const fr = {
         'app-elastos-staking-description': 'Déposez vos ELA pour ensuite pouvoir voter et être récompensé',
         'app-dpos2-voting': 'Votes BPoS',
         'app-dpos2-description': 'Votez pour les Supernodes Elastos',
+        'app-mainchain-polls': 'Sondages Mainchain',
+        'app-mainchain-polls-description': 'Participez aux sondages de vote de la mainchain',
 
         /******** Widgets *********/
         'data-sync-title': 'Synchro Données',

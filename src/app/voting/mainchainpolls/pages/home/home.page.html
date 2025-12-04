@@ -1,0 +1,42 @@
+<ion-content [scrollEvents]="true" #content [class.dark-container]="theme.darkMode">
+    <app-titlebar></app-titlebar>
+
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content pullingIcon="arrow-down" refreshingSpinner="crescent">
+        </ion-refresher-content>
+    </ion-refresher>
+
+    <div class="intro-section" *ngIf="pollsFetched">
+        <p>{{ 'mainchainpolls.intro' | translate }}</p>
+    </div>
+
+    <ion-grid *ngIf="pollsFetched" class="container ion-no-padding">
+        <div *ngIf="loading" class="loading">
+            <ion-spinner></ion-spinner>
+        </div>
+
+        <div *ngIf="!loading && polls && polls.length > 0" class="poll-list">
+            <div *ngFor="let poll of polls" (click)="selectPoll(poll)" class="poll-item ripple ion-activatable">
+                <div class="icon-col img-col">
+                    <img class="img" src="assets/wallet/networks/elastos.png" />
+                </div>
+                <div class="poll-col">
+                    <div class="poll-title">{{ poll.description }}</div>
+                    <div class="poll-meta">
+                        <span class="poll-status" [class]="getStatusClass(poll.status)">
+                            {{ 'mainchainpolls.status.' + poll.status | translate }}
+                        </span>
+                        <span class="poll-date">
+                            {{ formatDate(poll.startTime) }} - {{ formatDate(poll.endTime) }}
+                        </span>
+                    </div>
+                </div>
+                <ion-ripple-effect></ion-ripple-effect>
+            </div>
+        </div>
+
+        <div *ngIf="!loading && (!polls || polls.length == 0)" class="no-data">
+            {{ 'mainchainpolls.no-polls' | translate }}
+        </div>
+    </ion-grid>
+</ion-content>

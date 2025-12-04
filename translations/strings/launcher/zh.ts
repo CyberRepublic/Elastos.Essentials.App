@@ -88,6 +88,8 @@ export const zh = {
         'app-elastos-staking-description': '存入您的 ELA 代币，稍后投票并赚取奖励',
         'app-dpos2-voting': 'BPoS 超级节点投票',
         'app-dpos2-description': '为亦来云超级节点投票',
+        'app-mainchain-polls': '主链投票',
+        'app-mainchain-polls-description': '参与主链投票',
 
         /******** Widgets *********/
         'data-sync-title': '数据同步',

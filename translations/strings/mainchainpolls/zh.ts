@@ -1,0 +1,37 @@
+export const zh = {
+  mainchainpolls: {
+    title: 'Elastos 投票',
+    intro: '通过使用您的 ELA 投票参与主链投票。您的投票记录在交易备注中的链上。',
+    'poll-detail': '投票详情',
+    'no-polls': '暂无投票',
+    'poll-not-found': '未找到投票',
+    'loading': '加载中...',
+    choices: '选项',
+    status: {
+      active: '进行中',
+      ended: '已结束',
+      upcoming: '即将开始'
+    },
+    'start-time': '开始时间',
+    'end-time': '结束时间',
+    'vote-status': '投票状态',
+    'wallet-address': '钱包地址',
+    voted: '已投票',
+    'vote-amount': '投票金额',
+    'vote-choice': '投票选项',
+    'available-balance': '可用余额',
+    'select-choice': '选择选项',
+    'select-choice-message': '投票前请先选择一个选项',
+    vote: '投票',
+    'poll-not-active': '此投票当前未激活',
+    'insufficient-balance': '余额不足',
+    'insufficient-balance-message': '投票需要至少 1 ELA + 手续费',
+    'vote-success': '投票已提交',
+    'vote-success-message': '您的投票已成功提交。交易 ID：{{txId}}',
+    'vote-error': '投票失败',
+    'vote-error-message': '提交投票失败，请重试。',
+    'confirm-vote': '确认投票',
+    'confirm-vote-message': '您即将使用 {{amount}} ELA 投票给 "{{choice}}"。此操作无法撤销。'
+  }
+};
+
