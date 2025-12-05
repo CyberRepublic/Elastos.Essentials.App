@@ -1,15 +1,18 @@
 export const it = {
   mainchainpolls: {
     title: 'Votazione Elastos',
-    intro: 'Partecipa ai sondaggi della mainchain votando con il tuo ELA. Il tuo voto è registrato on-chain nei memo delle transazioni.',
+    intro:
+      'Partecipa ai sondaggi della mainchain votando con il tuo ELA. Il tuo voto è registrato on-chain nei memo delle transazioni.',
     'poll-detail': 'Dettagli del Sondaggio',
     'no-polls': 'Nessun sondaggio disponibile',
     'poll-not-found': 'Sondaggio non trovato',
-    'loading': 'Caricamento...',
+    loading: 'Caricamento...',
     choices: 'scelte',
     status: {
       active: 'Attivo',
+      voting: 'Attivo',
       ended: 'Terminato',
+      finished: 'Terminato',
       upcoming: 'In arrivo'
     },
     'start-time': 'Ora di Inizio',
@@ -24,6 +27,8 @@ export const it = {
     'select-choice-message': 'Seleziona una scelta prima di votare',
     vote: 'Vota',
     'poll-not-active': 'Questo sondaggio non è attualmente attivo',
+    'poll-not-started': 'Il sondaggio non è ancora iniziato',
+    'poll-finished': 'Il sondaggio è terminato',
     'insufficient-balance': 'Saldo Insufficiente',
     'insufficient-balance-message': 'Hai bisogno di almeno 1 ELA + commissioni per votare',
     'vote-success': 'Voto Inviato',
@@ -31,7 +36,7 @@ export const it = {
     'vote-error': 'Voto Fallito',
     'vote-error-message': 'Invio del voto fallito. Riprova.',
     'confirm-vote': 'Conferma Voto',
-    'confirm-vote-message': 'Stai per votare con {{amount}} ELA. Nota che il voto non può essere modificato e i tuoi token non vengono spesi, vengono utilizzati solo come potere di voto.'
+    'confirm-vote-message':
+      'Stai per votare con {{amount}} ELA. Nota che il voto non può essere modificato e i tuoi token non vengono spesi, vengono utilizzati solo come potere di voto.'
   }
 };
-

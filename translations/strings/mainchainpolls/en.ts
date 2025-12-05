@@ -10,7 +10,9 @@ export const en = {
     choices: 'choices',
     status: {
       active: 'Active',
+      voting: 'Active',
       ended: 'Ended',
+      finished: 'Finished',
       upcoming: 'Upcoming'
     },
     'start-time': 'Start Time',
@@ -25,6 +27,8 @@ export const en = {
     'select-choice-message': 'Please select a choice before voting',
     vote: 'Vote',
     'poll-not-active': 'This poll is not currently active',
+    'poll-not-started': "Poll hasn't started yet",
+    'poll-finished': 'Poll has finished',
     'insufficient-balance': 'Insufficient Balance',
     'insufficient-balance-message': 'You need at least 1 ELA + fees to vote',
     'vote-success': 'Vote Submitted',

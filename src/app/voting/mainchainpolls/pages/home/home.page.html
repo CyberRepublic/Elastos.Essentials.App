@@ -6,16 +6,16 @@
         </ion-refresher-content>
     </ion-refresher>
 
-    <div class="intro-section" *ngIf="pollsFetched">
+    <div class="intro-section">
         <p>{{ 'mainchainpolls.intro' | translate }}</p>
     </div>
 
-    <ion-grid *ngIf="pollsFetched" class="container ion-no-padding">
-        <div *ngIf="loading" class="loading">
-            <ion-spinner></ion-spinner>
-        </div>
+    <div *ngIf="loading" class="loading">
+        <ion-spinner></ion-spinner>
+    </div>
 
-        <div *ngIf="!loading && polls && polls.length > 0" class="poll-list">
+    <ion-grid *ngIf="!loading && pollsFetched" class="container ion-no-padding">
+        <div *ngIf="polls && polls.length > 0" class="poll-list">
             <div *ngFor="let poll of polls" (click)="selectPoll(poll)" class="poll-item ripple ion-activatable">
                 <div class="icon-col img-col">
                     <img class="img" src="assets/wallet/networks/elastos.png" />
@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <div *ngIf="!loading && (!polls || polls.length == 0)" class="no-data">
+        <div *ngIf="!polls || polls.length == 0" class="no-data">
             {{ 'mainchainpolls.no-polls' | translate }}
         </div>
     </ion-grid>

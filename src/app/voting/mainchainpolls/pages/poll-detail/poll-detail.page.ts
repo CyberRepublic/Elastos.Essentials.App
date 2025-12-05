@@ -1,11 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import { Logger } from 'src/app/logger';
 import { App } from 'src/app/model/app.enum';
-import { GlobalNavService } from 'src/app/services/global.nav.service';
 import { GlobalPopupService } from 'src/app/services/global.popup.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 import { Config } from 'src/app/wallet/config/Config';
@@ -13,7 +12,9 @@ import { StandardCoinName } from 'src/app/wallet/model/coin';
 import { MainChainSubWallet } from 'src/app/wallet/model/networks/elastos/mainchain/subwallets/mainchain.subwallet';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
-import { VotingDetails } from '../../model/voting-details.model';
+import { PollDetails } from '../../model/poll-details.model';
+import { PollStatus } from '../../model/poll-status.enum';
+import { Vote } from '../../model/vote.model';
 import { MainchainPollsService } from '../../services/mainchain-polls.service';
 
 @Component({
@@ -25,7 +26,7 @@ export class PollDetailPage implements OnInit {
   @ViewChild(TitleBarComponent, { static: false }) titleBar: TitleBarComponent;
 
   public pollId: string;
-  public pollDetails: VotingDetails | null = null;
+  public pollDetails: PollDetails | null = null;
   public loading = false;
   public loadingWalletInfo = false;
   public voting = false;
@@ -34,7 +35,7 @@ export class PollDetailPage implements OnInit {
   public walletAddress = '';
   public walletBalance: BigNumber | null = null;
   public availableBalance: BigNumber | null = null; // Balance - 1 ELA for fees
-  public userVote: { option: number; amount: string } | null = null;
+  public userVote: Vote | null = null;
 
   public selectedChoice: number | null = null;
 
@@ -42,8 +43,6 @@ export class PollDetailPage implements OnInit {
     public theme: GlobalThemeService,
     private pollsService: MainchainPollsService,
     private route: ActivatedRoute,
-    private router: Router,
-    private globalNav: GlobalNavService,
     public translate: TranslateService,
     private walletNetworkService: WalletNetworkService,
     private walletService: WalletService,
@@ -67,7 +66,7 @@ export class PollDetailPage implements OnInit {
   async loadPollDetails() {
     try {
       this.loading = true;
-      this.pollDetails = await this.pollsService.getVotingDetails(this.pollId);
+      this.pollDetails = await this.pollsService.getPollDetails(this.pollId);
       this.loading = false;
 
       if (this.pollDetails) {
@@ -238,15 +237,62 @@ export class PollDetailPage implements OnInit {
     }
   }
 
-  getStatusClass(status: string): string {
-    const statusLower = status.toLowerCase();
-    if (statusLower === 'active' || statusLower === 'ongoing') {
+  getStatusClass(status: PollStatus | string): string {
+    const normalizedStatus = typeof status === 'string' ? status.toLowerCase() : status;
+    if (normalizedStatus === 'voting') {
       return 'active';
-    } else if (statusLower === 'ended' || statusLower === 'finished') {
+    } else if (normalizedStatus === 'finished') {
       return 'ended';
     } else {
       return 'upcoming';
     }
+  }
+
+  isPollActive(pollDetails: PollDetails | null): boolean {
+    if (!pollDetails) {
+      return false;
+    }
+    const status: PollStatus = pollDetails.status;
+    return status === 'voting';
+  }
+
+  isPollNotActive(pollDetails: PollDetails | null): boolean {
+    if (!pollDetails) {
+      return false;
+    }
+    return !this.isPollActive(pollDetails);
+  }
+
+  getPollInactiveMessage(pollDetails: PollDetails | null): string {
+    if (!pollDetails) {
+      return '';
+    }
+    const status: PollStatus = pollDetails.status;
+    if (status === 'finished') {
+      return this.translate.instant('mainchainpolls.poll-finished');
+    } else if (status === 'upcoming') {
+      return this.translate.instant('mainchainpolls.poll-not-started');
+    }
+    return this.translate.instant('mainchainpolls.poll-not-active');
+  }
+
+  getPollInactiveStatusClass(pollDetails: PollDetails | null): string {
+    if (!pollDetails) {
+      return '';
+    }
+    const status: PollStatus = pollDetails.status;
+    if (status === 'finished') {
+      return 'finished';
+    } else if (status === 'upcoming') {
+      return 'upcoming';
+    }
+    return '';
+  }
+
+  getPollInactiveClasses(pollDetails: PollDetails | null): string {
+    const baseClass = 'cannot-vote-info';
+    const statusClass = this.getPollInactiveStatusClass(pollDetails);
+    return statusClass ? `${baseClass} ${statusClass}` : baseClass;
   }
 
   canVote(): boolean {
@@ -256,73 +302,12 @@ export class PollDetailPage implements OnInit {
     if (this.userVote) {
       return false; // Already voted
     }
-    if (this.pollDetails.status.toLowerCase() !== 'active') {
+    if (!this.isPollActive(this.pollDetails)) {
       return false; // Poll not active
     }
     if (!this.availableBalance || this.availableBalance.isLessThanOrEqualTo(0)) {
       return false; // Insufficient balance
     }
     return true;
-  }
-
-  async testMemoGeneration() {
-    if (this.selectedChoice === null || this.selectedChoice === undefined) {
-      await this.popupService.ionicAlert('mainchainpolls.select-choice', 'mainchainpolls.select-choice-message');
-      return;
-    }
-
-    // For testing, use a default amount if balance is insufficient
-    let voteAmount = new BigNumber(0);
-    let amountString = '0';
-
-    if (this.availableBalance && this.availableBalance.isGreaterThan(0)) {
-      const oneELA = new BigNumber(1).multipliedBy(Config.SELAAsBigNumber);
-      voteAmount = this.availableBalance.minus(oneELA);
-      if (voteAmount.isLessThanOrEqualTo(0)) {
-        voteAmount = this.availableBalance.dividedBy(2); // Use half if less than 1 ELA
-      }
-      amountString = voteAmount.dividedBy(Config.SELAAsBigNumber).toString(10);
-    } else {
-      // Use a test amount for debugging when balance is insufficient
-      amountString = '1.0';
-      Logger.log(App.MAINCHAIN_POLLS, 'Using test amount for memo generation (insufficient balance)');
-    }
-
-    try {
-      Logger.log(App.MAINCHAIN_POLLS, '=== TEST MEMO GENERATION ===');
-      Logger.log(App.MAINCHAIN_POLLS, 'Poll ID:', this.pollId);
-      Logger.log(App.MAINCHAIN_POLLS, 'Choice:', this.selectedChoice);
-      Logger.log(App.MAINCHAIN_POLLS, 'Amount (ELA):', amountString);
-      Logger.log(
-        App.MAINCHAIN_POLLS,
-        'Available Balance:',
-        this.availableBalance ? this.availableBalance.toString() : '0'
-      );
-
-      // Generate memo
-      const memoHex = await this.pollsService.generateVoteMemoForTesting(
-        this.pollId,
-        this.selectedChoice,
-        amountString
-      );
-
-      Logger.log(App.MAINCHAIN_POLLS, '=== MEMO HEX STRING ===');
-      Logger.log(App.MAINCHAIN_POLLS, memoHex);
-      Logger.log(App.MAINCHAIN_POLLS, 'Memo length (hex chars):', memoHex.length);
-      Logger.log(App.MAINCHAIN_POLLS, 'Memo length (bytes):', memoHex.length / 2);
-      Logger.log(App.MAINCHAIN_POLLS, '=== END MEMO GENERATION ===');
-
-      // Show alert with memo info
-      const memoInfo = `Memo Hex: ${memoHex}\n\nLength: ${memoHex.length} hex chars (${
-        memoHex.length / 2
-      } bytes)\n\nCheck console logs for full details.`;
-      await this.popupService.ionicAlert('Memo Generated (Debug)', memoInfo);
-    } catch (err) {
-      Logger.error(App.MAINCHAIN_POLLS, 'Test memo generation error:', err);
-      await this.popupService.ionicAlert(
-        'mainchainpolls.vote-error',
-        err.message || 'mainchainpolls.vote-error-message'
-      );
-    }
   }
 }

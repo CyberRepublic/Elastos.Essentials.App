@@ -32,11 +32,6 @@
         <div class="vote-section">
             <h2>{{ 'mainchainpolls.vote-status' | translate }}</h2>
 
-            <div class="wallet-info">
-                <p class="wallet-address-label">{{ 'mainchainpolls.wallet-address' | translate }}</p>
-                <p class="wallet-address">{{ walletAddress || ('mainchainpolls.loading' | translate) }}</p>
-            </div>
-
             <div *ngIf="userVote" class="voted-info">
                 <div class="voted-badge">
                     <ion-icon name="checkmark-circle"></ion-icon>
@@ -51,27 +46,7 @@
             </div>
 
             <!-- Show choices and voting UI when poll is active and not voted -->
-            <div *ngIf="!userVote && pollDetails && pollDetails.status.toLowerCase() === 'active' && !loading"
-                class="not-voted-info">
-                <!-- Show spinner while loading wallet balance -->
-                <div *ngIf="loadingWalletInfo" class="balance-loading">
-                    <ion-spinner name="crescent"></ion-spinner>
-                    <p>{{ 'mainchainpolls.loading' | translate }}</p>
-                </div>
-
-                <!-- Show balance when loaded -->
-                <div *ngIf="!loadingWalletInfo">
-                    <p class="available-balance">
-                        {{ 'mainchainpolls.available-balance' | translate }}: {{ formatBalance(availableBalance) }} ELA
-                    </p>
-
-                    <div *ngIf="availableBalance !== null && (!availableBalance || availableBalance.isLessThanOrEqualTo(0))"
-                        class="insufficient-balance-warning">
-                        <p>{{ 'mainchainpolls.insufficient-balance' | translate }}</p>
-                        <p class="warning-note">You can still select a choice to test memo generation</p>
-                    </div>
-                </div>
-
+            <div *ngIf="!userVote && isPollActive(pollDetails) && !loading" class="not-voted-info">
                 <div class="choices-list">
                     <h3>{{ 'mainchainpolls.select-choice' | translate }}</h3>
                     <ion-radio-group [(ngModel)]="selectedChoice">
@@ -85,6 +60,29 @@
                     </ion-radio-group>
                 </div>
 
+                <!-- Show spinner while loading wallet balance -->
+                <div *ngIf="loadingWalletInfo" class="balance-loading">
+                    <ion-spinner name="crescent"></ion-spinner>
+                    <p>{{ 'mainchainpolls.loading' | translate }}</p>
+                </div>
+
+                <!-- Show wallet info when loaded -->
+                <div *ngIf="!loadingWalletInfo" class="wallet-balance-section">
+                    <div class="wallet-info">
+                        <p class="wallet-address-label">{{ 'mainchainpolls.wallet-address' | translate }}</p>
+                        <p class="wallet-address">{{ walletAddress || ('mainchainpolls.loading' | translate) }}</p>
+                    </div>
+
+                    <p class="available-balance">
+                        {{ 'mainchainpolls.available-balance' | translate }}: {{ formatBalance(availableBalance) }} ELA
+                    </p>
+
+                    <div *ngIf="availableBalance !== null && (!availableBalance || availableBalance.isLessThanOrEqualTo(0))"
+                        class="insufficient-balance-warning">
+                        <p>{{ 'mainchainpolls.insufficient-balance' | translate }}</p>
+                    </div>
+                </div>
+
                 <div class="vote-button-container">
                     <ebutton [disabled]="selectedChoice === null || voting || !canVote()" [spinning]="voting"
                         [title]="'mainchainpolls.vote' | translate" (clicked)="vote()">
@@ -93,20 +91,9 @@
             </div>
 
             <!-- Show message when poll is not active -->
-            <div *ngIf="!userVote && pollDetails && pollDetails.status.toLowerCase() !== 'active' && !loading"
-                class="cannot-vote-info">
-                <p>{{ 'mainchainpolls.poll-not-active' | translate }}</p>
-            </div>
-
-            <!-- Test memo button always visible when not voted (even if can't vote) -->
-            <div *ngIf="!userVote && !loading" class="test-memo-section">
-                <ion-button expand="block" fill="outline" (click)="testMemoGeneration()"
-                    [disabled]="selectedChoice === null || selectedChoice === undefined" class="test-memo-button">
-                    Test Memo Generation (Debug)
-                </ion-button>
-                <p *ngIf="selectedChoice === null || selectedChoice === undefined" class="test-memo-hint">
-                    Select a choice above to test memo generation
-                </p>
+            <div *ngIf="!userVote && isPollNotActive(pollDetails) && !loading"
+                [class]="getPollInactiveClasses(pollDetails)">
+                <p>{{ getPollInactiveMessage(pollDetails) }}</p>
             </div>
         </div>
     </ion-grid>

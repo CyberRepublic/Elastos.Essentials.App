@@ -1,30 +1,30 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import { Buffer } from 'buffer';
 import { Logger } from 'src/app/logger';
 import { App } from 'src/app/model/app.enum';
+import { GlobalJsonRPCService } from 'src/app/services/global.jsonrpc.service';
 import { Config } from 'src/app/wallet/config/Config';
 import { StandardCoinName } from 'src/app/wallet/model/coin';
 import { MainChainSubWallet } from 'src/app/wallet/model/networks/elastos/mainchain/subwallets/mainchain.subwallet';
 import { Transfer } from 'src/app/wallet/services/cointransfer.service';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
-import { VotingDetails } from '../model/voting-details.model';
-import { VotingInfo } from '../model/voting-info.model';
+import { PollDetails } from '../model/poll-details.model';
+import { Poll } from '../model/poll.model';
+import { Vote } from '../model/vote.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MainchainPollsService {
-  // TODO: Set the actual API base URL
-  private apiBaseUrl = 'https://api.example.com/mainchain-polls'; // Stub URL
+  private apiBaseUrl = 'https://ela-node-test.eadd.co/';
 
-  private readonly USER_VOTE_FLAG = 'uservote';
+  private readonly USER_VOTE_FLAG = 'pollvote';
   private readonly USER_VOTE_FLAG_BYTE_LENGTH = 8; // 8 bytes
 
   constructor(
-    private http: HttpClient,
+    private globalJsonRPCService: GlobalJsonRPCService,
     private walletNetworkService: WalletNetworkService,
     private walletService: WalletService
   ) {}
@@ -90,113 +90,77 @@ export class MainchainPollsService {
 
   /**
    * Get list of poll IDs
-   * API: getPoll
+   * API: getpolls
    */
-  getPoll(): Promise<string[]> {
+  async getPolls(): Promise<string[]> {
     try {
-      // TODO: Replace with actual API call
-      const url = `${this.apiBaseUrl}/getpoll`;
-      Logger.log(App.MAINCHAIN_POLLS, 'getPoll - calling:', url);
-
-      // Stub response - placeholder poll for testing
-      const response = {
-        ids: ['0x' + '0'.repeat(64)] // Placeholder poll ID (64 hex chars = 32 bytes)
+      const url = this.apiBaseUrl;
+      const param = {
+        jsonrpc: '2.0',
+        method: 'getpolls',
+        params: [],
+        id: '1'
       };
 
-      // TODO: Uncomment when API is ready
-      // const response = await this.http.get<{ ids: string[] }>(url).toPromise();
+      Logger.log(App.MAINCHAIN_POLLS, 'getpolls - calling:', url, 'with params:', param);
 
-      Logger.log(App.MAINCHAIN_POLLS, 'getPoll - response:', response);
-      return Promise.resolve(response.ids || []);
+      const response = await this.globalJsonRPCService.httpPost(url, param, 'mainchain-polls');
+
+      Logger.log(App.MAINCHAIN_POLLS, 'getpolls - response:', response);
+      return Promise.resolve(response?.ids || []);
     } catch (err) {
-      Logger.error(App.MAINCHAIN_POLLS, 'getPoll error:', err);
+      Logger.error(App.MAINCHAIN_POLLS, 'getpolls error:', err);
       return Promise.resolve([]);
     }
   }
 
   /**
-   * Get voting info for multiple polls
-   * API: getVotingInfo
+   * Get poll info for multiple polls
+   * API: getPollInfo
    */
-  getVotingInfo(ids: string[]): Promise<VotingInfo[]> {
+  async getPollInfo(ids: string[]): Promise<Poll[]> {
     try {
-      // TODO: Replace with actual API call
-      const url = `${this.apiBaseUrl}/getVotingInfo`;
-      Logger.log(App.MAINCHAIN_POLLS, 'getVotingInfo - calling:', url, 'ids:', ids);
-
-      // Stub response - placeholder poll for testing
-      const placeholderPollId = '0x' + '0'.repeat(64);
-      const response = {
-        votingInfos:
-          ids.includes(placeholderPollId) || ids.includes(placeholderPollId.replace('0x', ''))
-            ? [
-                {
-                  id: placeholderPollId.replace('0x', ''),
-                  status: 'active',
-                  description: 'Test Poll - Mainchain Voting',
-                  startTime: Math.floor(Date.now() / 1000) - 86400, // 1 day ago
-                  endTime: Math.floor(Date.now() / 1000) + 86400 * 7, // 7 days from now
-                  choices: [
-                    'Approve the proposal to increase the block size limit to 4MB',
-                    'Reject the proposal and maintain current block size limit',
-                    'Request further discussion and delay the decision',
-                    'Approve with modifications to implement gradual increase over 6 months'
-                  ]
-                } as VotingInfo
-              ]
-            : ([] as VotingInfo[])
+      const url = this.apiBaseUrl;
+      const param = {
+        jsonrpc: '2.0',
+        method: 'getpollinfo',
+        params: { ids },
+        id: '1'
       };
 
-      // TODO: Uncomment when API is ready
-      // const response = await this.http.post<{ votingInfos: VotingInfo[] }>(url, { ids }).toPromise();
+      Logger.log(App.MAINCHAIN_POLLS, 'getPollInfo - calling:', url, 'ids:', ids);
 
-      Logger.log(App.MAINCHAIN_POLLS, 'getVotingInfo - response:', response);
-      return Promise.resolve(response.votingInfos || []);
+      const polls = await this.globalJsonRPCService.httpPost<Poll[]>(url, param, 'mainchain-polls');
+
+      Logger.log(App.MAINCHAIN_POLLS, 'getPollInfo - polls:', polls);
+      return polls;
     } catch (err) {
-      Logger.error(App.MAINCHAIN_POLLS, 'getVotingInfo error:', err);
+      Logger.error(App.MAINCHAIN_POLLS, 'getPollInfo error:', err);
       return Promise.resolve([]);
     }
   }
 
   /**
-   * Get voting details including votes
-   * API: getVotingDetails
+   * Get poll details including votes
+   * API: getPollDetails
    */
-  getVotingDetails(id: string): Promise<VotingDetails | null> {
+  async getPollDetails(id: string): Promise<PollDetails | null> {
     try {
-      // TODO: Replace with actual API call
-      const url = `${this.apiBaseUrl}/getVotingDetails`;
-      Logger.log(App.MAINCHAIN_POLLS, 'getVotingDetails - calling:', url, 'id:', id);
+      const url = this.apiBaseUrl;
+      const param = {
+        jsonrpc: '2.0',
+        method: 'getpolldetails',
+        params: { id }
+      };
 
-      // Stub response - placeholder poll details for testing
-      const placeholderPollId = '0x' + '0'.repeat(64);
-      const pollIdHex = id.replace(/^0x/i, '');
-      const placeholderIdHex = placeholderPollId.replace(/^0x/i, '');
+      Logger.log(App.MAINCHAIN_POLLS, 'getPollDetails - calling:', url, 'id:', id);
 
-      let response: VotingDetails | null = null;
-      if (pollIdHex === placeholderIdHex || pollIdHex === '0'.repeat(64)) {
-        response = {
-          status: 'active',
-          description: 'Test Poll - Mainchain Voting',
-          startTime: Math.floor(Date.now() / 1000) - 86400, // 1 day ago
-          endTime: Math.floor(Date.now() / 1000) + 86400 * 7, // 7 days from now
-          choices: [
-            'Approve the proposal to increase the block size limit to 4MB',
-            'Reject the proposal and maintain current block size limit',
-            'Request further discussion and delay the decision',
-            'Approve with modifications to implement gradual increase over 6 months'
-          ],
-          votes: []
-        };
-      }
+      const response = await this.globalJsonRPCService.httpPost(url, param, 'mainchain-polls');
 
-      // TODO: Uncomment when API is ready
-      // const response = await this.http.post<VotingDetails>(url, { id }).toPromise();
-
-      Logger.log(App.MAINCHAIN_POLLS, 'getVotingDetails - response:', response);
-      return Promise.resolve(response);
+      Logger.log(App.MAINCHAIN_POLLS, 'getPollDetails - response:', response);
+      return Promise.resolve(response || null);
     } catch (err) {
-      Logger.error(App.MAINCHAIN_POLLS, 'getVotingDetails error:', err);
+      Logger.error(App.MAINCHAIN_POLLS, 'getPollDetails error:', err);
       return Promise.resolve(null);
     }
   }
@@ -305,22 +269,14 @@ export class MainchainPollsService {
   /**
    * Get user's vote for a specific poll
    */
-  async getUserVote(pollId: string, userAddress: string): Promise<{ option: number; amount: string } | null> {
+  async getUserVote(pollId: string, userAddress: string): Promise<Vote | null> {
     try {
-      const details = await this.getVotingDetails(pollId);
+      const details = await this.getPollDetails(pollId);
       if (!details || !details.votes) {
         return null;
       }
 
-      const userVote = details.votes.find(vote => vote.voter.toLowerCase() === userAddress.toLowerCase());
-      if (!userVote) {
-        return null;
-      }
-
-      return {
-        option: userVote.option,
-        amount: userVote.amount
-      };
+      return details.votes.find(vote => vote.voter.toLowerCase() === userAddress.toLowerCase());
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'getUserVote error:', err);
       return null;

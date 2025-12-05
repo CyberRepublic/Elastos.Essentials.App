@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent, RefresherCustomEvent } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
+import { TitleBarIconSlot, TitleBarMenuItem, TitleBarSlotItem } from 'src/app/components/titlebar/titlebar.types';
 import { Logger } from 'src/app/logger';
 import { App } from 'src/app/model/app.enum';
 import { GlobalNavService } from 'src/app/services/global.nav.service';
@@ -16,13 +17,14 @@ import { MainchainPollsService } from '../../services/mainchain-polls.service';
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss']
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
   @ViewChild(TitleBarComponent, { static: false }) titleBar: TitleBarComponent;
   @ViewChild('content', { static: false }) content: IonContent;
 
   public polls: Poll[] = [];
   public pollsFetched = false;
-  public loading = false;
+  public loading = true;
+  private titleBarIconClickedListener?: (icon: TitleBarSlotItem | TitleBarMenuItem) => void;
 
   constructor(
     public theme: GlobalThemeService,
@@ -38,8 +40,47 @@ export class HomePage implements OnInit {
     void this.init();
   }
 
+  ngOnDestroy() {
+    if (this.titleBarIconClickedListener) {
+      this.titleBar.removeOnItemClickedListener(this.titleBarIconClickedListener);
+    }
+    this.titleBar.setIcon(TitleBarIconSlot.INNER_RIGHT, null);
+  }
+
   async init() {
     this.titleBar.setTitle(this.translate.instant('mainchainpolls.title'));
+
+    // Set up refresh icon
+    this.setupRefreshIcon();
+
+    // Only fetch polls if they haven't been fetched yet
+    if (!this.pollsFetched) {
+      await this.fetchPolls();
+    }
+  }
+
+  setupRefreshIcon() {
+    // Set refresh icon on inner right slot
+    const refreshIconPath = 'assets/shared/curcol-icons/reload.svg';
+
+    this.titleBar.setIcon(TitleBarIconSlot.INNER_RIGHT, {
+      key: 'refresh',
+      iconPath: refreshIconPath
+    });
+
+    // Set up click listener only if not already set up
+    if (!this.titleBarIconClickedListener) {
+      this.titleBarIconClickedListener = (icon: TitleBarSlotItem | TitleBarMenuItem) => {
+        if (icon.key === 'refresh') {
+          void this.refreshPolls();
+        }
+      };
+      this.titleBar.addOnItemClickedListener(this.titleBarIconClickedListener);
+    }
+  }
+
+  async refreshPolls() {
+    this.pollsFetched = false;
     await this.fetchPolls();
   }
 
@@ -49,7 +90,7 @@ export class HomePage implements OnInit {
       Logger.log(App.MAINCHAIN_POLLS, 'Fetching polls...');
 
       // Get poll IDs
-      const pollIds = await this.pollsService.getPoll();
+      const pollIds = await this.pollsService.getPolls();
       Logger.log(App.MAINCHAIN_POLLS, 'Poll IDs:', pollIds);
 
       if (pollIds.length === 0) {
@@ -60,18 +101,10 @@ export class HomePage implements OnInit {
       }
 
       // Get voting info for all polls
-      const votingInfos = await this.pollsService.getVotingInfo(pollIds);
-      Logger.log(App.MAINCHAIN_POLLS, 'Voting infos:', votingInfos);
+      const pollInfo = await this.pollsService.getPollInfo(pollIds);
+      Logger.log(App.MAINCHAIN_POLLS, 'Poll infos:', pollInfo);
 
-      // Convert to Poll model
-      this.polls = votingInfos.map(info => ({
-        id: info.id,
-        status: this.mapStatus(info.status),
-        description: info.description,
-        startTime: info.startTime,
-        endTime: info.endTime,
-        choices: info.choices
-      }));
+      this.polls = pollInfo;
 
       this.pollsFetched = true;
       this.loading = false;
@@ -92,24 +125,13 @@ export class HomePage implements OnInit {
     void this.globalNav.navigateTo(App.MAINCHAIN_POLLS, `/mainchainpolls/poll/${poll.id}`);
   }
 
-  private mapStatus(status: string): PollStatus {
-    const statusLower = status.toLowerCase();
-    if (statusLower === 'active' || statusLower === 'ongoing') {
-      return PollStatus.ACTIVE;
-    } else if (statusLower === 'ended' || statusLower === 'finished') {
-      return PollStatus.ENDED;
-    } else {
-      return PollStatus.UPCOMING;
-    }
-  }
-
   getStatusClass(status: PollStatus): string {
     switch (status) {
-      case PollStatus.ACTIVE:
+      case 'voting':
         return 'active';
-      case PollStatus.ENDED:
+      case 'finished':
         return 'ended';
-      case PollStatus.UPCOMING:
+      case 'upcoming':
         return 'upcoming';
       default:
         return '';

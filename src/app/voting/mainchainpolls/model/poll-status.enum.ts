@@ -1,5 +1,1 @@
-export enum PollStatus {
-  UPCOMING = 'upcoming',
-  ACTIVE = 'active',
-  ENDED = 'ended'
-}
+export type PollStatus = 'voting' | 'finished' | 'upcoming';

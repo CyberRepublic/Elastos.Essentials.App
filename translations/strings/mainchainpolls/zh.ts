@@ -5,11 +5,13 @@ export const zh = {
     'poll-detail': '投票详情',
     'no-polls': '暂无投票',
     'poll-not-found': '未找到投票',
-    'loading': '加载中...',
+    loading: '加载中...',
     choices: '选项',
     status: {
       active: '进行中',
+      voting: '进行中',
       ended: '已结束',
+      finished: '已结束',
       upcoming: '即将开始'
     },
     'start-time': '开始时间',
@@ -24,6 +26,8 @@ export const zh = {
     'select-choice-message': '投票前请先选择一个选项',
     vote: '投票',
     'poll-not-active': '此投票当前未激活',
+    'poll-not-started': '投票尚未开始',
+    'poll-finished': '投票已结束',
     'insufficient-balance': '余额不足',
     'insufficient-balance-message': '投票需要至少 1 ELA + 手续费',
     'vote-success': '投票已提交',
@@ -34,4 +38,3 @@ export const zh = {
     'confirm-vote-message': '您即将使用 {{amount}} ELA 投票。请注意，投票无法更改，您的代币不会被花费，仅用作投票权。'
   }
 };
-
