@@ -31,22 +31,24 @@
         <!-- Vote Section -->
         <div class="vote-section">
             <h2>{{ 'mainchainpolls.vote-status' | translate }}</h2>
-
-            <div *ngIf="userVote" class="voted-info">
+            <div *ngIf="hasAlreadyVoted()" class="voted-info">
                 <div class="voted-badge">
                     <ion-icon name="checkmark-circle"></ion-icon>
                     <span>{{ 'mainchainpolls.voted' | translate }}</span>
                 </div>
-                <p class="vote-details">
-                    {{ 'mainchainpolls.vote-amount' | translate }}: {{ formatVoteAmount(userVote.amount) }} ELA
+                <p class="vote-details" *ngIf="getDisplayVote()">
+                    {{ 'mainchainpolls.vote-amount' | translate }}: {{ formatVoteAmount(getDisplayVote().amount) }} ELA
                 </p>
-                <p class="vote-details">
-                    {{ 'mainchainpolls.vote-choice' | translate }}: {{ pollDetails.choices[userVote.option] }}
+                <p class="vote-details" *ngIf="getDisplayVote() && pollDetails && getVoteOption() !== null">
+                    {{ 'mainchainpolls.vote-choice' | translate }}: {{ pollDetails.choices[getVoteOption()] }}
+                </p>
+                <p class="vote-details stored-vote-note" *ngIf="storedVote && !userVote">
+                    <small>{{ 'mainchainpolls.vote-pending-confirmation' | translate }}</small>
                 </p>
             </div>
 
             <!-- Show choices and voting UI when poll is active and not voted -->
-            <div *ngIf="!userVote && isPollActive(pollDetails) && !loading" class="not-voted-info">
+            <div *ngIf="!hasAlreadyVoted() && isPollActive(pollDetails) && !loading" class="not-voted-info">
                 <div class="choices-list">
                     <h3>{{ 'mainchainpolls.select-choice' | translate }}</h3>
                     <ion-radio-group [(ngModel)]="selectedChoice">
@@ -74,7 +76,8 @@
                     </div>
 
                     <p class="available-balance">
-                        {{ 'mainchainpolls.available-balance' | translate }}: {{ formatBalance(availableBalance) }} ELA
+                        {{ 'mainchainpolls.available-voting-power' | translate }}: {{ formatBalance(availableBalance) }}
+                        ELA
                     </p>
 
                     <div *ngIf="availableBalance !== null && (!availableBalance || availableBalance.isLessThanOrEqualTo(0))"
@@ -91,9 +94,35 @@
             </div>
 
             <!-- Show message when poll is not active -->
-            <div *ngIf="!userVote && isPollNotActive(pollDetails) && !loading"
+            <div *ngIf="!hasAlreadyVoted() && isPollNotActive(pollDetails) && !loading"
                 [class]="getPollInactiveClasses(pollDetails)">
                 <p>{{ getPollInactiveMessage(pollDetails) }}</p>
+            </div>
+        </div>
+
+        <!-- Poll Results Section (shown when user has voted) -->
+        <div *ngIf="hasAlreadyVoted() && pollDetails && getPollResults().length > 0" class="poll-results-section">
+            <h2>{{ 'mainchainpolls.poll-results' | translate }}</h2>
+            <div class="results-summary">
+                <p class="total-votes">
+                    {{ 'mainchainpolls.total-votes' | translate }}: {{
+                    formatVoteAmount(getTotalVotesAmount().toString()) }} ELA
+                </p>
+            </div>
+            <div class="results-list">
+                <div *ngFor="let result of getPollResults()" class="result-item">
+                    <div class="result-header">
+                        <h3 class="choice-title">{{ result.choiceTitle }}</h3>
+                        <span class="result-percentage">{{ formatPercentage(result.percentage) }}%</span>
+                    </div>
+                    <div class="result-details">
+                        <p class="vote-amount">{{ formatVoteAmount(result.voteAmount.toString()) }} ELA</p>
+                        <p class="vote-count">{{ 'mainchainpolls.vote-count' | translate }}: {{ result.voteCount }}</p>
+                    </div>
+                    <div class="result-bar-container">
+                        <div class="result-bar" [style.width.%]="result.percentage"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </ion-grid>

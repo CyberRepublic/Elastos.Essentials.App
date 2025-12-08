@@ -21,7 +21,7 @@ export const zh = {
     voted: '已投票',
     'vote-amount': '投票金额',
     'vote-choice': '投票选项',
-    'available-balance': '可用余额',
+    'available-voting-power': '可用投票权',
     'select-choice': '选择选项',
     'select-choice-message': '投票前请先选择一个选项',
     vote: '投票',
@@ -35,6 +35,9 @@ export const zh = {
     'vote-error': '投票失败',
     'vote-error-message': '提交投票失败，请重试。',
     'confirm-vote': '确认投票',
-    'confirm-vote-message': '您即将使用 {{amount}} ELA 投票。请注意，投票无法更改，您的代币不会被花费，仅用作投票权。'
+    'confirm-vote-message': '您即将使用 {{amount}} ELA 投票。请注意，投票无法更改，您的代币不会被花费，仅用作投票权。',
+    'poll-results': '投票结果',
+    'total-votes': '总投票数',
+    'vote-count': '投票次数'
   }
 };

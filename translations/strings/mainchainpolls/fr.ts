@@ -22,7 +22,7 @@ export const fr = {
     voted: 'Voté',
     'vote-amount': 'Montant du Vote',
     'vote-choice': 'Choix de Vote',
-    'available-balance': 'Solde Disponible',
+    'available-voting-power': 'Pouvoir de Vote Disponible',
     'select-choice': 'Sélectionner un Choix',
     'select-choice-message': 'Veuillez sélectionner un choix avant de voter',
     vote: 'Voter',
@@ -37,6 +37,9 @@ export const fr = {
     'vote-error-message': 'Échec de la soumission de votre vote. Veuillez réessayer.',
     'confirm-vote': 'Confirmer le Vote',
     'confirm-vote-message':
-      'Vous êtes sur le point de voter avec {{amount}} ELA. Notez que le vote ne peut pas être modifié et que vos jetons ne sont pas dépensés, ils sont uniquement utilisés comme pouvoir de vote.'
+      'Vous êtes sur le point de voter avec {{amount}} ELA. Notez que le vote ne peut pas être modifié et que vos jetons ne sont pas dépensés, ils sont uniquement utilisés comme pouvoir de vote.',
+    'poll-results': 'Résultats du Sondage',
+    'total-votes': 'Total des Votes',
+    'vote-count': 'Nombre de Votes'
   }
 };

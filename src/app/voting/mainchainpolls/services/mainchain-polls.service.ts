@@ -12,7 +12,9 @@ import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
 import { PollDetails } from '../model/poll-details.model';
 import { Poll } from '../model/poll.model';
+import { StoredVoteInfo } from '../model/stored-vote-info.model';
 import { Vote } from '../model/vote.model';
+import { LocalStorage } from './storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +28,8 @@ export class MainchainPollsService {
   constructor(
     private globalJsonRPCService: GlobalJsonRPCService,
     private walletNetworkService: WalletNetworkService,
-    private walletService: WalletService
+    private walletService: WalletService,
+    private localStorage: LocalStorage
   ) {}
 
   /**
@@ -133,6 +136,12 @@ export class MainchainPollsService {
       const polls = await this.globalJsonRPCService.httpPost<Poll[]>(url, param, 'mainchain-polls');
 
       Logger.log(App.MAINCHAIN_POLLS, 'getPollInfo - polls:', polls);
+
+      // Sort polls by start date ascending
+      if (polls && polls.length > 0) {
+        polls.sort((a, b) => a.startTime - b.startTime);
+      }
+
       return polls;
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'getPollInfo error:', err);
@@ -166,21 +175,22 @@ export class MainchainPollsService {
   }
 
   /**
-   * Generate vote memo hex string for testing/debugging
-   * This method generates the memo without creating a transaction
-   */
-  async generateVoteMemoForTesting(pollId: string, option: number, amount: string): Promise<string> {
-    const pollIdHex = pollId.replace(/^0x/i, '').padStart(64, '0').slice(0, 64);
-    return await this.encodeVoteMemo(this.USER_VOTE_FLAG, pollIdHex, option, amount);
-  }
-
-  /**
    * Submit a vote by creating a transaction with vote data in memo
-   * Sends ELA to self with max amount - 1 ELA (to account for fees)
+   * @param pollId - Poll ID
+   * @param option - Selected choice index
+   * @param voteAmount - Vote amount in sELA (smallest unit), already calculated
    */
-  async submitVote(pollId: string, option: number): Promise<string> {
+  async submitVote(pollId: string, option: number, voteAmount: BigNumber): Promise<string> {
     try {
-      Logger.log(App.MAINCHAIN_POLLS, 'submitVote - pollId:', pollId, 'option:', option);
+      Logger.log(
+        App.MAINCHAIN_POLLS,
+        'submitVote - pollId:',
+        pollId,
+        'option:',
+        option,
+        'voteAmount:',
+        voteAmount.toString()
+      );
 
       // Get mainchain subwallet
       const networkWallet = this.walletService.activeNetworkWallet.value;
@@ -188,40 +198,11 @@ export class MainchainPollsService {
         throw new Error('No active network wallet found');
       }
 
-      const mainchainNetwork = this.walletNetworkService.getNetworkByKey('elastos');
-      if (!mainchainNetwork) {
-        throw new Error('Elastos mainchain network not found');
-      }
-
-      const mainchainWallet = await mainchainNetwork.createNetworkWallet(networkWallet.masterWallet, false);
-      if (!mainchainWallet) {
-        throw new Error('Failed to create mainchain network wallet');
-      }
-
-      const mainchainSubWallet = mainchainWallet.getSubWallet(StandardCoinName.ELA) as MainChainSubWallet;
+      // Get standard subwallets (includes ELA mainchain)
+      const mainchainSubWallet = networkWallet.getSubWallet('ELA') as MainChainSubWallet;
       if (!mainchainSubWallet) {
         throw new Error('Mainchain subwallet not found');
       }
-
-      // Get current balance
-      const balance = await mainchainSubWallet.getTotalBalanceByType(true, false); // spendable balance
-      if (!balance || balance.isLessThanOrEqualTo(0)) {
-        throw new Error('Insufficient balance');
-      }
-
-      // Calculate vote amount: max balance - 1 ELA (to account for fees)
-      const voteAmount = this.calculateVoteAmount(balance);
-      if (!voteAmount) {
-        throw new Error('Insufficient balance for voting (need at least 1 ELA + fees)');
-      }
-
-      Logger.log(
-        App.MAINCHAIN_POLLS,
-        'submitVote - balance:',
-        balance.toString(),
-        'voteAmount:',
-        voteAmount.toString()
-      );
 
       // Get self address
       const selfAddress = mainchainSubWallet.getCurrentReceiverAddress();
@@ -237,9 +218,13 @@ export class MainchainPollsService {
 
       // Create transaction - send to self with vote amount
       const voteAmountELA = voteAmount.dividedBy(Config.SELAAsBigNumber);
-      const rawTx = await mainchainSubWallet.createPaymentTransaction(selfAddress, voteAmountELA, voteMemoHex);
+      const rawTx = await mainchainSubWallet.createPaymentTransaction(selfAddress, voteAmountELA, voteMemoHex, true);
 
-      Logger.log(App.MAINCHAIN_POLLS, 'submitVote - rawTx created');
+      if (!rawTx) {
+        throw new Error('Failed to create payment transaction');
+      }
+
+      Logger.log(App.MAINCHAIN_POLLS, 'submitVote - rawTx created:', rawTx);
 
       // Sign and send
       const transfer = new Transfer();
@@ -281,5 +266,45 @@ export class MainchainPollsService {
       Logger.error(App.MAINCHAIN_POLLS, 'getUserVote error:', err);
       return null;
     }
+  }
+
+  /**
+   * Save vote information to local storage
+   */
+  async saveVoteToLocalStorage(pollId: string, option: number, voteAmount: BigNumber): Promise<void> {
+    try {
+      const storedVoteInfo: StoredVoteInfo = {
+        pollId,
+        voteAmount: voteAmount.toString(),
+        voteTimestamp: Math.floor(Date.now() / 1000), // Unix timestamp
+        option
+      };
+      await this.localStorage.saveVote(storedVoteInfo);
+      Logger.log(App.MAINCHAIN_POLLS, 'Vote saved to local storage:', pollId);
+    } catch (err) {
+      Logger.error(App.MAINCHAIN_POLLS, 'Error saving vote to local storage:', err);
+      // Don't throw - this is not critical, vote was already submitted
+    }
+  }
+
+  /**
+   * Get stored vote information from local storage
+   */
+  async getStoredVote(pollId: string): Promise<StoredVoteInfo | null> {
+    return await this.localStorage.getVote(pollId);
+  }
+
+  /**
+   * Check if user has voted on a poll (either from API or local storage)
+   */
+  async hasVoted(pollId: string, userAddress: string): Promise<boolean> {
+    // Check API first
+    const apiVote = await this.getUserVote(pollId, userAddress);
+    if (apiVote) {
+      return true;
+    }
+    // Check local storage
+    const storedVote = await this.getStoredVote(pollId);
+    return storedVote !== null;
   }
 }

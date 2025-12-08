@@ -22,7 +22,7 @@ export const en = {
     voted: 'Voted',
     'vote-amount': 'Vote Amount',
     'vote-choice': 'Vote Choice',
-    'available-balance': 'Available Balance',
+    'available-voting-power': 'Available Voting Power',
     'select-choice': 'Select Choice',
     'select-choice-message': 'Please select a choice before voting',
     vote: 'Vote',
@@ -37,6 +37,10 @@ export const en = {
     'vote-error-message': 'Failed to submit your vote. Please try again.',
     'confirm-vote': 'Confirm Vote',
     'confirm-vote-message':
-      'You are about to vote with {{amount}} ELA. Note that the vote cannot be changed, and your tokens are not spent, they are only used as voting power.'
+      'You are about to vote with {{amount}} ELA. Note that the vote cannot be changed, and your tokens are not spent, they are only used as voting power.',
+    'vote-pending-confirmation': 'Vote submitted, pending blockchain confirmation',
+    'poll-results': 'Poll Results',
+    'total-votes': 'Total Votes',
+    'vote-count': 'Vote Count'
   }
 };

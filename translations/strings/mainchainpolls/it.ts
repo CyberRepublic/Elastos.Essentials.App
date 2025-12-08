@@ -22,7 +22,7 @@ export const it = {
     voted: 'Votato',
     'vote-amount': 'Importo del Voto',
     'vote-choice': 'Scelta di Voto',
-    'available-balance': 'Saldo Disponibile',
+    'available-voting-power': 'Potere di Voto Disponibile',
     'select-choice': 'Seleziona Scelta',
     'select-choice-message': 'Seleziona una scelta prima di votare',
     vote: 'Vota',
@@ -37,6 +37,10 @@ export const it = {
     'vote-error-message': 'Invio del voto fallito. Riprova.',
     'confirm-vote': 'Conferma Voto',
     'confirm-vote-message':
-      'Stai per votare con {{amount}} ELA. Nota che il voto non può essere modificato e i tuoi token non vengono spesi, vengono utilizzati solo come potere di voto.'
+      'Stai per votare con {{amount}} ELA. Nota che il voto non può essere modificato e i tuoi token non vengono spesi, vengono utilizzati solo come potere di voto.',
+    'vote-pending-confirmation': 'Voto inviato, in attesa di conferma blockchain',
+    'poll-results': 'Risultati del Sondaggio',
+    'total-votes': 'Totale Voti',
+    'vote-count': 'Numero di Voti'
   }
 };

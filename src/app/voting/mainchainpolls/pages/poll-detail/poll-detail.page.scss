@@ -126,6 +126,9 @@ ion-content {
         .voted-info {
             text-align: center;
             padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
 
             .voted-badge {
                 display: flex;
@@ -136,6 +139,7 @@ ion-content {
                 font-weight: 600;
                 margin-bottom: 16px;
                 font-size: 16px;
+                width: 100%;
 
                 ion-icon {
                     font-size: 24px;
@@ -224,7 +228,8 @@ ion-content {
                 }
 
                 ion-item {
-                    --padding-start: 15px;
+                    --padding-start: 0;
+                    --inner-padding-start: 12px;
                     --padding-end: 0px;
                     --padding-top: 12px;
                     --padding-bottom: 12px;
@@ -362,6 +367,108 @@ ion-content {
                 color: var(--ion-color-medium);
                 font-weight: 400;
                 margin-top: 8px;
+            }
+        }
+    }
+
+    .poll-results-section {
+        margin: 0 10px;
+        padding: 20px 15px;
+        background: var(--essentials-box-color);
+        border-radius: 17px;
+        margin-bottom: 20px;
+
+        h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--ion-text-color);
+        }
+
+        .results-summary {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--essentials-border-separator-color);
+
+            .total-votes {
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--ion-text-color);
+                margin: 0;
+            }
+        }
+
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+
+            .result-item {
+                padding: 16px;
+                background: var(--ion-background-color);
+                border-radius: 8px;
+                border: 1px solid var(--essentials-border-separator-color);
+
+                .result-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 12px;
+
+                    .choice-title {
+                        font-size: 15px;
+                        font-weight: 600;
+                        color: var(--ion-text-color);
+                        margin: 0;
+                        flex: 1;
+                        line-height: 1.4;
+                        padding-right: 12px;
+                    }
+
+                    .result-percentage {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: #00b978;
+                        white-space: nowrap;
+                    }
+                }
+
+                .result-details {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 12px;
+                    gap: 12px;
+
+                    .vote-amount {
+                        font-size: 14px;
+                        font-weight: 500;
+                        color: var(--ion-text-color);
+                        margin: 0;
+                    }
+
+                    .vote-count {
+                        font-size: 12px;
+                        color: var(--ion-color-medium);
+                        margin: 0;
+                        opacity: 0.7;
+                    }
+                }
+
+                .result-bar-container {
+                    width: 100%;
+                    height: 8px;
+                    background: var(--essentials-border-separator-color);
+                    border-radius: 4px;
+                    overflow: hidden;
+
+                    .result-bar {
+                        height: 100%;
+                        background: linear-gradient(90deg, #00b978 0%, rgba(0, 185, 120, 0.8) 100%);
+                        border-radius: 4px;
+                        transition: width 0.3s ease;
+                    }
+                }
             }
         }
     }

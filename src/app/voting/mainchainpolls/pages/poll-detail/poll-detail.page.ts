@@ -14,6 +14,7 @@ import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
 import { PollDetails } from '../../model/poll-details.model';
 import { PollStatus } from '../../model/poll-status.enum';
+import { StoredVoteInfo } from '../../model/stored-vote-info.model';
 import { Vote } from '../../model/vote.model';
 import { MainchainPollsService } from '../../services/mainchain-polls.service';
 
@@ -36,6 +37,7 @@ export class PollDetailPage implements OnInit {
   public walletBalance: BigNumber | null = null;
   public availableBalance: BigNumber | null = null; // Balance - 1 ELA for fees
   public userVote: Vote | null = null;
+  public storedVote: StoredVoteInfo | null = null; // Vote from local storage
 
   public selectedChoice: number | null = null;
 
@@ -68,13 +70,6 @@ export class PollDetailPage implements OnInit {
       this.loading = true;
       this.pollDetails = await this.pollsService.getPollDetails(this.pollId);
       this.loading = false;
-
-      if (this.pollDetails) {
-        // Load user vote if exists
-        if (this.walletAddress) {
-          this.userVote = await this.pollsService.getUserVote(this.pollId, this.walletAddress);
-        }
-      }
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'loadPollDetails error:', err);
       this.loading = false;
@@ -119,15 +114,18 @@ export class PollDetailPage implements OnInit {
       // Get balance
       this.walletBalance = await mainchainSubWallet.getTotalBalanceByType(true, false);
       if (this.walletBalance) {
-        // Available balance = balance - 1 ELA (for fees)
-        const oneELA = new BigNumber(1).multipliedBy(Config.SELAAsBigNumber);
-        this.availableBalance = this.walletBalance.minus(oneELA);
+        this.availableBalance = this.walletBalance;
         if (this.availableBalance.isLessThanOrEqualTo(0)) {
           this.availableBalance = new BigNumber(0);
         }
       }
 
-      // Load user vote
+      // Load stored vote from local storage
+      if (this.pollId) {
+        this.storedVote = await this.pollsService.getStoredVote(this.pollId);
+      }
+
+      // Load user vote from API if exists
       if (this.pollId && this.walletAddress) {
         this.userVote = await this.pollsService.getUserVote(this.pollId, this.walletAddress);
       }
@@ -139,7 +137,7 @@ export class PollDetailPage implements OnInit {
   }
 
   selectChoice(choiceIndex: number) {
-    if (this.userVote) {
+    if (this.hasAlreadyVoted()) {
       // Already voted
       return;
     }
@@ -170,8 +168,19 @@ export class PollDetailPage implements OnInit {
       this.voting = true;
       Logger.log(App.MAINCHAIN_POLLS, 'Submitting vote - pollId:', this.pollId, 'choice:', this.selectedChoice);
 
-      const txId = await this.pollsService.submitVote(this.pollId, this.selectedChoice);
+      // Calculate vote amount
+      const voteAmount = this.pollsService.calculateVoteAmount(this.availableBalance);
+      if (!voteAmount) {
+        throw new Error('Insufficient balance for voting');
+      }
+
+      const txId = await this.pollsService.submitVote(this.pollId, this.selectedChoice, voteAmount);
       Logger.log(App.MAINCHAIN_POLLS, 'Vote submitted, txId:', txId);
+
+      // Save vote to local storage
+      if (this.pollDetails) {
+        await this.pollsService.saveVoteToLocalStorage(this.pollId, this.selectedChoice, voteAmount);
+      }
 
       const successMessage = this.translate.instant('mainchainpolls.vote-success-message', { txId });
       await this.popupService.ionicAlert('mainchainpolls.vote-success', successMessage);
@@ -299,7 +308,7 @@ export class PollDetailPage implements OnInit {
     if (!this.pollDetails) {
       return false;
     }
-    if (this.userVote) {
+    if (this.hasAlreadyVoted()) {
       return false; // Already voted
     }
     if (!this.isPollActive(this.pollDetails)) {
@@ -309,5 +318,137 @@ export class PollDetailPage implements OnInit {
       return false; // Insufficient balance
     }
     return true;
+  }
+
+  /**
+   * Check if user has already voted (either from API or local storage)
+   */
+  hasAlreadyVoted(): boolean {
+    return !!this.userVote || !!this.storedVote;
+  }
+
+  /**
+   * Get the vote information to display (prefer API vote over stored vote)
+   */
+  getDisplayVote(): Vote | null {
+    if (this.userVote) {
+      return this.userVote;
+    }
+    if (this.storedVote) {
+      // Convert StoredVoteInfo to Vote object for display
+      return {
+        voter: this.walletAddress || '',
+        amount: this.storedVote.voteAmount,
+        choice: this.storedVote.option
+      };
+    }
+    return null;
+  }
+
+  /**
+   * Get vote option/choice index
+   */
+  getVoteOption(): number | null {
+    const displayVote = this.getDisplayVote();
+    if (!displayVote) {
+      return null;
+    }
+    return displayVote.choice;
+  }
+
+  /**
+   * Calculate poll results by aggregating votes by choice
+   */
+  getPollResults(): Array<{
+    choiceIndex: number;
+    choiceTitle: string;
+    voteAmount: BigNumber;
+    percentage: number;
+    voteCount: number;
+  }> {
+    if (!this.pollDetails || !this.pollDetails.votes || this.pollDetails.votes.length === 0) {
+      return [];
+    }
+
+    // Aggregate votes by choice
+    const votesByChoice: Map<number, { totalAmount: BigNumber; count: number }> = new Map();
+
+    this.pollDetails.votes.forEach(vote => {
+      const choiceIndex = vote.choice;
+      const voteAmount = new BigNumber(vote.amount);
+
+      if (votesByChoice.has(choiceIndex)) {
+        const existing = votesByChoice.get(choiceIndex);
+        if (existing) {
+          existing.totalAmount = existing.totalAmount.plus(voteAmount);
+          existing.count += 1;
+        }
+      } else {
+        votesByChoice.set(choiceIndex, {
+          totalAmount: voteAmount,
+          count: 1
+        });
+      }
+    });
+
+    // Calculate total votes
+    let totalVotes = new BigNumber(0);
+    votesByChoice.forEach(value => {
+      totalVotes = totalVotes.plus(value.totalAmount);
+    });
+
+    // Build results array
+    const results: Array<{
+      choiceIndex: number;
+      choiceTitle: string;
+      voteAmount: BigNumber;
+      percentage: number;
+      voteCount: number;
+    }> = [];
+
+    this.pollDetails.choices.forEach((choiceTitle, index) => {
+      const voteData = votesByChoice.get(index);
+      const voteAmount = voteData ? voteData.totalAmount : new BigNumber(0);
+      const voteCount = voteData ? voteData.count : 0;
+      const percentage = totalVotes.isGreaterThan(0)
+        ? voteAmount.dividedBy(totalVotes).multipliedBy(100).toNumber()
+        : 0;
+
+      results.push({
+        choiceIndex: index,
+        choiceTitle,
+        voteAmount,
+        percentage,
+        voteCount
+      });
+    });
+
+    // Sort by vote amount descending
+    results.sort((a, b) => b.voteAmount.comparedTo(a.voteAmount));
+
+    return results;
+  }
+
+  /**
+   * Get total votes amount
+   */
+  getTotalVotesAmount(): BigNumber {
+    if (!this.pollDetails || !this.pollDetails.votes || this.pollDetails.votes.length === 0) {
+      return new BigNumber(0);
+    }
+
+    let total = new BigNumber(0);
+    this.pollDetails.votes.forEach(vote => {
+      total = total.plus(new BigNumber(vote.amount));
+    });
+
+    return total;
+  }
+
+  /**
+   * Format percentage for display
+   */
+  formatPercentage(percentage: number): string {
+    return percentage.toFixed(2);
   }
 }
