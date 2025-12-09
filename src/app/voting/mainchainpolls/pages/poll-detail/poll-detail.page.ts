@@ -238,8 +238,9 @@ export class PollDetailPage implements OnInit {
       return '0';
     }
     try {
+      // Amount is already in ELA units (from API or normalized from stored vote)
       const amountBN = new BigNumber(amount);
-      return amountBN.dividedBy(Config.SELAAsBigNumber).toFixed(8);
+      return amountBN.toFixed(2);
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'Error formatting vote amount:', err);
       return amount;
@@ -336,9 +337,11 @@ export class PollDetailPage implements OnInit {
     }
     if (this.storedVote) {
       // Convert StoredVoteInfo to Vote object for display
+      // Stored vote amount is in sELA, convert to ELA for consistency with API votes
+      const voteAmountELA = new BigNumber(this.storedVote.voteAmount).dividedBy(Config.SELAAsBigNumber).toString(10);
       return {
         voter: this.walletAddress || '',
-        amount: this.storedVote.voteAmount,
+        amount: voteAmountELA,
         choice: this.storedVote.option
       };
     }
@@ -375,6 +378,7 @@ export class PollDetailPage implements OnInit {
 
     this.pollDetails.votes.forEach(vote => {
       const choiceIndex = vote.choice;
+      // Vote amount from API is already in ELA units (not sELA)
       const voteAmount = new BigNumber(vote.amount);
 
       if (votesByChoice.has(choiceIndex)) {
@@ -438,6 +442,7 @@ export class PollDetailPage implements OnInit {
     }
 
     let total = new BigNumber(0);
+    // Vote amounts from API are already in ELA units (not sELA)
     this.pollDetails.votes.forEach(vote => {
       total = total.plus(new BigNumber(vote.amount));
     });
