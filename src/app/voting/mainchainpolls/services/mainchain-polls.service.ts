@@ -61,7 +61,7 @@ export class MainchainPollsService {
    * @param amount - string representation of ELA amount (must match transferred amount)
    * @returns Hex string ready to be passed as memo to SDK
    */
-  private async encodeVoteMemo(userVoteFlag: string, pollId: string, option: number, amount: string): Promise<string> {
+  private async encodeVoteMemo(userVoteFlag: string, pollId: string, option: number, amount: string): Promise<Buffer> {
     // Use dynamic import for SmartBuffer like other files in codebase
     const { SmartBuffer } = await import('smart-buffer');
     const buffer = new SmartBuffer();
@@ -84,11 +84,11 @@ export class MainchainPollsService {
     // 3. option - uint32 (4 bytes, little-endian)
     buffer.writeUInt32LE(option);
 
-    // 4. amount - string (UTF-8 encoded)
-    const amountBytes = Buffer.from(amount, 'utf8');
-    buffer.writeBuffer(amountBytes);
+    // 4. amount length (1 byte) + amount - string (UTF-8 encoded)
+    buffer.writeUInt8(amount.length);
+    buffer.writeString(amount);
 
-    return buffer.toString('hex');
+    return buffer.toBuffer();
   }
 
   /**
@@ -212,13 +212,13 @@ export class MainchainPollsService {
       const amountString = voteAmount.dividedBy(Config.SELAAsBigNumber).toString(10); // Convert to ELA string
       const pollIdHex = pollId.replace(/^0x/i, '').padStart(64, '0').slice(0, 64);
 
-      const voteMemoHex = await this.encodeVoteMemo(this.USER_VOTE_FLAG, pollIdHex, option, amountString);
+      const voteMemo = await this.encodeVoteMemo(this.USER_VOTE_FLAG, pollIdHex, option, amountString);
 
-      Logger.log(App.MAINCHAIN_POLLS, 'submitVote - voteMemoHex:', voteMemoHex);
+      Logger.log(App.MAINCHAIN_POLLS, 'submitVote - voteMemoHex:', voteMemo);
 
       // Create transaction - send to self with vote amount
       const voteAmountELA = voteAmount.dividedBy(Config.SELAAsBigNumber);
-      const rawTx = await mainchainSubWallet.createPaymentTransaction(selfAddress, voteAmountELA, voteMemoHex, true);
+      const rawTx = await mainchainSubWallet.createPaymentTransaction(selfAddress, voteAmountELA, voteMemo);
 
       if (!rawTx) {
         throw new Error('Failed to create payment transaction');

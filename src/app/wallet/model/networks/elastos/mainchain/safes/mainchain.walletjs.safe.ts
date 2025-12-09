@@ -37,14 +37,8 @@ import { AnySubWallet } from '../../../base/subwallets/subwallet';
 import { ElastosMainChainSafe } from './mainchain.safe';
 
 export class MainChainWalletJSSafe extends WalletJSSafe implements ElastosMainChainSafe {
-  public async createPaymentTransaction(
-    inputs: UTXOInput[],
-    outputs: Outputs[],
-    fee: string,
-    memo: string,
-    useRawMemo = false
-  ) {
-    return await (<MainchainSubWallet>this.sdkSubWallet).createTransaction(inputs, outputs, fee, memo, useRawMemo);
+  public async createPaymentTransaction(inputs: UTXOInput[], outputs: Outputs[], fee: string, memo: string | Buffer) {
+    return await (<MainchainSubWallet>this.sdkSubWallet).createTransaction(inputs, outputs, fee, memo);
   }
 
   public async createVoteTransaction(inputs: UTXOInput[], voteContent: VoteContentInfo[], fee: string, memo: string) {

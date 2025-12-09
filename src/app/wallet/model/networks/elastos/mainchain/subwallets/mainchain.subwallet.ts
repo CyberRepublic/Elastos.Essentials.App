@@ -439,8 +439,7 @@ export class MainChainSubWallet extends MainCoinSubWallet<ElastosTransaction, El
   public async createPaymentTransaction(
     toAddress: string,
     amount: BigNumber,
-    memo = '',
-    useRawMemo = false
+    memo: string | Buffer = ''
   ): Promise<string> {
     let toAmount = 0;
     let au: AvalaibleUtxos = null;
@@ -468,8 +467,7 @@ export class MainChainSubWallet extends MainCoinSubWallet<ElastosTransaction, El
       au.utxo,
       outputs,
       '10000',
-      memo,
-      useRawMemo
+      memo
     );
   }
 

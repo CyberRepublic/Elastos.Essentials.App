@@ -41,13 +41,7 @@ export interface ElastosMainChainSafe {
   signDigestWithOwnerKey(digest: string, passwd: string): Promise<string>;
   verifyDigest(publicKey: string, digest: string, signature: string): boolean;
 
-  createPaymentTransaction(
-    inputs: UTXOInput[],
-    outputs: Outputs[],
-    fee: string,
-    memo: string,
-    useRawMemo?: boolean
-  ): Promise<any>;
+  createPaymentTransaction(inputs: UTXOInput[], outputs: Outputs[], fee: string, memo: string | Buffer): Promise<any>;
   createVoteTransaction(inputs: UTXOInput[], voteContent: VoteContentInfo[], fee: string, memo: string): Promise<any>;
   createDepositTransaction(
     inputs: UTXOInput[],
