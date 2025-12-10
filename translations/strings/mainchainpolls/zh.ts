@@ -36,6 +36,7 @@ export const zh = {
     'vote-error-message': '提交投票失败，请重试。',
     'confirm-vote': '确认投票',
     'confirm-vote-message': '您即将使用 {{amount}} ELA 投票。请注意，投票无法更改，您的代币不会被花费，仅用作投票权。',
+    'vote-pending-confirmation': '投票已提交，等待区块链确认',
     'poll-results': '投票结果',
     'total-votes': '总投票数',
     'vote-count': '投票次数'

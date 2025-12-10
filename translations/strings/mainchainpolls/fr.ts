@@ -38,6 +38,7 @@ export const fr = {
     'confirm-vote': 'Confirmer le Vote',
     'confirm-vote-message':
       'Vous êtes sur le point de voter avec {{amount}} ELA. Notez que le vote ne peut pas être modifié et que vos jetons ne sont pas dépensés, ils sont uniquement utilisés comme pouvoir de vote.',
+    'vote-pending-confirmation': 'Vote soumis, en attente de confirmation blockchain',
     'poll-results': 'Résultats du Sondage',
     'total-votes': 'Total des Votes',
     'vote-count': 'Nombre de Votes'
