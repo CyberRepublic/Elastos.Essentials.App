@@ -1,7 +1,7 @@
 export const zh = {
   mainchainpolls: {
     title: 'Elastos 投票',
-    intro: '通过使用您的 ELA 投票参与主链投票。您的投票记录在交易备注中的链上。',
+    intro: '使用您的 ELA 参与主链投票。您的投票将记录在链上交易备注中。',
     'poll-detail': '投票详情',
     'no-polls': '暂无投票',
     'poll-not-found': '未找到投票',

@@ -4,7 +4,6 @@ import { GlobalJsonRPCService } from "src/app/services/global.jsonrpc.service";
 import { TransactionDirection } from "../../../tx-providers/transaction.types";
 import { AnySubWallet } from "../../base/subwallets/subwallet";
 import { EtherscanAPIVersion, EthTransaction } from "../evm.types";
-import { EVMNetwork } from "../evm.network";
 
 export class EtherscanHelper {
   public static async fetchTokenTransactions(subWallet: AnySubWallet, etherscanApiUrl: string, accountAddress: string, contractAddress: string, page: number, pageSize: number, apiKey?: string, apiVersion = EtherscanAPIVersion.V1, chainId?: number): Promise<{ transactions: EthTransaction[], canFetchMore?: boolean }> {

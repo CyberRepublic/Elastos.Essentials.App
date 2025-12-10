@@ -131,8 +131,7 @@ export class MainChainLedgerSafe extends LedgerSafe implements ElastosMainChainS
     inputs: UTXOInput[],
     outputs: Outputs[],
     fee: string,
-    memo: string,
-    useRawMemo = false
+    memo: string | Buffer
   ): Promise<any> {
     Logger.log(
       'wallet',
@@ -145,10 +144,6 @@ export class MainChainLedgerSafe extends LedgerSafe implements ElastosMainChainS
       ' memo:',
       memo
     );
-
-    if (useRawMemo) {
-      throw new Error('useRawMemo is not supported for Ledger for now');
-    }
 
     let tx = await ELATransactionFactory.createUnsignedSendToTx(
       inputs,
