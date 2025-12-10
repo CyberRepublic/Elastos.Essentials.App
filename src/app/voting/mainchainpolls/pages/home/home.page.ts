@@ -62,10 +62,11 @@ export class HomePage implements OnInit, OnDestroy {
   setupRefreshIcon() {
     // Set refresh icon on inner right slot
     const refreshIconPath = 'assets/shared/curcol-icons/reload.svg';
+    const darkmodeRefreshIconPath = 'assets/shared/curcol-icons/darkmode/reload.svg';
 
     this.titleBar.setIcon(TitleBarIconSlot.INNER_RIGHT, {
       key: 'refresh',
-      iconPath: refreshIconPath
+      iconPath: this.theme.darkMode ? darkmodeRefreshIconPath : refreshIconPath
     });
 
     // Set up click listener only if not already set up
