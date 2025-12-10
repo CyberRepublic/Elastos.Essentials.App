@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { SharedComponentsModule } from 'src/app/components/sharedcomponents.module';
 import { PollDetailPage } from './poll-detail.page';
 import { TranslateModule } from '@ngx-translate/core';
+import { LedgerSignComponentModule } from 'src/app/wallet/components/ledger-sign/module';
 
 const routes: Routes = [
   {
@@ -22,7 +23,8 @@ const routes: Routes = [
     IonicModule,
     RouterModule.forChild(routes),
     TranslateModule,
-    SharedComponentsModule
+    SharedComponentsModule,
+    LedgerSignComponentModule
   ],
   declarations: [PollDetailPage]
 })
