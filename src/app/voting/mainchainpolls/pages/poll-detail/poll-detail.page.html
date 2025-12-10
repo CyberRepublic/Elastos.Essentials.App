@@ -87,7 +87,7 @@
                 </div>
 
                 <div class="vote-button-container">
-                    <ebutton [disabled]="selectedChoice === null || voting || !canVote()" [spinning]="voting"
+                    <ebutton [disabled]="selectedChoice === null || voting" [spinning]="voting"
                         [title]="'mainchainpolls.vote' | translate" (clicked)="vote()">
                     </ebutton>
                 </div>

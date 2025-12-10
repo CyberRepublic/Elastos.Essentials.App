@@ -31,6 +31,7 @@ export const fr = {
     'poll-finished': 'Le sondage est terminé',
     'insufficient-balance': 'Solde Insuffisant',
     'insufficient-balance-message': "Vous avez besoin d'au moins 1 ELA + frais pour voter",
+    'insufficient-balance-toast': 'Solde minimum requis : 1 ELA',
     'vote-success': 'Vote Soumis',
     'vote-success-message': 'Votre vote a été soumis avec succès. ID de transaction : {{txId}}',
     'vote-error': 'Échec du Vote',

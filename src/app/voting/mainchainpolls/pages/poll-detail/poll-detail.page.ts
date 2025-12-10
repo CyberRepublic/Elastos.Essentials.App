@@ -5,6 +5,7 @@ import { BigNumber } from 'bignumber.js';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import { Logger } from 'src/app/logger';
 import { App } from 'src/app/model/app.enum';
+import { GlobalNativeService } from 'src/app/services/global.native.service';
 import { GlobalPopupService } from 'src/app/services/global.popup.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 import { Config } from 'src/app/wallet/config/Config';
@@ -48,7 +49,8 @@ export class PollDetailPage implements OnInit {
     public translate: TranslateService,
     private walletNetworkService: WalletNetworkService,
     private walletService: WalletService,
-    private popupService: GlobalPopupService
+    private popupService: GlobalPopupService,
+    private globalNative: GlobalNativeService
   ) {
     this.pollId = this.route.snapshot.params.id;
   }
@@ -150,11 +152,15 @@ export class PollDetailPage implements OnInit {
       return;
     }
 
+    // Check minimum balance requirement (need more than 1 ELA)
+    const oneELA = new BigNumber(1).multipliedBy(Config.SELAAsBigNumber);
+    if (!this.walletBalance || this.walletBalance.isLessThanOrEqualTo(oneELA)) {
+      this.globalNative.genericToast('mainchainpolls.insufficient-balance-toast', 3000);
+      return;
+    }
+
     if (!this.availableBalance || this.availableBalance.isLessThanOrEqualTo(0)) {
-      await this.popupService.ionicAlert(
-        'mainchainpolls.insufficient-balance',
-        'mainchainpolls.insufficient-balance-message'
-      );
+      this.globalNative.genericToast('mainchainpolls.insufficient-balance-toast', 3000);
       return;
     }
 

@@ -30,6 +30,7 @@ export const zh = {
     'poll-finished': '投票已结束',
     'insufficient-balance': '余额不足',
     'insufficient-balance-message': '投票需要至少 1 ELA + 手续费',
+    'insufficient-balance-toast': '最低余额要求：1 ELA',
     'vote-success': '投票已提交',
     'vote-success-message': '您的投票已成功提交。交易 ID：{{txId}}',
     'vote-error': '投票失败',
