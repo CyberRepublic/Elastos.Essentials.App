@@ -269,18 +269,28 @@ export class MainchainPollsService {
   }
 
   /**
-   * Save vote information to local storage
+   * Save vote information to local storage (sandboxed per wallet address)
    */
-  async saveVoteToLocalStorage(pollId: string, option: number, voteAmount: BigNumber): Promise<void> {
+  async saveVoteToLocalStorage(
+    pollId: string,
+    option: number,
+    voteAmount: BigNumber,
+    walletAddress: string
+  ): Promise<void> {
     try {
+      if (!walletAddress) {
+        Logger.warn(App.MAINCHAIN_POLLS, 'Cannot save vote to local storage: wallet address is missing');
+        return;
+      }
       const storedVoteInfo: StoredVoteInfo = {
         pollId,
         voteAmount: voteAmount.toString(),
         voteTimestamp: Math.floor(Date.now() / 1000), // Unix timestamp
-        option
+        option,
+        walletAddress
       };
       await this.localStorage.saveVote(storedVoteInfo);
-      Logger.log(App.MAINCHAIN_POLLS, 'Vote saved to local storage:', pollId);
+      Logger.log(App.MAINCHAIN_POLLS, 'Vote saved to local storage:', pollId, 'for wallet:', walletAddress);
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'Error saving vote to local storage:', err);
       // Don't throw - this is not critical, vote was already submitted
@@ -288,23 +298,29 @@ export class MainchainPollsService {
   }
 
   /**
-   * Get stored vote information from local storage
+   * Get stored vote information from local storage (sandboxed per wallet address)
    */
-  async getStoredVote(pollId: string): Promise<StoredVoteInfo | null> {
-    return await this.localStorage.getVote(pollId);
+  async getStoredVote(pollId: string, walletAddress: string): Promise<StoredVoteInfo | null> {
+    if (!walletAddress) {
+      return null;
+    }
+    return await this.localStorage.getVote(pollId, walletAddress);
   }
 
   /**
    * Check if user has voted on a poll (either from API or local storage)
    */
   async hasVoted(pollId: string, userAddress: string): Promise<boolean> {
+    if (!userAddress) {
+      return false;
+    }
     // Check API first
     const apiVote = await this.getUserVote(pollId, userAddress);
     if (apiVote) {
       return true;
     }
-    // Check local storage
-    const storedVote = await this.getStoredVote(pollId);
+    // Check local storage (sandboxed per wallet address)
+    const storedVote = await this.getStoredVote(pollId, userAddress);
     return storedVote !== null;
   }
 }

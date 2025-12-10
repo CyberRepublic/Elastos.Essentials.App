@@ -21,11 +21,23 @@ export class LocalStorage {
   }
 
   /**
-   * Save vote information for a poll
+   * Get storage key for a specific wallet address
+   */
+  private getStorageKey(walletAddress: string): string {
+    // Normalize address to lowercase for consistent storage
+    const normalizedAddress = walletAddress.toLowerCase();
+    return `voted-polls-${normalizedAddress}`;
+  }
+
+  /**
+   * Save vote information for a poll (sandboxed per wallet address)
    */
   public async saveVote(voteInfo: StoredVoteInfo): Promise<void> {
     try {
-      const votes = await this.getAllVotes();
+      if (!voteInfo.walletAddress) {
+        throw new Error('Wallet address is required to save vote');
+      }
+      const votes = await this.getAllVotesForWallet(voteInfo.walletAddress);
       // Update or add vote for this poll
       const existingIndex = votes.findIndex(v => v.pollId === voteInfo.pollId);
       if (existingIndex >= 0) {
@@ -33,8 +45,15 @@ export class LocalStorage {
       } else {
         votes.push(voteInfo);
       }
-      await this.set('voted-polls', JSON.stringify(votes));
-      Logger.log(App.MAINCHAIN_POLLS, 'Vote saved to local storage:', voteInfo.pollId);
+      const storageKey = this.getStorageKey(voteInfo.walletAddress);
+      await this.set(storageKey, JSON.stringify(votes));
+      Logger.log(
+        App.MAINCHAIN_POLLS,
+        'Vote saved to local storage:',
+        voteInfo.pollId,
+        'for wallet:',
+        voteInfo.walletAddress
+      );
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'Error saving vote to local storage:', err);
       throw err;
@@ -42,11 +61,14 @@ export class LocalStorage {
   }
 
   /**
-   * Get vote information for a specific poll
+   * Get vote information for a specific poll (sandboxed per wallet address)
    */
-  public async getVote(pollId: string): Promise<StoredVoteInfo | null> {
+  public async getVote(pollId: string, walletAddress: string): Promise<StoredVoteInfo | null> {
     try {
-      const votes = await this.getAllVotes();
+      if (!walletAddress) {
+        return null;
+      }
+      const votes = await this.getAllVotesForWallet(walletAddress);
       return votes.find(v => v.pollId === pollId) || null;
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'Error getting vote from local storage:', err);
@@ -55,11 +77,15 @@ export class LocalStorage {
   }
 
   /**
-   * Get all stored votes
+   * Get all stored votes for a specific wallet address
    */
-  public async getAllVotes(): Promise<StoredVoteInfo[]> {
+  public async getAllVotesForWallet(walletAddress: string): Promise<StoredVoteInfo[]> {
     try {
-      const rawVotes = await this.get('voted-polls');
+      if (!walletAddress) {
+        return [];
+      }
+      const storageKey = this.getStorageKey(walletAddress);
+      const rawVotes = await this.get(storageKey);
       if (!rawVotes) {
         return [];
       }
@@ -74,14 +100,32 @@ export class LocalStorage {
   }
 
   /**
-   * Remove vote information for a specific poll
+   * Get all stored votes (for backward compatibility, returns empty array)
+   * Use getAllVotesForWallet instead for wallet-specific votes
    */
-  public async removeVote(pollId: string): Promise<void> {
+  public async getAllVotes(): Promise<StoredVoteInfo[]> {
+    // This method is kept for backward compatibility but returns empty array
+    // since votes are now sandboxed per wallet address
+    Logger.warn(
+      App.MAINCHAIN_POLLS,
+      'getAllVotes() called but votes are now sandboxed per wallet. Use getAllVotesForWallet() instead.'
+    );
+    return [];
+  }
+
+  /**
+   * Remove vote information for a specific poll (sandboxed per wallet address)
+   */
+  public async removeVote(pollId: string, walletAddress: string): Promise<void> {
     try {
-      const votes = await this.getAllVotes();
+      if (!walletAddress) {
+        throw new Error('Wallet address is required to remove vote');
+      }
+      const votes = await this.getAllVotesForWallet(walletAddress);
       const filteredVotes = votes.filter(v => v.pollId !== pollId);
-      await this.set('voted-polls', JSON.stringify(filteredVotes));
-      Logger.log(App.MAINCHAIN_POLLS, 'Vote removed from local storage:', pollId);
+      const storageKey = this.getStorageKey(walletAddress);
+      await this.set(storageKey, JSON.stringify(filteredVotes));
+      Logger.log(App.MAINCHAIN_POLLS, 'Vote removed from local storage:', pollId, 'for wallet:', walletAddress);
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'Error removing vote from local storage:', err);
       throw err;
@@ -89,10 +133,10 @@ export class LocalStorage {
   }
 
   /**
-   * Check if a poll has been voted on
+   * Check if a poll has been voted on (sandboxed per wallet address)
    */
-  public async hasVoted(pollId: string): Promise<boolean> {
-    const vote = await this.getVote(pollId);
+  public async hasVoted(pollId: string, walletAddress: string): Promise<boolean> {
+    const vote = await this.getVote(pollId, walletAddress);
     return vote !== null;
   }
 

@@ -122,9 +122,9 @@ export class PollDetailPage implements OnInit {
         }
       }
 
-      // Load stored vote from local storage
-      if (this.pollId) {
-        this.storedVote = await this.pollsService.getStoredVote(this.pollId);
+      // Load stored vote from local storage (sandboxed per wallet address)
+      if (this.pollId && this.walletAddress) {
+        this.storedVote = await this.pollsService.getStoredVote(this.pollId, this.walletAddress);
       }
 
       // Load user vote from API if exists
@@ -183,9 +183,14 @@ export class PollDetailPage implements OnInit {
       const txId = await this.pollsService.submitVote(this.pollId, this.selectedChoice, voteAmount);
       Logger.log(App.MAINCHAIN_POLLS, 'Vote submitted, txId:', txId);
 
-      // Save vote to local storage
-      if (this.pollDetails) {
-        await this.pollsService.saveVoteToLocalStorage(this.pollId, this.selectedChoice, voteAmount);
+      // Save vote to local storage (sandboxed per wallet address)
+      if (this.pollDetails && this.walletAddress) {
+        await this.pollsService.saveVoteToLocalStorage(
+          this.pollId,
+          this.selectedChoice,
+          voteAmount,
+          this.walletAddress
+        );
       }
 
       const successMessage = this.translate.instant('mainchainpolls.vote-success-message', { txId });
