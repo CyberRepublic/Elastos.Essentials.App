@@ -137,9 +137,9 @@ export class MainchainPollsService {
 
       Logger.log(App.MAINCHAIN_POLLS, 'getPollInfo - polls:', polls);
 
-      // Sort polls by start date ascending
+      // Sort polls by start date descending (newest first)
       if (polls && polls.length > 0) {
-        polls.sort((a, b) => a.startTime - b.startTime);
+        polls.sort((a, b) => (b.startTime ?? 0) - (a.startTime ?? 0));
       }
 
       return polls;
@@ -239,7 +239,8 @@ export class MainchainPollsService {
         true // visualFeedback
       );
 
-      if (result.status === 'delegated') { // Mutisign wallet: Transaction signature has been delegated to another flow.
+      if (result.status === 'delegated') {
+        // Mutisign wallet: Transaction signature has been delegated to another flow.
         Logger.log(App.MAINCHAIN_POLLS, 'submitVote - transaction delegated');
       } else {
         if (!result.published || !result.txid) {
