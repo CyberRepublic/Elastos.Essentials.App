@@ -116,7 +116,7 @@ export class PollDetailPage implements OnInit {
       // Get balance
       this.walletBalance = await mainchainSubWallet.getTotalBalanceByType(true, false);
       if (this.walletBalance) {
-        this.availableBalance = this.walletBalance;
+        this.availableBalance = this.pollsService.calculateVoteAmount(this.walletBalance);
         if (this.availableBalance.isLessThanOrEqualTo(0)) {
           this.availableBalance = new BigNumber(0);
         }
@@ -174,13 +174,7 @@ export class PollDetailPage implements OnInit {
       this.voting = true;
       Logger.log(App.MAINCHAIN_POLLS, 'Submitting vote - pollId:', this.pollId, 'choice:', this.selectedChoice);
 
-      // Calculate vote amount
-      const voteAmount = this.pollsService.calculateVoteAmount(this.availableBalance);
-      if (!voteAmount) {
-        throw new Error('Insufficient balance for voting');
-      }
-
-      const txId = await this.pollsService.submitVote(this.pollId, this.selectedChoice, voteAmount);
+      const txId = await this.pollsService.submitVote(this.pollId, this.selectedChoice, this.availableBalance);
       Logger.log(App.MAINCHAIN_POLLS, 'Vote submitted, txId:', txId);
 
       // Save vote to local storage (sandboxed per wallet address)
@@ -188,13 +182,16 @@ export class PollDetailPage implements OnInit {
         await this.pollsService.saveVoteToLocalStorage(
           this.pollId,
           this.selectedChoice,
-          voteAmount,
+          this.availableBalance,
           this.walletAddress
         );
       }
 
-      const successMessage = this.translate.instant('mainchainpolls.vote-success-message', { txId });
-      await this.popupService.ionicAlert('mainchainpolls.vote-success', successMessage);
+      // Multisign wallet: Need to wait for other signers to sign before publishing, so don't show success message here.
+      if (txId) {
+        const successMessage = this.translate.instant('mainchainpolls.vote-success-message', { txId });
+        await this.popupService.ionicAlert('mainchainpolls.vote-success', successMessage);
+      }
 
       // Reload poll details and wallet info
       await this.loadPollDetails();
@@ -212,13 +209,7 @@ export class PollDetailPage implements OnInit {
   }
 
   private async showVoteConfirmation(): Promise<boolean> {
-    // Calculate actual vote amount using shared service method
-    const voteAmount = this.pollsService.calculateVoteAmount(this.availableBalance);
-    if (!voteAmount) {
-      // This shouldn't happen as we check canVote() before showing confirmation
-      return false;
-    }
-    const voteAmountString = voteAmount.dividedBy(Config.SELAAsBigNumber).toFixed(3);
+    const voteAmountString = this.availableBalance.dividedBy(Config.SELAAsBigNumber).toFixed(3);
 
     const confirmed = await this.popupService.showConfirmationPopup(
       this.translate.instant('mainchainpolls.confirm-vote'),

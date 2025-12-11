@@ -239,11 +239,15 @@ export class MainchainPollsService {
         true // visualFeedback
       );
 
-      if (!result.published || !result.txid) {
-        throw new Error(result.status === 'cancelled' ? 'Transaction cancelled' : 'Failed to publish transaction');
-      }
+      if (result.status === 'delegated') { // Mutisign wallet: Transaction signature has been delegated to another flow.
+        Logger.log(App.MAINCHAIN_POLLS, 'submitVote - transaction delegated');
+      } else {
+        if (!result.published || !result.txid) {
+          throw new Error(result.status === 'cancelled' ? 'Transaction cancelled' : 'Failed to publish transaction');
+        }
 
-      Logger.log(App.MAINCHAIN_POLLS, 'submitVote - transaction published:', result.txid);
+        Logger.log(App.MAINCHAIN_POLLS, 'submitVote - transaction published:', result.txid);
+      }
       return result.txid;
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'submitVote error:', err);
