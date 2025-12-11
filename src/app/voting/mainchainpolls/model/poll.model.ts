@@ -7,4 +7,5 @@ export interface Poll {
   startTime: number;
   endTime: number;
   choices: string[];
+  url?: string; // Optional URL with more information
 }

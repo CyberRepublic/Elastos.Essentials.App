@@ -25,6 +25,19 @@
                         </ion-col>
                     </ion-row>
                 </div>
+
+                <div *ngIf="hasValidUrl()" class="poll-url">
+                    <p class="url-label">{{ 'mainchainpolls.info-url' | translate }}</p>
+                    <div class="url-value">
+                        <a [href]="pollDetails.url" target="_blank" rel="noopener noreferrer">
+                            {{ pollDetails.url }}
+                        </a>
+                        <ion-button fill="clear" size="small" class="copy-url-button" type="button"
+                            (click)="copyPollUrl()" [title]="'mainchainpolls.copy-url' | translate">
+                            <ion-icon slot="icon-only" name="copy-outline"></ion-icon>
+                        </ion-button>
+                    </div>
+                </div>
             </div>
         </div>
 

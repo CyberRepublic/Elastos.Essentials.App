@@ -78,6 +78,20 @@ export class PollDetailPage implements OnInit {
     }
   }
 
+  hasValidUrl(): boolean {
+    const url = this.pollDetails?.url?.trim();
+    return !!url && url.toLowerCase().startsWith('http');
+  }
+
+  copyPollUrl() {
+    if (!this.hasValidUrl()) {
+      return;
+    }
+
+    void this.globalNative.copyClipboard(this.pollDetails?.url || '');
+    this.globalNative.genericToast('mainchainpolls.url-copied');
+  }
+
   async loadWalletInfo() {
     try {
       this.loadingWalletInfo = true;
