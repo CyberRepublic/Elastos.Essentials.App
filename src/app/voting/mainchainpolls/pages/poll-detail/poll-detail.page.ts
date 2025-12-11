@@ -39,6 +39,7 @@ export class PollDetailPage implements OnInit {
   public availableBalance: BigNumber | null = null; // Balance - 1 ELA for fees
   public userVote: Vote | null = null;
   public storedVote: StoredVoteInfo | null = null; // Vote from local storage
+  public walletUnavailable = false;
 
   public selectedChoice: number | null = null;
 
@@ -95,9 +96,17 @@ export class PollDetailPage implements OnInit {
   async loadWalletInfo() {
     try {
       this.loadingWalletInfo = true;
+      this.walletUnavailable = false;
+      this.walletAddress = '';
+      this.walletBalance = null;
+      this.availableBalance = null;
+      this.userVote = null;
+      this.storedVote = null;
+
       const networkWallet = this.walletService.activeNetworkWallet.value;
       if (!networkWallet) {
         Logger.warn(App.MAINCHAIN_POLLS, 'No active network wallet');
+        this.walletUnavailable = true;
         this.loadingWalletInfo = false;
         return;
       }
@@ -105,6 +114,17 @@ export class PollDetailPage implements OnInit {
       const mainchainNetwork = this.walletNetworkService.getNetworkByKey('elastos');
       if (!mainchainNetwork) {
         Logger.warn(App.MAINCHAIN_POLLS, 'Elastos mainchain network not found');
+        this.walletUnavailable = true;
+        this.loadingWalletInfo = false;
+        return;
+      }
+
+      if (!networkWallet.masterWallet.supportsNetwork(mainchainNetwork)) {
+        Logger.warn(
+          App.MAINCHAIN_POLLS,
+          'Active master wallet does not support the mainchain network (likely imported private key)'
+        );
+        this.walletUnavailable = true;
         this.loadingWalletInfo = false;
         return;
       }
@@ -112,6 +132,7 @@ export class PollDetailPage implements OnInit {
       const mainchainWallet = await mainchainNetwork.createNetworkWallet(networkWallet.masterWallet, false);
       if (!mainchainWallet) {
         Logger.warn(App.MAINCHAIN_POLLS, 'Failed to create mainchain wallet');
+        this.walletUnavailable = true;
         this.loadingWalletInfo = false;
         return;
       }
@@ -119,6 +140,7 @@ export class PollDetailPage implements OnInit {
       const mainchainSubWallet = mainchainWallet.getSubWallet(StandardCoinName.ELA) as MainChainSubWallet;
       if (!mainchainSubWallet) {
         Logger.warn(App.MAINCHAIN_POLLS, 'Mainchain subwallet not found');
+        this.walletUnavailable = true;
         this.loadingWalletInfo = false;
         return;
       }
@@ -324,6 +346,12 @@ export class PollDetailPage implements OnInit {
   canVote(): boolean {
     if (!this.pollDetails) {
       return false;
+    }
+    if (this.walletUnavailable) {
+      return false; // No eligible wallet for voting
+    }
+    if (!this.walletAddress) {
+      return false; // Wallet not loaded
     }
     if (this.hasAlreadyVoted()) {
       return false; // Already voted

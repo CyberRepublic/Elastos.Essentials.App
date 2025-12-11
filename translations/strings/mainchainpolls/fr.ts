@@ -8,6 +8,7 @@ export const fr = {
     'poll-not-found': 'Sondage introuvable',
     loading: 'Chargement...',
     choices: 'choix',
+    'no-wallet': 'Aucun portefeuille disponible pour voter sur la chaîne principale',
     status: {
       active: 'Actif',
       voting: 'Actif',

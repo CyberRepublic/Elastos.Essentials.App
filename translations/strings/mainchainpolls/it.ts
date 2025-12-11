@@ -8,6 +8,7 @@ export const it = {
     'poll-not-found': 'Sondaggio non trovato',
     loading: 'Caricamento...',
     choices: 'scelte',
+    'no-wallet': 'Nessun portafoglio disponibile per il voto sulla mainchain',
     status: {
       active: 'Attivo',
       voting: 'Attivo',

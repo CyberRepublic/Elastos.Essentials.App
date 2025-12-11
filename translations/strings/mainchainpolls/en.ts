@@ -8,6 +8,7 @@ export const en = {
     'poll-not-found': 'Poll not found',
     loading: 'Loading...',
     choices: 'choices',
+    'no-wallet': 'No wallet available for mainchain voting',
     status: {
       active: 'Active',
       voting: 'Active',

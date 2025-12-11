@@ -83,24 +83,30 @@
 
                 <!-- Show wallet info when loaded -->
                 <div *ngIf="!loadingWalletInfo" class="wallet-balance-section">
-                    <div class="wallet-info">
-                        <p class="wallet-address-label">{{ 'mainchainpolls.wallet-address' | translate }}</p>
-                        <p class="wallet-address">{{ walletAddress || ('mainchainpolls.loading' | translate) }}</p>
+                    <div *ngIf="walletUnavailable" class="wallet-unavailable">
+                        <p>{{ 'mainchainpolls.no-wallet' | translate }}</p>
                     </div>
+                    <div *ngIf="!walletUnavailable">
+                        <div class="wallet-info">
+                            <p class="wallet-address-label">{{ 'mainchainpolls.wallet-address' | translate }}</p>
+                            <p class="wallet-address">{{ walletAddress || ('mainchainpolls.loading' | translate) }}</p>
+                        </div>
 
-                    <p class="available-balance">
-                        {{ 'mainchainpolls.available-voting-power' | translate }}: {{ formatBalance(availableBalance) }}
-                        ELA
-                    </p>
+                        <p class="available-balance">
+                            {{ 'mainchainpolls.available-voting-power' | translate }}: {{
+                            formatBalance(availableBalance) }}
+                            ELA
+                        </p>
 
-                    <div *ngIf="availableBalance !== null && (!availableBalance || availableBalance.isLessThanOrEqualTo(0))"
-                        class="insufficient-balance-warning">
-                        <p>{{ 'mainchainpolls.insufficient-balance' | translate }}</p>
+                        <div *ngIf="availableBalance !== null && (!availableBalance || availableBalance.isLessThanOrEqualTo(0))"
+                            class="insufficient-balance-warning">
+                            <p>{{ 'mainchainpolls.insufficient-balance' | translate }}</p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="vote-button-container">
-                    <ebutton [disabled]="selectedChoice === null || voting" [spinning]="voting"
+                    <ebutton [disabled]="selectedChoice === null || voting || !canVote()" [spinning]="voting"
                         [title]="'mainchainpolls.vote' | translate" (clicked)="vote()">
                     </ebutton>
                 </div>
