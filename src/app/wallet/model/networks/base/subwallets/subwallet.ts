@@ -443,7 +443,7 @@ export abstract class SubWallet<
    * (Optionally) Internally called by implementations of publishTransaction() to hide a generic publication
    * dialog.
    */
-  protected markGenericOutgoingTransactionEnd(txid: string, message: string = '') {
+  protected markGenericOutgoingTransactionEnd(txid: string, message = '') {
     if (txid) TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.PUBLISHED);
     else TransactionService.instance.setOnGoingPublishedTransactionState(OutgoingTransactionState.ERRORED, message);
   }
@@ -482,7 +482,9 @@ export abstract class SubWallet<
         return {
           published: false,
           txid: null,
-          status: 'delegated'
+          status: 'delegated',
+          offlineTransactionKey: signedTxResult.offlineTransactionKey,
+          offlineTransactionId: signedTxResult.offlineTransactionId,
         };
       } else {
         return {

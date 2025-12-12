@@ -7,7 +7,7 @@ export const zh = {
     'poll-not-found': '未找到投票',
     loading: '加载中...',
     choices: '选项',
-    'no-wallet': '无可用于主链投票的钱包',
+    'no-wallet': '没有可以进行主链投票的钱包',
     status: {
       active: '进行中',
       voting: '进行中',

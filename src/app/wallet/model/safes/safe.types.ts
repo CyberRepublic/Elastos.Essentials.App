@@ -10,4 +10,7 @@ export enum SignTransactionErrorType {
 export type SignTransactionResult = {
   signedTransaction?: any; // often a string, but potentially an object (AA user op with signature inside)
   errorType?: SignTransactionErrorType;
+  // For multisig wallets, need save the transaction key and id of the offline transaction for mainchain polling voting.
+  offlineTransactionKey?: string; // Transaction key of the offline transaction
+  offlineTransactionId?: string; // Transaction id of the offline transaction
 };

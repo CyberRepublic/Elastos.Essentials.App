@@ -180,7 +180,7 @@ export class MainchainPollsService {
    * @param option - Selected choice index
    * @param voteAmount - Vote amount in sELA (smallest unit), already calculated
    */
-  async submitVote(pollId: string, option: number, voteAmount: BigNumber): Promise<string> {
+  async submitVote(pollId: string, option: number, voteAmount: BigNumber): Promise<{txid?: string, offlineTransactionKey?: string, offlineTransactionId?: string}> {
     try {
       Logger.log(
         App.MAINCHAIN_POLLS,
@@ -242,6 +242,7 @@ export class MainchainPollsService {
       if (result.status === 'delegated') {
         // Mutisign wallet: Transaction signature has been delegated to another flow.
         Logger.log(App.MAINCHAIN_POLLS, 'submitVote - transaction delegated');
+        return {offlineTransactionKey: result.offlineTransactionKey, offlineTransactionId: result.offlineTransactionId};
       } else {
         if (!result.published || !result.txid) {
           throw new Error(result.status === 'cancelled' ? 'Transaction cancelled' : 'Failed to publish transaction');
@@ -249,7 +250,7 @@ export class MainchainPollsService {
 
         Logger.log(App.MAINCHAIN_POLLS, 'submitVote - transaction published:', result.txid);
       }
-      return result.txid;
+      return {txid: result.txid};
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'submitVote error:', err);
       throw err;
@@ -280,7 +281,9 @@ export class MainchainPollsService {
     pollId: string,
     option: number,
     voteAmount: BigNumber,
-    walletAddress: string
+    walletAddress: string,
+    offlineTransactionKey?: string, // For multisig wallets, the transaction key of the offline transaction.
+    offlineTransactionId?: string // For multisig wallets, the transaction id of the offline transaction.
   ): Promise<void> {
     try {
       if (!walletAddress) {
@@ -292,7 +295,9 @@ export class MainchainPollsService {
         voteAmount: voteAmount.toString(),
         voteTimestamp: Math.floor(Date.now() / 1000), // Unix timestamp
         option,
-        walletAddress
+        walletAddress,
+        offlineTransactionKey,
+        offlineTransactionId
       };
       await this.localStorage.saveVote(storedVoteInfo);
       Logger.log(App.MAINCHAIN_POLLS, 'Vote saved to local storage:', pollId, 'for wallet:', walletAddress);
@@ -310,6 +315,16 @@ export class MainchainPollsService {
       return null;
     }
     return await this.localStorage.getVote(pollId, walletAddress);
+  }
+
+  /**
+   * Remove stored vote information from local storage (sandboxed per wallet address)
+   */
+  async removeStoredVote(pollId: string, walletAddress: string): Promise<void> {
+    if (!walletAddress) {
+      return;
+    }
+    await this.localStorage.removeVote(pollId, walletAddress);
   }
 
   /**

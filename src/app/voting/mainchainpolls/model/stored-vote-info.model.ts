@@ -9,4 +9,7 @@ export interface StoredVoteInfo {
   voteTimestamp: number; // Unix timestamp when vote was cast
   option: number; // Selected choice index
   walletAddress: string; // Wallet address that cast the vote
+  // For multisig wallets
+  offlineTransactionKey?: string; // Transaction key on chain
+  offlineTransactionId?: string; // Used to reference this on going transaction locally and on the essentials api multisig service
 }

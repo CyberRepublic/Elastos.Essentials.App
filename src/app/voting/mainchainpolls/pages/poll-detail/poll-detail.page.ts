@@ -18,6 +18,8 @@ import { PollStatus } from '../../model/poll-status.enum';
 import { StoredVoteInfo } from '../../model/stored-vote-info.model';
 import { Vote } from '../../model/vote.model';
 import { MainchainPollsService } from '../../services/mainchain-polls.service';
+import { AnyOfflineTransaction } from 'src/app/wallet/model/tx-providers/transaction.types';
+import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
 
 @Component({
   selector: 'app-poll-detail',
@@ -42,6 +44,11 @@ export class PollDetailPage implements OnInit {
   public walletUnavailable = false;
 
   public selectedChoice: number | null = null;
+
+  // For multisig wallets, check if the offline transaction is on chain or not.
+  public offlineTransactions: AnyOfflineTransaction[] = [];
+  public isTransactionPending = false;
+  public isCheckingOfflineTransaction = false;
 
   constructor(
     public theme: GlobalThemeService,
@@ -129,15 +136,7 @@ export class PollDetailPage implements OnInit {
         return;
       }
 
-      const mainchainWallet = await mainchainNetwork.createNetworkWallet(networkWallet.masterWallet, false);
-      if (!mainchainWallet) {
-        Logger.warn(App.MAINCHAIN_POLLS, 'Failed to create mainchain wallet');
-        this.walletUnavailable = true;
-        this.loadingWalletInfo = false;
-        return;
-      }
-
-      const mainchainSubWallet = mainchainWallet.getSubWallet(StandardCoinName.ELA) as MainChainSubWallet;
+      const mainchainSubWallet = networkWallet.getSubWallet(StandardCoinName.ELA) as MainChainSubWallet;
       if (!mainchainSubWallet) {
         Logger.warn(App.MAINCHAIN_POLLS, 'Mainchain subwallet not found');
         this.walletUnavailable = true;
@@ -161,6 +160,36 @@ export class PollDetailPage implements OnInit {
       // Load stored vote from local storage (sandboxed per wallet address)
       if (this.pollId && this.walletAddress) {
         this.storedVote = await this.pollsService.getStoredVote(this.pollId, this.walletAddress);
+
+        // For multisig wallets, check if the offline transaction is on chain or not.
+        if (this.storedVote && this.storedVote.offlineTransactionId) {
+          this.isCheckingOfflineTransaction = true;
+
+          // Load offline transactions for multisig wallets
+          this.offlineTransactions = (await mainchainSubWallet.getOfflineTransactions()) || [];
+          const isTransactionInOfflineTransactions = this.offlineTransactions.findIndex(tx => tx.transactionKey === this.storedVote.offlineTransactionKey) !== -1;
+          if (!isTransactionInOfflineTransactions) {
+            // If the offline transaction is not found, check if the transaction is on chain.
+            const txRawTx = await GlobalElastosAPIService.instance.getRawTransaction(this.storedVote.offlineTransactionId);
+            if (txRawTx) {
+              // The transaction is on chain, remove offlinetransaction key and id from stored vote
+              await this.pollsService.saveVoteToLocalStorage(
+                this.storedVote.pollId,
+                this.storedVote.option,
+                new BigNumber(this.storedVote.voteAmount),
+                this.storedVote.walletAddress
+              );
+              this.isTransactionPending = false;
+            } else {
+              // The transaction is not on chain, maybe user deleted the transaction, so delete the stored vote.
+              await this.pollsService.removeStoredVote(this.pollId, this.walletAddress);
+              this.storedVote = null;
+            }
+          } else {
+            this.isTransactionPending = true;
+          }
+          this.isCheckingOfflineTransaction = false;
+        }
       }
 
       // Load user vote from API if exists
@@ -210,7 +239,10 @@ export class PollDetailPage implements OnInit {
       this.voting = true;
       Logger.log(App.MAINCHAIN_POLLS, 'Submitting vote - pollId:', this.pollId, 'choice:', this.selectedChoice);
 
-      const txId = await this.pollsService.submitVote(this.pollId, this.selectedChoice, this.availableBalance);
+      const result = await this.pollsService.submitVote(this.pollId, this.selectedChoice, this.availableBalance);
+      const txId = result.txid;
+      const offlineTransactionKey = result.offlineTransactionKey;
+      const offlineTransactionId = result.offlineTransactionId;
       Logger.log(App.MAINCHAIN_POLLS, 'Vote submitted, txId:', txId);
 
       // Save vote to local storage (sandboxed per wallet address)
@@ -219,7 +251,9 @@ export class PollDetailPage implements OnInit {
           this.pollId,
           this.selectedChoice,
           this.availableBalance,
-          this.walletAddress
+          this.walletAddress,
+          offlineTransactionKey,
+          offlineTransactionId
         );
       }
 
@@ -369,7 +403,7 @@ export class PollDetailPage implements OnInit {
    * Check if user has already voted (either from API or local storage)
    */
   hasAlreadyVoted(): boolean {
-    return !!this.userVote || !!this.storedVote;
+    return !this.isCheckingOfflineTransaction && (!!this.userVote || !!this.storedVote);
   }
 
   /**

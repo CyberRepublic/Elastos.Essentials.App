@@ -319,4 +319,7 @@ export type RawTransactionPublishResult = {
   status?: string; // published, cancelled, error, delegated
   code?: number;  // Error code.
   message?: string; // Errror message.
+  // For multisig wallets, need save the transaction key and id of the offline transaction for mainchain polling voting.
+  offlineTransactionKey?: string; // For multisig wallets, the transaction key of the offline transaction.
+  offlineTransactionId?: string; // For multisig wallets, the transaction id of the offline transaction.
 }

@@ -45,9 +45,12 @@
         <div class="vote-section">
             <h2>{{ 'mainchainpolls.vote-status' | translate }}</h2>
             <div *ngIf="hasAlreadyVoted()" class="voted-info">
-                <div class="voted-badge">
+                <div *ngIf="!isTransactionPending" class="voted-badge">
                     <ion-icon name="checkmark-circle"></ion-icon>
                     <span>{{ 'mainchainpolls.voted' | translate }}</span>
+                </div>
+                <div *ngIf="isTransactionPending" class="vote-pending">
+                    <span>{{ 'wallet.coin-transaction-status-not-published' | translate }}</span>
                 </div>
                 <p class="vote-details" *ngIf="getDisplayVote()">
                     {{ 'mainchainpolls.vote-amount' | translate }}: {{ formatVoteAmount(getDisplayVote().amount) }} ELA
@@ -55,7 +58,7 @@
                 <p class="vote-details" *ngIf="getDisplayVote() && pollDetails && getVoteOption() !== null">
                     {{ 'mainchainpolls.vote-choice' | translate }}: {{ pollDetails.choices[getVoteOption()] }}
                 </p>
-                <p class="vote-details stored-vote-note" *ngIf="storedVote && !userVote">
+                <p class="vote-details stored-vote-note" *ngIf="storedVote && !userVote && !isTransactionPending">
                     <small>{{ 'mainchainpolls.vote-pending-confirmation' | translate }}</small>
                 </p>
             </div>
