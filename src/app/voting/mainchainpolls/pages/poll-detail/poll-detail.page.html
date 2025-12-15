@@ -122,8 +122,9 @@
             </div>
         </div>
 
-        <!-- Poll Results Section (shown when user has voted) -->
-        <div *ngIf="hasAlreadyVoted() && pollDetails && getPollResults().length > 0" class="poll-results-section">
+        <!-- Poll Results Section (shown when user has voted or poll is finished) -->
+        <div *ngIf="(hasAlreadyVoted() || pollDetails.status === 'finished') && pollDetails && getPollResults().length > 0"
+            class="poll-results-section">
             <h2>{{ 'mainchainpolls.poll-results' | translate }}</h2>
             <div class="results-summary">
                 <p class="total-votes">
