@@ -10,11 +10,17 @@ import { MainChainSubWallet } from 'src/app/wallet/model/networks/elastos/mainch
 import { Transfer } from 'src/app/wallet/services/cointransfer.service';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
+import { environment } from 'src/environments/environment';
 import { PollDetails } from '../model/poll-details.model';
 import { Poll } from '../model/poll.model';
 import { StoredVoteInfo } from '../model/stored-vote-info.model';
 import { Vote } from '../model/vote.model';
 import { LocalStorage } from './storage.service';
+
+/**
+ * If true, fetches polls with specific type 255 which are only internal polls.
+ */
+const USE_TEST_POLLS = environment.useTestPolls;
 
 @Injectable({
   providedIn: 'root'
@@ -98,14 +104,14 @@ export class MainchainPollsService {
   async getPolls(): Promise<string[]> {
     try {
       const url = this.apiBaseUrl;
-      const param = {
-        jsonrpc: '2.0',
-        method: 'getpolls',
-        params: [],
-        id: '1'
-      };
 
-      Logger.log(App.MAINCHAIN_POLLS, 'getpolls - calling:', url, 'with params:', param);
+      // For now, test polls use type 255, live polls use type 1, and older
+      // untyped polls use type 0 / no type.
+      const params = USE_TEST_POLLS ? { type: 255 } : { type: 1 };
+
+      const param = { jsonrpc: '2.0', method: 'getpolls', params, id: '1' };
+
+      Logger.log(App.MAINCHAIN_POLLS, 'getpolls - calling:', url, 'with params:', params);
 
       const response = await this.globalJsonRPCService.httpPost(url, param, 'mainchain-polls');
 
@@ -180,7 +186,11 @@ export class MainchainPollsService {
    * @param option - Selected choice index
    * @param voteAmount - Vote amount in sELA (smallest unit), already calculated
    */
-  async submitVote(pollId: string, option: number, voteAmount: BigNumber): Promise<{txid?: string, offlineTransactionKey?: string, offlineTransactionId?: string}> {
+  async submitVote(
+    pollId: string,
+    option: number,
+    voteAmount: BigNumber
+  ): Promise<{ txid?: string; offlineTransactionKey?: string; offlineTransactionId?: string }> {
     try {
       Logger.log(
         App.MAINCHAIN_POLLS,
@@ -242,7 +252,10 @@ export class MainchainPollsService {
       if (result.status === 'delegated') {
         // Mutisign wallet: Transaction signature has been delegated to another flow.
         Logger.log(App.MAINCHAIN_POLLS, 'submitVote - transaction delegated');
-        return {offlineTransactionKey: result.offlineTransactionKey, offlineTransactionId: result.offlineTransactionId};
+        return {
+          offlineTransactionKey: result.offlineTransactionKey,
+          offlineTransactionId: result.offlineTransactionId
+        };
       } else {
         if (!result.published || !result.txid) {
           throw new Error(result.status === 'cancelled' ? 'Transaction cancelled' : 'Failed to publish transaction');
@@ -250,7 +263,7 @@ export class MainchainPollsService {
 
         Logger.log(App.MAINCHAIN_POLLS, 'submitVote - transaction published:', result.txid);
       }
-      return {txid: result.txid};
+      return { txid: result.txid };
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'submitVote error:', err);
       throw err;
