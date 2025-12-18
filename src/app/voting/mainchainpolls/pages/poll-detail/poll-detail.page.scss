@@ -50,8 +50,8 @@ ion-content {
             }
 
             &.ended {
-                background: var(--essentials-box-color);
-                color: var(--ion-color-medium);
+                background: rgba(255, 152, 0, 0.15);
+                color: #ff9800;
             }
 
             &.upcoming {
@@ -171,7 +171,8 @@ ion-content {
             flex-direction: column;
             align-items: center;
 
-            .voted-badge, .vote-pending {
+            .voted-badge,
+            .vote-pending {
                 display: flex;
                 align-items: center;
                 justify-content: center;

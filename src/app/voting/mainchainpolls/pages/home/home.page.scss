@@ -89,8 +89,8 @@ ion-content {
                     }
 
                     &.ended {
-                        background: var(--essentials-box-color);
-                        color: var(--ion-color-medium);
+                        background: rgba(255, 152, 0, 0.15);
+                        color: #ff9800;
                     }
 
                     &.upcoming {

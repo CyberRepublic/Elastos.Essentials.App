@@ -5,12 +5,14 @@ import { BigNumber } from 'bignumber.js';
 import { TitleBarComponent } from 'src/app/components/titlebar/titlebar.component';
 import { Logger } from 'src/app/logger';
 import { App } from 'src/app/model/app.enum';
+import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
 import { GlobalNativeService } from 'src/app/services/global.native.service';
 import { GlobalPopupService } from 'src/app/services/global.popup.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 import { Config } from 'src/app/wallet/config/Config';
 import { StandardCoinName } from 'src/app/wallet/model/coin';
 import { MainChainSubWallet } from 'src/app/wallet/model/networks/elastos/mainchain/subwallets/mainchain.subwallet';
+import { AnyOfflineTransaction } from 'src/app/wallet/model/tx-providers/transaction.types';
 import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
 import { PollDetails } from '../../model/poll-details.model';
@@ -18,8 +20,6 @@ import { PollStatus } from '../../model/poll-status.enum';
 import { StoredVoteInfo } from '../../model/stored-vote-info.model';
 import { Vote } from '../../model/vote.model';
 import { MainchainPollsService } from '../../services/mainchain-polls.service';
-import { AnyOfflineTransaction } from 'src/app/wallet/model/tx-providers/transaction.types';
-import { GlobalElastosAPIService } from 'src/app/services/global.elastosapi.service';
 
 @Component({
   selector: 'app-poll-detail',
@@ -167,10 +167,14 @@ export class PollDetailPage implements OnInit {
 
           // Load offline transactions for multisig wallets
           this.offlineTransactions = (await mainchainSubWallet.getOfflineTransactions()) || [];
-          const isTransactionInOfflineTransactions = this.offlineTransactions.findIndex(tx => tx.transactionKey === this.storedVote.offlineTransactionKey) !== -1;
+          const isTransactionInOfflineTransactions =
+            this.offlineTransactions.findIndex(tx => tx.transactionKey === this.storedVote.offlineTransactionKey) !==
+            -1;
           if (!isTransactionInOfflineTransactions) {
             // If the offline transaction is not found, check if the transaction is on chain.
-            const txRawTx = await GlobalElastosAPIService.instance.getRawTransaction(this.storedVote.offlineTransactionId);
+            const txRawTx = await GlobalElastosAPIService.instance.getRawTransaction(
+              this.storedVote.offlineTransactionId
+            );
             if (txRawTx) {
               // The transaction is on chain, remove offlinetransaction key and id from stored vote
               await this.pollsService.saveVoteToLocalStorage(
@@ -447,31 +451,41 @@ export class PollDetailPage implements OnInit {
     percentage: number;
     voteCount: number;
   }> {
-    if (!this.pollDetails || !this.pollDetails.votes || this.pollDetails.votes.length === 0) {
+    if (!this.pollDetails) {
+      return [];
+    }
+
+    // For finished polls, show results even if there are no votes
+    const isFinished = this.pollDetails.status === 'finished';
+    const hasVotes = this.pollDetails.votes && this.pollDetails.votes.length > 0;
+
+    if (!hasVotes && !isFinished) {
       return [];
     }
 
     // Aggregate votes by choice
     const votesByChoice: Map<number, { totalAmount: BigNumber; count: number }> = new Map();
 
-    this.pollDetails.votes.forEach(vote => {
-      const choiceIndex = vote.choice;
-      // Vote amount from API is already in ELA units (not sELA)
-      const voteAmount = new BigNumber(vote.amount);
+    if (this.pollDetails.votes && this.pollDetails.votes.length > 0) {
+      this.pollDetails.votes.forEach(vote => {
+        const choiceIndex = vote.choice;
+        // Vote amount from API is already in ELA units (not sELA)
+        const voteAmount = new BigNumber(vote.amount);
 
-      if (votesByChoice.has(choiceIndex)) {
-        const existing = votesByChoice.get(choiceIndex);
-        if (existing) {
-          existing.totalAmount = existing.totalAmount.plus(voteAmount);
-          existing.count += 1;
+        if (votesByChoice.has(choiceIndex)) {
+          const existing = votesByChoice.get(choiceIndex);
+          if (existing) {
+            existing.totalAmount = existing.totalAmount.plus(voteAmount);
+            existing.count += 1;
+          }
+        } else {
+          votesByChoice.set(choiceIndex, {
+            totalAmount: voteAmount,
+            count: 1
+          });
         }
-      } else {
-        votesByChoice.set(choiceIndex, {
-          totalAmount: voteAmount,
-          count: 1
-        });
-      }
-    });
+      });
+    }
 
     // Calculate total votes
     let totalVotes = new BigNumber(0);
