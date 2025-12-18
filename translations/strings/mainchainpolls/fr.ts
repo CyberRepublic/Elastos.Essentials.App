@@ -43,6 +43,8 @@ export const fr = {
     'confirm-vote': 'Confirmer le Vote',
     'confirm-vote-message':
       'Vous êtes sur le point de voter avec {{amount}} ELA. Notez que le vote ne peut pas être modifié et que vos jetons ne sont pas dépensés, ils sont uniquement utilisés comme pouvoir de vote.',
+    'votes-will-be-cleared-warning':
+      "Note: Vous avez déjà voté pour d'autres sondages actifs. Ce nouveau vote annulera vos votes précédents dans tous les autres sondages actifs.",
     'vote-pending-confirmation': 'Vote soumis, en attente de confirmation blockchain',
     'poll-results': 'Résultats du Sondage',
     'total-votes': 'Total des Votes',

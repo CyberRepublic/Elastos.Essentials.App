@@ -31,6 +31,11 @@ export class MainchainPollsService {
   private readonly USER_VOTE_FLAG = 'pollvote';
   private readonly USER_VOTE_FLAG_BYTE_LENGTH = 8; // 8 bytes
 
+  // Caching
+  private pollIdsCache: string[] | null = null;
+  private pollInfoCache: Map<string, Poll> = new Map();
+  private pollDetailsCache: Map<string, PollDetails> = new Map();
+
   constructor(
     private globalJsonRPCService: GlobalJsonRPCService,
     private walletNetworkService: WalletNetworkService,
@@ -102,6 +107,11 @@ export class MainchainPollsService {
    * API: getpolls
    */
   async getPolls(): Promise<string[]> {
+    if (this.pollIdsCache) {
+      Logger.log(App.MAINCHAIN_POLLS, 'getPolls - returning cached IDs');
+      return this.pollIdsCache;
+    }
+
     try {
       const url = this.apiBaseUrl;
 
@@ -116,10 +126,11 @@ export class MainchainPollsService {
       const response = await this.globalJsonRPCService.httpPost(url, param, 'mainchain-polls');
 
       Logger.log(App.MAINCHAIN_POLLS, 'getpolls - response:', response);
-      return Promise.resolve(response?.ids || []);
+      this.pollIdsCache = response?.ids || [];
+      return this.pollIdsCache;
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'getpolls error:', err);
-      return Promise.resolve([]);
+      return [];
     }
   }
 
@@ -128,30 +139,57 @@ export class MainchainPollsService {
    * API: getPollInfo
    */
   async getPollInfo(ids: string[]): Promise<Poll[]> {
+    if (!ids || ids.length === 0) return [];
+
+    // Check if all requested IDs are in cache
+    const cachedPolls: Poll[] = [];
+    const idsToFetch: string[] = [];
+
+    for (const id of ids) {
+      if (this.pollInfoCache.has(id)) {
+        cachedPolls.push(this.pollInfoCache.get(id)!);
+      } else {
+        idsToFetch.push(id);
+      }
+    }
+
+    if (idsToFetch.length === 0) {
+      Logger.log(App.MAINCHAIN_POLLS, 'getPollInfo - returning all cached polls');
+      // Sort before returning
+      return cachedPolls.sort((a, b) => (b.startTime ?? 0) - (a.startTime ?? 0));
+    }
+
     try {
       const url = this.apiBaseUrl;
       const param = {
         jsonrpc: '2.0',
         method: 'getpollinfo',
-        params: { ids },
+        params: { ids: idsToFetch },
         id: '1'
       };
 
-      Logger.log(App.MAINCHAIN_POLLS, 'getPollInfo - calling:', url, 'ids:', ids);
+      Logger.log(App.MAINCHAIN_POLLS, 'getPollInfo - calling:', url, 'ids to fetch:', idsToFetch);
 
-      const polls = await this.globalJsonRPCService.httpPost<Poll[]>(url, param, 'mainchain-polls');
+      const fetchedPolls = await this.globalJsonRPCService.httpPost<Poll[]>(url, param, 'mainchain-polls');
 
-      Logger.log(App.MAINCHAIN_POLLS, 'getPollInfo - polls:', polls);
+      Logger.log(App.MAINCHAIN_POLLS, 'getPollInfo - fetched polls:', fetchedPolls);
 
-      // Sort polls by start date descending (newest first)
-      if (polls && polls.length > 0) {
-        polls.sort((a, b) => (b.startTime ?? 0) - (a.startTime ?? 0));
+      if (fetchedPolls && fetchedPolls.length > 0) {
+        for (const poll of fetchedPolls) {
+          this.pollInfoCache.set(poll.id, poll);
+          cachedPolls.push(poll);
+        }
       }
 
-      return polls;
+      // Sort polls by start date descending (newest first)
+      if (cachedPolls && cachedPolls.length > 0) {
+        cachedPolls.sort((a, b) => (b.startTime ?? 0) - (a.startTime ?? 0));
+      }
+
+      return cachedPolls;
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'getPollInfo error:', err);
-      return Promise.resolve([]);
+      return cachedPolls; // Return whatever we have in cache if fetch fails
     }
   }
 
@@ -160,6 +198,11 @@ export class MainchainPollsService {
    * API: getPollDetails
    */
   async getPollDetails(id: string): Promise<PollDetails | null> {
+    if (this.pollDetailsCache.has(id)) {
+      Logger.log(App.MAINCHAIN_POLLS, 'getPollDetails - returning cached details for:', id);
+      return this.pollDetailsCache.get(id)!;
+    }
+
     try {
       const url = this.apiBaseUrl;
       const param = {
@@ -170,13 +213,16 @@ export class MainchainPollsService {
 
       Logger.log(App.MAINCHAIN_POLLS, 'getPollDetails - calling:', url, 'id:', id);
 
-      const response = await this.globalJsonRPCService.httpPost(url, param, 'mainchain-polls');
+      const response = await this.globalJsonRPCService.httpPost<PollDetails>(url, param, 'mainchain-polls');
 
       Logger.log(App.MAINCHAIN_POLLS, 'getPollDetails - response:', response);
-      return Promise.resolve(response || null);
+      if (response) {
+        this.pollDetailsCache.set(id, response);
+      }
+      return response || null;
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'getPollDetails error:', err);
-      return Promise.resolve(null);
+      return null;
     }
   }
 
@@ -288,7 +334,42 @@ export class MainchainPollsService {
   }
 
   /**
+   * Returns a list of other unfinished polls that the user has already voted for.
+   * Voting for a new poll clears all previous votes in other open polls.
+   */
+  async getOtherUnfinishedVotedPolls(walletAddress: string, currentPollId: string): Promise<Poll[]> {
+    try {
+      // 1. Get all poll IDs
+      const allPollIds = await this.getPolls();
+      if (!allPollIds || allPollIds.length === 0) return [];
+
+      // 2. Get info for all polls
+      const allPolls = await this.getPollInfo(allPollIds);
+
+      // 3. Filter for unfinished polls (status === 'voting') excluding current one
+      const activePolls = allPolls.filter(p => p.status === 'voting' && p.id !== currentPollId);
+      if (activePolls.length === 0) return [];
+
+      // 4. For each active poll, check if user has voted
+      // We check both local storage and API
+      const unfinishedVotedPolls: Poll[] = [];
+      for (const poll of activePolls) {
+        const voted = await this.hasVoted(poll.id, walletAddress);
+        if (voted) {
+          unfinishedVotedPolls.push(poll);
+        }
+      }
+
+      return unfinishedVotedPolls;
+    } catch (err) {
+      Logger.error(App.MAINCHAIN_POLLS, 'getOtherUnfinishedVotedPolls error:', err);
+      return [];
+    }
+  }
+
+  /**
    * Save vote information to local storage (sandboxed per wallet address)
+   * Also clears other unfinished votes from local storage.
    */
   async saveVoteToLocalStorage(
     pollId: string,
@@ -303,6 +384,17 @@ export class MainchainPollsService {
         Logger.warn(App.MAINCHAIN_POLLS, 'Cannot save vote to local storage: wallet address is missing');
         return;
       }
+
+      // First, clear other unfinished votes because this new vote on-chain will clear them.
+      // Note: we do this BEFORE saving the new one to avoid clearing the new one if something goes wrong.
+      const allPollIds = await this.getPolls();
+      const allPolls = await this.getPollInfo(allPollIds);
+      const otherUnfinishedPolls = allPolls.filter(p => p.status === 'voting' && p.id !== pollId);
+
+      for (const poll of otherUnfinishedPolls) {
+        await this.localStorage.removeVote(poll.id, walletAddress);
+      }
+
       const storedVoteInfo: StoredVoteInfo = {
         pollId,
         voteAmount: voteAmount.toString(),
@@ -355,5 +447,16 @@ export class MainchainPollsService {
     // Check local storage (sandboxed per wallet address)
     const storedVote = await this.getStoredVote(pollId, userAddress);
     return storedVote !== null;
+  }
+
+  /**
+   * Clear all cached polls data.
+   * Called when user manually refreshes the polls list.
+   */
+  public clearCache() {
+    this.pollIdsCache = null;
+    this.pollInfoCache.clear();
+    this.pollDetailsCache.clear();
+    Logger.log(App.MAINCHAIN_POLLS, 'Caches cleared');
   }
 }

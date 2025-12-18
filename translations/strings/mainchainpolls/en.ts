@@ -43,6 +43,8 @@ export const en = {
     'confirm-vote': 'Confirm Vote',
     'confirm-vote-message':
       'You are about to vote with {{amount}} ELA. Note that the vote cannot be changed, and your tokens are not spent, they are only used as voting power.',
+    'votes-will-be-cleared-warning':
+      'Note: You have already voted in one or more other active polls. This new vote will clear those previous votes.',
     'vote-pending-confirmation': 'Vote submitted, pending blockchain confirmation',
     'poll-results': 'Poll Results',
     'total-votes': 'Total Votes',

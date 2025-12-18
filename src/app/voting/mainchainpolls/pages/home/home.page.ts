@@ -81,6 +81,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async refreshPolls() {
+    this.pollsService.clearCache();
     this.pollsFetched = false;
     await this.fetchPolls();
   }
@@ -117,6 +118,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async doRefresh(event: RefresherCustomEvent) {
+    this.pollsService.clearCache();
     this.pollsFetched = false;
     await this.fetchPolls();
     void event.target.complete();

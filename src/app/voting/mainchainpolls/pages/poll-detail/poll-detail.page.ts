@@ -17,6 +17,7 @@ import { WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { WalletService } from 'src/app/wallet/services/wallet.service';
 import { PollDetails } from '../../model/poll-details.model';
 import { PollStatus } from '../../model/poll-status.enum';
+import { Poll } from '../../model/poll.model';
 import { StoredVoteInfo } from '../../model/stored-vote-info.model';
 import { Vote } from '../../model/vote.model';
 import { MainchainPollsService } from '../../services/mainchain-polls.service';
@@ -44,6 +45,7 @@ export class PollDetailPage implements OnInit {
   public walletUnavailable = false;
 
   public selectedChoice: number | null = null;
+  public otherUnfinishedVotedPolls: Poll[] = []; // Other polls that have been voted on and are still active
 
   // For multisig wallets, check if the offline transaction is on chain or not.
   public offlineTransactions: AnyOfflineTransaction[] = [];
@@ -199,6 +201,12 @@ export class PollDetailPage implements OnInit {
       // Load user vote from API if exists
       if (this.pollId && this.walletAddress) {
         this.userVote = await this.pollsService.getUserVote(this.pollId, this.walletAddress);
+
+        // Check if there are other unfinished polls already voted on
+        this.otherUnfinishedVotedPolls = await this.pollsService.getOtherUnfinishedVotedPolls(
+          this.walletAddress,
+          this.pollId
+        );
       }
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'loadWalletInfo error:', err);
@@ -249,6 +257,9 @@ export class PollDetailPage implements OnInit {
       const offlineTransactionId = result.offlineTransactionId;
       Logger.log(App.MAINCHAIN_POLLS, 'Vote submitted, txId:', txId);
 
+      // Clear cache after voting as on-chain state has changed
+      this.pollsService.clearCache();
+
       // Save vote to local storage (sandboxed per wallet address)
       if (this.pollDetails && this.walletAddress) {
         await this.pollsService.saveVoteToLocalStorage(
@@ -285,11 +296,17 @@ export class PollDetailPage implements OnInit {
   private async showVoteConfirmation(): Promise<boolean> {
     const voteAmountString = this.availableBalance.dividedBy(Config.SELAAsBigNumber).toFixed(3);
 
+    let message = this.translate.instant('mainchainpolls.confirm-vote-message', {
+      amount: voteAmountString
+    });
+
+    if (this.otherUnfinishedVotedPolls.length > 0) {
+      message += '\n\n' + this.translate.instant('mainchainpolls.votes-will-be-cleared-warning');
+    }
+
     const confirmed = await this.popupService.showConfirmationPopup(
       this.translate.instant('mainchainpolls.confirm-vote'),
-      this.translate.instant('mainchainpolls.confirm-vote-message', {
-        amount: voteAmountString
-      }),
+      message,
       this.translate.instant('common.confirm'),
       '' // No icon
     );

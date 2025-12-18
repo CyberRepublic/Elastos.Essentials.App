@@ -105,6 +105,11 @@
                             class="insufficient-balance-warning">
                             <p>{{ 'mainchainpolls.insufficient-balance' | translate }}</p>
                         </div>
+
+                        <div *ngIf="otherUnfinishedVotedPolls.length > 0" class="other-votes-warning">
+                            <ion-icon name="warning-outline" color="warning"></ion-icon>
+                            <p>{{ 'mainchainpolls.votes-will-be-cleared-warning' | translate }}</p>
+                        </div>
                     </div>
                 </div>
 
