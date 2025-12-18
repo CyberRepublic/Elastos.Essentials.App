@@ -92,6 +92,10 @@ export abstract class TransactionProvider<TransactionType extends GenericTransac
 
   protected abstract getSubWalletInternalTransactionProvider(subWallet: AnySubWallet): AnySubWalletTransactionProvider;
 
+  protected getSubWalletRechargeTransactionProvider(subWallet: AnySubWallet): AnySubWalletTransactionProvider {
+    return null;
+  }
+
   /**
    * Returns transactions currently in cache.
    */
@@ -101,13 +105,16 @@ export abstract class TransactionProvider<TransactionType extends GenericTransac
   ): Promise<TransactionType[]> {
     if (transactionListType === TransactionListType.NORMAL) {
       return this.getSubWalletTransactionProvider(subWallet)?.getTransactions(subWallet, transactionListType);
-    } else {
+    } else if (transactionListType === TransactionListType.INTERNAL) {
       if (subWallet.supportInternalTransactions()) {
         return this.getSubWalletInternalTransactionProvider(subWallet)?.getTransactions(subWallet, transactionListType);
-      } else {
-        return null;
+      }
+    } else if (transactionListType === TransactionListType.RECHARGE) {
+     if (subWallet.supportRechargeTransactions()) {
+        return this.getSubWalletRechargeTransactionProvider(subWallet)?.getTransactions(subWallet, transactionListType);
       }
     }
+    return null;
   }
 
   public getOfflineTransactions(subWallet: SubWallet<GenericTransaction, any>): Promise<AnyOfflineTransaction[]> {
@@ -137,11 +144,18 @@ export abstract class TransactionProvider<TransactionType extends GenericTransac
       if (!provider) {
         Logger.warn('wallet', 'fetchNewestTransactions(): no transaction provider');
       } else await provider.fetchTransactions(subWallet);
-    } else {
+    } else if (transactionListType === TransactionListType.INTERNAL) {
       if (subWallet.supportInternalTransactions()) {
         let provider = this.getSubWalletInternalTransactionProvider(subWallet);
         if (!provider) {
           Logger.warn('wallet', 'fetchNewestTransactions(): no internal transaction provider');
+        } else await provider.fetchTransactions(subWallet);
+      }
+    } else if (transactionListType === TransactionListType.RECHARGE) {
+      if (subWallet.supportRechargeTransactions()) {
+        let provider = this.getSubWalletRechargeTransactionProvider(subWallet);
+        if (!provider) {
+          Logger.warn('wallet', 'fetchNewestTransactions(): no recharge transaction provider');
         } else await provider.fetchTransactions(subWallet);
       }
     }

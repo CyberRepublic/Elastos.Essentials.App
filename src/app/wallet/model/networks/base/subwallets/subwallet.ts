@@ -284,6 +284,10 @@ export abstract class SubWallet<
     return false;
   }
 
+  public supportRechargeTransactions() {
+    return false;
+  }
+
   /**
    * Tells if this subwallet has a balance greater than or equal to the given amount.
    */
@@ -362,7 +366,7 @@ export abstract class SubWallet<
         this.getUniqueIdentifierOnNetwork() +
         '-transactions'
       );
-    } else {
+    } else if (transactionListType === TransactionListType.INTERNAL) {
       return (
         this.masterWallet.id +
         '-' +
@@ -370,6 +374,15 @@ export abstract class SubWallet<
         '-' +
         this.getUniqueIdentifierOnNetwork() +
         '-internaltransactions'
+      );
+    } else if (transactionListType === TransactionListType.RECHARGE) {
+      return (
+        this.masterWallet.id +
+        '-' +
+        this.networkWallet.network.key +
+        '-' +
+        this.getUniqueIdentifierOnNetwork() +
+        '-rechargetransactions'
       );
     }
   }

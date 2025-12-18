@@ -279,12 +279,14 @@ export class Util {
 
   /**
    * Reverse txid, eg. '65c1af8a' => '8aafc165'.
-   * For get address in cross chain transaction.
+   * For get address in cross chain transaction, Elastos mainchain uses little-endian, EVM uses big-endian.
    */
   public static reversetxid(txid) {
+    // Remove 0x prefix if present
+    const cleanTxId = txid.startsWith('0x') ? txid.slice(2) : txid;
     let newtxid = "";
-    for (let i = txid.length - 2; i >= 0; i -= 2) {
-      newtxid += txid.substring(i, i + 2);
+    for (let i = cleanTxId.length - 2; i >= 0; i -= 2) {
+      newtxid += cleanTxId.substring(i, i + 2);
     }
     return newtxid;
   }

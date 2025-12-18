@@ -134,6 +134,7 @@ export const it = {
     'coin-action-receive': 'RICEVI',
     'coin-transactions': 'Transazioni',
     'coin-internal-transactions': 'Int. Trans.',
+    'coin-recharge-transactions': 'Da Main Chain',
     'coin-no-transactions': 'Nessuna Transazione',
     'coin-op-received-token': 'Ricevuti',
     'coin-op-sent-token': 'Inviati',

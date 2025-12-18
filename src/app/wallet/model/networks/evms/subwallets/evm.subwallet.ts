@@ -178,7 +178,7 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
       erc20TokenTransactionInfo = await this.getERC20TokenTransactionInfo(transaction);
     }
 
-    let isCrossChain = this.isCrossChain(transaction);
+    let isCrossChain = transaction.isCrossChain || this.isCrossChain(transaction);
 
     if (!transaction.hash && transaction.transactionHash) {
       transaction.hash = transaction.transactionHash;
@@ -295,6 +295,10 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
   }
 
   protected async getTransactionName(transaction: EthTransaction): Promise<string> {
+    if (transaction.isCrossChain && transaction.Direction === TransactionDirection.RECEIVED) {
+      return 'wallet.coin-dir-from-mainchain';
+    }
+
     // Use extended info is there is some
     let extInfo = await this.networkWallet.getExtendedTxInfo(transaction.hash);
     if (extInfo && extInfo.evm && extInfo.evm.txInfo && extInfo.evm.txInfo.operation)

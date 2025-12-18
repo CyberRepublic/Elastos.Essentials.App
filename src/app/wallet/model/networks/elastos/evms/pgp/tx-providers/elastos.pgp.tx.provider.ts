@@ -16,7 +16,6 @@ export class ElastosPGPChainTransactionProvider extends TransactionProvider<Elas
   private elaPGPProvider: PGPSubWalletProvider;
   private tokenProvider: ElastosTokenSubWalletProvider;
 
-  // Only for ESC
   private internalTXProvider: EtherscanEVMSubWalletInternalTransactionProvider<AnyMainCoinEVMSubWallet> = null;
 
   public async start(): Promise<void> {

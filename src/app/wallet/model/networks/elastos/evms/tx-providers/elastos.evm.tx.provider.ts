@@ -9,6 +9,7 @@ import { AnyMainCoinEVMSubWallet } from '../../../evms/subwallets/evm.subwallet'
 import { EtherscanEVMSubWalletInternalTransactionProvider } from '../../../evms/tx-providers/etherscan.evm.subwallet.internaltx.provider';
 import { ElastosTokenSubWalletProvider } from '../esc/tx-providers/token.subwallet.provider';
 import { ElastosEVMSubWallet } from '../subwallets/standard/elastos.evm.subwallet';
+import { ElastosEvmRechargeTransactionProvider } from './evm.recharge.tx.provider';
 import { ElastosEvmSubWalletProvider } from './evm.subwallet.provider';
 
 // For ESC and ECO chains
@@ -18,8 +19,8 @@ export class ElastosEVMChainTransactionProvider extends TransactionProvider<Elas
   private evmProvider: ElastosEvmSubWalletProvider;
   private tokenProvider: ElastosTokenSubWalletProvider;
 
-  // Only for ESC
   private internalTXProvider: EtherscanEVMSubWalletInternalTransactionProvider<AnyMainCoinEVMSubWallet> = null;
+  private rechargeTransactionProvider: ElastosEvmRechargeTransactionProvider;
 
   constructor(networkWallet: AnyEVMNetworkWallet, sideChain: StandardCoinName) {
     super(networkWallet);
@@ -44,6 +45,9 @@ export class ElastosEVMChainTransactionProvider extends TransactionProvider<Elas
       this.internalTXProvider = new EtherscanEVMSubWalletInternalTransactionProvider(this, this.mainSubWallet);
       await this.internalTXProvider.initialize();
 
+      this.rechargeTransactionProvider = new ElastosEvmRechargeTransactionProvider(this, this.mainSubWallet);
+      await this.rechargeTransactionProvider.initialize();
+
       // Discover new transactions globally for all tokens at once, in order to notify user
       // of NEW tokens received, and NEW payments received for existing tokens.
       this.refreshEvery(() => this.tokenProvider.discoverTokens(), 60000);
@@ -59,5 +63,9 @@ export class ElastosEVMChainTransactionProvider extends TransactionProvider<Elas
 
   protected getSubWalletInternalTransactionProvider(subWallet: ERC20SubWallet): AnySubWalletTransactionProvider {
     return this.internalTXProvider;
+  }
+
+  protected getSubWalletRechargeTransactionProvider(subWallet: ElastosEVMSubWallet): AnySubWalletTransactionProvider {
+    return this.rechargeTransactionProvider;
   }
 }

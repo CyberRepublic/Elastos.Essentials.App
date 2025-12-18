@@ -270,9 +270,11 @@ export class CoinTxInfoPage implements OnInit {
       }
     }
 
-    if (this.transactionInfo.isCrossChain === true && this.transactionInfo.crossChainToAddress) {
-      this.targetAddress = this.transactionInfo.crossChainToAddress;
-      // TODO: Only transactions withdrawn from the sidechain to the mainchain will be displayed.
+    if (this.transactionInfo.isCrossChain === true) {
+      if (this.transactionInfo.crossChainToAddress) {
+        this.targetAddress = this.transactionInfo.crossChainToAddress;
+      }
+
       this.crossChainNetworkKey = 'elastos';
     }
 
@@ -399,7 +401,9 @@ export class CoinTxInfoPage implements OnInit {
         this.txDetails.unshift({
           type: TransactionInfoType.ADDRESS,
           title: 'wallet.tx-info-sender-address',
-          value: await this.networkWallet.convertAddressForUsage(this.fromAddress, AddressUsage.DISPLAY_TRANSACTIONS),
+          value: this.transactionInfo.isCrossChain
+            ? this.fromAddress
+            : await this.networkWallet.convertAddressForUsage(this.fromAddress, AddressUsage.DISPLAY_TRANSACTIONS),
           show: true
         });
       }

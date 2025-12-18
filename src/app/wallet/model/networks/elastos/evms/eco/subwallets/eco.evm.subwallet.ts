@@ -13,4 +13,8 @@ export class EcoSubWallet extends ElastosEVMSubWallet {
 
     this.withdrawContractAddress = Config.ETHECO_WITHDRAW_ADDRESS.toLowerCase();
   }
+
+  public supportRechargeTransactions(): boolean {
+    return true;
+  }
 }

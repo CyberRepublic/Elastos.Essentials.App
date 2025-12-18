@@ -90,6 +90,7 @@ export class CoinHomePage implements OnInit {
 
   public transactionListType = TransactionListType.NORMAL;
   public hasInternalTransactions = false;
+  public hasRechargeTransactions = false;
 
   public stakedBalance = null; // Staked on ELA main chain or Tron
 
@@ -266,7 +267,8 @@ export class CoinHomePage implements OnInit {
     if (updateAll) {
       // Must one by one.
       await this.subWallet.fetchNewestTransactions(TransactionListType.NORMAL),
-        await this.subWallet.fetchNewestTransactions(TransactionListType.INTERNAL);
+      await this.subWallet.fetchNewestTransactions(TransactionListType.INTERNAL);
+      await this.subWallet.fetchNewestTransactions(TransactionListType.RECHARGE);
     } else {
       void this.subWallet.fetchNewestTransactions(this.transactionListType);
     }
@@ -285,6 +287,7 @@ export class CoinHomePage implements OnInit {
     await this.getOfflineTransactions();
     await this.getAllTx();
     await this.checkInternalTransactions();
+    await this.checkRechargeTransactions();
   }
 
   async updateWalletInfo() {
@@ -295,12 +298,25 @@ export class CoinHomePage implements OnInit {
   }
 
   async checkInternalTransactions() {
-    if (!this.hasInternalTransactions) {
+    if (this.subWallet.supportInternalTransactions() && !this.hasInternalTransactions) {
       let transactions = await this.subWallet.getTransactions(TransactionListType.INTERNAL);
       if (transactions && transactions.length > 0) {
         Logger.log('wallet', 'find internal transactions.');
         this.zone.run(() => {
           this.hasInternalTransactions = true;
+        });
+      }
+    }
+  }
+
+  async checkRechargeTransactions() {
+    if (this.subWallet.supportRechargeTransactions() && !this.hasRechargeTransactions) {
+      let transactions = await this.subWallet.getTransactions(TransactionListType.RECHARGE);
+      Logger.log('wallet', 'recharge transactions: ', transactions);
+      if (transactions && transactions.length > 0) {
+        Logger.log('wallet', 'find recharge transactions.');
+        this.zone.run(() => {
+          this.hasRechargeTransactions = true;
         });
       }
     }

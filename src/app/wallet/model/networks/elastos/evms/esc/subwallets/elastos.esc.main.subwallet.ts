@@ -26,6 +26,10 @@ export class ElastosEscMainSubWallet extends ElastosEVMSubWallet {
     return true;
   }
 
+  public supportRechargeTransactions(): boolean {
+    return true;
+  }
+
   public async getClaimableTxs() {
     await this.updateNFTTxStatus();
     return this.mintNFTTxCache

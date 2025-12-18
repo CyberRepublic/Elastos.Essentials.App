@@ -133,6 +133,7 @@ export const en = {
     'coin-action-receive': 'RECEIVE',
     'coin-transactions': 'Transactions',
     'coin-internal-transactions': 'Int. Trans.',
+    'coin-recharge-transactions': 'From Main Chain',
     'coin-no-transactions': 'No transactions',
     'coin-op-received-token': 'Received',
     'coin-op-sent-token': 'Sent',
