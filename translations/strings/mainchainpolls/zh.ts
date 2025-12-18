@@ -42,7 +42,7 @@ export const zh = {
     'confirm-vote': '确认投票',
     'confirm-vote-message': '您即将使用 {{amount}} ELA 投票。请注意，投票无法更改，您的代币不会被花费，仅用作投票权。',
     'votes-will-be-cleared-warning':
-      '注意：您已经在其他一个或多个进行中的投票中投过票。本次新投票将清除之前的投票记录。',
+      '注意：您已在其他进行中的主链投票投过票。若继续本次投票，将清除您之前的投票记录。',
     'vote-pending-confirmation': '投票已提交，等待区块链确认',
     'poll-results': '投票结果',
     'total-votes': '总投票数',
