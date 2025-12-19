@@ -55,6 +55,7 @@ export class PollDetailPage implements OnInit, OnDestroy {
   // Polling for vote confirmation
   private readonly POLLING_INTERVAL_MS = 30000; // 30 seconds
   private pollingTimer: any = null;
+  private isPolling = false;
 
   constructor(
     public theme: GlobalThemeService,
@@ -91,23 +92,46 @@ export class PollDetailPage implements OnInit, OnDestroy {
   }
 
   /**
+   * Check if a stored vote has timed out (30 minutes)
+   */
+  private isStoredVoteExpired(storedVote: StoredVoteInfo): boolean {
+    if (!storedVote || !storedVote.voteTimestamp) {
+      return false;
+    }
+    const now = Math.floor(Date.now() / 1000);
+    const elapsed = now - storedVote.voteTimestamp;
+    return elapsed > MainchainPollsService.PENDING_VOTE_TIMEOUT_SEC;
+  }
+
+  /**
    * Start polling for vote confirmation when there's a stored vote but no API confirmation
    */
   private startPollingForVoteConfirmation() {
-    // Stop any existing polling
-    this.stopPollingForVoteConfirmation();
-
     // Only start polling if we have a stored vote but no user vote (waiting for confirmation)
     if (this.storedVote && !this.userVote && !this.isTransactionPending) {
+      if (this.isPolling) {
+        return;
+      }
+
+      // If the stored vote is already expired, don't start polling and clear it
+      if (this.isStoredVoteExpired(this.storedVote)) {
+        Logger.log(App.MAINCHAIN_POLLS, 'Stored vote expired, not starting polling');
+        void this.pollsService.removeStoredVote(this.pollId, this.walletAddress);
+        this.storedVote = null;
+        return;
+      }
+
       Logger.log(App.MAINCHAIN_POLLS, 'Starting polling for vote confirmation');
+      this.isPolling = true;
+
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       this.pollingTimer = setInterval(async () => {
         Logger.log(App.MAINCHAIN_POLLS, 'Polling for vote confirmation...');
         await this.ngZone.run(async () => {
           // Clear cache to ensure we get fresh data from the API
           this.pollsService.clearCache();
-          await this.loadPollDetails();
-          await this.loadWalletInfo();
+          await this.loadPollDetails(true);
+          await this.loadWalletInfo(true);
         });
 
         // Stop polling if we now have a user vote (confirmation received)
@@ -115,7 +139,18 @@ export class PollDetailPage implements OnInit, OnDestroy {
           Logger.log(App.MAINCHAIN_POLLS, 'Vote confirmed, stopping polling');
           this.stopPollingForVoteConfirmation();
         }
+
+        // Stop polling if stored vote is now expired
+        if (this.storedVote && this.isStoredVoteExpired(this.storedVote)) {
+          Logger.log(App.MAINCHAIN_POLLS, 'Stored vote expired during polling, stopping');
+          this.stopPollingForVoteConfirmation();
+          // Force a non-silent refresh to update UI state
+          await this.loadWalletInfo();
+        }
       }, this.POLLING_INTERVAL_MS);
+    } else {
+      // If we don't need polling anymore, stop it
+      this.stopPollingForVoteConfirmation();
     }
   }
 
@@ -128,16 +163,20 @@ export class PollDetailPage implements OnInit, OnDestroy {
       clearInterval(this.pollingTimer);
       this.pollingTimer = null;
     }
+    this.isPolling = false;
   }
 
-  async loadPollDetails() {
+  async loadPollDetails(silent = false) {
     try {
-      this.loading = true;
-      this.pollDetails = await this.pollsService.getPollDetails(this.pollId);
-      this.loading = false;
+      if (!silent) this.loading = true;
+      const details = await this.pollsService.getPollDetails(this.pollId);
+      if (details) {
+        this.pollDetails = details;
+      }
+      if (!silent) this.loading = false;
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'loadPollDetails error:', err);
-      this.loading = false;
+      if (!silent) this.loading = false;
     }
   }
 
@@ -155,21 +194,23 @@ export class PollDetailPage implements OnInit, OnDestroy {
     this.globalNative.genericToast('mainchainpolls.url-copied');
   }
 
-  async loadWalletInfo() {
+  async loadWalletInfo(silent = false) {
     try {
-      this.loadingWalletInfo = true;
-      this.walletUnavailable = false;
-      this.walletAddress = '';
-      this.walletBalance = null;
-      this.availableBalance = null;
-      this.userVote = null;
-      this.storedVote = null;
+      if (!silent) {
+        this.loadingWalletInfo = true;
+        this.walletUnavailable = false;
+        this.walletAddress = '';
+        this.walletBalance = null;
+        this.availableBalance = null;
+        this.userVote = null;
+        this.storedVote = null;
+      }
 
       const networkWallet = this.walletService.activeNetworkWallet.value;
       if (!networkWallet) {
         Logger.warn(App.MAINCHAIN_POLLS, 'No active network wallet');
         this.walletUnavailable = true;
-        this.loadingWalletInfo = false;
+        if (!silent) this.loadingWalletInfo = false;
         return;
       }
 
@@ -177,7 +218,7 @@ export class PollDetailPage implements OnInit, OnDestroy {
       if (!mainchainNetwork) {
         Logger.warn(App.MAINCHAIN_POLLS, 'Elastos mainchain network not found');
         this.walletUnavailable = true;
-        this.loadingWalletInfo = false;
+        if (!silent) this.loadingWalletInfo = false;
         return;
       }
 
@@ -187,7 +228,7 @@ export class PollDetailPage implements OnInit, OnDestroy {
           'Active master wallet does not support the mainchain network (likely imported private key)'
         );
         this.walletUnavailable = true;
-        this.loadingWalletInfo = false;
+        if (!silent) this.loadingWalletInfo = false;
         return;
       }
 
@@ -195,7 +236,7 @@ export class PollDetailPage implements OnInit, OnDestroy {
       if (!mainchainSubWallet) {
         Logger.warn(App.MAINCHAIN_POLLS, 'Mainchain subwallet not found');
         this.walletUnavailable = true;
-        this.loadingWalletInfo = false;
+        if (!silent) this.loadingWalletInfo = false;
         return;
       }
 
@@ -204,7 +245,8 @@ export class PollDetailPage implements OnInit, OnDestroy {
       Logger.log(App.MAINCHAIN_POLLS, 'Wallet address:', this.walletAddress);
 
       // Get balance
-      this.walletBalance = await mainchainSubWallet.getTotalBalanceByType(true, false);
+      const totalBalance = await mainchainSubWallet.getTotalBalanceByType(true, false);
+      this.walletBalance = totalBalance;
       if (this.walletBalance) {
         this.availableBalance = this.pollsService.calculateVoteAmount(this.walletBalance);
         if (this.availableBalance.isLessThanOrEqualTo(0)) {
@@ -214,7 +256,21 @@ export class PollDetailPage implements OnInit, OnDestroy {
 
       // Load stored vote from local storage (sandboxed per wallet address)
       if (this.pollId && this.walletAddress) {
-        this.storedVote = await this.pollsService.getStoredVote(this.pollId, this.walletAddress);
+        let storedVote = await this.pollsService.getStoredVote(this.pollId, this.walletAddress);
+
+        // If not found with current address, but we already had one, keep it!
+        // This handles cases where the current receiver address might have changed.
+        if (!storedVote && this.storedVote) {
+          storedVote = this.storedVote;
+        }
+
+        if (storedVote && this.isStoredVoteExpired(storedVote)) {
+          Logger.log(App.MAINCHAIN_POLLS, 'Stored vote expired, removing');
+          await this.pollsService.removeStoredVote(this.pollId, storedVote.walletAddress);
+          this.storedVote = null;
+        } else {
+          this.storedVote = storedVote;
+        }
 
         // For multisig wallets, check if the offline transaction is on chain or not.
         if (this.storedVote && this.storedVote.offlineTransactionId) {
@@ -253,7 +309,10 @@ export class PollDetailPage implements OnInit, OnDestroy {
 
       // Load user vote from API if exists
       if (this.pollId && this.walletAddress) {
-        this.userVote = await this.pollsService.getUserVote(this.pollId, this.walletAddress);
+        // Use the address from stored vote if available, as it's the one that was used to vote
+        const addressToCheck = this.storedVote ? this.storedVote.walletAddress : this.walletAddress;
+        const userVote = await this.pollsService.getUserVote(this.pollId, addressToCheck);
+        this.userVote = userVote;
 
         // Check if there are other unfinished polls already voted on
         this.otherUnfinishedVotedPolls = await this.pollsService.getOtherUnfinishedVotedPolls(
@@ -267,7 +326,7 @@ export class PollDetailPage implements OnInit, OnDestroy {
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'loadWalletInfo error:', err);
     } finally {
-      this.loadingWalletInfo = false;
+      if (!silent) this.loadingWalletInfo = false;
     }
   }
 

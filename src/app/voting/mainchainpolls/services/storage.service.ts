@@ -100,20 +100,6 @@ export class LocalStorage {
   }
 
   /**
-   * Get all stored votes (for backward compatibility, returns empty array)
-   * Use getAllVotesForWallet instead for wallet-specific votes
-   */
-  public async getAllVotes(): Promise<StoredVoteInfo[]> {
-    // This method is kept for backward compatibility but returns empty array
-    // since votes are now sandboxed per wallet address
-    Logger.warn(
-      App.MAINCHAIN_POLLS,
-      'getAllVotes() called but votes are now sandboxed per wallet. Use getAllVotesForWallet() instead.'
-    );
-    return [];
-  }
-
-  /**
    * Remove vote information for a specific poll (sandboxed per wallet address)
    */
   public async removeVote(pollId: string, walletAddress: string): Promise<void> {

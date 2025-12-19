@@ -30,6 +30,7 @@ export class MainchainPollsService {
 
   private readonly USER_VOTE_FLAG = 'pollvote';
   private readonly USER_VOTE_FLAG_BYTE_LENGTH = 8; // 8 bytes
+  public static readonly PENDING_VOTE_TIMEOUT_SEC = 30 * 60; // 30 minutes in seconds
 
   // Caching
   private pollIdsCache: string[] | null = null;
