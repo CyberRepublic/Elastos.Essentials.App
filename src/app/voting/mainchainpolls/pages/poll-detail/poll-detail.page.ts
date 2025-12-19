@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { BigNumber } from 'bignumber.js';
@@ -27,7 +27,7 @@ import { MainchainPollsService } from '../../services/mainchain-polls.service';
   templateUrl: './poll-detail.page.html',
   styleUrls: ['./poll-detail.page.scss']
 })
-export class PollDetailPage implements OnInit {
+export class PollDetailPage implements OnInit, OnDestroy {
   @ViewChild(TitleBarComponent, { static: false }) titleBar: TitleBarComponent;
 
   public pollId: string;
@@ -52,6 +52,10 @@ export class PollDetailPage implements OnInit {
   public isTransactionPending = false;
   public isCheckingOfflineTransaction = false;
 
+  // Polling for vote confirmation
+  private readonly POLLING_INTERVAL_MS = 30000; // 30 seconds
+  private pollingTimer: any = null;
+
   constructor(
     public theme: GlobalThemeService,
     private pollsService: MainchainPollsService,
@@ -60,7 +64,8 @@ export class PollDetailPage implements OnInit {
     private walletNetworkService: WalletNetworkService,
     private walletService: WalletService,
     private popupService: GlobalPopupService,
-    private globalNative: GlobalNativeService
+    private globalNative: GlobalNativeService,
+    private ngZone: NgZone
   ) {
     this.pollId = this.route.snapshot.params.id;
   }
@@ -71,10 +76,56 @@ export class PollDetailPage implements OnInit {
     await this.init();
   }
 
+  ionViewWillLeave() {
+    this.stopPollingForVoteConfirmation();
+  }
+
+  ngOnDestroy() {
+    this.stopPollingForVoteConfirmation();
+  }
+
   async init() {
     this.titleBar.setTitle(this.translate.instant('mainchainpolls.poll-detail'));
     await this.loadPollDetails();
     await this.loadWalletInfo();
+  }
+
+  /**
+   * Start polling for vote confirmation when there's a stored vote but no API confirmation
+   */
+  private startPollingForVoteConfirmation() {
+    // Stop any existing polling
+    this.stopPollingForVoteConfirmation();
+
+    // Only start polling if we have a stored vote but no user vote (waiting for confirmation)
+    if (this.storedVote && !this.userVote && !this.isTransactionPending) {
+      Logger.log(App.MAINCHAIN_POLLS, 'Starting polling for vote confirmation');
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      this.pollingTimer = setInterval(async () => {
+        Logger.log(App.MAINCHAIN_POLLS, 'Polling for vote confirmation...');
+        await this.ngZone.run(async () => {
+          await this.loadPollDetails();
+          await this.loadWalletInfo();
+        });
+
+        // Stop polling if we now have a user vote (confirmation received)
+        if (this.userVote) {
+          Logger.log(App.MAINCHAIN_POLLS, 'Vote confirmed, stopping polling');
+          this.stopPollingForVoteConfirmation();
+        }
+      }, this.POLLING_INTERVAL_MS);
+    }
+  }
+
+  /**
+   * Stop polling for vote confirmation
+   */
+  private stopPollingForVoteConfirmation() {
+    if (this.pollingTimer) {
+      Logger.log(App.MAINCHAIN_POLLS, 'Stopping polling for vote confirmation');
+      clearInterval(this.pollingTimer);
+      this.pollingTimer = null;
+    }
   }
 
   async loadPollDetails() {
@@ -208,6 +259,9 @@ export class PollDetailPage implements OnInit {
           this.pollId
         );
       }
+
+      // Start polling if we have a stored vote but no API confirmation
+      this.startPollingForVoteConfirmation();
     } catch (err) {
       Logger.error(App.MAINCHAIN_POLLS, 'loadWalletInfo error:', err);
     } finally {
