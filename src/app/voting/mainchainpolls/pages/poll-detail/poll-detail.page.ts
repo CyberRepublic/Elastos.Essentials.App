@@ -104,6 +104,8 @@ export class PollDetailPage implements OnInit, OnDestroy {
       this.pollingTimer = setInterval(async () => {
         Logger.log(App.MAINCHAIN_POLLS, 'Polling for vote confirmation...');
         await this.ngZone.run(async () => {
+          // Clear cache to ensure we get fresh data from the API
+          this.pollsService.clearCache();
           await this.loadPollDetails();
           await this.loadWalletInfo();
         });
