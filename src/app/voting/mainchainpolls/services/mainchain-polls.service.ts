@@ -136,6 +136,29 @@ export class MainchainPollsService {
   }
 
   /**
+   * Sort polls based on their status:
+   * - If all polls are active (voting), sort by startTime
+   * - If there are any finished polls, sort by endTime
+   */
+  private sortPolls(polls: Poll[]): Poll[] {
+    if (!polls || polls.length === 0) return polls;
+
+    // Create a copy to avoid mutating the original array
+    const sortedPolls = [...polls];
+
+    // Check if there are any finished polls
+    const hasFinished = sortedPolls.some(poll => poll.status === 'finished');
+
+    if (hasFinished) {
+      // If there are finished polls, sort by endTime (descending - newest first)
+      return sortedPolls.sort((a, b) => (b.endTime ?? 0) - (a.endTime ?? 0));
+    } else {
+      // If all are active (voting), sort by startTime (descending - newest first)
+      return sortedPolls.sort((a, b) => (b.startTime ?? 0) - (a.startTime ?? 0));
+    }
+  }
+
+  /**
    * Get poll info for multiple polls
    * API: getPollInfo
    */
@@ -157,7 +180,7 @@ export class MainchainPollsService {
     if (idsToFetch.length === 0) {
       Logger.log(App.MAINCHAIN_POLLS, 'getPollInfo - returning all cached polls');
       // Sort before returning
-      return cachedPolls.sort((a, b) => (b.startTime ?? 0) - (a.startTime ?? 0));
+      return this.sortPolls(cachedPolls);
     }
 
     try {
@@ -182,9 +205,9 @@ export class MainchainPollsService {
         }
       }
 
-      // Sort polls by start date descending (newest first)
+      // Sort polls based on status
       if (cachedPolls && cachedPolls.length > 0) {
-        cachedPolls.sort((a, b) => (b.startTime ?? 0) - (a.startTime ?? 0));
+        return this.sortPolls(cachedPolls);
       }
 
       return cachedPolls;
