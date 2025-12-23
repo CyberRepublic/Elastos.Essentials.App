@@ -26,7 +26,8 @@ const USE_TEST_POLLS = environment.useTestPolls;
   providedIn: 'root'
 })
 export class MainchainPollsService {
-  private apiBaseUrl = 'https://ela-node-test.eadd.co/';
+  // private apiBaseUrl = 'https://ela-node-test.eadd.co/'; // For testing
+  private apiBaseUrl = 'https://api.elastos.io/ela';
 
   private readonly USER_VOTE_FLAG = 'pollvote';
   private readonly USER_VOTE_FLAG_BYTE_LENGTH = 8; // 8 bytes
