@@ -130,7 +130,9 @@ export class ElastosEVMSubWallet extends MainCoinEVMSubWallet<ElastosMainChainWa
     }
 
     // _amount % 10000000000 == 0
-    const amountTemp = toAmount.toFixed(9);
+    // use ROUND_DOWN to truncate instead of rounding, to avoid amountTemp being larger than toAmount
+    const amountBN = new BigNumber(toAmount);
+    const amountTemp = amountBN.decimalPlaces(9, BigNumber.ROUND_DOWN).toFixed(9);
     const fixedAmount = amountTemp.substring(0, amountTemp.lastIndexOf('.') + 9);
     // TODO fixedAmount >= 0.0002 (_amount.sub(_fee) >= _fee)
 
