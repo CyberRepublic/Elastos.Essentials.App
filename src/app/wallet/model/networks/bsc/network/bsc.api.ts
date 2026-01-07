@@ -3,7 +3,8 @@ import { MAINNET_TEMPLATE, TESTNET_TEMPLATE } from "src/app/services/global.netw
 export enum BscApiType {
   ETHERSCAN_API,
   RPC,
-  BLOCK_EXPLORER
+  BLOCK_EXPLORER,
+  NOWNODE_EXPLORER
 }
 
 // https://docs.binance.org/smart-chain/developer/rpc.html
@@ -15,6 +16,7 @@ export class BscAPI {
           case BscApiType.RPC: return 'https://bsc-rpc.publicnode.com';
           case BscApiType.ETHERSCAN_API: return 'https://api.etherscan.io/v2/api';
           case BscApiType.BLOCK_EXPLORER: return 'https://bscscan.com';
+          case BscApiType.NOWNODE_EXPLORER: return 'https://bsc-blockbook.nownodes.io';
           default:
             throw new Error("Bsc API - Unknown api type " + type);
         }
@@ -23,6 +25,7 @@ export class BscAPI {
           case BscApiType.RPC: return 'https://data-seed-prebsc-1-s1.binance.org:8545';
           case BscApiType.ETHERSCAN_API: return 'https://api.etherscan.io/v2/api';
           case BscApiType.BLOCK_EXPLORER: return 'https://testnet.bscscan.com';
+          case BscApiType.NOWNODE_EXPLORER: return 'https://bsc-blockbook-testnet.nownodes.io';
           default:
             throw new Error("Bsc API - Unknown api type " + type);
         }
