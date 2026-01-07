@@ -10,6 +10,7 @@ import {
 import { ethereumMainnetUniswapSwapProvider } from '../earn/swap.providers';
 import { EthereumAPI, EthereumAPIType } from './ethereum.api';
 import { EthereumBaseNetwork } from './ethereum.base.network';
+import { GlobalJsonRPCService } from 'src/app/services/global.jsonrpc.service';
 
 // https://rpc.info/#ethereum-rpc
 export class EthereumMainNetNetwork extends EthereumBaseNetwork {
@@ -30,6 +31,10 @@ export class EthereumMainNetNetwork extends EthereumBaseNetwork {
         {
           name: 'Ethereum RPC',
           url: 'https://eth.llamarpc.com'
+        },
+        {
+          name: 'blastapi',
+          url: 'https://eth-mainnet.public.blastapi.io'
         }
       ],
       [],
@@ -56,6 +61,8 @@ export class EthereumMainNetNetwork extends EthereumBaseNetwork {
       return EthereumAPI.getApiUrl(EthereumAPIType.ETHERSCAN_API, 'mainnet');
     else if (type === NetworkAPIURLType.BLOCK_EXPLORER)
       return EthereumAPI.getApiUrl(EthereumAPIType.BLOCK_EXPLORER, 'mainnet');
+    else if (type === NetworkAPIURLType.NOWNODE_EXPLORER)
+      return EthereumAPI.getApiUrl(EthereumAPIType.NOWNODE_EXPLORER, 'mainnet');
     else throw new Error(`EthereumMainNetNetwork: getAPIUrlOfType() has no entry for url type ${type.toString()}`);
   }
 

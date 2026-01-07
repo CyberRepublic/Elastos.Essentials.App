@@ -110,6 +110,7 @@ export class GlobalJsonRPCService {
             followRedirect: true
           };
 
+          // Logger.warn('GlobalJsonRPCService', 'httpPost url:', url, ' options:', options);
           this.http.sendRequest(url, <any>options).then(
             res => {
               if (res && res.data) {
@@ -169,24 +170,29 @@ export class GlobalJsonRPCService {
     return promiseResult as Promise<ReturnType>;
   }
 
-  httpGet(url: string, limitatorName = 'default', timeout = 10000): Promise<any> {
+  httpGet(url: string, limitatorName = 'default', timeout = 10000, customHeaders?: { [key: string]: string }): Promise<any> {
     let limitator = this.getLimitator(limitatorName);
     timeout = timeout != -1 ? timeout / 1000 : undefined; // http plugin timeout is in seconds
 
     let promiseResult = limitator.queue.add(() => {
       return new Promise((resolve, reject) => {
+        const headers: { [key: string]: string } = {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        };
+        // Merge custom headers if provided
+        if (customHeaders) {
+            Object.assign(headers, customHeaders);
+        }
         const options = {
           method: 'get',
-          serializer: 'json',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          responseType: 'json',
+          serializer: "json",
+          headers: headers,
+          responseType: "json",
           followRedirect: true,
           timeout: timeout,
           connectTimeout: timeout,
-          readTimeout: timeout
+          readTimeout: timeout,
         };
 
         this.http.sendRequest(url, <any>options).then(
