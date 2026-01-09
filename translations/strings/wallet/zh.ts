@@ -882,6 +882,7 @@ export const zh = {
     'ext-tx-info-type-submit-to-lender-transfer-proof': '提交证明',
     'ext-tx-info-type-borrow': '领取代币',
     'ext-tx-info-type-repay': '还款',
+    'ext-tx-info-type-close-order': '关闭订单',
     'ext-tx-info-type-deposit-from-mainchain': '主链充值',
 
     /********************************

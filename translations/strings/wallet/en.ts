@@ -907,6 +907,7 @@ export const en = {
     'ext-tx-info-type-submit-to-lender-transfer-proof': 'Submit Proof',
     'ext-tx-info-type-borrow': 'Claim Tokens',
     'ext-tx-info-type-repay': 'Repay',
+    'ext-tx-info-type-close-order': 'Close Order',
     'ext-tx-info-type-deposit-from-mainchain': 'Deposit from Mainchain',
 
     /********************************

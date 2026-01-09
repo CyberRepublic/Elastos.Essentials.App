@@ -744,6 +744,10 @@ export class ETHTransactionInfoParser {
         txInfo.type = ETHOperationType.BTCD;
         txInfo.operation = { description: 'wallet.ext-tx-info-type-repay' };
         break;
+      case '0x929de493': // submitRegularUnlockTransferProof, then close order
+        txInfo.type = ETHOperationType.BTCD;
+        txInfo.operation = { description: 'wallet.ext-tx-info-type-close-order' };
+        break;
 
       // Staking
       case '0x8305e5af': // create staking contract
@@ -758,9 +762,10 @@ export class ETHTransactionInfoParser {
         txInfo.type = ETHOperationType.STAKE;
         txInfo.operation = { description: 'wallet.ext-tx-info-type-extend-stake' };
         break;
+
       case '0x3ccfd60b': // withdraw()
-        txInfo.type = ETHOperationType.STAKE;
-        txInfo.operation = { description: 'wallet.ext-tx-info-type-stake-withdraw' };
+        txInfo.type = ETHOperationType.WITHDRAW;
+        txInfo.operation = { description: 'wallet.ext-tx-info-type-withdraw' };
         break;
 
       case '0x3e44a583': // Receive ela from main chain

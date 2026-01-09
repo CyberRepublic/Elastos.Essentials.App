@@ -913,6 +913,7 @@ export const it = {
     'ext-tx-info-type-submit-to-lender-transfer-proof': 'Invia Prova',
     'ext-tx-info-type-borrow': 'Richiedi token',
     'ext-tx-info-type-repay': 'Rimborso',
+    'ext-tx-info-type-close-order': 'Chiudi Ordine',
     'ext-tx-info-type-deposit-from-mainchain': 'Deposito da Mainchain',
 
     /********************************

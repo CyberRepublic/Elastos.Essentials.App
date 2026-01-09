@@ -156,6 +156,10 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
       return null;
     }
 
+    if (!transaction.hash && transaction.transactionHash) {
+      transaction.hash = transaction.transactionHash;
+    }
+
     transaction.to = transaction.to.toLowerCase();
 
     const timestamp = parseInt(transaction.timeStamp) * 1000; // Convert seconds to use milliseconds
@@ -179,10 +183,6 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
     }
 
     let isCrossChain = transaction.isCrossChain || this.isCrossChain(transaction);
-
-    if (!transaction.hash && transaction.transactionHash) {
-      transaction.hash = transaction.transactionHash;
-    }
 
     const transactionInfo: TransactionInfo = {
       amount: new BigNumber(-1),
@@ -406,7 +406,7 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
     }
 
     const address = await this.getAccountAddress();
-    if (address === targetAddress) {
+    if (address.toLowerCase() === targetAddress.toLowerCase()) {
       return TransactionDirection.RECEIVED;
     } else {
       return TransactionDirection.SENT;
