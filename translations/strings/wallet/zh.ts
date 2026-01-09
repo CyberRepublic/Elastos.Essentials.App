@@ -858,6 +858,9 @@ export const zh = {
     'ext-tx-info-type-get-booster-rewards': '获得助推器奖励',
     'ext-tx-info-type-deposit': '充值',
     'ext-tx-info-type-stake': '质押',
+    'ext-tx-info-type-create-stake': '创建质押合约',
+    'ext-tx-info-type-extend-stake': '延长质押',
+    'ext-tx-info-type-stake-withdraw': '质押提现',
     'ext-tx-info-type-mint': '创建',
     'ext-tx-info-type-redeem': '赎回',
     'ext-tx-info-type-lock': '锁币',
@@ -874,6 +877,12 @@ export const zh = {
     'ext-tx-info-type-inscription-mint': '铭刻铭文',
     'ext-tx-info-type-inscription-transfer': '发送铭文',
     'ext-tx-info-type-inscription-list': '铭文挂单',
+    'ext-tx-info-type-create-order': '创建订单',
+    'ext-tx-info-type-take-order': '接收订单',
+    'ext-tx-info-type-submit-to-lender-transfer-proof': '提交证明',
+    'ext-tx-info-type-borrow': '领取代币',
+    'ext-tx-info-type-repay': '还款',
+    'ext-tx-info-type-deposit-from-mainchain': '主链充值',
 
     /********************************
      * Tron Resource page *

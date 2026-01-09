@@ -883,6 +883,9 @@ export const en = {
     'ext-tx-info-type-get-booster-rewards': 'Get booster rewards',
     'ext-tx-info-type-deposit': 'Deposit',
     'ext-tx-info-type-stake': 'Stake',
+    'ext-tx-info-type-create-stake': 'Create staking contract',
+    'ext-tx-info-type-extend-stake': 'Extend Stake',
+    'ext-tx-info-type-stake-withdraw': 'Stake Withdraw',
     'ext-tx-info-type-mint': 'Mint',
     'ext-tx-info-type-redeem': 'Redeem',
     'ext-tx-info-type-lock': 'Lock',
@@ -899,6 +902,12 @@ export const en = {
     'ext-tx-info-type-inscription-mint': 'Mint Inscription',
     'ext-tx-info-type-inscription-transfer': 'Transfer Inscription',
     'ext-tx-info-type-inscription-list': 'List Inscription',
+    'ext-tx-info-type-create-order': 'Create Order',
+    'ext-tx-info-type-take-order': 'Take Order',
+    'ext-tx-info-type-submit-to-lender-transfer-proof': 'Submit Proof',
+    'ext-tx-info-type-borrow': 'Claim Tokens',
+    'ext-tx-info-type-repay': 'Repay',
+    'ext-tx-info-type-deposit-from-mainchain': 'Deposit from Mainchain',
 
     /********************************
      * Tron Resource page *

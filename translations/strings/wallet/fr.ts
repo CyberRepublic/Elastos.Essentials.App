@@ -891,6 +891,9 @@ export const fr = {
     'ext-tx-info-type-get-booster-rewards': 'Récompenses de booster',
     'ext-tx-info-type-deposit': 'Depôt',
     'ext-tx-info-type-stake': 'Stake',
+    'ext-tx-info-type-create-stake': 'Créer un contrat de staking',
+    'ext-tx-info-type-extend-stake': 'Étendre le Stake',
+    'ext-tx-info-type-stake-withdraw': 'Retrait de Stake',
     'ext-tx-info-type-mint': 'Création de jeton',
     'ext-tx-info-type-redeem': 'Récupération',
     'ext-tx-info-type-lock': 'Blocage',
@@ -907,6 +910,12 @@ export const fr = {
     'ext-tx-info-type-inscription-mint': 'Mint Inscription',
     'ext-tx-info-type-inscription-transfer': 'Transfer Inscription',
     'ext-tx-info-type-inscription-list': 'List Inscription',
+    'ext-tx-info-type-create-order': 'Créer une commande',
+    'ext-tx-info-type-take-order': 'Prendre une commande',
+    'ext-tx-info-type-submit-to-lender-transfer-proof': 'Soumettre une preuve',
+    'ext-tx-info-type-borrow': 'Réclamer des jetons',
+    'ext-tx-info-type-repay': 'Rembourser',
+    'ext-tx-info-type-deposit-from-mainchain': 'Depuis ELA mainchain',
 
     /********************************
      * Tron Resource page *

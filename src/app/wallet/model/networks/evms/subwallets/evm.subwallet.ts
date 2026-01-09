@@ -347,6 +347,8 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
           return '/assets/wallet/tx/get-rewards.svg';
         case ETHOperationType.STAKE:
           return '/assets/wallet/tx/stake.svg';
+        case ETHOperationType.BTCD:
+          return '/assets/wallet/tx/btcd.svg';
       }
     }
 
