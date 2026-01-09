@@ -101,11 +101,12 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
       12343,
       [
         {
-          name: 'Elastos ECO Chain RPC',
-          url: GlobalElastosAPIService.instance.getApiUrl(
-            GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECO),
-            MAINNET_TEMPLATE
-          )
+          name: 'Official Elastos Node',
+          url: 'https://api.elastos.io/eco'
+        },
+        {
+          name: 'Official Elastos Node 2',
+          url: 'https://api2.elastos.io/eco'
         },
         {
           name: '大陆高防BGP节点',
@@ -114,14 +115,6 @@ export class ElastosECOMainNetNetwork extends ElastosECONetworkBase {
         {
           name: '全球备用节点',
           url: 'https://sknode.pgachain.org'
-        },
-        {
-          name: 'Official Elastos Node',
-          url: 'https://api.elastos.io/eco'
-        },
-        {
-          name: 'Official Elastos Node 2',
-          url: 'https://api2.elastos.io/eco'
         },
         {
           name: 'Hong Kong Node',
