@@ -181,7 +181,7 @@ export const zh = {
     'coin-dir-from-ethsc': 'ESC 侧链提现',
     'coin-dir-from-eco': 'ECO 侧链提现',
     'coin-dir-from-pgp': 'PGP 侧链提现',
-    'coin-dir-to-mainchain': '主链提现',
+    'coin-dir-to-mainchain': 'ELA 主链提现',
     'coin-dir-to-idchain': 'EID 侧链充值',
     'coin-dir-to-ethsc': 'ESC 侧链充值',
     'coin-dir-to-eco': 'ECO 侧链充值',

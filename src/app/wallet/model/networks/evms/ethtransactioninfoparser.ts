@@ -605,12 +605,26 @@ export class ETHTransactionInfoParser {
         txInfo.operation = { description: 'wallet.ext-tx-info-type-remove-liquidity' };
         break;
 
+      case '0x3ccfd60b': // withdraw()
       case '0x2e1a7d4d': // withdraw(uint256)
       case '0xf1d5314a': // withdrawApplication(uint256)
       case '0x441a3e70': // withdraw(uint256,uint256)
       case '0xd1abb907': // withdrawAndHarvest(uint256 pid, uint256 amount, address to)
         txInfo.type = ETHOperationType.WITHDRAW;
         txInfo.operation = { description: 'wallet.ext-tx-info-type-withdraw' }; // TODO: refine - withdraw what?
+        break;
+      case '0xf8737918': // withdraw(string _addr, uint256 _amount, uint256 _fee), Send ela from side chain to main chain
+        txInfo.type = ETHOperationType.WITHDRAW;
+        txInfo.operation = { description: "wallet.ext-tx-info-type-withdraw-to-mainchain" };
+        try {
+          let params = await this.extractTransactionParamValues(["function withdraw(string _addr, uint256 _amount, uint256 _fee) public returns (bool success)"], txData);
+          // Get the real receiving address of the main chain
+          let toAddress = this.stringTransactionParamAt(params, 0);
+          txInfo.operation.descriptionTranslationParams = { toAddress: toAddress };
+        }
+        catch (e) {
+          // Do nothing
+        }
         break;
       case '0x3d18b912': // getReward()
         txInfo.type = ETHOperationType.GET_REWARDS;
@@ -625,6 +639,10 @@ export class ETHTransactionInfoParser {
       case '0xd0e30db0': // deposit()
         txInfo.type = ETHOperationType.DEPOSIT;
         txInfo.operation = { description: 'wallet.ext-tx-info-type-deposit' }; // TODO: refine - deposit what?
+        break;
+      case '0x3e44a583': // Receive ela from main chain
+        txInfo.type = ETHOperationType.DEPOSIT;
+        txInfo.operation = { description: 'wallet.ext-tx-info-type-deposit-from-mainchain' };
         break;
       case '0xa694fc3a': // stake(uint256)
       case '0xecd9ba82': // stakeWithPermit(uint256,uint256,uint8,bytes32,bytes32)
@@ -761,29 +779,6 @@ export class ETHTransactionInfoParser {
       case '0xc35aef7b': // extendStake()
         txInfo.type = ETHOperationType.STAKE;
         txInfo.operation = { description: 'wallet.ext-tx-info-type-extend-stake' };
-        break;
-
-      case '0x3ccfd60b': // withdraw()
-        txInfo.type = ETHOperationType.WITHDRAW;
-        txInfo.operation = { description: 'wallet.ext-tx-info-type-withdraw' };
-        break;
-
-      case '0x3e44a583': // Receive ela from main chain
-        txInfo.type = ETHOperationType.DEPOSIT;
-        txInfo.operation = { description: 'wallet.ext-tx-info-type-deposit-from-mainchain' };
-        break;
-      case '0xf8737918': // withdraw(string _addr, uint256 _amount, uint256 _fee), Send ela from side chain to main chain
-        txInfo.type = ETHOperationType.WITHDRAW;
-        txInfo.operation = { description: "wallet.ext-tx-info-type-withdraw-to-mainchain" };
-        try {
-          let params = await this.extractTransactionParamValues(["function withdraw(string _addr, uint256 _amount, uint256 _fee) public returns (bool success)"], txData);
-          // Get the real receiving address of the main chain
-          let toAddress = this.stringTransactionParamAt(params, 0);
-          txInfo.operation.descriptionTranslationParams = { toAddress: toAddress };
-        }
-        catch (e) {
-          // Do nothing
-        }
         break;
 
       case '0xcb722992': // cross chain transfer, send

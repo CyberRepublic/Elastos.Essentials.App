@@ -160,6 +160,8 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
       transaction.hash = transaction.transactionHash;
     }
 
+    let isCrossChain = transaction.isCrossChain || this.isCrossChain(transaction);
+
     transaction.to = transaction.to.toLowerCase();
 
     const timestamp = parseInt(transaction.timeStamp) * 1000; // Convert seconds to use milliseconds
@@ -181,8 +183,6 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
     if (isERC20TokenTransfer) {
       erc20TokenTransactionInfo = await this.getERC20TokenTransactionInfo(transaction);
     }
-
-    let isCrossChain = transaction.isCrossChain || this.isCrossChain(transaction);
 
     const transactionInfo: TransactionInfo = {
       amount: new BigNumber(-1),
@@ -295,8 +295,13 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
   }
 
   protected async getTransactionName(transaction: EthTransaction): Promise<string> {
-    if (transaction.isCrossChain && transaction.Direction === TransactionDirection.RECEIVED) {
-      return 'wallet.coin-dir-from-mainchain';
+    if (transaction.isCrossChain) {
+      if (transaction.Direction === TransactionDirection.RECEIVED) {
+        return 'wallet.coin-dir-from-mainchain';
+      }
+      else if (transaction.Direction === TransactionDirection.SENT) {
+        return 'wallet.coin-dir-to-mainchain';
+      }
     }
 
     // Use extended info is there is some
@@ -386,7 +391,11 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
         case ETHOperationType.REMOVE_LIQUIDITY:
           return TransactionDirection.RECEIVED;
         case ETHOperationType.WITHDRAW:
-          return TransactionDirection.RECEIVED;
+          if (transaction.isCrossChain) {
+            return TransactionDirection.SENT;
+          } else {
+            return TransactionDirection.RECEIVED;
+          }
         case ETHOperationType.DEPOSIT:
           return TransactionDirection.SENT;
         case ETHOperationType.GET_REWARDS:
