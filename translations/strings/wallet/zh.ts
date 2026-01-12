@@ -878,7 +878,7 @@ export const zh = {
     'ext-tx-info-type-inscription-transfer': '发送铭文',
     'ext-tx-info-type-inscription-list': '铭文挂单',
     'ext-tx-info-type-create-order': '创建订单',
-    'ext-tx-info-type-take-order': '接收订单',
+    'ext-tx-info-type-take-order': '接受订单',
     'ext-tx-info-type-submit-to-lender-transfer-proof': '提交证明',
     'ext-tx-info-type-borrow': '领取代币',
     'ext-tx-info-type-repay': '还款',
