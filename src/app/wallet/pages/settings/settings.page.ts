@@ -209,19 +209,19 @@ export class SettingsPage implements OnInit {
             },
           ],
         },
-        {
-          title: this.translate.instant("wallet.settings-add-wallet-aa-wallet"),
-          items: [
-            {
-              title: this.translate.instant(
-                "wallet.settings-add-wallet-create-aa-wallet"
-              ),
-              routeOrAction: () => {
-                this.createAAWallet();
-              },
-            },
-          ],
-        },
+        // {
+        //   title: this.translate.instant("wallet.settings-add-wallet-aa-wallet"),
+        //   items: [
+        //     {
+        //       title: this.translate.instant(
+        //         "wallet.settings-add-wallet-create-aa-wallet"
+        //       ),
+        //       routeOrAction: () => {
+        //         this.createAAWallet();
+        //       },
+        //     },
+        //   ],
+        // },
       ],
     };
 
