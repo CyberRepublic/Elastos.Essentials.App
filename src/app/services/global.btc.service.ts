@@ -15,7 +15,8 @@ import { GlobalJsonRPCService } from './global.jsonrpc.service';
 export enum BTCFeeSpeed {
   FAST = 1, // 1 block
   AVERAGE = 3, // 3 block
-  SLOW = 6 // 6 block
+  SLOW = 6, // 6 block
+  CUSTOM = -1 // Custom fee rate set by user
 }
 
 @Injectable({

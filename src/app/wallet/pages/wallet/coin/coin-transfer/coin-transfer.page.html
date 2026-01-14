@@ -234,10 +234,10 @@
             </ion-row>
 
             <ion-row *ngIf="shouldShowPickBTCFeerate()" class="btc-fee-row" (click)="pickBTCFeerate()">
-              <ion-col size="7.5">
+              <ion-col size="4">
                   <span>{{ 'wallet.btc-feerate' | translate }}</span>
               </ion-col>
-              <ion-col size="3.5" class="middle-col">
+              <ion-col size="7" class="middle-col">
                   <span>{{ getCurrenttBtcFeerateTitle() }}</span>
               </ion-col>
               <ion-col size="1" class="right-col">

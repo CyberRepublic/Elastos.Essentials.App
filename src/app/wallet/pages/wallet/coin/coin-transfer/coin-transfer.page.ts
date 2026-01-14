@@ -23,7 +23,7 @@
 import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Keyboard } from '@awesome-cordova-plugins/keyboard/ngx';
-import { IonContent, ModalController, PopoverController } from '@ionic/angular';
+import { AlertController, IonContent, ModalController, PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import BigNumber from 'bignumber.js';
 import { Subscription } from 'rxjs';
@@ -137,6 +137,7 @@ export class CoinTransferPage implements OnInit, OnDestroy {
   private btcFeerates: {
     [index: number]: number;
   } = {};
+  private customBtcFeerate: number = null; // Custom fee rate in sat/vB
   public useInscriptionUTXO = false;
 
   // For Tron
@@ -218,6 +219,7 @@ export class CoinTransferPage implements OnInit, OnDestroy {
     private contactsService: ContactsService,
     private modalCtrl: ModalController,
     private popoverCtrl: PopoverController,
+    private alertCtrl: AlertController,
     private nameResolvingService: NameResolvingService,
     private erc721Service: ERC721Service,
     private erc1155Service: ERC1155Service,
@@ -570,12 +572,17 @@ export class CoinTransferPage implements OnInit, OnDestroy {
           this.nonce
         );
       } else if (this.fromSubWallet instanceof BTCSubWallet) {
+        // For custom fee rate, convert sat/vB to sat/kB
+        let forcedSatPerKB = null;
+        if (this.btcFeerateUsed === BTCFeeSpeed.CUSTOM && this.customBtcFeerate) {
+          forcedSatPerKB = this.customBtcFeerate * 1000;
+        }
         rawTx = await this.fromSubWallet.createPaymentTransaction(
           this.toAddress, // User input address
           new BigNumber(this.amount), // User input amount
           this.memo, // User input memo
           this.btcFeerateUsed,
-          null,
+          forcedSatPerKB,
           this.useInscriptionUTXO
         );
       } else if (this.fromSubWallet instanceof MainCoinSubWallet) {
@@ -1474,6 +1481,13 @@ export class CoinTransferPage implements OnInit, OnDestroy {
         routeOrAction: () => {
           void this.setBTCFeerate(BTCFeeSpeed.SLOW);
         }
+      },
+      {
+        title: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-custom'),
+        subtitle: this.customBtcFeerate ? this.customBtcFeerate + ' sat/vB' : '',
+        routeOrAction: () => {
+          void this.showCustomFeerateInput();
+        }
       }
     ];
   }
@@ -1502,13 +1516,88 @@ export class CoinTransferPage implements OnInit, OnDestroy {
         return GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-avg');
       case BTCFeeSpeed.SLOW:
         return GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-slow');
+      case BTCFeeSpeed.CUSTOM:
+        return GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-custom');
       default: // BTCFeeRate.Fast
         return GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-fast');
     }
   }
 
   public getCurrenttBtcFeerateTitle() {
+    if (this.btcFeerateUsed === BTCFeeSpeed.CUSTOM && this.customBtcFeerate) {
+      return `${this.getBtcFeerateTitle(this.btcFeerateUsed)} (${this.customBtcFeerate} sat/vB)`;
+    }
     return this.getBtcFeerateTitle(this.btcFeerateUsed);
+  }
+
+  /**
+   * Show a dialog for user to input custom fee rate
+   */
+  private async showCustomFeerateInput() {
+    const alert = await this.alertCtrl.create({
+      mode: 'ios',
+      header: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-custom-input-title'),
+      message: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-custom-input-message'),
+      inputs: [
+        {
+          name: 'feerate',
+          type: 'number',
+          placeholder: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-custom-input-placeholder'),
+          value: this.customBtcFeerate || '',
+          min: 1
+        }
+      ],
+      buttons: [
+        {
+          text: GlobalTranslationService.instance.translateInstant('common.cancel'),
+          role: 'cancel'
+        },
+        {
+          text: GlobalTranslationService.instance.translateInstant('common.confirm'),
+          handler: (data) => {
+            const feerate = parseFloat(data.feerate);
+            if (feerate && feerate > 0) {
+              // Check if the fee rate is too low
+              const slowFeerate = this.btcFeerates[BTCFeeSpeed.SLOW] || 1;
+              if (feerate < slowFeerate) {
+                // Show warning for low fee rate
+                void this.showLowFeerateWarning(feerate);
+              } else {
+                this.customBtcFeerate = feerate;
+                this.btcFeerateUsed = BTCFeeSpeed.CUSTOM;
+                Logger.log('wallet', 'Custom BTC fee rate set to:', this.customBtcFeerate, 'sat/vB');
+              }
+            } else {
+              this.native.toast_trans('wallet.btc-feerate-custom-input-invalid');
+              return false;
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  /**
+   * Show a warning dialog when the custom fee rate is too low
+   */
+  private async showLowFeerateWarning(feerate: number) {
+    const slowFeerate = this.btcFeerates[BTCFeeSpeed.SLOW] || 1;
+    const confirmed = await this.globalPopupService.ionicConfirm(
+      'wallet.btc-feerate-low-warning-title',
+      this.translate.instant('wallet.btc-feerate-low-warning-message', {
+        feerate: feerate,
+        slowFeerate: slowFeerate
+      }),
+      'common.confirm',
+      'common.cancel'
+    );
+
+    if (confirmed) {
+      this.customBtcFeerate = feerate;
+      this.btcFeerateUsed = BTCFeeSpeed.CUSTOM;
+      Logger.log('wallet', 'Custom BTC fee rate set to (low):', this.customBtcFeerate, 'sat/vB');
+    }
   }
 
   // public async showConfirmIfNeedUseInscriptionUtxos(amount: BigNumber) {
@@ -1532,11 +1621,16 @@ export class CoinTransferPage implements OnInit, OnDestroy {
   public async estimateBTCFees() {
     // Calculate fee after input amount
     let amountBigNumber = new BigNumber(this.amount || 0);
+    // For custom fee rate, convert sat/vB to sat/kB
+    let forcedSatPerKB = null;
+    if (this.btcFeerateUsed === BTCFeeSpeed.CUSTOM && this.customBtcFeerate) {
+      forcedSatPerKB = this.customBtcFeerate * 1000;
+    }
     try {
       this.feeOfBTC = (
         await (<BTCSubWallet>this.fromSubWallet).estimateTransferTransactionGas(
           this.btcFeerateUsed,
-          null,
+          forcedSatPerKB,
           amountBigNumber,
           this.useInscriptionUTXO
         )

@@ -155,17 +155,31 @@ export class GlobalNativeService {
    * pick one option in the menus.
    */
   public async showGenericBottomSheetMenuChooser(
-    menu: MenuSheetMenu
+    menu: MenuSheetMenu,
+    options?: { autoHeight?: boolean }
   ): Promise<void> {
+    // Determine CSS class based on options and menu items count
+    let cssClass: string;
+    const itemCount = menu.items?.length || 0;
+
+    if (options?.autoHeight || itemCount > 3) {
+      // Use auto height for menus with more than 3 items
+      cssClass = !this.theme.darkMode
+        ? "menu-chooser-component-larger"
+        : "menu-chooser-component-larger-dark";
+    } else {
+      cssClass = !this.theme.darkMode
+        ? "menu-chooser-component"
+        : "menu-chooser-component-dark";
+    }
+
     const modal = await this.modalCtrl.create({
       component: MenuSheetComponent,
       componentProps: {
         menu,
       },
       backdropDismiss: true, // Closeable
-      cssClass: !this.theme.darkMode
-        ? "menu-chooser-component"
-        : "menu-chooser-component-dark",
+      cssClass: cssClass,
     });
 
     void modal.onDidDismiss().then((response: { data?: boolean }) => {});

@@ -22,6 +22,7 @@
 
 import { Component, NgZone, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import BigNumber from 'bignumber.js';
 import { MenuSheetMenu } from 'src/app/components/menu-sheet/menu-sheet.component';
@@ -82,6 +83,7 @@ export class SendBitcoinPage implements OnInit {
   private feeSpeedsInSatPerVB: {
     [index: number]: number;
   } = {};
+  private customFeeSpeedSatPerVB: number = null; // Custom fee rate in sat/vB
   public showEditFeeRate = false;
   public loading = true;
   public actionIsGoing = false;
@@ -109,7 +111,8 @@ export class SendBitcoinPage implements OnInit {
     public theme: GlobalThemeService,
     public uiService: UiService,
     private router: Router,
-    public globalPopupService: GlobalPopupService
+    public globalPopupService: GlobalPopupService,
+    private alertCtrl: AlertController
   ) {
     const navigation = this.router.getCurrentNavigation();
     if (navigation && navigation.extras && navigation.extras.state) {
@@ -186,7 +189,8 @@ export class SendBitcoinPage implements OnInit {
     if (this.intentParams.satPerVB) {
       // Fee rate is forced in the intent by the caller
       this.satPerKB = this.intentParams.satPerVB * 1000;
-      this.showEditFeeRate = false;
+      // allow user edit fee rate
+      this.showEditFeeRate = true;
     } else {
       this.showEditFeeRate = true;
       void this.computeBTCFeeRate();
@@ -284,12 +288,20 @@ export class SendBitcoinPage implements OnInit {
     this.signingAndTransacting = true;
     let rawTx = null;
     try {
+      // Determine the satPerKB to use
+      let forcedSatPerKB = this.satPerKB;
+      if (this.forcedFeeSpeed === BTCFeeSpeed.CUSTOM && this.customFeeSpeedSatPerVB) {
+        forcedSatPerKB = this.customFeeSpeedSatPerVB * 1000;
+      } else if (this.feeSpeedsInSatPerVB[this.forcedFeeSpeed]) {
+        forcedSatPerKB = this.feeSpeedsInSatPerVB[this.forcedFeeSpeed] * 1000;
+      }
+
       rawTx = await this.btcSubWallet.createPaymentTransaction(
         this.intentParams.payAddress,
         this.getTotalTransactionCostInCurrency().valueAsBigNumber,
         '',
         this.forcedFeeSpeed,
-        this.satPerKB,
+        forcedSatPerKB,
         this.useInscriptionUTXO
       );
     } catch (err) {
@@ -431,6 +443,13 @@ export class SendBitcoinPage implements OnInit {
         routeOrAction: () => {
           void this.setFeeSpeed(BTCFeeSpeed.SLOW);
         }
+      },
+      {
+        title: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-custom'),
+        subtitle: this.customFeeSpeedSatPerVB ? this.customFeeSpeedSatPerVB + ' sat/vB' : '',
+        routeOrAction: () => {
+          void this.showCustomFeerateInput();
+        }
       }
     ];
   }
@@ -459,13 +478,99 @@ export class SendBitcoinPage implements OnInit {
         return GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-avg');
       case BTCFeeSpeed.SLOW:
         return GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-slow');
+      case BTCFeeSpeed.CUSTOM:
+        return GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-custom');
       default: // BTCFeeRate.Fast
         return GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-fast');
     }
   }
 
   public getCurrentFeeSpeedTitle() {
+    if (this.forcedFeeSpeed === BTCFeeSpeed.CUSTOM && this.customFeeSpeedSatPerVB) {
+      return `${this.getFeeSpeedTitle(this.forcedFeeSpeed)} (${this.customFeeSpeedSatPerVB} sat/vB)`;
+    }
     return this.getFeeSpeedTitle(this.forcedFeeSpeed);
+  }
+
+  /**
+   * Show a dialog for user to input custom fee rate
+   */
+  private async showCustomFeerateInput() {
+    const alert = await this.alertCtrl.create({
+      mode: 'ios',
+      header: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-custom-input-title'),
+      message: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-custom-input-message'),
+      inputs: [
+        {
+          name: 'feerate',
+          type: 'number',
+          placeholder: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-custom-input-placeholder'),
+          value: this.customFeeSpeedSatPerVB || '',
+          min: 1
+        }
+      ],
+      buttons: [
+        {
+          text: GlobalTranslationService.instance.translateInstant('common.cancel'),
+          role: 'cancel'
+        },
+        {
+          text: GlobalTranslationService.instance.translateInstant('common.confirm'),
+          handler: (data) => {
+            const feerate = parseFloat(data.feerate);
+            if (feerate && feerate > 0) {
+              // Check if the fee rate is too low
+              const slowFeerate = this.feeSpeedsInSatPerVB[BTCFeeSpeed.SLOW] || 1;
+              if (feerate < slowFeerate) {
+                // Show warning for low fee rate
+                void this.showLowFeerateWarning(feerate);
+              } else {
+                void this.applyCustomFeerate(feerate);
+              }
+            } else {
+              this.native.toast_trans('wallet.btc-feerate-custom-input-invalid');
+              return false;
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  /**
+   * Show a warning dialog when the custom fee rate is too low
+   */
+  private async showLowFeerateWarning(feerate: number) {
+    const slowFeerate = this.feeSpeedsInSatPerVB[BTCFeeSpeed.SLOW] || 1;
+    const confirmed = await this.globalPopupService.ionicConfirm(
+      'wallet.btc-feerate-low-warning-title',
+      this.translate.instant('wallet.btc-feerate-low-warning-message', {
+        feerate: feerate,
+        slowFeerate: slowFeerate
+      }),
+      'common.confirm',
+      'common.cancel'
+    );
+
+    if (confirmed) {
+      await this.applyCustomFeerate(feerate);
+    }
+  }
+
+  /**
+   * Apply custom fee rate and recompute fees
+   */
+  private async applyCustomFeerate(feerate: number) {
+    this.customFeeSpeedSatPerVB = feerate;
+    this.forcedFeeSpeed = BTCFeeSpeed.CUSTOM;
+    Logger.log('wallet', 'Custom BTC fee rate set to:', this.customFeeSpeedSatPerVB, 'sat/vB');
+
+    // Recomputes fees
+    this.actionIsGoing = true;
+    const forcedSatsPerKB = this.customFeeSpeedSatPerVB * 1000;
+    await this.estimateBTCFees(forcedSatsPerKB);
+    this.actionIsGoing = false;
   }
 
   /**
