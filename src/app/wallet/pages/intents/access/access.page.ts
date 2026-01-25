@@ -136,6 +136,12 @@ export class AccessPage implements OnInit {
             case 'ethaddress':
                 value = await this.getAddress(StandardCoinName.ETHSC);
                 break;
+            case 'btcaddress':
+                value = await this.getAddress(StandardCoinName.BTC);
+                break;
+            case 'tronaddress':
+                value = await this.getAddress(StandardCoinName.TRON);
+                break;
             default:
                 Logger.log('wallet', 'Not support ', key);
                 break;
@@ -154,6 +160,12 @@ export class AccessPage implements OnInit {
                 break;
             case 'ethaddress':
                 value = 'wallet.ethaddress';
+                break;
+            case 'btcaddress':
+                value = 'wallet.btcaddress';
+                break;
+            case 'tronaddress':
+                value = 'wallet.tronaddress';
                 break;
             default:
                 Logger.log('wallet', 'Not support ', key);
