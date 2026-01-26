@@ -17,7 +17,7 @@
             </div>
             <ion-row class="data-row" *ngFor="let item of requestItems">
                 <p>{{ getClaimTitle(item.name) | translate }}</p>
-                <h5 *ngIf="item.name === 'elaamount'">{{ item.value/Config.SELA }}</h5>
+                <h5 *ngIf="item.name === 'elaamount'">{{ item.value}} ELA</h5>
                 <h5 *ngIf="item.name !== 'elaamount'">{{ item.value }}</h5>
             </ion-row>
         </div>

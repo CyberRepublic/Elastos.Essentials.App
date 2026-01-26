@@ -292,12 +292,12 @@ export class WalletNetworkService {
   }
 
   /**
-   * Tells if the currently active network is the elastos mainchain, ESC or EID.
+   * Tells if the currently active network is the elastos mainchain, ESC , ECO or EID.
    */
   public isActiveNetworkElastos(): boolean {
     return (
       this.activeNetwork.value &&
-      ['elastos', 'elastossmartchain', 'elastosidchain'].includes(this.activeNetwork.value.key)
+      ['elastos', 'elastossmartchain', 'elastosidchain', 'elastoseco'].includes(this.activeNetwork.value.key)
     );
   }
 
