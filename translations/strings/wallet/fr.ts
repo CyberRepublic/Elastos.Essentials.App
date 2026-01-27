@@ -596,9 +596,11 @@ export const fr = {
     'access-reason': 'Raison',
     'access-data-access': 'Accès aux données',
     'access-mnemonic': 'Accès au mnémonique',
-    elaaddress: 'Adresse ELA',
+    elaaddress: 'Adresse ELA Principale',
     elaamount: "Solde d'ELA",
-    ethaddress: 'Adresses ESC',
+    ethaddress: 'Adresses EVM',
+    btcaddress: 'Adresses BTC',
+    tronaddress: 'Adresses Tron',
     requester: 'Demandé par',
     'text-allow': 'Autoriser',
     'text-share-mnemonic-warning':

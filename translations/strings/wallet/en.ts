@@ -588,9 +588,11 @@ export const en = {
     'access-reason': 'Reason',
     'access-data-access': 'Data Access',
     'access-mnemonic': 'Request Mnemonic',
-    elaaddress: 'ELA Address',
+    elaaddress: 'ELA Mainchain Address',
     elaamount: 'ELA Balance',
-    ethaddress: 'ESC Address',
+    ethaddress: 'EVM Address',
+    btcaddress: 'BTC Address',
+    tronaddress: 'Tron Address',
     requester: 'Request from',
     'text-allow': 'Allow',
     'text-share-mnemonic-warning':
