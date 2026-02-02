@@ -189,12 +189,15 @@ export class SendBitcoinPage implements OnInit {
     if (this.intentParams.satPerVB) {
       // Fee rate is forced in the intent by the caller
       this.satPerKB = this.intentParams.satPerVB * 1000;
+      this.forcedFeeSpeed = BTCFeeSpeed.CUSTOM;
+      this.customFeeSpeedSatPerVB = this.intentParams.satPerVB;
       // allow user edit fee rate
       this.showEditFeeRate = true;
     } else {
       this.showEditFeeRate = true;
-      void this.computeBTCFeeRate();
     }
+
+    void this.computeBTCFeeRate();
 
     let feesSAT: number = null;
     try {
@@ -457,7 +460,10 @@ export class SendBitcoinPage implements OnInit {
   /**
    * Choose a fee speed
    */
-  public pickBTCFeeSpeed() {
+  public async pickBTCFeeSpeed() {
+    if (!this.feeSpeedsInSatPerVB[BTCFeeSpeed.SLOW]) {
+      await this.computeBTCFeeRate();
+    }
     if (!this.feeSpeedsInSatPerVB[BTCFeeSpeed.SLOW]) {
       Logger.warn('wallet', 'Can not get the btc fee rate.');
       return;
