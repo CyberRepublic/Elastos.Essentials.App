@@ -99,7 +99,7 @@ export class ElastosPGPMainNetNetwork extends ElastosPGPNetworkBase {
     super(
       ElastosPGPNetworkBase.NETWORK_KEY,
       "ELA-PGP Chain",
-      "PGP",
+      "ELA-PGP",
       // "assets/wallet/networks/pgp.png",
       'assets/wallet/networks/elastos-eco.svg',
       MAINNET_TEMPLATE,
@@ -159,7 +159,7 @@ export class ElastosPGPTestNetNetwork extends ElastosPGPNetworkBase {
     super(
       ElastosPGPNetworkBase.NETWORK_KEY,
       "ELA-PGP Testnet",
-      "PGP Testnet",
+      "ELA-PGP Testnet",
       // "assets/wallet/networks/pgp.png",
       'assets/wallet/networks/elastos-eco.svg',
       TESTNET_TEMPLATE,

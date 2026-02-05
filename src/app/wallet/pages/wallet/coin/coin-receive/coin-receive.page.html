@@ -20,7 +20,7 @@
         <ion-row class="address-row">
             <ion-col class="address-col">
               <h2 *ngIf="qrcode" (click)="copyAddress()">
-                  {{ qrcodeLine1 }}<br>{{ qrcodeLine2 }}
+                  {{ qrcode }}
               </h2>
               <ion-icon class='icon' mode="ios" name="open-outline" (click)="openForBrowseMode()"></ion-icon>
             </ion-col>
