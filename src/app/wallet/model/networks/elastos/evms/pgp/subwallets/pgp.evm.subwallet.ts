@@ -5,7 +5,7 @@ import { ElastosEVMSubWallet } from "../../subwallets/standard/elastos.evm.subwa
 
 export class PGPSubWallet extends ElastosEVMSubWallet {
   constructor(networkWallet: AnyEVMNetworkWallet) {
-    super(networkWallet, StandardCoinName.ETHECOPGP, "ELA-PGP Chain");
+    super(networkWallet, StandardCoinName.ETHECOPGP, "PGP Chain");
   }
 
   public async initialize() {

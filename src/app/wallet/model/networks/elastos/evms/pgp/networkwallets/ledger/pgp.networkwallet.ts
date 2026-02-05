@@ -12,7 +12,7 @@ import { ElastosPGPChainTransactionProvider } from "../../tx-providers/elastos.p
 
 export class ElastosPGPLedgerNetworkWallet extends ElastosLedgerEVMNetworkWallet {
   constructor(masterWallet: LedgerMasterWallet, network: EVMNetwork) {
-    super(masterWallet, network, 'PGA', 'ELA-PGP Chain', StandardCoinName.ETHECOPGP);
+    super(masterWallet, network, 'PGA', 'PGP Chain', StandardCoinName.ETHECOPGP);
   }
 
   protected createTransactionDiscoveryProvider(): TransactionProvider<any> {
