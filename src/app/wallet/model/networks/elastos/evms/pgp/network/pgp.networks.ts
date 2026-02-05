@@ -27,7 +27,7 @@ export abstract class ElastosPGPNetworkBase extends ElastosEVMNetwork<WalletNetw
           .ElastosPGPLedgerNetworkWallet;
         return new ElastosPGPLedgerNetworkWallet(masterWallet as LedgerMasterWallet, this);
       default:
-        Logger.warn('wallet', 'PGP does not support ', masterWallet.type);
+        Logger.warn('wallet', 'ELA-PGP does not support ', masterWallet.type);
         return null;
     }
   }
@@ -98,7 +98,7 @@ export class ElastosPGPMainNetNetwork extends ElastosPGPNetworkBase {
   constructor() {
     super(
       ElastosPGPNetworkBase.NETWORK_KEY,
-      "PGP Chain",
+      "ELA-PGP Chain",
       "PGP",
       // "assets/wallet/networks/pgp.png",
       'assets/wallet/networks/elastos-eco.svg',
@@ -158,7 +158,7 @@ export class ElastosPGPTestNetNetwork extends ElastosPGPNetworkBase {
   constructor() {
     super(
       ElastosPGPNetworkBase.NETWORK_KEY,
-      "PGP Testnet",
+      "ELA-PGP Testnet",
       "PGP Testnet",
       // "assets/wallet/networks/pgp.png",
       'assets/wallet/networks/elastos-eco.svg',
