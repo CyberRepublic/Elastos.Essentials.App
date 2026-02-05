@@ -164,7 +164,7 @@ export class CoinSelectPage implements OnInit {
     this.destNetworks.push({
       id: StandardCoinName.ETHECOPGP,
       chainId: (<EVMNetwork>ecoChain).getMainChainID(),
-      friendName: 'ELA-PGP Chain',
+      friendName: 'PGP Chain',
       logo: ecoPGPChain.logo,
       tokenSymbol: ecoPGPChain.getMainTokenSymbol()})
   }
