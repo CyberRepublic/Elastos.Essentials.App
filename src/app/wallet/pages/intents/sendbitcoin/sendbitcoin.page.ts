@@ -92,6 +92,8 @@ export class SendBitcoinPage implements OnInit {
 
   public signingAndTransacting = false;
 
+  private isShowingBTCFeeSpeedMenu = false;
+
   public currentNetworkName = '';
 
   public inscriptionUtxoBalanceSATOnBTC: BigNumber;
@@ -461,21 +463,30 @@ export class SendBitcoinPage implements OnInit {
    * Choose a fee speed
    */
   public async pickBTCFeeSpeed() {
-    if (!this.feeSpeedsInSatPerVB[BTCFeeSpeed.SLOW]) {
-      await this.computeBTCFeeRate();
-    }
-    if (!this.feeSpeedsInSatPerVB[BTCFeeSpeed.SLOW]) {
-      Logger.warn('wallet', 'Can not get the btc fee rate.');
-      return;
-    }
-    let menuItems: MenuSheetMenu[] = this.buildBTCFeerateMenuItems();
+    if (this.isShowingBTCFeeSpeedMenu) return;
 
-    let menu: MenuSheetMenu = {
-      title: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-select-title'),
-      items: menuItems
-    };
+    this.isShowingBTCFeeSpeedMenu = true;
+    try {
+      if (!this.feeSpeedsInSatPerVB[BTCFeeSpeed.SLOW]) {
+        await this.computeBTCFeeRate();
 
-    void GlobalNativeService.instance.showGenericBottomSheetMenuChooser(menu);
+        if (!this.feeSpeedsInSatPerVB[BTCFeeSpeed.SLOW]) {
+          Logger.warn('wallet', 'Can not get the btc fee rate.');
+          return;
+        }
+      }
+
+      let menuItems: MenuSheetMenu[] = this.buildBTCFeerateMenuItems();
+
+      let menu: MenuSheetMenu = {
+        title: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-select-title'),
+        items: menuItems
+      };
+
+      await GlobalNativeService.instance.showGenericBottomSheetMenuChooser(menu);
+    } finally {
+      this.isShowingBTCFeeSpeedMenu = false;
+    }
   }
 
   public getFeeSpeedTitle(btcFeerate) {

@@ -138,6 +138,7 @@ export class CoinTransferPage implements OnInit, OnDestroy {
     [index: number]: number;
   } = {};
   private customBtcFeerate: number = null; // Custom fee rate in sat/vB
+  private isShowingBTCFeerateMenu = false;
   public useInscriptionUTXO = false;
 
   // For Tron
@@ -1449,6 +1450,7 @@ export class CoinTransferPage implements OnInit, OnDestroy {
       Logger.warn('wallet', ' estimatesmartfee error', e);
     }
   }
+
   public shouldShowPickBTCFeerate(): boolean {
     if (this.fromSubWallet instanceof BTCSubWallet) return true;
 
@@ -1495,19 +1497,30 @@ export class CoinTransferPage implements OnInit, OnDestroy {
   /**
    * Choose an fee rate
    */
-  public pickBTCFeerate() {
-    if (!this.btcFeerates[BTCFeeSpeed.SLOW]) {
-      Logger.warn('wallet', 'Can not get the btc fee rate.');
-      return;
+  public async pickBTCFeerate() {
+    if (this.isShowingBTCFeerateMenu) return;
+
+    this.isShowingBTCFeerateMenu = true;
+    try {
+      if (!this.btcFeerates[BTCFeeSpeed.SLOW]) {
+        await this.getAllBTCFeerate();
+        if (!this.btcFeerates[BTCFeeSpeed.SLOW]) {
+          Logger.warn('wallet', 'Can not get the btc fee rate.');
+          return;
+        }
+      }
+
+      let menuItems: MenuSheetMenu[] = this.buildBTCFeerateMenuItems();
+
+      let menu: MenuSheetMenu = {
+        title: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-select-title'),
+        items: menuItems
+      };
+
+      await GlobalNativeService.instance.showGenericBottomSheetMenuChooser(menu);
+    } finally {
+      this.isShowingBTCFeerateMenu = false;
     }
-    let menuItems: MenuSheetMenu[] = this.buildBTCFeerateMenuItems();
-
-    let menu: MenuSheetMenu = {
-      title: GlobalTranslationService.instance.translateInstant('wallet.btc-feerate-select-title'),
-      items: menuItems
-    };
-
-    void GlobalNativeService.instance.showGenericBottomSheetMenuChooser(menu);
   }
 
   public getBtcFeerateTitle(btcFeerate) {
