@@ -62,7 +62,7 @@ export class CoinReceivePage implements OnInit, OnDestroy {
     }
   }
 
-  async init(): Promise<void> {
+  init() {
     this.masterWalletId = this.coinTransferService.masterWalletId;
     this.subWalletId = this.coinTransferService.subWalletId;
     this.networkWallet = this.walletManager.getNetworkWalletFromMasterWalletId(this.masterWalletId);
@@ -87,7 +87,7 @@ export class CoinReceivePage implements OnInit, OnDestroy {
     this.native.toast(this.translate.instant('common.copied-to-clipboard'));
   }
 
-  async getAddress() {
+  getAddress() {
     this.walletAddressInfo = this.networkWallet.getAddresses();
 
     this.setAddressType(0);
@@ -97,6 +97,18 @@ export class CoinReceivePage implements OnInit, OnDestroy {
     this.addressType = type;
     this.qrcode = this.walletAddressInfo[type].address;
     Logger.log('wallet', 'Address', this.qrcode);
+  }
+
+  get qrcodeLine1(): string {
+    if (!this.qrcode) return '';
+    const mid = Math.ceil(this.qrcode.length / 2);
+    return this.qrcode.slice(0, mid);
+  }
+
+  get qrcodeLine2(): string {
+    if (!this.qrcode) return '';
+    const mid = Math.ceil(this.qrcode.length / 2);
+    return this.qrcode.slice(mid);
   }
 
   showAddressList() {
@@ -113,7 +125,7 @@ export class CoinReceivePage implements OnInit, OnDestroy {
     });
   }
 
-  async openForBrowseMode() {
+  openForBrowseMode() {
     let browserUrl = WalletNetworkService.instance.activeNetwork.value.getBrowserUrlByType(
       TransactionInfoType.ADDRESS,
       this.qrcode
