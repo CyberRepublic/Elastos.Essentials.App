@@ -99,18 +99,6 @@ export class CoinReceivePage implements OnInit, OnDestroy {
     Logger.log('wallet', 'Address', this.qrcode);
   }
 
-  get qrcodeLine1(): string {
-    if (!this.qrcode) return '';
-    const mid = Math.ceil(this.qrcode.length / 2);
-    return this.qrcode.slice(0, mid);
-  }
-
-  get qrcodeLine2(): string {
-    if (!this.qrcode) return '';
-    const mid = Math.ceil(this.qrcode.length / 2);
-    return this.qrcode.slice(mid);
-  }
-
   showAddressList() {
     if (!this.selectSubscription) {
       this.selectSubscription = this.events.subscribe('selectaddress', address => {
