@@ -1707,7 +1707,7 @@ export class CoinTransferPage implements OnInit, OnDestroy {
   }
 
   /**
-   * The ELA on the PGP chain is an ERC20 token, and approval is required for withdrawal
+   * The ELA on the ELA-PGP chain is an ERC20 token, and approval is required for withdrawal
    */
   private async approveSpendingIfNeeded(targetAddress: string): Promise<boolean> {
       let mainCoinSubWallet = this.networkWallet.getMainEvmSubWallet();

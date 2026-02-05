@@ -121,10 +121,10 @@ export class ElastosPGPMainNetNetwork extends ElastosPGPNetworkBase {
     );
 
     this.builtInCoins = [
-      new ERC20Coin(this, "ELA", "ELA on PGP", "0x0000000000000000000000000000000000000065", 8, false, true),
-      new ERC20Coin(this, 'USDT', 'PGP-USDT', '0xdF72788af68E7902F61377D246Dd502b0b383385', 18, false, true),
+      new ERC20Coin(this, "ELA", "ELA on ELA-PGP", "0x0000000000000000000000000000000000000065", 8, false, true),
+      new ERC20Coin(this, 'USDT', 'USDT on ELA-PGP', '0xdF72788af68E7902F61377D246Dd502b0b383385', 18, false, true),
       new ERC20Coin(this, 'BTCD', 'BTC Dollar', '0xF9BF836FEd97a9c9Bfe4D4c28316b9400C59Cc6B', 18, false, true),
-      new ERC20Coin(this, 'FIST', 'FIST on PGP', '0x800E5c441b84a3E809E2ec922BeEE9f32f954B11', 18, false, true),
+      new ERC20Coin(this, 'FIST', 'FIST on ELA-PGP', '0x800E5c441b84a3E809E2ec922BeEE9f32f954B11', 18, false, true),
     ];
 
     this.customCurrencyProviders.push(new ElastosECOPGPOracleCustomCurrencyProvider(this));
@@ -166,7 +166,7 @@ export class ElastosPGPTestNetNetwork extends ElastosPGPNetworkBase {
       12345,
       [
         {
-          name: 'PGP Chain Testnet RPC',
+          name: 'ELA-PGP Chain Testnet RPC',
           url: GlobalElastosAPIService.instance.getApiUrl(
             GlobalElastosAPIService.instance.getApiUrlTypeForRpc(StandardCoinName.ETHECOPGP),
             TESTNET_TEMPLATE
@@ -176,7 +176,7 @@ export class ElastosPGPTestNetNetwork extends ElastosPGPNetworkBase {
     );
 
     this.builtInCoins = [
-      new ERC20Coin(this, "ELA", "ELA on PGP", "0x0000000000000000000000000000000000000065", 8, false, true),
+      new ERC20Coin(this, "ELA", "ELA on ELA-PGP", "0x0000000000000000000000000000000000000065", 8, false, true),
     ];
 
     this.customCurrencyProviders.push(new ElastosECOPGPOracleCustomCurrencyProvider(this));
