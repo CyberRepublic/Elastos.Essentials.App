@@ -539,7 +539,7 @@ export class WalletHomePage implements OnInit, OnDestroy {
       event.preventDefault();
       event.stopPropagation();
 
-      let confirmationMessage = this.translate.instant('launcher.address-copied-to-clipboard', { address });
+      let confirmationMessage = this.translate.instant('common.copied-to-clipboard');
       this.native.toast(confirmationMessage);
       void this.native.copyClipboard(address);
     }
