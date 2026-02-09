@@ -196,7 +196,11 @@ class ETHTransactionManager {
       }
     } catch (err) {
       Logger.error('wallet', 'ETHTransactionManager publishTransaction error:', err);
-      throw err;
+
+      this.closePublicationLoader();
+      await this.globalPopupService.ionicAlert('wallet.transaction-fail', 'common.network-or-server-error');
+
+      return null;
     }
   }
 

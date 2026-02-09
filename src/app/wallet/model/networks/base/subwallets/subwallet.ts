@@ -537,7 +537,7 @@ export abstract class SubWallet<
 
       Logger.log('wallet', 'publishTransaction txid:', txid);
 
-      if (navigateHomeAfterCompletion) {
+      if (navigateHomeAfterCompletion && txid) {
         await Native.instance.setRootRouter('/wallet/wallet-home');
         WalletService.instance.events.publish('wallet:transactionsent', { subwalletid: this.id, txid: txid });
       }
