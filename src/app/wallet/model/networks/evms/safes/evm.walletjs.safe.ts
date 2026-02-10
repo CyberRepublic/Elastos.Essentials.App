@@ -86,7 +86,7 @@ export class EVMWalletJSSafe extends Safe implements EVMSafe {
       );
 
       if (this.privateKey) {
-        this.account = (await EVMService.instance.getWeb3(this.networkWallet.network)).eth.accounts.privateKeyToAccount(
+        this.account = (await EVMService.instance.getWeb3(this.networkWallet.network, true)).eth.accounts.privateKeyToAccount(
           this.privateKey
         );
       }

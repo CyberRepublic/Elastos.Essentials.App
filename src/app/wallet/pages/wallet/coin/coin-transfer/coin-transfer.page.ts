@@ -601,13 +601,13 @@ export class CoinTransferPage implements OnInit, OnDestroy {
       } else {
         throw new Error('Unknown subwallet type used for payment!');
       }
+
+      // SIGN AND PUBLISH
+      await this.signAndSendRawTransaction(rawTx);
     } catch (err) {
       await this.parseException(err);
     }
     await this.native.hideLoading();
-
-    // SIGN AND PUBLISH
-    await this.signAndSendRawTransaction(rawTx);
   }
 
   /**
@@ -624,13 +624,13 @@ export class CoinTransferPage implements OnInit, OnDestroy {
         this.amount, // User input amount
         this.memo // Memo, not necessary
       );
+
+      await this.signAndSendRawTransaction(rawTx);
     } catch (err) {
       await this.parseException(err);
     }
 
     await this.native.hideLoading();
-
-    await this.signAndSendRawTransaction(rawTx);
   }
 
   /**
@@ -647,11 +647,11 @@ export class CoinTransferPage implements OnInit, OnDestroy {
         this.gasLimit,
         this.nonce
       );
+
+      await this.signAndSendRawTransaction(rawTx);
     } catch (err) {
       await this.parseException(err);
     }
-
-    await this.signAndSendRawTransaction(rawTx);
   }
 
   async createSendNFTTransaction() {
@@ -687,14 +687,14 @@ export class CoinTransferPage implements OnInit, OnDestroy {
         // Probably failed to create transaction because of non standard NFT transfer methods in contracts.
         // Let user know
         await this.globalPopupService.ionicAlert('wallet.transaction-fail', 'wallet.nft-transaction-creation-error');
+      } else {
+        // SIGN AND PUBLISH
+        await this.signAndSendRawTransaction(rawTx);
       }
     } catch (err) {
       await this.parseException(err);
     }
     await this.native.hideLoading();
-
-    // SIGN AND PUBLISH
-    if (rawTx) await this.signAndSendRawTransaction(rawTx);
   }
 
   private async signAndSendRawTransaction(rawTx) {
