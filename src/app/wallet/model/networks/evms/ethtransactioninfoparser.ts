@@ -766,6 +766,14 @@ export class ETHTransactionInfoParser {
         txInfo.type = ETHOperationType.BTCD;
         txInfo.operation = { description: 'wallet.ext-tx-info-type-close-order' };
         break;
+      case '0x99b29871': // claimTimeoutCompensation(bytes32 id)
+        txInfo.type = ETHOperationType.BTCD;
+        txInfo.operation = { description: 'wallet.ext-tx-info-type-claim-timeout-compensation' };
+        break;
+      case '0xb2c7f878': // requestArbitration(bytes unLockSignature)
+        txInfo.type = ETHOperationType.BTCD;
+        txInfo.operation = { description: 'wallet.ext-tx-info-type-request-arbitration' };
+        break;
 
       // Staking
       case '0x8305e5af': // create staking contract

@@ -925,6 +925,8 @@ export const fr = {
     'ext-tx-info-type-borrow': 'Réclamer des jetons',
     'ext-tx-info-type-repay': 'Rembourser',
     'ext-tx-info-type-close-order': 'Fermer une commande',
+    'ext-tx-info-type-claim-timeout-compensation': 'Réclamer une compensation de timeout',
+    'ext-tx-info-type-request-arbitration': 'Demander une arbitrage',
     'ext-tx-info-type-deposit-from-mainchain': 'Depuis ELA mainchain',
 
     /********************************

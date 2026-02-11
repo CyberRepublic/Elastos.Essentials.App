@@ -877,7 +877,7 @@ export const zh = {
     'ext-tx-info-type-claim-bpos-nft': '申领 BPoS NFT',
     'ext-tx-info-type-destroy-bpos-nft': '赎回 BPoS NFT',
     'ext-tx-info-type-withdraw-to-mainchain': '主链提现',
-    'ext-tx-info-type-harvest': '收获',
+    'ext-tx-info-type-harvest': '领取',
     'ext-tx-info-type-buy-nft': '购买 NFT',
     'ext-tx-info-type-sell-nft': '出售 NFT',
     'ext-tx-info-type-nft-tx': 'NFT 交易',
@@ -892,6 +892,8 @@ export const zh = {
     'ext-tx-info-type-borrow': '领取代币',
     'ext-tx-info-type-repay': '还款',
     'ext-tx-info-type-close-order': '关闭订单',
+    'ext-tx-info-type-claim-timeout-compensation': '领取超时补偿',
+    'ext-tx-info-type-request-arbitration': '请求仲裁',
     'ext-tx-info-type-deposit-from-mainchain': '主链充值',
 
     /********************************

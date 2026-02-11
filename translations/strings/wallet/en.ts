@@ -917,6 +917,8 @@ export const en = {
     'ext-tx-info-type-borrow': 'Claim Tokens',
     'ext-tx-info-type-repay': 'Repay',
     'ext-tx-info-type-close-order': 'Close Order',
+    'ext-tx-info-type-claim-timeout-compensation': 'Claim Timeout Compensation',
+    'ext-tx-info-type-request-arbitration': 'Request Arbitration',
     'ext-tx-info-type-deposit-from-mainchain': 'Deposit from Mainchain',
 
     /********************************

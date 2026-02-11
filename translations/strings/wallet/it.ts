@@ -923,6 +923,8 @@ export const it = {
     'ext-tx-info-type-borrow': 'Richiedi token',
     'ext-tx-info-type-repay': 'Rimborso',
     'ext-tx-info-type-close-order': 'Chiudi Ordine',
+    'ext-tx-info-type-claim-timeout-compensation': 'Rivendicazione di compensazione di timeout',
+    'ext-tx-info-type-request-arbitration': 'Richiesta di arbitrato',
     'ext-tx-info-type-deposit-from-mainchain': 'Deposito da Mainchain',
 
     /********************************
