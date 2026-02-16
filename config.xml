@@ -230,10 +230,10 @@
             </array>
         </config-file>
         <config-file parent="NSPhotoLibraryUsageDescription" target="*-Info.plist">
-            <string>Maybe access the photo library</string>
+            <string>Allow access to your photo library to let you choose profile pictures and to scan QR codes from saved images.</string>
         </config-file>
         <config-file parent="NSCameraUsageDescription" target="*-Info.plist">
-            <string>Need camera access to take pictures</string>
+            <string>Allow access to the camera to scan QR codes for wallet addresses and transaction signing.</string>
         </config-file>
         <preference name="SwiftVersion" value="5.2" />
         <preference name="UseSwiftLanguageVersion" value="5.2" />
