@@ -676,6 +676,7 @@ export class ETHTransactionInfoParser {
         break;
 
       case '0x67d630fa': // receivePayload(string _addr, uint256 _amount, uint256 _fee), Send ela from side chain to main chain
+        txInfo.type = ETHOperationType.WITHDRAW;
         txInfo.operation = { description: "wallet.ext-tx-info-type-withdraw-to-mainchain" };
         try {
           let params = await this.extractTransactionParamValues(["function receivePayload(string _addr, uint256 _amount, uint256 _fee) public returns (bool success)"], txData);

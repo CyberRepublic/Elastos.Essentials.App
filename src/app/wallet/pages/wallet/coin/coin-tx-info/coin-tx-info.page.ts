@@ -221,13 +221,18 @@ export class CoinTxInfoPage implements OnInit {
         await this.getRenewalVotesContentInfo(this.transactionInfo.renewalVotesContentInfo);
       }
 
+      let extTxInfo = await this.networkWallet.getExtendedTxInfo(this.transactionInfo.txid);
+      this.extendedTxInfo = extTxInfo;
+      if (this.extendedTxInfo?.evm?.txInfo?.type == ETHOperationType.INSCRIPTION) {
+        void this.getInscriptionInfo(this.transactionInfo.txid);
+      }
+
+      if (this.extendedTxInfo?.evm?.txInfo?.type == ETHOperationType.WITHDRAW
+          && this.extendedTxInfo?.evm?.txInfo?.operation?.descriptionTranslationParams?.toAddress) {
+        this.targetAddress = this.extendedTxInfo?.evm?.txInfo?.operation?.descriptionTranslationParams?.toAddress;
+      }
+
       void this.getTransactionDetails();
-      void this.networkWallet.getExtendedTxInfo(this.transactionInfo.txid).then(extTxInfo => {
-        this.extendedTxInfo = extTxInfo;
-        if (this.extendedTxInfo?.evm?.txInfo?.type == ETHOperationType.INSCRIPTION) {
-          void this.getInscriptionInfo(this.transactionInfo.txid);
-        }
-      });
     }
   }
 

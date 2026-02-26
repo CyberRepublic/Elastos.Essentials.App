@@ -404,6 +404,8 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
       transaction.hash = transaction.transactionHash;
     }
 
+    let isCrossChain = await this.isCrossChainWithdrawToMainChain(transaction);
+
     const transactionInfo: TransactionInfo = {
       amount: this.getDisplayValue(transaction.value),
       confirmStatus: parseInt(transaction.confirmations),
@@ -422,7 +424,7 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
       timestamp,
       txid: transaction.hash,
       type: null,
-      isCrossChain: false,
+      isCrossChain: isCrossChain,
       isRedPacket: transaction.isRedPacket,
       subOperations: []
     };
@@ -475,6 +477,7 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
         }
         transactionInfo.name = await this.getTransactionName(transaction);
         transactionInfo.payStatusIcon = await this.getTransactionIconPath(transaction);
+        transactionInfo.isCrossChain = await this.isCrossChainWithdrawToMainChain(transaction);
       }
     });
 
@@ -553,6 +556,18 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
     }
 
     return null;
+  }
+
+  private async isCrossChainWithdrawToMainChain(transaction: EthTransaction) {
+    // Use extended info is there is some
+    let extInfo = await this.networkWallet.getExtendedTxInfo(transaction.hash);
+    // Send ELA from pgp side chain to main chain
+    if (extInfo && extInfo.evm && extInfo.evm.txInfo && extInfo.evm.txInfo.type == ETHOperationType.WITHDRAW
+        && extInfo.evm.txInfo.operation.descriptionTranslationParams?.toAddress) {
+      return true;
+    }
+
+    return false;
   }
 
   public createWithdrawTransaction(
