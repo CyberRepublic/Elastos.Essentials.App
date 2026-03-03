@@ -30,6 +30,10 @@ export class EthereumMainNetNetwork extends EthereumBaseNetwork {
         {
           name: 'Ethereum RPC',
           url: 'https://eth.llamarpc.com'
+        },
+        {
+          name: 'Blast API',
+          url: 'https://eth-mainnet.public.blastapi.io'
         }
       ],
       [],
