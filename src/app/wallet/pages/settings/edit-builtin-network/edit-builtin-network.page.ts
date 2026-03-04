@@ -178,7 +178,10 @@ export class EditBuiltinNetworkPage implements OnInit {
       await this.networkService.setBuiltinNetworkOverride(this.network.key, override);
     } else {
       // Remove any existing override since values match defaults
-      await this.networkService.removeBuiltinNetworkOverride(this.network.key);
+      const firstRpcUrl = this.allRpcProviders[0]?.url;
+      if (currentSelectedRpcUrl === firstRpcUrl) {
+        await this.networkService.removeBuiltinNetworkOverride(this.network.key);
+      }
     }
 
     // Save visibility setting
