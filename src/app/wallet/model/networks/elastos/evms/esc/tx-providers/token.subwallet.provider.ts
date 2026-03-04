@@ -108,7 +108,7 @@ export class ElastosTokenSubWalletProvider extends SubWalletTransactionProvider<
 
       this.mergeTransactions(transactions, accountAddress);
 
-      await this.saveTransactions(transactions);
+      await this.saveTransactions(transactions, !afterTransaction);
     } catch (e) {
       Logger.error('wallet', 'ElastosTokenSubWalletProvider fetchTransactions error:', e);
     }

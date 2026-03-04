@@ -178,9 +178,18 @@ export abstract class TransactionProvider<TransactionType extends GenericTransac
     }
 
     if (!afterTransaction) {
-      // Compute the current last transaction to start fetching after that one.
+      // Use getFetchedCount when available (tracks network fetches, handles both stale cache and incremental).
+      // Fallback to last element when count not tracked (e.g. cache loaded from disk before any fetch).
       let currentTransactions = await this.getTransactions(subWallet);
-      if (currentTransactions) afterTransaction = currentTransactions[currentTransactions.length - 1];
+      if (currentTransactions && currentTransactions.length > 0) {
+        const provider = this.getSubWalletTransactionProvider(subWallet);
+        const cacheKey = subWallet.getTransactionsCacheKey();
+        const fetchedCount = provider?.getFetchedCount?.(cacheKey) ?? 0;
+        const cursorIndex = fetchedCount > 0
+          ? Math.min(fetchedCount - 1, currentTransactions.length - 1)
+          : currentTransactions.length - 1;
+        afterTransaction = currentTransactions[cursorIndex];
+      }
     }
 
     // Fetching

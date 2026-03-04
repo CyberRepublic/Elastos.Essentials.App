@@ -16,6 +16,8 @@ export abstract class SubWalletTransactionProvider<SubWalletType extends AnySubW
   // Disk cache for fast/offline display of transactions when entering a screen.
   // Always contains only the N most recent transactions
   protected transactionsCache: Map<string, TimeBasedPersistentCache<TransactionType>>;
+  // Number of transactions fetched from network (for pagination cursor). Resets on fetchNewest, accumulates on fetchMore.
+  private fetchedCountByCacheKey: Map<string, number> = new Map();
 
   constructor(protected provider: TransactionProvider<any>, protected subWallet: SubWalletType) {
   }
@@ -62,7 +64,10 @@ export abstract class SubWalletTransactionProvider<SubWalletType extends AnySubW
     return cache;
   }
 
-  public async saveTransactions(newTransactions: TransactionType[]): Promise<void> {
+  /**
+   * @param isNewestFetch When true (fetchNewestTransactions), resets fetched count. When false (fetchMore), adds to count.
+   */
+  public async saveTransactions(newTransactions: TransactionType[], isNewestFetch?: boolean): Promise<void> {
     //console.log("DEBUG saveTransactions newTransactions=", newTransactions);
 
     if (!newTransactions)
@@ -84,6 +89,16 @@ export abstract class SubWalletTransactionProvider<SubWalletType extends AnySubW
 
       modifiedCaches.set(providerTransactionInfo.cacheKey, cache); // Same key, same cache, but we want to save each cache only once
       modifiedTransactionListsSubjects.set(providerTransactionInfo.subjectKey, providerTransactionInfo.subjectKey); // unique list of subject keys to notify in the end
+    }
+
+    for (const cacheKey of modifiedCaches.keys()) {
+      if (isNewestFetch === true) {
+        this.fetchedCountByCacheKey.set(cacheKey, newTransactions.length);
+      } else if (isNewestFetch === false) {
+        const prev = this.fetchedCountByCacheKey.get(cacheKey) || 0;
+        this.fetchedCountByCacheKey.set(cacheKey, prev + newTransactions.length);
+      }
+      // undefined: don't update (e.g. updateTransactions from other sources)
     }
 
     for (let cache of modifiedCaches.values()) {
@@ -123,6 +138,21 @@ export abstract class SubWalletTransactionProvider<SubWalletType extends AnySubW
    * have in the cache right now.
    */
   public abstract canFetchMoreTransactions(subWallet: AnySubWallet): boolean;
+
+  /**
+   * Returns the number of transactions fetched in the first/initial request.
+   */
+  public getInitialFetchSize(): number {
+    return 30;
+  }
+
+  /**
+   * Returns the number of transactions fetched from network so far (for pagination cursor).
+   * Use the transaction at index (getFetchedCount - 1) as afterTransaction.
+   */
+  public getFetchedCount(cacheKey: string): number {
+    return this.fetchedCountByCacheKey.get(cacheKey) || 0;
+  }
 
   /**
    * Fetches transactions (real network call). If afterTransaction if not given, the most recent transactions

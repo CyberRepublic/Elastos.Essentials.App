@@ -81,7 +81,7 @@ export class EtherscanEVMSubWalletProvider<SubWalletType extends AnySubWallet> e
         this.canFetchMore = false;
       }
 
-      await this.saveTransactions(transactions);
+      await this.saveTransactions(transactions, !afterTransaction);
     } catch (e) {
       Logger.error('wallet', 'EVMSubWalletProvider fetchTransactions error:', e)
     }

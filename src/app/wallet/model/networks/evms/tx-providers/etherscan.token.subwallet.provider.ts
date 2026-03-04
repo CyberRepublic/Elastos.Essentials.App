@@ -93,7 +93,7 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
       this.chainid);
 
     this.canFetchMore = canFetchMore;
-    await this.saveTransactions(transactions);
+    await this.saveTransactions(transactions, !afterTransaction);
   }
 
   public async discoverTokens(): Promise<void> {
