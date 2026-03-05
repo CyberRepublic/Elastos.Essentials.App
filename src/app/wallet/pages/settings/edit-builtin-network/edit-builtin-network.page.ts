@@ -171,9 +171,9 @@ export class EditBuiltinNetworkPage implements OnInit {
       // Save the override
       const override: BuiltinNetworkOverride = {
         networkKey: this.network.key,
+        selectedRpcUrl: this.selectedRpcUrl.trim(),
         ...(nameChanged && { name: this.editedName.trim() }),
-        ...(customRpcProviders.length > 0 && { customRpcUrls: customRpcProviders }),
-        ...(selectedRpcUrlChanged && { selectedRpcUrl: this.selectedRpcUrl.trim() })
+        ...(customRpcProviders.length > 0 && { customRpcUrls: customRpcProviders })
       };
       await this.networkService.setBuiltinNetworkOverride(this.network.key, override);
     } else {
