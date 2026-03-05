@@ -362,6 +362,11 @@ export class EVMService {
     }
   }
 
+  public clearWeb3Cache() {
+    this.web3s = {};
+    Logger.log('wallet', 'Web3 cache cleared');
+  }
+
   /**
    * Returns a ETHERSJS json rpc provider. Beware, don't mix Web3 and Ethers providers...
    */

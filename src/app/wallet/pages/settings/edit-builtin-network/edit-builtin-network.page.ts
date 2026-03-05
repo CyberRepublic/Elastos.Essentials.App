@@ -9,6 +9,7 @@ import { GlobalPopupService } from 'src/app/services/global.popup.service';
 import { GlobalThemeService } from 'src/app/services/theming/global.theme.service';
 import type { AnyNetwork } from 'src/app/wallet/model/networks/network';
 import type { RPCUrlProvider } from 'src/app/wallet/model/rpc-url-provider';
+import { EVMService } from 'src/app/wallet/services/evm/evm.service';
 import { Native } from 'src/app/wallet/services/native.service';
 import { BuiltinNetworkOverride, WalletNetworkService } from 'src/app/wallet/services/network.service';
 import { RpcProvidersQualityService, RpcProviderStatus } from 'src/app/wallet/services/rpc-providers-quality.service';
@@ -168,6 +169,15 @@ export class EditBuiltinNetworkPage implements OnInit {
 
     // Save changes
     if (nameChanged || selectedRpcUrlChanged || customRpcProviders.length > 0) {
+      // if the RPC URL changed and the network is an EVM network, then clear the Web3 cache
+      if (
+        selectedRpcUrlChanged &&
+        this.network.isEVMNetwork() &&
+        this.networkService.activeNetwork.value?.key === this.network.key
+      ) {
+        EVMService.instance.clearWeb3Cache();
+      }
+
       // Save the override
       const override: BuiltinNetworkOverride = {
         networkKey: this.network.key,

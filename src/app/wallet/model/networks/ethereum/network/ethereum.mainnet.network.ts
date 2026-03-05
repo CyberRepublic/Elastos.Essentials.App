@@ -10,6 +10,7 @@ import {
 import { ethereumMainnetUniswapSwapProvider } from '../earn/swap.providers';
 import { EthereumAPI, EthereumAPIType } from './ethereum.api';
 import { EthereumBaseNetwork } from './ethereum.base.network';
+import { GlobalJsonRPCService } from 'src/app/services/global.jsonrpc.service';
 
 // https://rpc.info/#ethereum-rpc
 export class EthereumMainNetNetwork extends EthereumBaseNetwork {
@@ -52,6 +53,12 @@ export class EthereumMainNetNetwork extends EthereumBaseNetwork {
 
     this.uniswapCurrencyProvider = new EthereumMainnetUniswapCurrencyProvider(this);
     this.averageBlocktime = 15;
+
+    // Register a limitator to limit api requests speed on Ethereum> Mostly because of the free API key
+    // rate limitation of Etherscan: max 5 request per IP per second on the free tier.
+    GlobalJsonRPCService.instance.registerLimitator(this.key, {
+      minRequestsInterval: 300 // 5 req per sec max = 1 request / 200 ms + some margin
+    });
   }
 
   public getAPIUrlOfType(type: NetworkAPIURLType): string {
