@@ -26,6 +26,10 @@ export class PolygonMainNetNetwork extends PolygonBaseNetwork {
         {
           name: 'Polygon RPC',
           url: 'https://polygon-rpc.com/'
+        },
+        {
+          name: 'dRPC',
+          url: 'https://polygon.drpc.org'
         }
       ],
       [polygonMainnetElkEarnProvider],
