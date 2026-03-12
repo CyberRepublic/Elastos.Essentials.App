@@ -8,7 +8,7 @@ export class PolygonTestNetNetwork extends PolygonBaseNetwork {
       'Polygon Mumbai (Goërli)',
       'Polygon Mumbai',
       'assets/wallet/networks/polygon.png',
-      'MATIC',
+      'POL',
       'Polygon Coin',
       TESTNET_TEMPLATE,
       80001,

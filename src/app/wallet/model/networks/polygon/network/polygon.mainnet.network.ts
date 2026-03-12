@@ -17,7 +17,7 @@ export class PolygonMainNetNetwork extends PolygonBaseNetwork {
       'Polygon',
       'Polygon',
       'assets/wallet/networks/polygon.png',
-      'MATIC',
+      'POL',
       'Polygon Coin',
       MAINNET_TEMPLATE,
       137,
