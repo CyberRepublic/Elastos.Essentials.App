@@ -253,6 +253,13 @@ class ETHTransactionManager {
         nonce: parseInt(result.nonce)
       };
       this.emitEthTransactionStatusChange(status);
+
+      // Save to cache when tx is packed (for chains where fetchTransactions fails)
+      try {
+        await subwallet.savePublishedTransactionToCache(txid);
+      } catch (err) {
+        Logger.warn('wallet', 'savePublishedTransactionToCache failed:', err);
+      }
     } else {
       this.checkTimes++;
       if (this.checkTimes < this.waitforTimes) {

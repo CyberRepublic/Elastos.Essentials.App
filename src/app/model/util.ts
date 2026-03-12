@@ -317,4 +317,18 @@ export class Util {
     let ret = buf.toString("hex");
     return ret;
   }
+
+  public static isServerRejectedOrInaccessible(err: any, responseData?: any): boolean {
+    const status = err?.status ?? err?.statusCode;
+    if (typeof status === 'number' && (status >= 400 || status < 0)) return true;
+
+    const msg = String(err?.message ?? err?.error ?? err ?? '').toLowerCase();
+    if (msg.includes('timeout') || msg.includes('connection') || msg.includes('network') || msg.includes('refused')) return true;
+    if (responseData && typeof responseData === 'string') {
+      const s = responseData.toLowerCase();
+      if (/<!doctype\s+html>/i.test(s) || s.includes('access denied') || (s.includes('cloudflare') && s.includes('restrict'))) return true;
+    }
+
+    return false;
+  }
 }

@@ -11,6 +11,7 @@ import { ERC20SubWallet } from "../subwallets/erc20.subwallet";
 import { MainCoinEVMSubWallet } from "../subwallets/evm.subwallet";
 import { EtherscanHelper } from "./etherscan.helper";
 import { EVMNetwork } from "../evm.network";
+import { Util } from "src/app/model/util";
 
 const MAX_RESULTS_PER_FETCH = 30
 
@@ -244,6 +245,11 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
   }
 
   private async getTokenTransferEventsByAction(address: string, action: AccountAction, startblock: number, endblock = 9999999999): Promise<EthTokenTransaction[]> {
+    if (this.isFetchTransactionsBlocked()) {
+      Logger.warn('wallet', 'getTokenTransferEventsByAction blocked');
+      return [];
+    }
+
     let tokensEventUrl = this.subWallet.networkWallet.network.getAPIUrlOfType(NetworkAPIURLType.ETHERSCAN)
       + '?module=account&action=' + action + '&address=' + address
       + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=asc';
@@ -259,16 +265,29 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
 
     try {
       let result = await GlobalJsonRPCService.instance.httpGet(tokensEventUrl, this.subWallet.networkWallet.network.key);
+      if (Util.isServerRejectedOrInaccessible(null, result.result)) {
+        this.blockFetch();
+      }
+
       if (result.result instanceof Array) {
+        this.unblockFetch();
         return result.result as EthTokenTransaction[];
       } else return [];
     } catch (e) {
       Logger.error('wallet', 'getTokenTransferEventsByAction error:', e)
+      if (Util.isServerRejectedOrInaccessible(e, null)) {
+        this.blockFetch();
+      }
       return [];
     }
   }
 
   private async getTokenTransferEventsByContractAddress(address: string, contractAddress: string, action: AccountAction, startblock: number, endblock = 9999999999): Promise<EthTokenTransaction[]> {
+    if (this.isFetchTransactionsBlocked()) {
+      Logger.warn('wallet', 'getTokenTransferEventsByContractAddress blocked');
+      return [];
+    }
+
     let tokensEventUrl = this.subWallet.networkWallet.network.getAPIUrlOfType(NetworkAPIURLType.ETHERSCAN)
       + '?module=account&action=' + action + '&address=' + address
       + '&contractaddress=' + contractAddress
@@ -285,11 +304,19 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
 
     try {
       let result = await GlobalJsonRPCService.instance.httpGet(tokensEventUrl, this.subWallet.networkWallet.network.key);
+      if (Util.isServerRejectedOrInaccessible(null, result.result)) {
+        this.blockFetch();
+      }
+
       if (result.result instanceof Array) {
+        this.unblockFetch();
         return result.result as EthTokenTransaction[];
       } else return [];
     } catch (e) {
       Logger.error('wallet', 'getTokenTransferEventsByContractAddress error:', e)
+      if (Util.isServerRejectedOrInaccessible(e)) {
+        this.blockFetch();
+      }
       return [];
     }
   }

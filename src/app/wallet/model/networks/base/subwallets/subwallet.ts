@@ -444,6 +444,23 @@ export abstract class SubWallet<
   protected abstract publishTransaction(signedTransaction: string, visualFeedback?: boolean): Promise<string>;
 
   /**
+   * Hook called after a transaction is successfully published.
+   * Subwallets can override this to save the transaction to cache when fetchTransactions fails for their chain.
+   * Default implementation does nothing.
+   */
+  protected async onTransactionPublishedSuccessfully(txid: string): Promise<void> {
+    // Default: no-op. Subwallets (e.g. chains where fetchTransactions fails) can override to save to cache.
+  }
+
+  /**
+   * Save published transaction to cache. Called when tx is confirmed on chain (e.g. EVM when packed).
+   * Default no-op; EVM subwallets override to save when fetchTransactions fails for their chain.
+   */
+  public async savePublishedTransactionToCache(_txid: string): Promise<void> {
+    // Default: no-op
+  }
+
+  /**
    * (Optionally) Internally called by implementations of publishTransaction() to display a generic publication
    * dialog.
    */
@@ -536,6 +553,15 @@ export abstract class SubWallet<
       await this.markGenericOutgoingTransactionEnd(txid);
 
       Logger.log('wallet', 'publishTransaction txid:', txid);
+
+      // Save published transaction to cache for chains where fetchTransactions fails
+      if (txid) {
+        try {
+          await this.onTransactionPublishedSuccessfully(txid);
+        } catch (err) {
+          Logger.warn('wallet', 'onTransactionPublishedSuccessfully failed:', err);
+        }
+      }
 
       if (navigateHomeAfterCompletion && txid) {
         await Native.instance.setRootRouter('/wallet/wallet-home');

@@ -7,6 +7,7 @@ import { TransactionProvider } from "./transaction.provider";
 import { AnyOfflineTransaction, GenericTransaction } from "./transaction.types";
 
 export type AnySubWalletTransactionProvider = SubWalletTransactionProvider<any, any>;
+const DOMAIN_BLOCK_DURATION_MS = 120 * 1000; // 2 minutes
 
 /**
  * One provider can have multiple caches/paginated lists.
@@ -18,6 +19,9 @@ export abstract class SubWalletTransactionProvider<SubWalletType extends AnySubW
   protected transactionsCache: Map<string, TimeBasedPersistentCache<TransactionType>>;
   // Number of transactions fetched from network (for pagination cursor). Resets on fetchNewest, accumulates on fetchMore.
   private fetchedCountByCacheKey: Map<string, number> = new Map();
+
+  /** Timestamp until which fetch is blocked (rate limiting). null = not blocked. */
+  private fetchBlockedUntilTimestamp: number | null = null;
 
   constructor(protected provider: TransactionProvider<any>, protected subWallet: SubWalletType) {
   }
@@ -159,4 +163,20 @@ export abstract class SubWalletTransactionProvider<SubWalletType extends AnySubW
    * are fetched.
    */
   public abstract fetchTransactions(subWallet: AnySubWallet, afterTransaction?: GenericTransaction);
+
+
+  protected blockFetch(): void {
+    this.fetchBlockedUntilTimestamp = Date.now() + DOMAIN_BLOCK_DURATION_MS;
+  }
+
+  protected unblockFetch(): void {
+    this.fetchBlockedUntilTimestamp = null;
+  }
+
+  protected isFetchTransactionsBlocked(): boolean {
+    if (!this.fetchBlockedUntilTimestamp) {
+      return false;
+    }
+    return Date.now() <= this.fetchBlockedUntilTimestamp;
+  }
 }

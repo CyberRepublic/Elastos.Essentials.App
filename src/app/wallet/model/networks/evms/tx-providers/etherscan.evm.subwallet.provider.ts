@@ -7,6 +7,7 @@ import { NetworkAPIURLType } from "../../base/networkapiurltype";
 import { AnySubWallet } from "../../base/subwallets/subwallet";
 import { EtherscanAPIVersion, EthTransaction } from "../evm.types";
 import { EVMNetwork } from "../evm.network";
+import { Util } from "src/app/model/util";
 
 const MAX_RESULTS_PER_FETCH = 30;
 
@@ -36,6 +37,11 @@ export class EtherscanEVMSubWalletProvider<SubWalletType extends AnySubWallet> e
   }
 
   public async fetchTransactions(subWallet: AnySubWallet, afterTransaction?: EthTransaction): Promise<void> {
+    if (this.isFetchTransactionsBlocked()) {
+      Logger.warn('wallet', 'fetchTransactions blocked');
+      return null;
+    }
+
     const accountAddress = this.subWallet.getCurrentReceiverAddress();
 
     let page = 1;
@@ -70,6 +76,13 @@ export class EtherscanEVMSubWalletProvider<SubWalletType extends AnySubWallet> e
     try {
       // Logger.warn('wallet', 'fetchTransactions txListUrl:', txListUrl)
       let result = await GlobalJsonRPCService.instance.httpGet(txListUrl, this.subWallet.networkWallet.network.key);
+      if (Util.isServerRejectedOrInaccessible(null, result.result)) {
+        this.blockFetch();
+      }
+      else {
+        this.unblockFetch();
+      }
+
       let transactions = result.result as EthTransaction[];
       if (!(transactions instanceof Array)) {
         Logger.warn('wallet', 'etherscan fetchTransactions invalid transactions:', transactions)
@@ -84,6 +97,9 @@ export class EtherscanEVMSubWalletProvider<SubWalletType extends AnySubWallet> e
       await this.saveTransactions(transactions, !afterTransaction);
     } catch (e) {
       Logger.error('wallet', 'EVMSubWalletProvider fetchTransactions error:', e)
+      if (Util.isServerRejectedOrInaccessible(e)) {
+        this.blockFetch();
+      }
     }
     return null;
   }

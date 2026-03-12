@@ -383,6 +383,29 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
     return result;
   }
 
+  /**
+   * EVM saves to cache when packed (in evm.service checkPublicationStatusAndUpdate), not on immediate publish.
+   */
+  protected async onTransactionPublishedSuccessfully(_txid: string): Promise<void> {
+    // No-op: EVM saves when tx is packed on chain, see evm.service checkPublicationStatusAndUpdate
+  }
+
+  /**
+   * Save published transaction to cache when packed on chain. Called from evm.service when result.blockHash exists.
+   */
+  public async savePublishedTransactionToCache(txid: string): Promise<void> {
+    const txProvider = this.networkWallet.getTransactionDiscoveryProvider();
+    if (!txProvider) return;
+
+    const transaction = await this.getTransactionDetails(txid);
+    if (!transaction) return;
+
+    if (!transaction.hash) transaction.hash = txid;
+    if (!transaction.timeStamp) transaction.timeStamp = String(Math.floor(Date.now() / 1000));
+
+    await txProvider.updateTransactions(this, [transaction]);
+  }
+
   public async getTransactionInfo(transaction: EthTransaction): Promise<TransactionInfo> {
     if (transaction.hide) return null;
 
