@@ -393,15 +393,14 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
   /**
    * Save published transaction to cache when packed on chain. Called from evm.service when result.blockHash exists.
    */
-  public async savePublishedTransactionToCache(txid: string): Promise<void> {
+  public async savePublishedTransactionToCache(transaction: EthTransaction): Promise<void> {
     const txProvider = this.networkWallet.getTransactionDiscoveryProvider();
     if (!txProvider) return;
 
-    const transaction = await this.getTransactionDetails(txid);
-    if (!transaction) return;
-
-    if (!transaction.hash) transaction.hash = txid;
+    if (!transaction.hash) transaction.hash = transaction.transactionHash;
     if (!transaction.timeStamp) transaction.timeStamp = String(Math.floor(Date.now() / 1000));
+
+    if (!transaction.contractAddress) transaction.contractAddress = this.id.toLowerCase();
 
     await txProvider.updateTransactions(this, [transaction]);
   }
@@ -630,7 +629,7 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
       // '* 1.5': Make sure the gaslimit is big enough.
       gasLimit = Util.ceil(gasTemp * 1.5);
     } catch (error) {
-      Logger.log('wallet', 'estimateGas error:', error);
+      Logger.warn('wallet', 'ERC20SubWallet estimateTransferTransactionGas() error:', error);
     }
     return gasLimit;
   }
@@ -656,7 +655,6 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
       gasPrice = await highPriorityWeb3.eth.getGasPrice();
     }
 
-    Logger.log('wallet', 'createPaymentTransaction toAddress:', toAddress, ' amount:', amount, 'gasPrice:', gasPrice);
     // Convert the Token amount (ex: 20 TTECH) to contract amount (=token amount (20) * 10^decimals)
     let amountWithDecimals: BigNumber;
     if (amount.eq(-1)) {
@@ -674,6 +672,8 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
     if (gasLimit == null) {
       gasLimit = (await this.estimateTransferTransactionGas()).toString();
     }
+
+    Logger.log('wallet', 'ERC20SubWallet createPaymentTransaction toAddress:', toAddress, ' amount:', amount.toString(), 'gasPrice:', gasPrice, 'gasLimit:', gasLimit);
 
     let nonce = await this.getNonce();
     return (this.networkWallet.safe as unknown as EVMSafe).createContractTransaction(

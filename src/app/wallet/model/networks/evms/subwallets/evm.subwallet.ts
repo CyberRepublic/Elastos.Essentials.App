@@ -153,14 +153,11 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
   /**
    * Save published transaction to cache when packed on chain. Called from evm.service when result.blockHash exists.
    */
-  public async savePublishedTransactionToCache(txid: string): Promise<void> {
+  public async savePublishedTransactionToCache(transaction: EthTransaction): Promise<void> {
     const txProvider = this.networkWallet.getTransactionDiscoveryProvider();
     if (!txProvider) return;
 
-    const transaction = await this.getTransactionDetails(txid);
-    if (!transaction) return;
-
-    if (!transaction.hash) transaction.hash = txid;
+    if (!transaction.hash) transaction.hash = transaction.transactionHash;
     if (!transaction.timeStamp) transaction.timeStamp = String(Math.floor(Date.now() / 1000));
 
     await txProvider.updateTransactions(this, [transaction]);
@@ -652,7 +649,7 @@ export class MainCoinEVMSubWallet<WalletNetworkOptionsType extends WalletNetwork
    */
   public async getGasPrice(): Promise<string> {
     const gasPrice = await (await this.getWeb3(true)).eth.getGasPrice();
-    //Logger.log('wallet', "GAS PRICE: ", gasPrice)
+    // Logger.log('wallet', "MainCoinEVMSubWallet getGasPrice: ", gasPrice)
     return gasPrice;
   }
 

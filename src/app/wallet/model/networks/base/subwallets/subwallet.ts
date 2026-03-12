@@ -22,7 +22,7 @@ import type {
   RawTransactionPublishResult,
   TransactionInfo
 } from '../../../tx-providers/transaction.types';
-import { TransactionListType } from '../../evms/evm.types';
+import { EthTransaction, TransactionListType } from '../../evms/evm.types';
 import type { NetworkWallet } from '../networkwallets/networkwallet';
 
 export abstract class SubWallet<
@@ -455,8 +455,9 @@ export abstract class SubWallet<
   /**
    * Save published transaction to cache. Called when tx is confirmed on chain (e.g. EVM when packed).
    * Default no-op; EVM subwallets override to save when fetchTransactions fails for their chain.
+   * @param transaction - full transaction object to avoid redundant getTransactionDetails call
    */
-  public async savePublishedTransactionToCache(_txid: string): Promise<void> {
+  public async savePublishedTransactionToCache(transaction: EthTransaction): Promise<void> {
     // Default: no-op
   }
 

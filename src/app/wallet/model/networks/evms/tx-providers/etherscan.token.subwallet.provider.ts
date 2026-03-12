@@ -68,6 +68,11 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
   }
 
   public async fetchTransactions(erc20SubWallet: ERC20SubWallet, afterTransaction?: EthTransaction): Promise<void> {
+    if (this.isFetchTransactionsBlocked()) {
+      Logger.warn('wallet', 'fetchTransactions blocked');
+      return;
+    }
+
     let page = 1;
     // Compute the page to fetch from the api, based on the current position of "afterTransaction" in the list
     if (afterTransaction) {
@@ -92,6 +97,12 @@ export class EtherscanEVMSubWalletTokenProvider<SubWalletType extends MainCoinEV
       this.apiKey,
       this.apiVersion,
       this.chainid);
+
+    if (!transactions) {
+      this.blockFetch();
+      return;
+    }
+    this.unblockFetch();
 
     this.canFetchMore = canFetchMore;
     await this.saveTransactions(transactions, !afterTransaction);

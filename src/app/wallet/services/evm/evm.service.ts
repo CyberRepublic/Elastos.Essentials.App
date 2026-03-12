@@ -256,7 +256,8 @@ class ETHTransactionManager {
 
       // Save to cache when tx is packed (for chains where fetchTransactions fails)
       try {
-        await subwallet.savePublishedTransactionToCache(txid);
+        if (!result.hash) result.hash = txid;
+        await subwallet.savePublishedTransactionToCache(result);
       } catch (err) {
         Logger.warn('wallet', 'savePublishedTransactionToCache failed:', err);
       }
