@@ -402,6 +402,15 @@ export class ERC20SubWallet extends SubWallet<EthTransaction, any> {
 
     if (!transaction.contractAddress) transaction.contractAddress = this.id.toLowerCase();
 
+    // Parse ERC20 transfer input to fill to and value (RPC may return contract address and 0 for token txs)
+    if (transaction.input) {
+      const parsed = await ETHTransactionInfoParser.parseERC20TransferInput(transaction.input);
+      if (parsed) {
+        transaction.to = parsed.to;
+        transaction.value = parsed.value;
+      }
+    }
+
     await txProvider.updateTransactions(this, [transaction]);
   }
 

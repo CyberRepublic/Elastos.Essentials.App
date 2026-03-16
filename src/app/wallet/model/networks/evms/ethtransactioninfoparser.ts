@@ -73,6 +73,11 @@ export type ETHTransactionInfo = {
  * Utility to extract various information such as a called method name, from a received web3 transaction
  * data (ex: 0x.......).
  */
+/** ERC20 transfer(address,uint256) */
+const ERC20_TRANSFER_SELECTOR = '0xa9059cbb';
+/** ERC20/ERC721 transferFrom(address,address,uint256) */
+const ERC20_TRANSFER_FROM_SELECTOR = '0x23b872dd';
+
 export class ETHTransactionInfoParser {
   constructor(private network: AnyNetwork) {}
 
@@ -956,5 +961,47 @@ export class ETHTransactionInfoParser {
       events: []
     };
     return txInfo;
+  }
+
+
+  /**
+   * Parse ERC20 transfer/transferFrom input to extract recipient and value.
+   * Supports: transfer(address,uint256), transferFrom(address,address,uint256)
+   * @returns {to, value} or null if not a supported ERC20 transfer
+   */
+  public static async parseERC20TransferInput(input: string): Promise<{ to: string; value: string } | null> {
+    if (!input || !input.startsWith('0x') || input.length < 10) return null;
+    const selector = input.substring(0, 10).toLowerCase();
+    const abiAndExtractor: [string[], (args: any[]) => { to: any; value: any }] = (() => {
+      switch (selector) {
+        case ERC20_TRANSFER_SELECTOR:
+          return [
+            ['function transfer(address,uint256) public returns (bool success)'],
+            args => ({ to: args[0], value: args[1] })
+          ];
+        case ERC20_TRANSFER_FROM_SELECTOR:
+          return [
+            ['function transferFrom(address,address,uint256) public returns (bool success)'],
+            args => ({ to: args[1], value: args[2] })
+          ];
+        default:
+          return null;
+      }
+    })();
+    if (!abiAndExtractor) return null;
+    try {
+      const { utils } = await lazyEthersImport();
+      const iface = new utils.Interface(abiAndExtractor[0]);
+      const decoded = iface.parseTransaction({ data: input });
+      if (!decoded?.args || decoded.args.length < (selector === ERC20_TRANSFER_FROM_SELECTOR ? 3 : 2)) return null;
+      const { to, value } = abiAndExtractor[1](Array.from(decoded.args));
+      const toStr = typeof to === 'string' ? to : (to?.toString?.() ?? '');
+      return {
+        to: toStr.toLowerCase(),
+        value: value != null ? String(value) : '0'
+      };
+    } catch {
+      return null;
+    }
   }
 }
