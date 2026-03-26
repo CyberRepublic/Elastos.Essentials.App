@@ -894,6 +894,7 @@ export const zh = {
     'ext-tx-info-type-close-order': '关闭订单',
     'ext-tx-info-type-claim-timeout-compensation': '领取超时补偿',
     'ext-tx-info-type-request-arbitration': '请求仲裁',
+    'ext-tx-info-type-repurchase': '回购订单',
     'ext-tx-info-type-deposit-from-mainchain': '主链充值',
 
     /********************************

@@ -780,6 +780,10 @@ export class ETHTransactionInfoParser {
         txInfo.type = ETHOperationType.BTCD;
         txInfo.operation = { description: 'wallet.ext-tx-info-type-request-arbitration' };
         break;
+      case '0x14719e7b': // timeoutRepay(string repayerBtcAddress)
+        txInfo.type = ETHOperationType.BTCD;
+        txInfo.operation = { description: 'wallet.ext-tx-info-type-repurchase' };
+        break;
 
       // Staking
       case '0x8305e5af': // create staking contract
