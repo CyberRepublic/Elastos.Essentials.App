@@ -24,6 +24,7 @@ import { SendBitcoinPage } from './sendbitcoin/sendbitcoin.page';
 import { SignTypedDataPage } from './signtypeddata/signtypeddata.page';
 import { ElamainSignMessagePage } from './elamainsignmessage/elamainsignmessage.page';
 import { SignBitcoinDataPage } from './signbitcoindata/signbitcoindata.page';
+import { SignBitcoinPsbtPage } from './signbitcoinpsbt/signbitcoinpsbt.page';
 import { SignBitcoinMessagePage } from './signbitcoinmessage/signbitcoinmessage.page';
 import { PushBitcoinTxPage } from './pushbitcointx/pushbitcointx.page';
 
@@ -43,6 +44,7 @@ import { PushBitcoinTxPage } from './pushbitcointx/pushbitcointx.page';
         PushBitcoinTxPage,
         SendBitcoinPage,
         SignBitcoinDataPage,
+        SignBitcoinPsbtPage,
         SignBitcoinMessagePage,
         ElamainSignMessagePage
     ],
@@ -71,6 +73,7 @@ import { PushBitcoinTxPage } from './pushbitcointx/pushbitcointx.page';
             { path: 'pushbitcointx', component: PushBitcoinTxPage },
             { path: 'sendbitcoin', component: SendBitcoinPage },
             { path: 'signbitcoindata', component: SignBitcoinDataPage },
+            { path: 'signbitcoinpsbt', component: SignBitcoinPsbtPage },
             { path: 'signbitcoinmessage', component: SignBitcoinMessagePage },
             { path: 'elamainsignmessage', component: ElamainSignMessagePage },
         ])

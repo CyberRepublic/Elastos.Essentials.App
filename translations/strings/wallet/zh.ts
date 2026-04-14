@@ -656,6 +656,15 @@ export const zh = {
     'signbitcoindata-enable-signdata-request':
       '这个请求可能存在危险。 请先在Essentials设置 → 隐私中启用 Bitcoin signData()功能',
 
+    'signbitcoinpsbt-title': '签署 PSBT',
+    'signbitcoinpsbt-hex-label': 'PSBT（十六进制）',
+    'signbitcoinpsbt-options-label': '签名选项',
+    'signbitcoinpsbt-inputs-title': '输入：({{count}})',
+    'signbitcoinpsbt-outputs-title': '输出：({{count}})',
+    'signbitcoinpsbt-psbt-data-title': 'PSBT 数据：',
+    'signbitcoinpsbt-to-sign-badge': '待签名',
+    'signbitcoinpsbt-parse-error': '无法解析此 PSBT。您仍可复制下方的原始数据。',
+
     /***********************
      * Push Bitcoin Tx Page *
      ************************/

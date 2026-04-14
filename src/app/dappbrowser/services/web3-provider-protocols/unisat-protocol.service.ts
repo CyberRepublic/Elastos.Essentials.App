@@ -100,6 +100,9 @@ export class UnisatProtocolService {
       case 'unisat_signData':
         await this.handleBitcoinSignData(message);
         break;
+      case 'unisat_signPsbt':
+        await this.handleBitcoinSignPsbt(message);
+        break;
       default:
         Logger.warn('unisatprotocol', 'Unhandled unisat message command', message.data.name);
     }
@@ -489,6 +492,40 @@ export class UnisatProtocolService {
       });
       if (responseSigndata.result.signature) {
         this.sendInjectedResponse('unisat', message.data.id, responseSigndata.result.signature);
+      } else {
+        this.sendInjectedError('unisat', message.data.id, {
+          code: 4001,
+          message: 'User rejected the request.'
+        });
+      }
+    } catch (e) {
+      this.sendInjectedError('unisat', message.data.id, e);
+    }
+  }
+
+  private async handleBitcoinSignPsbt(message: DABMessage): Promise<void> {
+    try {
+      if (!this.activeBTCWallet) {
+        this.sendInjectedError('unisat', message.data.id, {
+          code: 4001,
+          message: 'No Bitcoin wallet connected.'
+        });
+        return;
+      }
+
+      const responsePsbt: {
+        action: string;
+        result: {
+          signedPsbt: string;
+        };
+      } = await GlobalIntentService.instance.sendIntent('https://wallet.web3essentials.io/signbitcoinpsbt', {
+        masterWalletId: this.activeBTCWallet.masterWallet.id,
+        payload: {
+          params: [message.data.object]
+        }
+      });
+      if (responsePsbt.result.signedPsbt) {
+        this.sendInjectedResponse('unisat', message.data.id, responsePsbt.result.signedPsbt);
       } else {
         this.sendInjectedError('unisat', message.data.id, {
           code: 4001,

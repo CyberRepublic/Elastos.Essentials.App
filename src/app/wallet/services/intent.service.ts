@@ -233,6 +233,11 @@ export class IntentService {
         this.coinTransferService.masterWalletId = intent.params.masterWalletId;
         navigationState = JSON.parse(JSON.stringify(intent));
         break;
+      case 'signbitcoinpsbt':
+        this.nextScreen = '/wallet/intents/signbitcoinpsbt';
+        this.coinTransferService.masterWalletId = intent.params.masterWalletId;
+        navigationState = JSON.parse(JSON.stringify(intent));
+        break;
       case 'signbitcoinmessage':
         this.nextScreen = '/wallet/intents/signbitcoinmessage';
         this.coinTransferService.masterWalletId = intent.params.masterWalletId;

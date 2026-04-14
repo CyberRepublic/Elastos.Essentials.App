@@ -669,6 +669,15 @@ export const en = {
     'signbitcoindata-enable-signdata-request':
       'This request can be dangerous. Please enable the Bitcoin signData() feature in the Essentials Settings → Privacy section',
 
+    'signbitcoinpsbt-title': 'Sign PSBT',
+    'signbitcoinpsbt-hex-label': 'PSBT (hex)',
+    'signbitcoinpsbt-options-label': 'Signing options',
+    'signbitcoinpsbt-inputs-title': 'Inputs: ({{count}})',
+    'signbitcoinpsbt-outputs-title': 'Outputs: ({{count}})',
+    'signbitcoinpsbt-psbt-data-title': 'PSBT Data:',
+    'signbitcoinpsbt-to-sign-badge': 'to sign',
+    'signbitcoinpsbt-parse-error': 'Could not parse this PSBT. You can still copy the raw data below.',
+
     /***********************
      * Push Bitcoin Tx Page *
      ************************/

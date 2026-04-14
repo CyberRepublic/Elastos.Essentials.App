@@ -88,6 +88,7 @@ const supportedEIP155Methods = [
   'wallet_watchAsset',
   // Bitcoin
   'unisat_signData',
+  'unisat_signPsbt',
   'unisat_sendBitcoin',
   'unisat_signMessage',
   'unisat_getPublicKey',
@@ -451,6 +452,10 @@ export class WalletConnectV2Service implements GlobalService {
       // Bitcoin
       case 'unisat_signData':
         resultOrError = await EIP155RequestHandler.handleBitcoinSignDataTransactionRequest(event.params.request.params);
+        void this.approveOrReject(event, resultOrError);
+        break;
+      case 'unisat_signPsbt':
+        resultOrError = await EIP155RequestHandler.handleBitcoinSignPsbtRequest(event.params.request.params);
         void this.approveOrReject(event, resultOrError);
         break;
       case 'unisat_sendBitcoin':

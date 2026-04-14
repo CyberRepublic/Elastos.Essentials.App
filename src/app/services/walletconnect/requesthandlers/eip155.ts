@@ -303,6 +303,46 @@ export class EIP155RequestHandler {
    *
    * @return Concatenated signature R|S (32 bytes, 32 bytes), HEX.
    */
+  /**
+   * Signs a PSBT (UniSat-compatible params: psbtHex, optional options).
+   */
+  public static async handleBitcoinSignPsbtRequest(params: any): Promise<EIP155ResultOrError<string>> {
+    try {
+      Logger.log('walletconnecteip155', 'Bitcoin signPsbt intent', params[0]);
+
+      let response: {
+        action: string;
+        result: {
+          signedPsbt: string;
+        };
+      } = await GlobalIntentService.instance.sendIntent('https://wallet.web3essentials.io/signbitcoinpsbt', {
+        payload: {
+          params: [params[0]]
+        }
+      });
+      Logger.log('walletconnecteip155', 'Got bitcoin signPsbt intent response', response);
+
+      if (response && response.result && response.result.signedPsbt) {
+        return { result: response.result.signedPsbt };
+      } else {
+        return {
+          error: {
+            code: -1,
+            message: 'Errored or cancelled - TODO: improve this error handler'
+          }
+        };
+      }
+    } catch (e) {
+      Logger.error('walletconnecteip155', 'Bitcoin signPsbt intent error', e);
+      return {
+        error: {
+          code: -1,
+          message: e
+        }
+      };
+    }
+  }
+
   public static async handleBitcoinSignDataTransactionRequest(params: any): Promise<EIP155ResultOrError<string>> {
     try {
       Logger.log('walletconnecteip155', 'Bitcoin Sign data intent', params[0]);

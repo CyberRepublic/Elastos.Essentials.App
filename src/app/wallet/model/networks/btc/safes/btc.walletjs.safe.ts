@@ -1,12 +1,14 @@
 import * as BTC from 'bitcoinjs-lib';
 import { Payment } from 'bitcoinjs-lib';
 import { bitcoin, testnet } from "bitcoinjs-lib/src/networks";
-import { toXOnly } from "bitcoinjs-lib/src/psbt/bip371";
+import { tapTweakHash, tweakKey } from 'bitcoinjs-lib/src/payments/bip341';
+import { isTaprootInput, toXOnly } from "bitcoinjs-lib/src/psbt/bip371";
+import { isP2TR } from 'bitcoinjs-lib/src/psbt/psbtutils';
 import { Logger } from "src/app/logger";
 import { TESTNET_TEMPLATE } from "src/app/services/global.networks.service";
 import { AuthService } from "src/app/wallet/services/auth.service";
 import { Transfer } from "src/app/wallet/services/cointransfer.service";
-import { BTCOutputData, BTCSignDataType, BTCTxData, BTCUTXO, BTC_MAINNET_PATHS, BitcoinAddressType, UtxoDust } from "../../../btc.types";
+import { BTCOutputData, BTCSignDataType, BTCSignPsbtOptions, BTCTxData, BTCUTXO, BTC_MAINNET_PATHS, BitcoinAddressType, UtxoDust } from "../../../btc.types";
 import { StandardMasterWallet } from "../../../masterwallets/masterwallet";
 import { Safe } from "../../../safes/safe";
 import { SignTransactionResult } from '../../../safes/safe.types';
@@ -220,6 +222,275 @@ export class BTCWalletJSSafe extends Safe implements BTCSafe {
         } else {
             throw new Error("Not support type");
         }
+    }
+
+    private getOutputScriptForAddressType(pubkey: Buffer, addressType: BitcoinAddressType): Buffer | null {
+        let payment: Payment = null;
+        switch (addressType) {
+            case BitcoinAddressType.Legacy:
+                payment = BTC.payments.p2pkh({ pubkey, network: this.btcNetwork });
+                break;
+            case BitcoinAddressType.NativeSegwit:
+                payment = BTC.payments.p2wpkh({ pubkey, network: this.btcNetwork });
+                break;
+            case BitcoinAddressType.P2sh:
+                payment = BTC.payments.p2sh({
+                    redeem: BTC.payments.p2wpkh({ pubkey, network: this.btcNetwork })
+                });
+                break;
+            case BitcoinAddressType.Taproot:
+                payment = BTC.payments.p2tr({ internalPubkey: toXOnly(pubkey), network: this.btcNetwork });
+                break;
+            default:
+                return null;
+        }
+        return payment?.output || null;
+    }
+
+    private getOutputScriptForCurrentAddressType(pubkey: Buffer): Buffer | null {
+        return this.getOutputScriptForAddressType(pubkey, this.bitcoinAddressType);
+    }
+
+    private psbtInputAddressAndValue(psbt: BTC.Psbt, inputIndex: number, network: BTC.Network): { address: string; sats: number } {
+        const input = psbt.data.inputs[inputIndex];
+        if (input.witnessUtxo) {
+            let address = '(unknown)';
+            try {
+                address = BTC.address.fromOutputScript(input.witnessUtxo.script, network);
+            } catch {
+                /* non-standard script */
+            }
+            return { address, sats: Number(input.witnessUtxo.value) };
+        }
+        if (input.nonWitnessUtxo && psbt.txInputs[inputIndex]) {
+            const prevTx = BTC.Transaction.fromBuffer(input.nonWitnessUtxo);
+            const prevOutIndex = psbt.txInputs[inputIndex].index;
+            const out = prevTx.outs[prevOutIndex];
+            if (!out) {
+                return { address: '(unknown)', sats: 0 };
+            }
+            let address = '(unknown)';
+            try {
+                address = BTC.address.fromOutputScript(out.script, network);
+            } catch {
+                /* non-standard */
+            }
+            return { address, sats: out.value };
+        }
+        return { address: '(unknown)', sats: 0 };
+    }
+
+    /** True if this input spends a prevout whose script equals our standard payment output script. */
+    private psbtInputPrevoutScriptEquals(psbt: BTC.Psbt, inputIndex: number, ourScript: Buffer): boolean {
+        const input = psbt.data.inputs[inputIndex];
+        if (input.witnessUtxo?.script && ourScript && input.witnessUtxo.script.equals(ourScript)) {
+            return true;
+        }
+        if (input.nonWitnessUtxo && psbt.txInputs[inputIndex]) {
+            const prevTx = BTC.Transaction.fromBuffer(input.nonWitnessUtxo);
+            const prevOutIndex = psbt.txInputs[inputIndex].index;
+            const outScript = prevTx.outs[prevOutIndex]?.script;
+            return !!(ourScript && outScript && outScript.equals(ourScript));
+        }
+        return false;
+    }
+
+    private buildOwnedAddressSet(accounts: BtcAccountInfos | null): Set<string> {
+        const s = new Set<string>();
+        if (this.btcAddress) s.add(this.btcAddress.toLowerCase());
+        if (accounts) {
+            for (const t of SupportedBtcAddressTypes) {
+                const a = accounts[t]?.address;
+                if (a) s.add(a.toLowerCase());
+            }
+        }
+        return s;
+    }
+
+    private buildOwnedPubkeySet(accounts: BtcAccountInfos | null): Set<string> {
+        const s = new Set<string>();
+        const addPk = (hex: string) => {
+            const h = hex.replace(/^0x/i, '').toLowerCase();
+            if (!h) return;
+            s.add(h);
+            if (h.length === 66) s.add(h.slice(2));
+        };
+        if (this.btcPublicKey) addPk(this.btcPublicKey);
+        if (accounts) {
+            for (const t of SupportedBtcAddressTypes) {
+                if (accounts[t]?.publicKey) addPk(accounts[t].publicKey);
+            }
+        }
+        return s;
+    }
+
+    private collectPsbtInputIndexesToSign(
+        psbt: BTC.Psbt,
+        options: BTCSignPsbtOptions | undefined,
+        accounts: BtcAccountInfos | null,
+        root: any
+    ): number[] {
+        const n = psbt.data.inputs.length;
+        const ownedAddrs = this.buildOwnedAddressSet(accounts);
+        const ownedPubkeys = this.buildOwnedPubkeySet(accounts);
+
+        if (options?.toSignInputs?.length) {
+            const picked: number[] = [];
+            for (const spec of options.toSignInputs) {
+                const idx = Number(spec.index);
+                if (Number.isNaN(idx) || idx < 0 || idx >= n) {
+                    continue;
+                }
+                if (spec.address && !ownedAddrs.has(spec.address.toLowerCase())) {
+                    continue;
+                }
+                if (spec.publicKey) {
+                    const pk = spec.publicKey.replace(/^0x/i, '').toLowerCase();
+                    if (!ownedPubkeys.has(pk)) {
+                        continue;
+                    }
+                }
+                picked.push(idx);
+            }
+            return [...new Set(picked)].sort((a, b) => a - b);
+        }
+
+        const ours: number[] = [];
+        for (let i = 0; i < n; i++) {
+            const { address } = this.psbtInputAddressAndValue(psbt, i, this.btcNetwork);
+            if (address !== '(unknown)' && ownedAddrs.has(address.toLowerCase())) {
+                ours.push(i);
+            }
+        }
+        if (ours.length > 0) {
+            return [...new Set(ours)].sort((a, b) => a - b);
+        }
+        // Address match failed (e.g. btcAccounts missing a type). Match prevout script against every
+        // supported derivation so Taproot funding inputs still sign when the active UI type is Segwit.
+        for (let i = 0; i < n; i++) {
+            for (const addrType of SupportedBtcAddressTypes) {
+                const pathKey = root.derivePath(this.getDerivePath(addrType));
+                const ourScript = this.getOutputScriptForAddressType(pathKey.publicKey, addrType);
+                if (ourScript && this.psbtInputPrevoutScriptEquals(psbt, i, ourScript)) {
+                    ours.push(i);
+                    break;
+                }
+            }
+        }
+        return [...new Set(ours)].sort((a, b) => a - b);
+    }
+
+    private resolveAddressTypeForInput(psbt: BTC.Psbt, index: number, accounts: BtcAccountInfos | null): BitcoinAddressType | null {
+        const { address } = this.psbtInputAddressAndValue(psbt, index, this.btcNetwork);
+        if (address === '(unknown)') {
+            return null;
+        }
+        const lower = address.toLowerCase();
+        if (accounts) {
+            for (const t of SupportedBtcAddressTypes) {
+                if (accounts[t]?.address && accounts[t].address.toLowerCase() === lower) {
+                    return t as BitcoinAddressType;
+                }
+            }
+        }
+        if (this.btcAddress && this.btcAddress.toLowerCase() === lower) {
+            return this.bitcoinAddressType;
+        }
+        return null;
+    }
+
+    /**
+     * Partially (or fully) signs a PSBT using keys for this wallet's active Bitcoin address type.
+     * Options follow UniSat `signPsbt` (autoFinalized, toSignInputs, per-input sighash / tweak flags).
+     */
+    public async signPsbt(psbtHex: string, options?: BTCSignPsbtOptions): Promise<string> {
+        const root = await this.getRoot(true);
+        if (!root) {
+            return null;
+        }
+
+        const accounts =
+            this.networkWallet ? ((await this.networkWallet.loadContextInfo('btcAccounts')) as BtcAccountInfos) : null;
+
+        const psbt = BTC.Psbt.fromHex(psbtHex.replace(/^0x/i, ''), { network: this.btcNetwork });
+        const autoFinalized = options?.autoFinalized !== false;
+        const indexes = this.collectPsbtInputIndexesToSign(psbt, options, accounts, root);
+
+        for (const idx of indexes) {
+            let input = psbt.data.inputs[idx];
+            const addrType = this.resolveAddressTypeForInput(psbt, idx, accounts);
+            if (addrType === null) {
+                throw new Error(
+                    `Cannot determine Bitcoin key type for PSBT input #${idx} (address unknown or not in this wallet).`
+                );
+            }
+
+            const pathKey = root.derivePath(this.getDerivePath(addrType));
+            const spec = options?.toSignInputs?.find(t => t.index === idx);
+            let signer: BTC.Signer = pathKey;
+
+            if (isTaprootInput(input)) {
+                const xOnlyInternal = toXOnly(pathKey.publicKey);
+                const wScript = input.witnessUtxo?.script;
+                let outputKeyXOnly: Buffer | null = null;
+                if (wScript && isP2TR(wScript)) {
+                    outputKeyXOnly = wScript.subarray(2, 34);
+                }
+                const mr = (input as { tapMerkleRoot?: Buffer }).tapMerkleRoot;
+                const merkleRoot =
+                    mr && Buffer.isBuffer(mr) && mr.length === 32 ? mr : undefined;
+
+                // Many dApps (e.g. PSBT from Tx + witnessUtxo only) omit tapInternalKey. bitcoinjs-lib then
+                // never enters the key-path signing branch. Inject fields when this wallet's key matches the UTXO.
+                if (!input.tapInternalKey && outputKeyXOnly) {
+                    const tw = tweakKey(xOnlyInternal, merkleRoot);
+                    if (tw && tw.x.equals(outputKeyXOnly)) {
+                        const tapUpdate: { tapInternalKey: Buffer; tapMerkleRoot?: Buffer } = {
+                            tapInternalKey: xOnlyInternal
+                        };
+                        if (merkleRoot) {
+                            tapUpdate.tapMerkleRoot = merkleRoot;
+                        }
+                        psbt.updateInput(idx, tapUpdate);
+                        input = psbt.data.inputs[idx];
+                    } else {
+                        throw new Error(
+                            `PSBT input #${idx}: Taproot UTXO does not match this wallet (missing tapInternalKey in PSBT). ` +
+                                `Add tapInternalKey (32-byte x-only internal pubkey) to the input, and tapMerkleRoot if used.`
+                        );
+                    }
+                }
+
+                // bitcoinjs key-path signing requires toXOnly(signerPubkey) === output key in witnessUtxo (tweaked Q).
+                const outputMatchesInternal =
+                    !!outputKeyXOnly && xOnlyInternal.equals(outputKeyXOnly);
+                const dappWantsUntweakedSigner =
+                    spec?.disableTweakSigner === true || spec?.useTweakedSigner === false;
+                if (dappWantsUntweakedSigner && outputMatchesInternal) {
+                    signer = pathKey;
+                } else {
+                    const tweak = tapTweakHash(xOnlyInternal, merkleRoot);
+                    signer = pathKey.tweak(tweak);
+                }
+            }
+
+            const sighashTypes = spec?.sighashTypes;
+            if (sighashTypes?.length) {
+                psbt.signInput(idx, signer, sighashTypes);
+            } else {
+                psbt.signInput(idx, signer);
+            }
+        }
+
+        if (autoFinalized) {
+            try {
+                psbt.finalizeAllInputs();
+            } catch (e) {
+                Logger.warn('wallet', 'BTCWalletJSSafe signPsbt finalizeAllInputs:', e);
+            }
+        }
+
+        return psbt.toHex();
     }
 
     public async signMessage(message: string): Promise<string> {
