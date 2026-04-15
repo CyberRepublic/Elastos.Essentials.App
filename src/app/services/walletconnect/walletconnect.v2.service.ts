@@ -283,7 +283,7 @@ export class WalletConnectV2Service implements GlobalService {
 
     try {
       let signClient = await Client.init({
-        logger: 'debug',
+        logger: 'info',
         projectId: GlobalConfig.WallectConnect.PROJECT_ID,
         relayUrl,
         metadata: {
