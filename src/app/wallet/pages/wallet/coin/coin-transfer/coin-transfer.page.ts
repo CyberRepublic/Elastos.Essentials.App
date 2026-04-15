@@ -279,7 +279,10 @@ export class CoinTransferPage implements OnInit, OnDestroy {
     this.fromSubWallet = this.networkWallet.getSubWallet(this.subWalletId);
     this.tokensymbol = this.fromSubWallet.getDisplayTokenName();
 
-    Logger.log('wallet', 'Balance', this.networkWallet.subWallets[this.subWalletId].getDisplayBalance().toFixed());
+    this.displayBalanceString = this.uiService.getFixedBalance(
+      this.networkWallet.subWallets[this.subWalletId].getDisplayBalance()
+    );
+    Logger.log('wallet', 'CoinTransferPage Balance', this.displayBalanceString)
 
     if (this.fromSubWallet instanceof MainCoinEVMSubWallet) {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -528,9 +531,6 @@ export class CoinTransferPage implements OnInit, OnDestroy {
       }
     }
 
-    this.displayBalanceString = this.uiService.getFixedBalance(
-      this.networkWallet.subWallets[this.subWalletId].getDisplayBalance()
-    );
     void this.getBalanceSpendable();
   }
 
