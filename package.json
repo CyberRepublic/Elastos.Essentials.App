@@ -30,6 +30,9 @@
     "manual-ng-run-android": "ng run app:ionic-cordova-serve --host=localhost --port=8100 --ssl --platform=android"
   },
   "private": true,
+  "overrides": {
+    "libsodium-wrappers": "0.7.10"
+  },
   "dependencies": {
     "@account-abstraction/contracts": "^0.8.0",
     "@account-abstraction/sdk": "^0.6.0",
