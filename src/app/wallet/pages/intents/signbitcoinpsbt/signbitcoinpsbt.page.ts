@@ -212,15 +212,36 @@ export class SignBitcoinPsbtPage implements OnInit {
     return trimmed || '0';
   }
 
+  /**
+   * `BTC.address.fromOutputScript` uses payments.p2tr(), which requires `BTC.initEccLib()` (wallet does that lazily).
+   * Intent PSBT preview can run before ECC init — Taproot then fails with "has no matching Address".
+   * Witness v1 + 32-byte program (BIP341 P2TR) can be encoded via `toBech32` without ECC.
+   */
+  private outputScriptToAddress(script: Buffer, network: BTC.Network): string {
+    if (
+      script &&
+      script.length === 34 &&
+      script[0] === 0x51 &&
+      script[1] === 0x20 &&
+      network?.bech32
+    ) {
+      try {
+        return BTC.address.toBech32(script.subarray(2), 1, network.bech32);
+      } catch {
+        /* fall through */
+      }
+    }
+    try {
+      return BTC.address.fromOutputScript(script, network);
+    } catch {
+      return '(unknown)';
+    }
+  }
+
   private psbtInputAddressAndValue(psbt: BTC.Psbt, index: number, network: BTC.Network): { address: string; sats: number } {
     const input = psbt.data.inputs[index];
     if (input.witnessUtxo) {
-      let address = '(unknown)';
-      try {
-        address = BTC.address.fromOutputScript(input.witnessUtxo.script, network);
-      } catch {
-        /* script may be non-standard */
-      }
+      const address = this.outputScriptToAddress(input.witnessUtxo.script, network);
       return { address, sats: Number(input.witnessUtxo.value) };
     }
     if (input.nonWitnessUtxo && psbt.txInputs[index]) {
@@ -228,12 +249,7 @@ export class SignBitcoinPsbtPage implements OnInit {
       const vout = psbt.txInputs[index].index;
       const out = prevTx.outs[vout];
       if (!out) return { address: '(unknown)', sats: 0 };
-      let address = '(unknown)';
-      try {
-        address = BTC.address.fromOutputScript(out.script, network);
-      } catch {
-        /* non-standard */
-      }
+      const address = this.outputScriptToAddress(out.script, network);
       return { address, sats: out.value };
     }
     return { address: '(unknown)', sats: 0 };
@@ -247,7 +263,6 @@ export class SignBitcoinPsbtPage implements OnInit {
 
     const btcNetwork =
       this.targetNetwork?.networkTemplate === TESTNET_TEMPLATE ? testnet : bitcoin;
-
     try {
       const psbt = BTC.Psbt.fromHex(this.intentParams.psbtHex.replace(/^0x/i, ''), { network: btcNetwork });
       const ourAddr = (this.getSigningWalletAddress() || '').toLowerCase();
@@ -272,12 +287,11 @@ export class SignBitcoinPsbtPage implements OnInit {
       for (let i = 0; i < psbt.txOutputs.length; i++) {
         const o = psbt.txOutputs[i];
         let address = o.address;
+        if (!address && o.script) {
+          address = this.outputScriptToAddress(o.script, btcNetwork);
+        }
         if (!address) {
-          try {
-            address = BTC.address.fromOutputScript(o.script, btcNetwork);
-          } catch {
-            address = '(unknown)';
-          }
+          address = '(unknown)';
         }
         this.psbtOutputs.push({
           addressShort: this.truncateMiddle(address, 7, 6),
