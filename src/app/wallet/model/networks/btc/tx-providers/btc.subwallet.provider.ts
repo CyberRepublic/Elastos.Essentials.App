@@ -11,6 +11,51 @@ import { BTCSubWallet } from "../subwallets/btc.subwallet";
 
 const MAX_RESULTS_PER_FETCH = 50;
 
+/**
+ * True if this output pays an address that is also spent by an input of the same tx
+ * (intra-wallet shuffle / consolidation). Those outputs must not count as "sent to external".
+ */
+function isOutputToVinSourceAddress(transaction: BTCTransaction, btcoutobj: BTCOutObj): boolean {
+    if (!btcoutobj.addresses || btcoutobj.addresses.length === 0) {
+        return false;
+    }
+    return btcoutobj.addresses.some(outAddr =>
+        transaction.vin.some(vin =>
+            vin.addresses && vin.addresses.indexOf(outAddr) !== -1
+        )
+    );
+}
+
+/** Net satoshis leaving this address in the tx (inputs spent − outputs received back to same address). */
+function getNetValueSatoshisForAddress(transaction: BTCTransaction, tokenAddress: string): number {
+    let inputSum = 0;
+    for (const vin of transaction.vin) {
+        if (vin.addresses && vin.addresses.indexOf(tokenAddress) !== -1) {
+            const v = parseInt(vin.value || "0", 10);
+            if (!isNaN(v)) {
+                inputSum += v;
+            }
+        }
+    }
+    let outputSum = 0;
+    for (const vout of transaction.vout) {
+        if (vout.addresses && vout.addresses.indexOf(tokenAddress) !== -1) {
+            const v = parseInt(vout.value || "0", 10);
+            if (!isNaN(v)) {
+                outputSum += v;
+            }
+        }
+    }
+    const net = inputSum - outputSum;
+    return net > 0 ? net : 0;
+}
+
+function allVoutsPayOnlyToAddress(transaction: BTCTransaction, tokenAddress: string): boolean {
+    return transaction.vout.every(
+        vo => vo.addresses && vo.addresses.indexOf(tokenAddress) !== -1
+    );
+}
+
 export class BTCSubWalletProvider<SubWalletType extends AnySubWallet> extends SubWalletTransactionProvider<SubWalletType, BTCTransaction> {
 
     protected canFetchMore = true;
@@ -106,14 +151,28 @@ export class BTCSubWalletProvider<SubWalletType extends AnySubWallet> extends Su
             transaction.direction = TransactionDirection.SENT;
             // TODO: Get all receiving address?
             btcoutobjArray = transaction.vout.filter(btcoutobj => btcoutobj.addresses.indexOf(tokenAddress) === -1);
+            // Drop outputs that pay an address also spent in this tx (multi-address consolidation / self paths).
+            btcoutobjArray = btcoutobjArray.filter(btcoutobj => !isOutputToVinSourceAddress(transaction, btcoutobj));
             if (btcoutobjArray && btcoutobjArray.length > 0) {
                 // Set first output address as receiving address.
                 transaction.to = btcoutobjArray[0].addresses[0];
-            } else {
-                // Move: send to self.
+            } else if (allVoutsPayOnlyToAddress(transaction, tokenAddress)) {
+                // Every output pays only this address (e.g. change-only): moved / send to self.
                 transaction.to = tokenAddress;
                 transaction.direction = TransactionDirection.MOVED;
                 transaction.realValue = 0;
+                return;
+            } else {
+                // Multi-address consolidation: not "moved"; show as sent with net outflow for this address (usually fee).
+                transaction.direction = TransactionDirection.SENT;
+                transaction.realValue = getNetValueSatoshisForAddress(transaction, tokenAddress);
+                const otherOut = transaction.vout.find(
+                    vo => vo.addresses && vo.addresses.indexOf(tokenAddress) === -1
+                );
+                transaction.to =
+                    otherOut && otherOut.addresses && otherOut.addresses.length > 0
+                        ? otherOut.addresses[0]
+                        : tokenAddress;
                 return;
             }
         } else {
