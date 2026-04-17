@@ -929,7 +929,7 @@ export const en = {
     'ext-tx-info-type-claim-timeout-compensation': 'Claim Timeout Compensation',
     'ext-tx-info-type-request-arbitration': 'Request Arbitration',
     'ext-tx-info-type-repurchase': 'Repurchase Order',
-    'ext-tx-info-type-renewal-order-request': 'Renewal Order',
+    'ext-tx-info-type-renewal-order-request': 'Extension Order',
     'ext-tx-info-type-deposit-from-mainchain': 'Deposit from Mainchain',
 
     /********************************
